@@ -19,22 +19,37 @@
 
 typedef enum
 {
+	METRIC_TYPE_IF = 0,
+	METRIC_TYPE_ELSE,
+	METRIC_TYPE_FORLOOP,
+	METRIC_TYPE_MAX
 } MetricType_e;
 
 #include <string>
 #include <map>
+#include <stdint.h>
 
 class MetricUnit
 {
 protected:
+	typedef std::map<std::string, MetricUnit*> SubUnitMap_t;
 	std::string m_name;
-	std::map<std::string, MetricUnit*> m_subUnits;
+	SubUnitMap_t m_subUnits;
 public:
+	typedef uint16_t counter_t;
+
 	MetricUnit( const std::string& p_name );
 
 	void increment( const MetricType_e p_metricType );
 
-	void dump( std::ostream& out );
+	void dump( std::ostream& out ) const;
+
+	counter_t getCounter( const MetricType_e p_metricType ) const;
+
+	MetricUnit* getSubUnit( const std::string& p_name );
+
+protected:
+	counter_t m_counters[ METRIC_TYPE_MAX ];
 };
 
 #endif

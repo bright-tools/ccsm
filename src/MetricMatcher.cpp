@@ -25,6 +25,7 @@
 using namespace clang;
 using namespace std;
 
+#if 0
 MetricMatcher::MetricMatcher(void) : m_currentCU( NULL )
 {
 }
@@ -44,6 +45,7 @@ void MetricMatcher::run(const clang::ast_matchers::MatchFinder::MatchResult &Res
 	if( sl.isValid() )
 	{
 		std::string fileName = Result.Context->getSourceManager().getFilename( sl ).str();
+		std::string fileName = Result.Context->getSourceManager().getF
 		std::cout << "Found Match in " << fn;
 		MetricUnit* file = m_unit.getSubUnit( fileName );
 		MetricUnit* func = file->getSubUnit( funcName );
@@ -54,3 +56,4 @@ void MetricMatcher::run(const clang::ast_matchers::MatchFinder::MatchResult &Res
 void MetricMatcher::dump( ostream& out )
 {
 }
+#endif

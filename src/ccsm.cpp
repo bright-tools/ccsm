@@ -13,15 +13,8 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-
- This project was kick-started by the public domain example provided by
- Eli Bendersky (eliben@gmail.com)
- at http://eli.thegreenplace.net/2012/06/08/basic-source-to-source-transformation-with-clang/
- Grateful thanks are due to Eli for sharing his knowledge
 */
 
-#include "clang/ASTMatchers/ASTMatchers.h"
-#include "clang/ASTMatchers/ASTMatchFinder.h"
 #include "clang/Basic/SourceManager.h"
 #include "clang/Frontend/FrontendActions.h"
 #include "clang/Lex/Lexer.h"
@@ -45,26 +38,8 @@
 
 
 using namespace clang;
-using namespace clang::ast_matchers;
 using namespace clang::tooling;
 using namespace llvm;
-
-namespace {
-class ToolTemplateCallback : public MatchFinder::MatchCallback {
- public:
-  ToolTemplateCallback(Replacements *Replace) : Replace(Replace) {}
-
-  virtual void run(const MatchFinder::MatchResult &Result) {
-//  TODO: This routine will get called for each thing that the matchers find.
-//  At this point, you can examine the match, and do whatever you want,
-//  including replacing the matched text with other text
-  (void) Replace; // This to prevent an "unused member variable" warning;
-  }
-
- private:
-  Replacements *Replace;
-};
-} // end anonymous namespace
 
 // Set up the command line options
 cl::opt<std::string> BuildPath(
@@ -83,19 +58,16 @@ cl::opt<std::string> SourcePaths(
   cl::desc("<source>"),
   cl::Required);
 
+MetricUnit topUnit("Global");
 
-StatementMatcher LoopMatcher = forStmt().bind("forLoop");
-StatementMatcher IfMatcher = ifStmt().bind("ifStmt");
-StatementMatcher WhileMatcher = whileStmt().bind("whileLoop");
-StatementMatcher CaseMatcher = caseStmt().bind("caseStmt");
-DeclarationMatcher FuncMatcher = functionDecl().bind("forLoop");
 
-// TODO: default ... case doesn't cover that.
-// TODO: do .. while
-// TODO: goto
-// TODO: while ...
-// TODO: function decl
-// TODO: return ..
+class MetricFrontendAction : public ASTFrontendAction {
+public:
+    virtual ASTConsumer *CreateASTConsumer(CompilerInstance &CI, StringRef file) {
+		// TODO: More elegant way of getting topUnit in.
+		return new MetricASTConsumer(&CI.getASTContext(),&topUnit); // pass CI pointer to ASTConsumer
+    }
+};
 
 int main(int argc, const char **argv) {
   llvm::sys::PrintStackTraceOnErrorSignal();
@@ -116,16 +88,11 @@ int main(int argc, const char **argv) {
       llvm::report_fatal_error(ErrorMessage);
     }
   }
-  RefactoringTool Tool(*Compilations, SourcePaths);
-  ast_matchers::MatchFinder Finder;
+  ClangTool Tool(*Compilations, SourcePaths);
 
-  MetricMatcher metricMatcher;
-  Finder.addMatcher(IfMatcher, &metricMatcher);
-  Finder.addMatcher(LoopMatcher, &metricMatcher);
-  Finder.addMatcher(WhileMatcher, &metricMatcher);
-  Finder.addMatcher(CaseMatcher, &metricMatcher);
+  int Result = Tool.run(newFrontendActionFactory<MetricFrontendAction>());
 
-  int Result = Tool.run(newFrontendActionFactory(&Finder));
+  topUnit.dump( std::cout );
 
   return Result;
 }

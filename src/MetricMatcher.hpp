@@ -17,26 +17,94 @@
 #define       METRIC_MATCHER_HPP
 
 #include "clang/Tooling/Tooling.h"
-#include "clang/ASTMatchers/ASTMatchers.h"
-#include "clang/ASTMatchers/ASTMatchFinder.h"
+#include "clang/AST/ASTConsumer.h"
+#include "clang/AST/RecursiveASTVisitor.h"
+#include "clang/AST/ASTContext.h"
+#include "clang/Frontend/CompilerInstance.h"
 
 #include <ostream>
+#include <iostream>
+#include <string>
 
 #include "MetricUnit.hpp"
 
-class MetricMatcher : public clang::ast_matchers::MatchFinder::MatchCallback
+class MetricVisitor : public clang::RecursiveASTVisitor<MetricVisitor>
 {
 protected:
-	MetricUnit* m_currentCU;
+	clang::ASTContext *astContext;
+	MetricUnit*		  m_topUnit;
+	std::string       m_currentFileName;
+	std::string       m_currentFunctionName;
+	MetricUnit*       m_currentUnit;
+
 public:
-    MetricMatcher(void);
+    explicit MetricVisitor(clang::ASTContext* p_Context, MetricUnit* p_topUnit) : astContext(p_Context), m_topUnit( p_topUnit ), m_currentUnit( NULL )
+    {
+    }
 
-	virtual ~MetricMatcher(void);
+	virtual bool VisitFunctionDecl(clang::FunctionDecl *func) {
+     //   numFunctions++;
+		m_currentFileName = astContext->getSourceManager().getFilename( func->getLocation() ).str();
+        m_currentFunctionName = func->getNameInfo().getName().getAsString();
 
-    virtual void run(const clang::ast_matchers::MatchFinder::MatchResult &Result) ;
+		m_currentUnit = m_topUnit->getSubUnit(m_currentFileName)->getSubUnit(m_currentFunctionName); 
+		return true;     
+	}     
+	
+	virtual bool VisitForStmt(clang::ForStmt *p_forSt) {
+		if( m_currentUnit )
+		{
+			m_currentUnit->increment( METRIC_TYPE_FORLOOP );
+		}
+		return true;
+	}
 
-	void dump( std::ostream& out );
+	virtual bool VisitIfStmt(clang::IfStmt *p_ifSt) {
+		if( m_currentUnit )
+		{
+			m_currentUnit->increment( METRIC_TYPE_IF );
 
+			if( p_ifSt->getElse() )
+			{
+				// TODO: This means that "else if" statements get counted as both an IF and an ELSE, which may not be what everyone wants
+				m_currentUnit->increment( METRIC_TYPE_ELSE );
+			}
+		} else {
+			/* TODO */
+		}
+        return true;
+    }
+
+	void dump( std::ostream& out )
+	{
+		m_topUnit->dump( out );
+	}
 };
+
+class MetricASTConsumer : public clang::ASTConsumer
+{
+protected:
+	MetricVisitor *visitor;
+
+public:
+    explicit MetricASTConsumer(clang::ASTContext *CI, MetricUnit* p_topUnit) : visitor(new MetricVisitor(CI, p_topUnit)) 
+        { }
+
+	virtual ~MetricASTConsumer(void) {};
+
+	virtual void HandleTranslationUnit(clang::ASTContext &Context) {
+		/* we can use ASTContext to get the TranslationUnitDecl, which is
+		   a single Decl that collectively represents the entire source file */
+		visitor->TraverseDecl(Context.getTranslationUnitDecl());
+	}
+
+	void dump( std::ostream& out )
+	{
+		visitor->dump( out );
+	}
+};
+
+
+
 
 #endif
