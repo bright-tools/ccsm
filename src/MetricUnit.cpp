@@ -77,7 +77,12 @@ void MetricUnit::dump( std::ostream& out ) const
 	}
 	out << m_dumpPrefix[ m_type ] << "IF statements: " << getCounter( METRIC_TYPE_IF ) << std::endl;
 	out << m_dumpPrefix[ m_type ] << "ELSE statements: " << getCounter( METRIC_TYPE_ELSE ) << std::endl;
+	out << m_dumpPrefix[ m_type ] << "SWITCH statements: " << getCounter( METRIC_TYPE_SWITCH ) << std::endl;
+	out << m_dumpPrefix[ m_type ] << "CASE statements: " << getCounter( METRIC_TYPE_CASE ) << std::endl;
+	out << m_dumpPrefix[ m_type ] << "DEFAULT statements: " << getCounter( METRIC_TYPE_DEFAULT ) << std::endl;
 	out << m_dumpPrefix[ m_type ] << "FOR loops: " << getCounter( METRIC_TYPE_FORLOOP ) << std::endl;
+	out << m_dumpPrefix[ m_type ] << "WHILE loops: " << getCounter( METRIC_TYPE_WHILELOOP ) << std::endl;
+	out << m_dumpPrefix[ m_type ] << "Variables: " << getCounter( METRIC_TYPE_VARIABLE ) << std::endl;
 
 	for( SubUnitMap_t::const_iterator unitIt = m_subUnits.begin();
 		 unitIt != m_subUnits.end();

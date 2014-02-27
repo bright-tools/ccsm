@@ -44,18 +44,46 @@ public:
 
 	virtual bool VisitFunctionDecl(clang::FunctionDecl *func) {
      //   numFunctions++;
-		m_currentFileName = astContext->getSourceManager().getFilename( func->getLocation() ).str();
-		m_currentFunctionName = func->getQualifiedNameAsString();
-
-		MetricUnitType_e type = METRIC_UNIT_FUNCTION;
-		if( func->isCXXClassMember() )
+		if( func->hasBody() )
 		{
-			type = METRIC_UNIT_METHOD;
+			m_currentFileName = astContext->getSourceManager().getFilename( func->getLocation() ).str();
+			m_currentFunctionName = func->getQualifiedNameAsString();
+
+			MetricUnitType_e type = METRIC_UNIT_FUNCTION;
+			if( func->isCXXClassMember() )
+			{
+				type = METRIC_UNIT_METHOD;
+			}
+			m_currentUnit = m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE)->getSubUnit(m_currentFunctionName, type);
 		}
-		m_currentUnit = m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE)->getSubUnit(m_currentFunctionName, type); 
 		return true;     
 	}     
-	
+
+	virtual bool VisitVarDecl(clang::VarDecl *p_varDec) {
+
+		/* Check it's not an external reference & not something like a function parameter */
+		if(( !p_varDec->hasExternalStorage() ) &&
+		   ( p_varDec->getKind() == clang::Decl::Var ))
+		{
+			std::cout << p_varDec->getNameAsString() << p_varDec->getKind() <<  std::endl;
+			/* Check to see if this variable does not have a parent function/method */
+			if( !p_varDec->getParentFunctionOrMethod() )
+			{
+				/* File-scope variable */
+	   			m_currentFileName = astContext->getSourceManager().getFilename( p_varDec->getLocation() ).str();
+				m_currentFunctionName = "";
+				m_currentUnit = m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE);
+			}
+
+			if( m_currentUnit )
+			{
+				m_currentUnit->increment( METRIC_TYPE_VARIABLE );
+			}
+		}
+		return true;	
+	}
+
+	// TODO: Lots of repetition here - template it?
 	virtual bool VisitForStmt(clang::ForStmt *p_forSt) {
 		if( m_currentUnit )
 		{
@@ -63,6 +91,39 @@ public:
 		}
 		return true;
 	}
+
+	virtual bool VisitWhileStmt(clang::WhileStmt *p_whileSt) {
+		if( m_currentUnit )
+		{
+			m_currentUnit->increment( METRIC_TYPE_WHILELOOP );
+		}
+		return true;
+	}
+
+	virtual bool VisitSwitchStmt(clang::SwitchStmt *p_switchSt) {
+		if( m_currentUnit )
+		{
+			m_currentUnit->increment( METRIC_TYPE_SWITCH );
+		}
+		return true;
+	}
+
+	virtual bool VisitDefaultStmt(clang::DefaultStmt *p_defaultSt) {
+		if( m_currentUnit )
+		{
+			m_currentUnit->increment( METRIC_TYPE_DEFAULT );
+		}
+		return true;
+	}
+
+	virtual bool VisitCaseStmt(clang::CaseStmt *p_caseSt) {
+		if( m_currentUnit )
+		{
+			m_currentUnit->increment( METRIC_TYPE_CASE );
+		}
+		return true;
+	}
+
 
 	virtual bool VisitIfStmt(clang::IfStmt *p_ifSt) {
 		if( m_currentUnit )
