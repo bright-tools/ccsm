@@ -44,7 +44,7 @@ public:
 
 	virtual bool VisitFunctionDecl(clang::FunctionDecl *func) {
      //   numFunctions++;
-		if( func->hasBody() )
+		if( func->doesThisDeclarationHaveABody() )
 		{
 			m_currentFileName = astContext->getSourceManager().getFilename( func->getLocation() ).str();
 			m_currentFunctionName = func->getQualifiedNameAsString();
@@ -65,7 +65,6 @@ public:
 		if(( !p_varDec->hasExternalStorage() ) &&
 		   ( p_varDec->getKind() == clang::Decl::Var ))
 		{
-			std::cout << p_varDec->getNameAsString() << p_varDec->getKind() <<  std::endl;
 			/* Check to see if this variable does not have a parent function/method */
 			if( !p_varDec->getParentFunctionOrMethod() )
 			{
