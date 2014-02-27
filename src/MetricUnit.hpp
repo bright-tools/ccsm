@@ -43,6 +43,7 @@ class MetricUnit
 private:
 	static const std::string m_dumpPrefix[ METRIC_UNIT_MAX ];
 	static const std::string m_namePrefix[ METRIC_UNIT_MAX ];
+	static const std::string m_subPrefix[ METRIC_UNIT_MAX ];
 protected:
 	typedef std::map<std::string, MetricUnit*> SubUnitMap_t;
 	std::string m_name;

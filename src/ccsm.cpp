@@ -42,21 +42,21 @@ using namespace clang::tooling;
 using namespace llvm;
 
 // Set up the command line options
+#if 0
 cl::opt<std::string> BuildPath(
   cl::Positional,
   cl::desc("<build-path>"));
 
-#if 0
 cl::opt<std::string> ProjectRoot(
   "r",
   cl::desc("Set project root directory"),
   cl::value_desc("filename"));
 #endif
 
-cl::opt<std::string> SourcePaths(
+cl::list<std::string> SourcePaths(
   cl::Positional,
-  cl::desc("<source>"),
-  cl::Required);
+  cl::desc("<source> [... <sourceN>]"),
+  cl::OneOrMore);
 
 MetricUnit topUnit("Global", METRIC_UNIT_GLOBAL);
 
@@ -74,12 +74,15 @@ int main(int argc, const char **argv) {
   llvm::OwningPtr<CompilationDatabase> Compilations(
         FixedCompilationDatabase::loadFromCommandLine(argc, argv));
   cl::ParseCommandLineOptions(argc, argv);
+
   if (!Compilations) {  // Couldn't find a compilation DB from the command line
     std::string ErrorMessage;
     Compilations.reset(
+#if 0
       !BuildPath.empty() ?
         CompilationDatabase::autoDetectFromDirectory(BuildPath, ErrorMessage) :
-        CompilationDatabase::autoDetectFromSource(SourcePaths, ErrorMessage)
+#endif
+        CompilationDatabase::autoDetectFromSource(SourcePaths[0], ErrorMessage)
       );
 
     //  Still no compilation DB? - bail.
@@ -92,9 +95,13 @@ int main(int argc, const char **argv) {
 
   int Result = Tool.run(newFrontendActionFactory<MetricFrontendAction>());
 
-  if( Result )
+  if( Result == 0 )
   {
 	topUnit.dump( std::cout );
+  }
+  else
+  {
+	std::cout << "Tool.run returned " << Result << std::endl;
   }
 
   return Result;

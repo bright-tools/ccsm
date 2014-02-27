@@ -28,6 +28,12 @@ const std::string MetricUnit::m_dumpPrefix[ METRIC_UNIT_MAX ] = {
 	"\t\t",
 	"\t\t"
 };
+const std::string MetricUnit::m_subPrefix[ METRIC_UNIT_MAX ] = {
+	"Files: ",
+	"Functions/Methods: ",
+	"",
+	""
+};
 
 
 MetricUnit::MetricUnit( const std::string& p_name, const MetricUnitType_e p_type ) : m_name( p_name ), m_type( p_type )
@@ -65,6 +71,10 @@ MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType ) 
 void MetricUnit::dump( std::ostream& out ) const
 {
 	out << m_namePrefix[ m_type ] << m_name << std::endl;
+	if( m_subPrefix[ m_type ].length() )
+	{
+		out << m_dumpPrefix[ m_type ] << m_subPrefix[ m_type ] << m_subUnits.size() << std::endl;
+	}
 	out << m_dumpPrefix[ m_type ] << "IF statements: " << getCounter( METRIC_TYPE_IF ) << std::endl;
 	out << m_dumpPrefix[ m_type ] << "ELSE statements: " << getCounter( METRIC_TYPE_ELSE ) << std::endl;
 	out << m_dumpPrefix[ m_type ] << "FOR loops: " << getCounter( METRIC_TYPE_FORLOOP ) << std::endl;

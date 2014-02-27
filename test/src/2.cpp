@@ -16,8 +16,8 @@ class SomeClass
             {
             }
         };
-        virtual ~SomeClass()
-}
+        virtual ~SomeClass();
+};
 
 void other_func( int p_q )
 {
