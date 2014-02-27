@@ -45,9 +45,14 @@ public:
 	virtual bool VisitFunctionDecl(clang::FunctionDecl *func) {
      //   numFunctions++;
 		m_currentFileName = astContext->getSourceManager().getFilename( func->getLocation() ).str();
-        m_currentFunctionName = func->getNameInfo().getName().getAsString();
+		m_currentFunctionName = func->getQualifiedNameAsString();
 
-		m_currentUnit = m_topUnit->getSubUnit(m_currentFileName)->getSubUnit(m_currentFunctionName); 
+		MetricUnitType_e type = METRIC_UNIT_FUNCTION;
+		if( func->isCXXClassMember() )
+		{
+			type = METRIC_UNIT_METHOD;
+		}
+		m_currentUnit = m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE)->getSubUnit(m_currentFunctionName, type); 
 		return true;     
 	}     
 	

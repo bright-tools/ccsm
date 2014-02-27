@@ -58,7 +58,7 @@ cl::opt<std::string> SourcePaths(
   cl::desc("<source>"),
   cl::Required);
 
-MetricUnit topUnit("Global");
+MetricUnit topUnit("Global", METRIC_UNIT_GLOBAL);
 
 
 class MetricFrontendAction : public ASTFrontendAction {
@@ -92,7 +92,10 @@ int main(int argc, const char **argv) {
 
   int Result = Tool.run(newFrontendActionFactory<MetricFrontendAction>());
 
-  topUnit.dump( std::cout );
+  if( Result )
+  {
+	topUnit.dump( std::cout );
+  }
 
   return Result;
 }

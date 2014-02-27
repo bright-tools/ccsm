@@ -28,6 +28,18 @@ void vain( int i )
         {
         } else
         {
+#if defined THIS_IS_DEFINED
+            if( 9 == 1 )
+            {
+            }
+#endif
+#if defined THIS_IS_NOT_DEFINED
+            for( j = 0;
+                 j < 2;
+                 j++ )
+            {
+            }
+#endif
         }
     }
 }

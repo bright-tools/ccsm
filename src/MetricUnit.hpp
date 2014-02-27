@@ -25,20 +25,33 @@ typedef enum
 	METRIC_TYPE_MAX
 } MetricType_e;
 
+typedef enum
+{
+	METRIC_UNIT_GLOBAL,
+	METRIC_UNIT_FILE,
+	METRIC_UNIT_FUNCTION,
+	METRIC_UNIT_METHOD,
+	METRIC_UNIT_MAX
+} MetricUnitType_e;
+
 #include <string>
 #include <map>
 #include <stdint.h>
 
 class MetricUnit
 {
+private:
+	static const std::string m_dumpPrefix[ METRIC_UNIT_MAX ];
+	static const std::string m_namePrefix[ METRIC_UNIT_MAX ];
 protected:
 	typedef std::map<std::string, MetricUnit*> SubUnitMap_t;
 	std::string m_name;
+	MetricUnitType_e m_type;
 	SubUnitMap_t m_subUnits;
 public:
 	typedef uint16_t counter_t;
 
-	MetricUnit( const std::string& p_name );
+	MetricUnit( const std::string& p_name, const MetricUnitType_e p_type );
 
 	void increment( const MetricType_e p_metricType );
 
@@ -46,7 +59,7 @@ public:
 
 	counter_t getCounter( const MetricType_e p_metricType ) const;
 
-	MetricUnit* getSubUnit( const std::string& p_name );
+	MetricUnit* getSubUnit( const std::string& p_name, const MetricUnitType_e p_type );
 
 protected:
 	counter_t m_counters[ METRIC_TYPE_MAX ];
