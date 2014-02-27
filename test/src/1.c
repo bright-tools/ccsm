@@ -1,3 +1,9 @@
+extern int z;
+int x,t;
+int y;
+
+extern int gain();
+
 int main( void )
 {
     if( 1 == 1 )
@@ -19,6 +25,19 @@ void vain( int i )
          j < 2;
          j++ )
     {
+    }
+    switch( j )
+    {
+        case 1:
+            break;
+        case 2:
+            break;
+        default:
+            break;
+    }
+    while( j > 0 )
+    {
+        j--;
     }
     if( 4 == 4 )
     {
