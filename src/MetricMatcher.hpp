@@ -22,6 +22,8 @@
 #include "clang/AST/ASTContext.h"
 #include "clang/Frontend/CompilerInstance.h"
 
+#include "MetricUtils.hpp"
+
 #include <ostream>
 #include <iostream>
 #include <string>
@@ -91,10 +93,40 @@ public:
 		return true;
 	}
 
+	virtual bool VisitGotoStmt(clang::GotoStmt *p_gotoSt) {
+		//if( m_currentUnit )
+		{
+			m_currentUnit->increment( METRIC_TYPE_GOTO );
+		}
+
+		return true;
+	}
+
+	virtual bool VisitLabelStmt(clang::LabelStmt *p_LabelSt) {
+		if( m_currentUnit )
+		{
+			m_currentUnit->increment( METRIC_TYPE_LABEL );
+		}
+		return true;
+	}
+
 	virtual bool VisitWhileStmt(clang::WhileStmt *p_whileSt) {
 		if( m_currentUnit )
 		{
 			m_currentUnit->increment( METRIC_TYPE_WHILELOOP );
+		}
+		return true;
+	}
+
+	virtual bool VisitReturnStmt(clang::ReturnStmt *p_returnSt) {
+		if( m_currentUnit )
+		{
+			m_currentUnit->increment( METRIC_TYPE_RETURN );
+
+			if( !isLastExecutableStmtInFn( p_returnSt, astContext ) )
+			{
+				m_currentUnit->increment( METRIC_TYPE_RETURNPOINTS );
+			}
 		}
 		return true;
 	}
@@ -140,9 +172,9 @@ public:
         return true;
     }
 
-	void dump( std::ostream& out )
+	void dump( std::ostream& out, const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE )
 	{
-		m_topUnit->dump( out );
+		m_topUnit->dump( out, p_fmt );
 	}
 };
 
@@ -163,9 +195,9 @@ public:
 		visitor->TraverseDecl(Context.getTranslationUnitDecl());
 	}
 
-	void dump( std::ostream& out )
+	void dump( std::ostream& out, const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE )
 	{
-		visitor->dump( out );
+		visitor->dump( out, p_fmt );
 	}
 };
 

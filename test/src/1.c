@@ -6,21 +6,29 @@ extern int gain();
 
 int main( void )
 {
-    if( 1 == 1 )
+main_start:
+    if( x == 1 )
     {
-        if( 2 == 2 )
+        if( y == 2 )
         {
-            if( 3 == 3 )
+            if( t == 3 )
             {
+                return 2;
             }
+        } else {
+            goto main_start;
         }
     }
+main_end:
     return 1;
 }
+
+int k;
 
 void vain( int i )
 {
     int j;
+    extern int p;
     for( j = 0;
          j < 2;
          j++ )
@@ -60,5 +68,9 @@ void vain( int i )
             }
 #endif
         }
+    }
+    else
+    {
+        return;
     }
 }

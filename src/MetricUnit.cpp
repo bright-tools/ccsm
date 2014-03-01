@@ -35,6 +35,21 @@ const std::string MetricUnit::m_subPrefix[ METRIC_UNIT_MAX ] = {
 	""
 };
 
+const std::string MetricUnit::m_metricNames[ METRIC_TYPE_MAX ] = {
+	"IF statements",
+	"ELSE statements",
+	"FOR loops",
+	"RETURN statements",
+	"WHILE loops",
+	"SWITCH statements",
+	"CASE statements",
+	"DEFAULT statements",
+	"GOTO statements",
+	"LABEL statements",
+	"Variables",
+	"Return points",
+};
+
 
 MetricUnit::MetricUnit( const std::string& p_name, const MetricUnitType_e p_type ) : m_name( p_name ), m_type( p_type )
 {
@@ -53,6 +68,29 @@ void MetricUnit::increment( const MetricType_e p_metricType )
 	m_counters[ p_metricType ]++;
 }
 
+MetricUnitType_e MetricUnit::GetType( void ) const
+{
+	return m_type;
+}
+
+MetricUnit::counter_t MetricUnit::getSubUnitCount( const MetricUnitType_e p_type ) const
+{
+	counter_t ret_val = 0;
+
+	for( SubUnitMap_t::const_iterator unitIt = m_subUnits.begin();
+		 unitIt != m_subUnits.end();
+		 ++unitIt )
+	{
+		if( (*unitIt).second->GetType() == p_type )
+		{
+			ret_val++;
+		}
+		ret_val += (*unitIt).second->getSubUnitCount( p_type );
+	}
+
+	return ret_val;
+}
+
 MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType ) const
 {
 	counter_t ret_val = m_counters[ p_metricType ];
@@ -68,27 +106,76 @@ MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType ) 
 	return ret_val;
 }
 
-void MetricUnit::dump( std::ostream& out ) const
+void MetricUnit::dump( std::ostream& out, const MetricDumpFormat_e p_fmt ) const
 {
-	out << m_namePrefix[ m_type ] << m_name << std::endl;
-	if( m_subPrefix[ m_type ].length() )
-	{
-		out << m_dumpPrefix[ m_type ] << m_subPrefix[ m_type ] << m_subUnits.size() << std::endl;
+	std::string sep;
+
+	switch( p_fmt ) {
+	case METRIC_DUMP_FORMAT_TREE:
+		// TODO: Should be endl
+		sep = "\r\n";
+		break;
+	case METRIC_DUMP_FORMAT_TSV:
+		sep = "\t";
+		break;
+	case METRIC_DUMP_FORMAT_CSV:
+		sep = ",";
+		break;
 	}
-	out << m_dumpPrefix[ m_type ] << "IF statements: " << getCounter( METRIC_TYPE_IF ) << std::endl;
-	out << m_dumpPrefix[ m_type ] << "ELSE statements: " << getCounter( METRIC_TYPE_ELSE ) << std::endl;
-	out << m_dumpPrefix[ m_type ] << "SWITCH statements: " << getCounter( METRIC_TYPE_SWITCH ) << std::endl;
-	out << m_dumpPrefix[ m_type ] << "CASE statements: " << getCounter( METRIC_TYPE_CASE ) << std::endl;
-	out << m_dumpPrefix[ m_type ] << "DEFAULT statements: " << getCounter( METRIC_TYPE_DEFAULT ) << std::endl;
-	out << m_dumpPrefix[ m_type ] << "FOR loops: " << getCounter( METRIC_TYPE_FORLOOP ) << std::endl;
-	out << m_dumpPrefix[ m_type ] << "WHILE loops: " << getCounter( METRIC_TYPE_WHILELOOP ) << std::endl;
-	out << m_dumpPrefix[ m_type ] << "Variables: " << getCounter( METRIC_TYPE_VARIABLE ) << std::endl;
+
+	if(( p_fmt == METRIC_DUMP_FORMAT_TSV ) ||
+	   ( p_fmt == METRIC_DUMP_FORMAT_CSV )) {
+
+		if( m_type == METRIC_UNIT_GLOBAL )
+		{
+			out << "Name" << sep 
+				<< m_subPrefix[ m_type ] << sep
+				<< "Functions" << sep;
+			unsigned loop;
+			for( loop = 0;
+				 loop < METRIC_TYPE_MAX;
+				 loop++ )
+			{
+				out << m_metricNames[loop] << sep;
+			}
+			out << std::endl;
+		}
+	}
+
+	if( p_fmt == METRIC_DUMP_FORMAT_TREE ) {
+		out << m_namePrefix[ m_type ]; 
+	}
+	out << m_name << sep;
+	if( p_fmt == METRIC_DUMP_FORMAT_TREE ) {
+		out << m_dumpPrefix[ m_type ] << m_subPrefix[ m_type ]; 
+	}
+	out << m_subUnits.size() << sep;
+	if( p_fmt == METRIC_DUMP_FORMAT_TREE ) {
+		out << m_dumpPrefix[ m_type ] << "Functions: ";
+	}
+	out << getSubUnitCount( METRIC_UNIT_FUNCTION ) << sep;
+
+	unsigned loop;
+	for( loop = 0;
+		 loop < METRIC_TYPE_MAX;
+		 loop++ )
+	{
+		if( p_fmt == METRIC_DUMP_FORMAT_TREE ) {
+			out << m_dumpPrefix[ m_type ] << m_metricNames[loop] << ": ";
+		} 
+		out << getCounter((MetricType_e) loop ) << sep;
+	}
+
+	if(( p_fmt == METRIC_DUMP_FORMAT_TSV ) ||
+	   ( p_fmt == METRIC_DUMP_FORMAT_CSV )) {
+		out << std::endl;
+	}
 
 	for( SubUnitMap_t::const_iterator unitIt = m_subUnits.begin();
 		 unitIt != m_subUnits.end();
 		 ++unitIt )
 	{
-		(*unitIt).second->dump( out );
+		(*unitIt).second->dump( out, p_fmt );
 	}
 }
 
@@ -99,6 +186,13 @@ MetricUnit* MetricUnit::getSubUnit( const std::string& p_name, const MetricUnitT
 	if( name_it == m_subUnits.end() )
 	{
 		ret_val = new MetricUnit( p_name, p_type );
+
+		if(( p_type == METRIC_UNIT_FUNCTION ) ||
+		   ( p_type == METRIC_UNIT_METHOD ))
+		{
+			/* By default, every function/method has 1 return point */
+			ret_val->increment( METRIC_TYPE_RETURNPOINTS );
+		}
 		m_subUnits[ p_name ] = ret_val;
 	} else {
 		ret_val = (*name_it).second;

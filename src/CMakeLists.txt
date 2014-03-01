@@ -5,6 +5,7 @@ add_clang_executable(ccsm
   ccsm.cpp
   MetricMatcher.cpp
   MetricUnit.cpp
+  MetricUtils.cpp
   )
 target_link_libraries(ccsm
   clangTooling

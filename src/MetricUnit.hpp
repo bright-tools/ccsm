@@ -19,14 +19,25 @@
 
 typedef enum
 {
+	METRIC_DUMP_FORMAT_TREE,
+	METRIC_DUMP_FORMAT_TSV,
+	METRIC_DUMP_FORMAT_CSV
+} MetricDumpFormat_e;
+
+typedef enum
+{
 	METRIC_TYPE_IF = 0,
 	METRIC_TYPE_ELSE,
 	METRIC_TYPE_FORLOOP,
+	METRIC_TYPE_RETURN,
 	METRIC_TYPE_WHILELOOP,
 	METRIC_TYPE_SWITCH,
 	METRIC_TYPE_CASE,
 	METRIC_TYPE_DEFAULT,
+	METRIC_TYPE_GOTO,
+	METRIC_TYPE_LABEL,
 	METRIC_TYPE_VARIABLE,
+	METRIC_TYPE_RETURNPOINTS,
 	METRIC_TYPE_MAX
 } MetricType_e;
 
@@ -49,6 +60,7 @@ private:
 	static const std::string m_dumpPrefix[ METRIC_UNIT_MAX ];
 	static const std::string m_namePrefix[ METRIC_UNIT_MAX ];
 	static const std::string m_subPrefix[ METRIC_UNIT_MAX ];
+	static const std::string m_metricNames[ METRIC_TYPE_MAX ];
 protected:
 	typedef std::map<std::string, MetricUnit*> SubUnitMap_t;
 	std::string m_name;
@@ -61,11 +73,16 @@ public:
 
 	void increment( const MetricType_e p_metricType );
 
-	void dump( std::ostream& out ) const;
+	void dump( std::ostream& out, const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE ) const;
 
 	counter_t getCounter( const MetricType_e p_metricType ) const;
 
 	MetricUnit* getSubUnit( const std::string& p_name, const MetricUnitType_e p_type );
+
+	counter_t getSubUnitCount( const MetricUnitType_e p_type ) const;
+
+	MetricUnitType_e GetType( void ) const;
+
 
 protected:
 	counter_t m_counters[ METRIC_TYPE_MAX ];
