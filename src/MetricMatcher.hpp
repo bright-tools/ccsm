@@ -208,9 +208,9 @@ public:
         return true;
     }
 
-	void dump( std::ostream& out, const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE )
+	void dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE )
 	{
-		m_topUnit->dump( out, p_fmt );
+		m_topUnit->dump( out, p_output, p_fmt );
 	}
 };
 
@@ -231,9 +231,9 @@ public:
 		visitor->TraverseDecl(Context.getTranslationUnitDecl());
 	}
 
-	void dump( std::ostream& out, const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE )
+	void dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE )
 	{
-		visitor->dump( out, p_fmt );
+		visitor->dump( out, p_output, p_fmt );
 	}
 };
 

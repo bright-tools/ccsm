@@ -49,7 +49,7 @@ typedef enum
 
 typedef enum
 {
-	METRIC_UNIT_GLOBAL,
+	METRIC_UNIT_GLOBAL = 0,
 	METRIC_UNIT_FILE,
 	METRIC_UNIT_FUNCTION,
 	METRIC_UNIT_METHOD,
@@ -79,7 +79,7 @@ public:
 
 	void increment( const MetricType_e p_metricType );
 
-	void dump( std::ostream& out, const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE ) const;
+	void dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE ) const;
 
 	counter_t getCounter( const MetricType_e p_metricType ) const;
 

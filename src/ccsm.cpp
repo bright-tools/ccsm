@@ -58,6 +58,26 @@ cl::list<std::string> SourcePaths(
   cl::desc("<source> [... <sourceN>]"),
   cl::OneOrMore);
 
+static cl::opt<bool> NoGlobal(
+  "disable-global",
+  cl::desc("Disable output of stats at the global level")
+);
+
+static cl::opt<bool> NoFile(
+  "disable-file",
+  cl::desc("Disable output of stats at the file level")
+);
+
+static cl::opt<bool> NoFunction(
+  "disable-function",
+  cl::desc("Disable output of stats at the function level")
+);
+
+static cl::opt<bool> NoMethod(
+  "disable-method",
+  cl::desc("Disable output of stats at the method level")
+);
+
 MetricUnit topUnit("Global", METRIC_UNIT_GLOBAL);
 
 
@@ -95,14 +115,28 @@ int main(int argc, const char **argv) {
 
   int Result = Tool.run(newFrontendActionFactory<MetricFrontendAction>());
 
-  if( Result == 0 )
-  {
-	topUnit.dump( std::cout, METRIC_DUMP_FORMAT_CSV );
-  }
-  else
-  {
-	std::cout << "Tool.run returned " << Result << std::endl;
-  }
+	if( Result == 0 )
+	{
+		bool output[ METRIC_UNIT_MAX ] = { 0, };
+		if( !NoMethod ) {
+			output[ METRIC_UNIT_METHOD ] = true;
+		}
+		if( !NoFunction ) {
+			output[ METRIC_UNIT_FUNCTION ] = true;
+		}
+		if( !NoFile ) {
+			output[ METRIC_UNIT_FILE ] = true;
+		}
+		if( !NoGlobal ) {
+			output[ METRIC_UNIT_GLOBAL ] = true;
+		}
+
+		topUnit.dump( std::cout, output, METRIC_DUMP_FORMAT_CSV );
+	}
+	else
+	{
+		std::cout << "Tool.run returned " << Result << std::endl;
+	}
 
   return Result;
 }

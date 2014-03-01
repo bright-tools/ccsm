@@ -144,79 +144,82 @@ MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType ) 
 	return ret_val;
 }
 
-void MetricUnit::dump( std::ostream& out, const MetricDumpFormat_e p_fmt ) const
+void MetricUnit::dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt ) const
 {
 	std::string sep;
 
-	switch( p_fmt ) {
-	case METRIC_DUMP_FORMAT_TREE:
-		// TODO: Should be endl
-		sep = "\r\n";
-		break;
-	case METRIC_DUMP_FORMAT_TSV:
-		sep = "\t";
-		break;
-	case METRIC_DUMP_FORMAT_CSV:
-		sep = ",";
-		break;
-	}
+	if( p_output[ m_type ] ) 
+	{
+		switch( p_fmt ) {
+		case METRIC_DUMP_FORMAT_TREE:
+			// TODO: Should be endl
+			sep = "\r\n";
+			break;
+		case METRIC_DUMP_FORMAT_TSV:
+			sep = "\t";
+			break;
+		case METRIC_DUMP_FORMAT_CSV:
+			sep = ",";
+			break;
+		}
 
-	if(( p_fmt == METRIC_DUMP_FORMAT_TSV ) ||
-	   ( p_fmt == METRIC_DUMP_FORMAT_CSV )) {
+		if(( p_fmt == METRIC_DUMP_FORMAT_TSV ) ||
+		   ( p_fmt == METRIC_DUMP_FORMAT_CSV )) {
 
-		if( m_type == METRIC_UNIT_GLOBAL )
-		{
-			out << "Name" << sep 
-				<< m_subPrefix[ m_type ] << sep
-				<< "Functions" << sep;
-			unsigned loop;
-			for( loop = 0;
-				 loop < METRIC_TYPE_MAX;
-				 loop++ )
+			if( m_type == METRIC_UNIT_GLOBAL )
 			{
-				out << m_metricNames[loop] << sep;
+				out << "Name" << sep 
+					<< m_subPrefix[ m_type ] << sep
+					<< "Functions" << sep;
+				unsigned loop;
+				for( loop = 0;
+					 loop < METRIC_TYPE_MAX;
+					 loop++ )
+				{
+					out << m_metricNames[loop] << sep;
+				}
+				out << std::endl;
 			}
+		}
+
+		if( p_fmt == METRIC_DUMP_FORMAT_TREE ) {
+			out << m_namePrefix[ m_type ]; 
+		}
+		out << m_name << sep;
+		if( p_fmt == METRIC_DUMP_FORMAT_TREE ) {
+			if( m_subPrefix[ m_type ].length() ) {
+				out << m_dumpPrefix[ m_type ] << m_subPrefix[ m_type ] << m_subUnits.size() << sep;
+			}
+		} else {
+			out << m_subUnits.size() << sep;
+		}
+		if( p_fmt == METRIC_DUMP_FORMAT_TREE ) {
+			out << m_dumpPrefix[ m_type ] << "Functions: ";
+		}
+		out << getSubUnitCount( METRIC_UNIT_FUNCTION ) << sep;
+
+		unsigned loop;
+		for( loop = 0;
+			 loop < METRIC_TYPE_MAX;
+			 loop++ )
+		{
+			if( p_fmt == METRIC_DUMP_FORMAT_TREE ) {
+				out << m_dumpPrefix[ m_type ] << m_metricNames[loop] << ": ";
+			} 
+			out << getCounter((MetricType_e) loop ) << sep;
+		}
+
+		if(( p_fmt == METRIC_DUMP_FORMAT_TSV ) ||
+		   ( p_fmt == METRIC_DUMP_FORMAT_CSV )) {
 			out << std::endl;
 		}
-	}
-
-	if( p_fmt == METRIC_DUMP_FORMAT_TREE ) {
-		out << m_namePrefix[ m_type ]; 
-	}
-	out << m_name << sep;
-	if( p_fmt == METRIC_DUMP_FORMAT_TREE ) {
-		if( m_subPrefix[ m_type ].length() ) {
-			out << m_dumpPrefix[ m_type ] << m_subPrefix[ m_type ] << m_subUnits.size() << sep;
-		}
-	} else {
-		out << m_subUnits.size() << sep;
-	}
-	if( p_fmt == METRIC_DUMP_FORMAT_TREE ) {
-		out << m_dumpPrefix[ m_type ] << "Functions: ";
-	}
-	out << getSubUnitCount( METRIC_UNIT_FUNCTION ) << sep;
-
-	unsigned loop;
-	for( loop = 0;
-		 loop < METRIC_TYPE_MAX;
-		 loop++ )
-	{
-		if( p_fmt == METRIC_DUMP_FORMAT_TREE ) {
-			out << m_dumpPrefix[ m_type ] << m_metricNames[loop] << ": ";
-		} 
-		out << getCounter((MetricType_e) loop ) << sep;
-	}
-
-	if(( p_fmt == METRIC_DUMP_FORMAT_TSV ) ||
-	   ( p_fmt == METRIC_DUMP_FORMAT_CSV )) {
-		out << std::endl;
 	}
 
 	for( SubUnitMap_t::const_iterator unitIt = m_subUnits.begin();
 		 unitIt != m_subUnits.end();
 		 ++unitIt )
 	{
-		(*unitIt).second->dump( out, p_fmt );
+		(*unitIt).second->dump( out, p_output, p_fmt );
 	}
 }
 
