@@ -48,6 +48,7 @@ const std::string MetricUnit::m_metricNames[ METRIC_TYPE_MAX ] = {
 	"LABEL statements",
 	"Variables",
 	"Return points",
+	"Statements"
 };
 
 

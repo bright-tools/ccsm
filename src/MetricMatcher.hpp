@@ -90,16 +90,16 @@ public:
 		{
 			m_currentUnit->increment( METRIC_TYPE_FORLOOP );
 		}
-		return true;
+        return true;
 	}
 
 	virtual bool VisitGotoStmt(clang::GotoStmt *p_gotoSt) {
-		//if( m_currentUnit )
+		if( m_currentUnit )
 		{
 			m_currentUnit->increment( METRIC_TYPE_GOTO );
 		}
 
-		return true;
+        return true;
 	}
 
 	virtual bool VisitLabelStmt(clang::LabelStmt *p_LabelSt) {
@@ -107,7 +107,7 @@ public:
 		{
 			m_currentUnit->increment( METRIC_TYPE_LABEL );
 		}
-		return true;
+        return true;
 	}
 
 	virtual bool VisitWhileStmt(clang::WhileStmt *p_whileSt) {
@@ -115,7 +115,7 @@ public:
 		{
 			m_currentUnit->increment( METRIC_TYPE_WHILELOOP );
 		}
-		return true;
+        return true;
 	}
 
 	virtual bool VisitReturnStmt(clang::ReturnStmt *p_returnSt) {
@@ -128,7 +128,7 @@ public:
 				m_currentUnit->increment( METRIC_TYPE_RETURNPOINTS );
 			}
 		}
-		return true;
+        return true;
 	}
 
 	virtual bool VisitSwitchStmt(clang::SwitchStmt *p_switchSt) {
@@ -136,7 +136,7 @@ public:
 		{
 			m_currentUnit->increment( METRIC_TYPE_SWITCH );
 		}
-		return true;
+        return true;
 	}
 
 	virtual bool VisitDefaultStmt(clang::DefaultStmt *p_defaultSt) {
@@ -144,13 +144,21 @@ public:
 		{
 			m_currentUnit->increment( METRIC_TYPE_DEFAULT );
 		}
-		return true;
+        return true;
 	}
 
 	virtual bool VisitCaseStmt(clang::CaseStmt *p_caseSt) {
 		if( m_currentUnit )
 		{
 			m_currentUnit->increment( METRIC_TYPE_CASE );
+		}
+        return true;
+	}
+	
+	virtual bool VisitStmt(clang::Stmt *p_statement) {
+		if( m_currentUnit )
+		{
+			m_currentUnit->increment( METRIC_TYPE_STATEMENTS );
 		}
 		return true;
 	}
@@ -169,6 +177,7 @@ public:
 		} else {
 			/* TODO */
 		}
+
         return true;
     }
 

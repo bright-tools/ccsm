@@ -34,6 +34,7 @@ void vain( int i )
          j++ )
     {
     }
+    j = (1 + 3 + 7) / 12;
     switch( j )
     {
         case 1:
