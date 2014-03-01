@@ -78,6 +78,13 @@ static cl::opt<bool> NoMethod(
   cl::desc("Disable output of stats at the method level")
 );
 
+static cl::opt<std::string> OutputFormat(
+	"output-format",
+	cl::desc("Format of output - choose from tree, csv or tsv"),
+	cl::value_desc("fmt-string"),
+	cl::init("tree")
+);
+
 MetricUnit topUnit("Global", METRIC_UNIT_GLOBAL);
 
 
@@ -130,8 +137,19 @@ int main(int argc, const char **argv) {
 		if( !NoGlobal ) {
 			output[ METRIC_UNIT_GLOBAL ] = true;
 		}
-
-		topUnit.dump( std::cout, output, METRIC_DUMP_FORMAT_CSV );
+		MetricDumpFormat_e fmt;
+		// TODO: Case sensitivity?  Detect invalid option?
+		if( OutputFormat == "tsv" )
+		{
+			fmt = METRIC_DUMP_FORMAT_TSV;
+		} else if( OutputFormat == "csv" )
+		{
+			fmt = METRIC_DUMP_FORMAT_CSV;
+		} else
+		{
+			fmt = METRIC_DUMP_FORMAT_TREE;
+		}
+		topUnit.dump( std::cout, output, fmt );
 	}
 	else
 	{
