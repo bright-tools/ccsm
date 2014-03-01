@@ -44,11 +44,16 @@ const std::string MetricUnit::m_metricNames[ METRIC_TYPE_MAX ] = {
 	"SWITCH statements",
 	"CASE statements",
 	"DEFAULT statements",
+	"LOGICAL AND operators",
+	"LOGICAL OR operators",
+	"TERNARY operators",
 	"GOTO statements",
 	"LABEL statements",
 	"Variables",
 	"Return points",
-	"Statements"
+	"Statements",
+	"McCabe",
+	"Modified McCabe"
 };
 
 
@@ -94,15 +99,47 @@ MetricUnit::counter_t MetricUnit::getSubUnitCount( const MetricUnitType_e p_type
 
 MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType ) const
 {
-	counter_t ret_val = m_counters[ p_metricType ];
+	counter_t ret_val = 0;
 
-	for( SubUnitMap_t::const_iterator unitIt = m_subUnits.begin();
-		 unitIt != m_subUnits.end();
-		 ++unitIt )
+	switch( p_metricType ) 
 	{
-		ret_val += (*unitIt).second->getCounter( p_metricType );
+		case METRIC_TYPE_MODIFIED_CYCLOMATIC:
+			if(( m_type == METRIC_UNIT_FUNCTION ) ||
+			   ( m_type == METRIC_UNIT_METHOD ))
+			{
+				ret_val = getCounter( METRIC_TYPE_FORLOOP ) +
+						  getCounter( METRIC_TYPE_IF ) +
+						  getCounter( METRIC_TYPE_WHILELOOP ) +
+						  getCounter( METRIC_TYPE_SWITCH ) +
+						  getCounter( METRIC_TYPE_LOGICAL_AND ) +
+						  getCounter( METRIC_TYPE_LOGICAL_OR ) +
+						  getCounter( METRIC_TYPE_TERNARY ) + 1;
+			}
+			break;
+		case METRIC_TYPE_CYCLOMATIC:
+			if(( m_type == METRIC_UNIT_FUNCTION ) ||
+			   ( m_type == METRIC_UNIT_METHOD ))
+			{
+				// TODO: What about the 'DEFAULT'?
+				ret_val = getCounter( METRIC_TYPE_FORLOOP ) +
+						  getCounter( METRIC_TYPE_IF ) +
+						  getCounter( METRIC_TYPE_WHILELOOP ) +
+						  getCounter( METRIC_TYPE_CASE ) +
+						  getCounter( METRIC_TYPE_LOGICAL_AND ) +
+						  getCounter( METRIC_TYPE_LOGICAL_OR ) +
+						  getCounter( METRIC_TYPE_TERNARY ) + 1;
+			}
+			break;
+		default:
+			ret_val  = m_counters[ p_metricType ];
+			for( SubUnitMap_t::const_iterator unitIt = m_subUnits.begin();
+				 unitIt != m_subUnits.end();
+				 ++unitIt )
+			{
+				ret_val += (*unitIt).second->getCounter( p_metricType );
+			}
+			break;
 	}
-
 
 	return ret_val;
 }
@@ -148,9 +185,12 @@ void MetricUnit::dump( std::ostream& out, const MetricDumpFormat_e p_fmt ) const
 	}
 	out << m_name << sep;
 	if( p_fmt == METRIC_DUMP_FORMAT_TREE ) {
-		out << m_dumpPrefix[ m_type ] << m_subPrefix[ m_type ]; 
+		if( m_subPrefix[ m_type ].length() ) {
+			out << m_dumpPrefix[ m_type ] << m_subPrefix[ m_type ] << m_subUnits.size() << sep;
+		}
+	} else {
+		out << m_subUnits.size() << sep;
 	}
-	out << m_subUnits.size() << sep;
 	if( p_fmt == METRIC_DUMP_FORMAT_TREE ) {
 		out << m_dumpPrefix[ m_type ] << "Functions: ";
 	}

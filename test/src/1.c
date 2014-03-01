@@ -35,11 +35,16 @@ void vain( int i )
     {
     }
     j = (1 + 3 + 7) / 12;
+    j = (j>1)?0:1;
     switch( j )
     {
         case 1:
             break;
         case 2:
+            break;
+        case 3:
+            break;
+        case 4:
             break;
         default:
             break;
@@ -50,7 +55,8 @@ void vain( int i )
     }
     if( 4 == 4 )
     {
-        if( 5 == 5 )
+        if(( j == 5 ) ||
+           ( j == 6 ))
         {
         } else if( 7 == 9 )
         {

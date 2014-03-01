@@ -97,7 +97,7 @@ int main(int argc, const char **argv) {
 
   if( Result == 0 )
   {
-	topUnit.dump( std::cout, METRIC_DUMP_FORMAT_TREE );
+	topUnit.dump( std::cout, METRIC_DUMP_FORMAT_CSV );
   }
   else
   {

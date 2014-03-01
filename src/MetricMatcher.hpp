@@ -139,6 +139,14 @@ public:
         return true;
 	}
 
+	virtual bool VisitConditionalOperator(clang::ConditionalOperator *p_condOp) {
+		if( m_currentUnit )
+		{
+			m_currentUnit->increment( METRIC_TYPE_TERNARY );
+		}
+        return true;
+	}
+
 	virtual bool VisitDefaultStmt(clang::DefaultStmt *p_defaultSt) {
 		if( m_currentUnit )
 		{
@@ -154,7 +162,26 @@ public:
 		}
         return true;
 	}
-	
+
+	virtual bool VisitBinaryOperator(clang::BinaryOperator *p_binOp) {
+		if( m_currentUnit )
+		{
+			switch( p_binOp->getOpcode() )
+			{
+				case clang::BO_LAnd:
+					m_currentUnit->increment( METRIC_TYPE_LOGICAL_AND );
+					break;
+				case clang::BO_LOr:
+					m_currentUnit->increment( METRIC_TYPE_LOGICAL_OR );
+					break;
+				default:
+					break;
+			}
+		}
+        return true;
+	}
+
+
 	virtual bool VisitStmt(clang::Stmt *p_statement) {
 		if( m_currentUnit )
 		{
