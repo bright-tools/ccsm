@@ -1,5 +1,12 @@
 /*
-   Copyright 2013 John Bailey
+   @file
+   @brief Functions to support AST operations of any complexity that 
+          aren't supported out-of-the-box by clang.
+
+   @author John Bailey
+   @copyright Copyright 2013 John Bailey
+
+   @section LICENSE
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.

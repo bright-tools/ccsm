@@ -1,5 +1,12 @@
 /*
-   Copyright 2014 John Bailey
+   @file
+   @brief Class to support AST matching in order to gather
+          code metrics.
+
+   @author John Bailey
+   @copyright Copyright 2014 John Bailey
+
+   @section LICENSE
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -40,178 +47,24 @@ protected:
 	MetricUnit*       m_currentUnit;
 
 public:
-    explicit MetricVisitor(clang::ASTContext* p_Context, MetricUnit* p_topUnit) : astContext(p_Context), m_topUnit( p_topUnit ), m_currentUnit( NULL )
-    {
-    }
+    explicit MetricVisitor(clang::ASTContext* p_Context, MetricUnit* p_topUnit);
+	virtual ~MetricVisitor(void);
+	virtual bool VisitFunctionDecl(clang::FunctionDecl *func);
+	virtual bool VisitVarDecl(clang::VarDecl *p_varDec);
+	virtual bool VisitForStmt(clang::ForStmt *p_forSt);
+	virtual bool VisitGotoStmt(clang::GotoStmt *p_gotoSt);
+	virtual bool VisitLabelStmt(clang::LabelStmt *p_LabelSt);
+	virtual bool VisitWhileStmt(clang::WhileStmt *p_whileSt);
+	virtual bool VisitReturnStmt(clang::ReturnStmt *p_returnSt);
+	virtual bool VisitSwitchStmt(clang::SwitchStmt *p_switchSt);
+	virtual bool VisitConditionalOperator(clang::ConditionalOperator *p_condOp);
+	virtual bool VisitDefaultStmt(clang::DefaultStmt *p_defaultSt);
+	virtual bool VisitCaseStmt(clang::CaseStmt *p_caseSt);
+	virtual bool VisitBinaryOperator(clang::BinaryOperator *p_binOp);
+	virtual bool VisitStmt(clang::Stmt *p_statement);
+	virtual bool VisitIfStmt(clang::IfStmt *p_ifSt);
 
-	virtual bool VisitFunctionDecl(clang::FunctionDecl *func) {
-     //   numFunctions++;
-		if( func->doesThisDeclarationHaveABody() )
-		{
-			m_currentFileName = astContext->getSourceManager().getFilename( func->getLocation() ).str();
-			m_currentFunctionName = func->getQualifiedNameAsString();
-
-			MetricUnitType_e type = METRIC_UNIT_FUNCTION;
-			if( func->isCXXClassMember() )
-			{
-				type = METRIC_UNIT_METHOD;
-			}
-			m_currentUnit = m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE)->getSubUnit(m_currentFunctionName, type);
-		}
-		return true;     
-	}     
-
-	virtual bool VisitVarDecl(clang::VarDecl *p_varDec) {
-
-		/* Check it's not an external reference & not something like a function parameter */
-		if(( !p_varDec->hasExternalStorage() ) &&
-		   ( p_varDec->getKind() == clang::Decl::Var ))
-		{
-			/* Check to see if this variable does not have a parent function/method */
-			if( !p_varDec->getParentFunctionOrMethod() )
-			{
-				/* File-scope variable */
-	   			m_currentFileName = astContext->getSourceManager().getFilename( p_varDec->getLocation() ).str();
-				m_currentFunctionName = "";
-				m_currentUnit = m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE);
-			}
-
-			if( m_currentUnit )
-			{
-				m_currentUnit->increment( METRIC_TYPE_VARIABLE );
-			}
-		}
-		return true;	
-	}
-
-	// TODO: Lots of repetition here - template it?
-	virtual bool VisitForStmt(clang::ForStmt *p_forSt) {
-		if( m_currentUnit )
-		{
-			m_currentUnit->increment( METRIC_TYPE_FORLOOP );
-		}
-        return true;
-	}
-
-	virtual bool VisitGotoStmt(clang::GotoStmt *p_gotoSt) {
-		if( m_currentUnit )
-		{
-			m_currentUnit->increment( METRIC_TYPE_GOTO );
-		}
-
-        return true;
-	}
-
-	virtual bool VisitLabelStmt(clang::LabelStmt *p_LabelSt) {
-		if( m_currentUnit )
-		{
-			m_currentUnit->increment( METRIC_TYPE_LABEL );
-		}
-        return true;
-	}
-
-	virtual bool VisitWhileStmt(clang::WhileStmt *p_whileSt) {
-		if( m_currentUnit )
-		{
-			m_currentUnit->increment( METRIC_TYPE_WHILELOOP );
-		}
-        return true;
-	}
-
-	virtual bool VisitReturnStmt(clang::ReturnStmt *p_returnSt) {
-		if( m_currentUnit )
-		{
-			m_currentUnit->increment( METRIC_TYPE_RETURN );
-
-			if( !isLastExecutableStmtInFn( p_returnSt, astContext ) )
-			{
-				m_currentUnit->increment( METRIC_TYPE_RETURNPOINTS );
-			}
-		}
-        return true;
-	}
-
-	virtual bool VisitSwitchStmt(clang::SwitchStmt *p_switchSt) {
-		if( m_currentUnit )
-		{
-			m_currentUnit->increment( METRIC_TYPE_SWITCH );
-		}
-        return true;
-	}
-
-	virtual bool VisitConditionalOperator(clang::ConditionalOperator *p_condOp) {
-		if( m_currentUnit )
-		{
-			m_currentUnit->increment( METRIC_TYPE_TERNARY );
-		}
-        return true;
-	}
-
-	virtual bool VisitDefaultStmt(clang::DefaultStmt *p_defaultSt) {
-		if( m_currentUnit )
-		{
-			m_currentUnit->increment( METRIC_TYPE_DEFAULT );
-		}
-        return true;
-	}
-
-	virtual bool VisitCaseStmt(clang::CaseStmt *p_caseSt) {
-		if( m_currentUnit )
-		{
-			m_currentUnit->increment( METRIC_TYPE_CASE );
-		}
-        return true;
-	}
-
-	virtual bool VisitBinaryOperator(clang::BinaryOperator *p_binOp) {
-		if( m_currentUnit )
-		{
-			switch( p_binOp->getOpcode() )
-			{
-				case clang::BO_LAnd:
-					m_currentUnit->increment( METRIC_TYPE_LOGICAL_AND );
-					break;
-				case clang::BO_LOr:
-					m_currentUnit->increment( METRIC_TYPE_LOGICAL_OR );
-					break;
-				default:
-					break;
-			}
-		}
-        return true;
-	}
-
-
-	virtual bool VisitStmt(clang::Stmt *p_statement) {
-		if( m_currentUnit )
-		{
-			m_currentUnit->increment( METRIC_TYPE_STATEMENTS );
-		}
-		return true;
-	}
-
-
-	virtual bool VisitIfStmt(clang::IfStmt *p_ifSt) {
-		if( m_currentUnit )
-		{
-			m_currentUnit->increment( METRIC_TYPE_IF );
-
-			if( p_ifSt->getElse() )
-			{
-				// TODO: This means that "else if" statements get counted as both an IF and an ELSE, which may not be what everyone wants
-				m_currentUnit->increment( METRIC_TYPE_ELSE );
-			}
-		} else {
-			/* TODO */
-		}
-
-        return true;
-    }
-
-	void dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE )
-	{
-		m_topUnit->dump( out, p_output, p_fmt );
-	}
+	void dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE );
 };
 
 class MetricASTConsumer : public clang::ASTConsumer
@@ -220,21 +73,12 @@ protected:
 	MetricVisitor *visitor;
 
 public:
-    explicit MetricASTConsumer(clang::ASTContext *CI, MetricUnit* p_topUnit) : visitor(new MetricVisitor(CI, p_topUnit)) 
-        { }
+    explicit MetricASTConsumer(clang::ASTContext *CI, MetricUnit* p_topUnit);
 
-	virtual ~MetricASTConsumer(void) {};
+	virtual ~MetricASTConsumer(void);
+	virtual void HandleTranslationUnit(clang::ASTContext &Context);
 
-	virtual void HandleTranslationUnit(clang::ASTContext &Context) {
-		/* we can use ASTContext to get the TranslationUnitDecl, which is
-		   a single Decl that collectively represents the entire source file */
-		visitor->TraverseDecl(Context.getTranslationUnitDecl());
-	}
-
-	void dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE )
-	{
-		visitor->dump( out, p_output, p_fmt );
-	}
+	void dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE );
 };
 
 

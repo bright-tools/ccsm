@@ -1,5 +1,12 @@
 /*
-   Copyright 2014 John Bailey
+   @file
+   @brief Class to support storing of metrics relating to C
+          code
+
+   @author John Bailey
+   @copyright Copyright 2014 John Bailey
+
+   @section LICENSE
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
