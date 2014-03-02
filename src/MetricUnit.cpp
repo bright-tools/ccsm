@@ -28,14 +28,10 @@ const std::string MetricUnit::m_dumpPrefix[ METRIC_UNIT_MAX ] = {
 	"\t\t",
 	"\t\t"
 };
-const std::string MetricUnit::m_subPrefix[ METRIC_UNIT_MAX ] = {
-	"Files: ",
-	"Functions/Methods: ",
-	"",
-	""
-};
 
 const std::string MetricUnit::m_metricNames[ METRIC_TYPE_MAX ] = {
+	"Files",
+	"Functions",
 	"IF statements",
 	"ELSE statements",
 	"FOR loops",
@@ -57,6 +53,100 @@ const std::string MetricUnit::m_metricNames[ METRIC_TYPE_MAX ] = {
 	"Local Functions"
 };
 
+const bool MetricUnit::m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ] = {
+	{
+			true, /* METRIC_TYPE_FILES */
+			true,/* METRIC_TYPE_FUNCTIONS */
+			true,/* METRIC_TYPE_IF */
+			true,/* METRIC_TYPE_ELSE */
+			true,/* METRIC_TYPE_FORLOOP */
+			true,/* METRIC_TYPE_RETURN */
+			true,/* METRIC_TYPE_WHILELOOP */
+			true,/* METRIC_TYPE_SWITCH */
+			true,/* METRIC_TYPE_CASE */
+			true,/* METRIC_TYPE_DEFAULT */
+			true,/* METRIC_TYPE_LOGICAL_AND */
+			true,/* METRIC_TYPE_LOGICAL_OR */
+			true,/* METRIC_TYPE_TERNARY */
+			true,/* METRIC_TYPE_GOTO */
+			true,/* METRIC_TYPE_LABEL */
+			true,/* METRIC_TYPE_VARIABLE */
+			true,/* METRIC_TYPE_RETURNPOINTS */
+			true,/* METRIC_TYPE_STATEMENTS */
+			false,/* METRIC_TYPE_CYCLOMATIC */
+			false,/* METRIC_TYPE_MODIFIED_CYCLOMATIC */
+			true, /* METRIC_TYPE_LOCAL_FUNCTIONS  */
+	},
+	{
+			false,/* METRIC_TYPE_FILES */
+			true,/* METRIC_TYPE_FUNCTIONS */
+			true,/* METRIC_TYPE_IF */
+			true,/* METRIC_TYPE_ELSE */
+			true,/* METRIC_TYPE_FORLOOP */
+			true,/* METRIC_TYPE_RETURN */
+			true,/* METRIC_TYPE_WHILELOOP */
+			true,/* METRIC_TYPE_SWITCH */
+			true,/* METRIC_TYPE_CASE */
+			true,/* METRIC_TYPE_DEFAULT */
+			true,/* METRIC_TYPE_LOGICAL_AND */
+			true,/* METRIC_TYPE_LOGICAL_OR */
+			true,/* METRIC_TYPE_TERNARY */
+			true,/* METRIC_TYPE_GOTO */
+			true,/* METRIC_TYPE_LABEL */
+			true,/* METRIC_TYPE_VARIABLE */
+			true,/* METRIC_TYPE_RETURNPOINTS */
+			true,/* METRIC_TYPE_STATEMENTS */
+			false,/* METRIC_TYPE_CYCLOMATIC */
+			false,/* METRIC_TYPE_MODIFIED_CYCLOMATIC */
+			true, /* METRIC_TYPE_LOCAL_FUNCTIONS  */
+	},
+	{
+			false, /* METRIC_TYPE_FILES */
+			false,/* METRIC_TYPE_FUNCTIONS */
+			true,/* METRIC_TYPE_IF */
+			true,/* METRIC_TYPE_ELSE */
+			true,/* METRIC_TYPE_FORLOOP */
+			true,/* METRIC_TYPE_RETURN */
+			true,/* METRIC_TYPE_WHILELOOP */
+			true,/* METRIC_TYPE_SWITCH */
+			true,/* METRIC_TYPE_CASE */
+			true,/* METRIC_TYPE_DEFAULT */
+			true,/* METRIC_TYPE_LOGICAL_AND */
+			true,/* METRIC_TYPE_LOGICAL_OR */
+			true,/* METRIC_TYPE_TERNARY */
+			true,/* METRIC_TYPE_GOTO */
+			true,/* METRIC_TYPE_LABEL */
+			true,/* METRIC_TYPE_VARIABLE */
+			true,/* METRIC_TYPE_RETURNPOINTS */
+			true,/* METRIC_TYPE_STATEMENTS */
+			true,/* METRIC_TYPE_CYCLOMATIC */
+			true,/* METRIC_TYPE_MODIFIED_CYCLOMATIC */
+			false, /* METRIC_TYPE_LOCAL_FUNCTIONS  */
+	},
+	{
+			false, /* METRIC_TYPE_FILES */
+			false,/* METRIC_TYPE_FUNCTIONS */
+			true,/* METRIC_TYPE_IF */
+			true,/* METRIC_TYPE_ELSE */
+			true,/* METRIC_TYPE_FORLOOP */
+			true,/* METRIC_TYPE_RETURN */
+			true,/* METRIC_TYPE_WHILELOOP */
+			true,/* METRIC_TYPE_SWITCH */
+			true,/* METRIC_TYPE_CASE */
+			true,/* METRIC_TYPE_DEFAULT */
+			true,/* METRIC_TYPE_LOGICAL_AND */
+			true,/* METRIC_TYPE_LOGICAL_OR */
+			true,/* METRIC_TYPE_TERNARY */
+			true,/* METRIC_TYPE_GOTO */
+			true,/* METRIC_TYPE_LABEL */
+			true,/* METRIC_TYPE_VARIABLE */
+			true,/* METRIC_TYPE_RETURNPOINTS */
+			true,/* METRIC_TYPE_STATEMENTS */
+			true,/* METRIC_TYPE_CYCLOMATIC */
+			true,/* METRIC_TYPE_MODIFIED_CYCLOMATIC */
+			false, /* METRIC_TYPE_LOCAL_FUNCTIONS  */
+	}
+};
 
 MetricUnit::MetricUnit( const std::string& p_name, const MetricUnitType_e p_type ) : m_name( p_name ), m_type( p_type )
 {
@@ -169,9 +259,7 @@ void MetricUnit::dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ]
 
 			if( m_type == METRIC_UNIT_GLOBAL )
 			{
-				out << "Name" << sep 
-					<< m_subPrefix[ m_type ] << sep
-					<< "Functions" << sep;
+				out << "Name" << sep;
 				unsigned loop;
 				for( loop = 0;
 					 loop < METRIC_TYPE_MAX;
@@ -184,41 +272,18 @@ void MetricUnit::dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ]
 		}
 
 		if( p_fmt == METRIC_DUMP_FORMAT_TREE ) {
-			out << m_namePrefix[ m_type ]; 
-		}
+			out << m_namePrefix[m_type];
+		} 
+
 		out << m_name << sep;
-		if( p_fmt == METRIC_DUMP_FORMAT_TREE ) {
-			if( m_subPrefix[ m_type ].length() ) {
-				out << m_dumpPrefix[ m_type ] << m_subPrefix[ m_type ] << m_subUnits.size() << sep;
-			}
-		} else {
-			out << m_subUnits.size() << sep;
-		}
-		/* Don't output function count at the function/method level */
-		if(( m_type != METRIC_UNIT_FUNCTION ) &&
-		   ( m_type != METRIC_UNIT_METHOD ))
-		{
-			if( p_fmt == METRIC_DUMP_FORMAT_TREE ) {
-				out << m_dumpPrefix[ m_type ] << "Functions: ";
-			}
-			out << getSubUnitCount( METRIC_UNIT_FUNCTION ) << sep;
-		} else if( p_fmt != METRIC_DUMP_FORMAT_TREE )
-		{
-			out << sep;
-		}
+
 		unsigned loop;
 		for( loop = 0;
 			 loop < METRIC_TYPE_MAX;
 			 loop++ )
 		{
 			/* Filter out metrics which only apply at file/method level */
-			if(((( loop != METRIC_TYPE_CYCLOMATIC ) &&
-			     ( loop != METRIC_TYPE_MODIFIED_CYCLOMATIC )) ||
-			    (( m_type == METRIC_UNIT_FUNCTION ) ||
-			     ( m_type == METRIC_UNIT_METHOD ))) &&
-			   (( loop != METRIC_TYPE_LOCAL_FUNCTIONS ) ||
-			   (( m_type == METRIC_UNIT_GLOBAL ) ||
-			     ( m_type == METRIC_UNIT_FILE ))))
+			if(m_metricApplies[ m_type ][ loop ])
 			{
 				if( p_fmt == METRIC_DUMP_FORMAT_TREE ) {
 					out << m_dumpPrefix[ m_type ] << m_metricNames[loop] << ": ";

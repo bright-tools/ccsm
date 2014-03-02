@@ -49,6 +49,7 @@ protected:
 public:
     explicit MetricVisitor(clang::ASTContext* p_Context, MetricUnit* p_topUnit);
 	virtual ~MetricVisitor(void);
+	virtual bool VisitTranslationUnitDecl(clang::TranslationUnitDecl *func);
 	virtual bool VisitFunctionDecl(clang::FunctionDecl *func);
 	virtual bool VisitVarDecl(clang::VarDecl *p_varDec);
 	virtual bool VisitForStmt(clang::ForStmt *p_forSt);

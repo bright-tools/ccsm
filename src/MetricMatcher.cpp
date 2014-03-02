@@ -39,21 +39,29 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 	{
 		m_currentFileName = astContext->getSourceManager().getFilename( func->getLocation() ).str();
 		m_currentFunctionName = func->getQualifiedNameAsString();
+		MetricUnit* fileUnit = m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE);
 
 		MetricUnitType_e type = METRIC_UNIT_FUNCTION;
 		if( func->isCXXClassMember() )
 		{
 			type = METRIC_UNIT_METHOD;
 		}
-		m_currentUnit = m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE)->getSubUnit(m_currentFunctionName, type);
+		m_currentUnit = fileUnit->getSubUnit(m_currentFunctionName, type);
 
 		if( func->getLinkageAndVisibility().getLinkage() == InternalLinkage )
 		{
-			m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE)->increment( METRIC_TYPE_LOCAL_FUNCTIONS );
+			fileUnit->increment( METRIC_TYPE_LOCAL_FUNCTIONS );
 		}
+		fileUnit->increment( METRIC_TYPE_FUNCTIONS );
 	}
 	return true;     
 }     
+
+bool MetricVisitor::VisitTranslationUnitDecl(clang::TranslationUnitDecl *func)
+{
+	m_topUnit->increment( METRIC_TYPE_FILES );
+	return true;
+}
 
 bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 

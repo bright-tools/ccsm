@@ -33,7 +33,9 @@ typedef enum
 
 typedef enum
 {
-	METRIC_TYPE_IF = 0,
+	METRIC_TYPE_FILES = 0,
+	METRIC_TYPE_FUNCTIONS,
+	METRIC_TYPE_IF,
 	METRIC_TYPE_ELSE,
 	METRIC_TYPE_FORLOOP,
 	METRIC_TYPE_RETURN,
@@ -73,8 +75,8 @@ class MetricUnit
 private:
 	static const std::string m_dumpPrefix[ METRIC_UNIT_MAX ];
 	static const std::string m_namePrefix[ METRIC_UNIT_MAX ];
-	static const std::string m_subPrefix[ METRIC_UNIT_MAX ];
 	static const std::string m_metricNames[ METRIC_TYPE_MAX ];
+	static const bool        m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ];
 protected:
 	typedef std::map<std::string, MetricUnit*> SubUnitMap_t;
 	std::string m_name;
