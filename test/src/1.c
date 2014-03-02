@@ -78,7 +78,8 @@ void vain( int i )
     }
     else
     {
+        /* This does not count as the final return statement
+           as it's inside a conditionally executed compound */
         return;
     }
-    return;
 }
