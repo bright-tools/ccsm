@@ -46,6 +46,11 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 			type = METRIC_UNIT_METHOD;
 		}
 		m_currentUnit = m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE)->getSubUnit(m_currentFunctionName, type);
+
+		if( func->getLinkageAndVisibility().getLinkage() == InternalLinkage )
+		{
+			m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE)->increment( METRIC_TYPE_LOCAL_FUNCTIONS );
+		}
 	}
 	return true;     
 }     

@@ -53,7 +53,8 @@ const std::string MetricUnit::m_metricNames[ METRIC_TYPE_MAX ] = {
 	"Return points",
 	"Statements",
 	"McCabe",
-	"Modified McCabe"
+	"Modified McCabe",
+	"Local Functions"
 };
 
 
@@ -211,10 +212,13 @@ void MetricUnit::dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ]
 			 loop++ )
 		{
 			/* Filter out metrics which only apply at file/method level */
-			if((( loop != METRIC_TYPE_CYCLOMATIC ) &&
-			    ( loop != METRIC_TYPE_MODIFIED_CYCLOMATIC )) ||
-			   (( m_type == METRIC_UNIT_FUNCTION ) ||
-			    ( m_type == METRIC_UNIT_METHOD )))
+			if(((( loop != METRIC_TYPE_CYCLOMATIC ) &&
+			     ( loop != METRIC_TYPE_MODIFIED_CYCLOMATIC )) ||
+			    (( m_type == METRIC_UNIT_FUNCTION ) ||
+			     ( m_type == METRIC_UNIT_METHOD ))) &&
+			   (( loop != METRIC_TYPE_LOCAL_FUNCTIONS ) ||
+			   (( m_type == METRIC_UNIT_GLOBAL ) ||
+			     ( m_type == METRIC_UNIT_FILE ))))
 			{
 				if( p_fmt == METRIC_DUMP_FORMAT_TREE ) {
 					out << m_dumpPrefix[ m_type ] << m_metricNames[loop] << ": ";

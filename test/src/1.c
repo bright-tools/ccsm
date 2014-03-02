@@ -25,6 +25,11 @@ main_end:
 
 int k;
 
+static int rain( int i )
+{
+    return i+1;
+}
+
 void vain( int i )
 {
     int j;
