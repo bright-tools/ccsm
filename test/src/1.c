@@ -80,4 +80,5 @@ void vain( int i )
     {
         return;
     }
+    return;
 }

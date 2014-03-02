@@ -28,11 +28,6 @@
 #include "clang/Basic/SourceManager.h"
 #include "clang/AST/ASTContext.h"
 
-extern bool isLastExecutableStmtInFn(clang::Stmt* p_stmt, clang::ASTContext* p_context );
-
-extern clang::SourceLocation findSemiAfterLocation(clang::SourceLocation loc,
-                                            clang::ASTContext &Ctx,
-                                            bool IsDecl = false);
-
+extern bool isLastExecutableStmtInFn(const clang::Stmt* const p_stmt, clang::ASTContext* p_context );
 
 #endif
