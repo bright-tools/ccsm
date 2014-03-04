@@ -64,6 +64,7 @@ public:
 	virtual bool VisitBinaryOperator(clang::BinaryOperator *p_binOp);
 	virtual bool VisitStmt(clang::Stmt *p_statement);
 	virtual bool VisitIfStmt(clang::IfStmt *p_ifSt);
+	virtual bool VisitCallExpr(clang::CallExpr *p_callExpr);
 
 	void dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE );
 };

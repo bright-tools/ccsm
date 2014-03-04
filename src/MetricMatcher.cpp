@@ -133,6 +133,15 @@ bool MetricVisitor::VisitReturnStmt(clang::ReturnStmt *p_returnSt) {
     return true;
 }
 
+bool MetricVisitor::VisitCallExpr(clang::CallExpr *p_callExpr)
+{
+	if( m_currentUnit )
+	{
+		m_currentUnit->increment( METRIC_TYPE_FUNCTION_CALLS );
+	}
+    return true;
+}
+
 bool MetricVisitor::VisitSwitchStmt(clang::SwitchStmt *p_switchSt) {
 	if( m_currentUnit )
 	{

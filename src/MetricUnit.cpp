@@ -50,7 +50,8 @@ const std::string MetricUnit::m_metricNames[ METRIC_TYPE_MAX ] = {
 	"Statements",
 	"McCabe",
 	"Modified McCabe",
-	"Local Functions"
+	"Local Functions",
+	"Function Calls"
 };
 
 const bool MetricUnit::m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ] = {
@@ -76,6 +77,7 @@ const bool MetricUnit::m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ] = {
 			false,/* METRIC_TYPE_CYCLOMATIC */
 			false,/* METRIC_TYPE_MODIFIED_CYCLOMATIC */
 			true, /* METRIC_TYPE_LOCAL_FUNCTIONS  */
+			false,/* METRIC_TYPE_FUNCTION_CALLS */
 	},
 	{
 			false,/* METRIC_TYPE_FILES */
@@ -99,6 +101,7 @@ const bool MetricUnit::m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ] = {
 			false,/* METRIC_TYPE_CYCLOMATIC */
 			false,/* METRIC_TYPE_MODIFIED_CYCLOMATIC */
 			true, /* METRIC_TYPE_LOCAL_FUNCTIONS  */
+			false,/* METRIC_TYPE_FUNCTION_CALLS */
 	},
 	{
 			false, /* METRIC_TYPE_FILES */
@@ -122,6 +125,7 @@ const bool MetricUnit::m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ] = {
 			true,/* METRIC_TYPE_CYCLOMATIC */
 			true,/* METRIC_TYPE_MODIFIED_CYCLOMATIC */
 			false, /* METRIC_TYPE_LOCAL_FUNCTIONS  */
+			true,/* METRIC_TYPE_FUNCTION_CALLS */
 	},
 	{
 			false, /* METRIC_TYPE_FILES */
@@ -145,6 +149,7 @@ const bool MetricUnit::m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ] = {
 			true,/* METRIC_TYPE_CYCLOMATIC */
 			true,/* METRIC_TYPE_MODIFIED_CYCLOMATIC */
 			false, /* METRIC_TYPE_LOCAL_FUNCTIONS  */
+			true,/* METRIC_TYPE_FUNCTION_CALLS */
 	}
 };
 

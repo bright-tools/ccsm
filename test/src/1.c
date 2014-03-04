@@ -88,3 +88,21 @@ void vain( int i )
         return;
     }
 }
+
+int jain( void )
+{
+    return 1;
+}
+
+enum some_enum {
+    enum_one,
+    enum_two
+};
+int other_array[ enum_two ];
+
+extern int some_array[ (enum_two>(sizeof(other_array)/sizeof(int)))?6:99 ];
+
+int yain( void )
+{
+    return jain()+3;
+}
