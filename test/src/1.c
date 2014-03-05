@@ -98,9 +98,9 @@ enum some_enum {
     enum_one,
     enum_two
 };
-int other_array[ enum_two ];
+static int other_array[ enum_two ];
 
-extern int some_array[ (enum_two>(sizeof(other_array)/sizeof(int)))?6:99 ];
+static int some_array[ (enum_two>(sizeof(other_array)/sizeof(int)))?6:99 ];
 
 int yain( void )
 {

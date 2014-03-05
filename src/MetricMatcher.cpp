@@ -35,10 +35,18 @@ MetricVisitor::~MetricVisitor(void)
 
 bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
     //   numFunctions++;
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+	std::cout << "VisitFunctionDecl" << std::endl;
+#endif
 	if( func->doesThisDeclarationHaveABody() )
 	{
 		m_currentFileName = astContext->getSourceManager().getFilename( func->getLocation() ).str();
 		m_currentFunctionName = func->getQualifiedNameAsString();
+
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+		std::cout << "VisitFunctionDecl - " << m_currentFileName << "::"<< m_currentFunctionName << std::endl;
+#endif
+
 		MetricUnit* fileUnit = m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE);
 
 		MetricUnitType_e type = METRIC_UNIT_FUNCTION;
@@ -46,6 +54,7 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 		{
 			type = METRIC_UNIT_METHOD;
 		}
+		
 		m_currentUnit = fileUnit->getSubUnit(m_currentFunctionName, type);
 
 		if( func->getLinkageAndVisibility().getLinkage() == InternalLinkage )
@@ -65,22 +74,35 @@ bool MetricVisitor::VisitTranslationUnitDecl(clang::TranslationUnitDecl *func)
 
 bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 
-	/* Check it's not an external reference & not something like a function parameter */
-	if(( !p_varDec->hasExternalStorage() ) &&
-		( p_varDec->getKind() == clang::Decl::Var ))
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+	std::cout << "VisitVarDecl : CONTEXT " << m_currentFileName << "::" << m_currentFunctionName << std::endl;
+#endif
+
+	/* Check it's not something like a function parameter */
+	if( p_varDec->getKind() == clang::Decl::Var )
 	{
 		/* Check to see if this variable does not have a parent function/method */
 		if( !p_varDec->getParentFunctionOrMethod() )
 		{
+			SourceLocation loc = p_varDec->getLocation();
+			if( loc.isMacroID() )
+			{
+				loc = astContext->getSourceManager().getFileLoc(loc);
+			}
+
 			/* File-scope variable */
-	   		m_currentFileName = astContext->getSourceManager().getFilename( p_varDec->getLocation() ).str();
+			m_currentFileName = astContext->getSourceManager().getFilename( loc ).str();
 			m_currentFunctionName = "";
 			m_currentUnit = m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE);
 		}
 
-		if( m_currentUnit )
+		/* Don't count external references */
+		if ( !p_varDec->hasExternalStorage() )
 		{
-			m_currentUnit->increment( METRIC_TYPE_VARIABLE );
+			if( m_currentUnit )
+			{
+				m_currentUnit->increment( METRIC_TYPE_VARIABLE );
+			}
 		}
 	}
 	return true;	
@@ -151,6 +173,9 @@ bool MetricVisitor::VisitSwitchStmt(clang::SwitchStmt *p_switchSt) {
 }
 
 bool MetricVisitor::VisitConditionalOperator(clang::ConditionalOperator *p_condOp) {
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+	std::cout << "VisitConditionalOperator : " << m_currentFileName << "::" << m_currentFunctionName << std::endl;
+#endif
 	if( m_currentUnit )
 	{
 		m_currentUnit->increment( METRIC_TYPE_TERNARY );
