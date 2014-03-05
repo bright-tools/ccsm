@@ -25,7 +25,9 @@
 using namespace clang;
 using namespace std;
 
-MetricVisitor::MetricVisitor(clang::ASTContext* p_Context, MetricUnit* p_topUnit) : astContext(p_Context), m_topUnit( p_topUnit ), m_currentUnit( NULL )
+//#define DEBUG_FN_TRACE_OUTOUT 1
+
+MetricVisitor::MetricVisitor(clang::ASTContext* p_Context, MetricUnit* p_topUnit, Options* p_options) : astContext(p_Context), m_topUnit( p_topUnit ), m_currentUnit( NULL ), m_options( p_options )
 {
 }
 
@@ -33,8 +35,35 @@ MetricVisitor::~MetricVisitor(void)
 {
 }
 
+bool MetricVisitor::ShouldIncludeFile( const std::string& p_fn ) const
+{
+	bool ret_val = true;
+	if (( m_options != NULL ) &&
+		( m_options->ExcludeFiles != NULL ))
+	{	
+		for( std::vector<std::string>::const_iterator it = m_options->ExcludeFiles->begin();
+			 it != m_options->ExcludeFiles->end();
+			 it++ )
+		{
+			if( p_fn.find( *it ) !=  string::npos )
+			{
+				ret_val = false;
+				break;
+			}
+		}
+	}
+	return ret_val;
+}
+
+bool MetricVisitor::ShouldIncludeFunction( const std::string& p_fn ) const
+{
+	return (( m_options == NULL ) ||
+			( m_options->ExcludeFunctions == NULL ) ||
+			( std::find( m_options->ExcludeFunctions->begin(), m_options->ExcludeFunctions->end(), p_fn ) == m_options->ExcludeFunctions->end() ));
+}
+
 bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
-    //   numFunctions++;
+    
 #if defined( DEBUG_FN_TRACE_OUTOUT )
 	std::cout << "VisitFunctionDecl" << std::endl;
 #endif
@@ -47,30 +76,35 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 		std::cout << "VisitFunctionDecl - " << m_currentFileName << "::"<< m_currentFunctionName << std::endl;
 #endif
 
-		MetricUnit* fileUnit = m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE);
-
-		MetricUnitType_e type = METRIC_UNIT_FUNCTION;
-		if( func->isCXXClassMember() )
+		if( ShouldIncludeFile( m_currentFileName ) && ShouldIncludeFunction( m_currentFunctionName ))
 		{
-			type = METRIC_UNIT_METHOD;
-		}
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+			std::cout << "VisitFunctionDecl - Should be included" << std::endl;
+#endif
+			MetricUnit* fileUnit = m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE);
+
+			MetricUnitType_e type = METRIC_UNIT_FUNCTION;
+
+			if( func->isCXXClassMember() )
+			{
+				type = METRIC_UNIT_METHOD;
+			}
 		
-		m_currentUnit = fileUnit->getSubUnit(m_currentFunctionName, type);
+			m_currentUnit = fileUnit->getSubUnit(m_currentFunctionName, type);
 
-		if( func->getLinkageAndVisibility().getLinkage() == InternalLinkage )
-		{
-			fileUnit->increment( METRIC_TYPE_LOCAL_FUNCTIONS );
+			if( func->getLinkageAndVisibility().getLinkage() == InternalLinkage )
+			{
+				fileUnit->increment( METRIC_TYPE_LOCAL_FUNCTIONS );
+			}
+			fileUnit->increment( METRIC_TYPE_FUNCTIONS );
 		}
-		fileUnit->increment( METRIC_TYPE_FUNCTIONS );
+		else
+		{
+			m_currentUnit = NULL;
+		}
 	}
 	return true;     
 }     
-
-bool MetricVisitor::VisitTranslationUnitDecl(clang::TranslationUnitDecl *func)
-{
-	m_topUnit->increment( METRIC_TYPE_FILES );
-	return true;
-}
 
 bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 
@@ -84,25 +118,36 @@ bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 		/* Check to see if this variable does not have a parent function/method */
 		if( !p_varDec->getParentFunctionOrMethod() )
 		{
-			SourceLocation loc = p_varDec->getLocation();
-			if( loc.isMacroID() )
+			/* Don't count external references */
+			if ( !p_varDec->hasExternalStorage() )
 			{
-				loc = astContext->getSourceManager().getFileLoc(loc);
-			}
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+				std::cout << "VisitVarDecl : Processing " << p_varDec->getNameAsString() << std::endl;
+#endif
 
-			/* File-scope variable */
-			m_currentFileName = astContext->getSourceManager().getFilename( loc ).str();
-			m_currentFunctionName = "";
-			m_currentUnit = m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE);
+				SourceLocation loc = p_varDec->getLocation();
+				if( loc.isMacroID() )
+				{
+					loc = astContext->getSourceManager().getFileLoc(loc);
+				}
+
+				/* File-scope variable */
+				m_currentFileName = astContext->getSourceManager().getFilename( loc ).str();
+				m_currentFunctionName = "";
+				if( ShouldIncludeFile( m_currentFileName ))
+				{
+					m_currentUnit = m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE);
+				}
+				else
+				{
+					m_currentUnit = NULL;
+				}
+			}
 		}
 
-		/* Don't count external references */
-		if ( !p_varDec->hasExternalStorage() )
+		if( m_currentUnit )
 		{
-			if( m_currentUnit )
-			{
-				m_currentUnit->increment( METRIC_TYPE_VARIABLE );
-			}
+			m_currentUnit->increment( METRIC_TYPE_VARIABLE );
 		}
 	}
 	return true;	
@@ -219,6 +264,7 @@ bool MetricVisitor::VisitBinaryOperator(clang::BinaryOperator *p_binOp) {
 
 
 bool MetricVisitor::VisitStmt(clang::Stmt *p_statement) {
+
 	if( m_currentUnit )
 	{
 		m_currentUnit->increment( METRIC_TYPE_STATEMENTS );
@@ -228,8 +274,15 @@ bool MetricVisitor::VisitStmt(clang::Stmt *p_statement) {
 
 
 bool MetricVisitor::VisitIfStmt(clang::IfStmt *p_ifSt) {
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+	std::cout << "VisitIfStmt : CONTEXT " << m_currentFileName << "::" << m_currentFunctionName << std::endl;
+#endif
+
 	if( m_currentUnit )
 	{
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+	std::cout << "VisitIfStmt - Recorded" << std::endl;
+#endif
 		m_currentUnit->increment( METRIC_TYPE_IF );
 
 		if( p_ifSt->getElse() )
@@ -249,7 +302,7 @@ void MetricVisitor::dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MA
 	m_topUnit->dump( out, p_output, p_fmt );
 }
 
-MetricASTConsumer::MetricASTConsumer(clang::ASTContext *CI, MetricUnit* p_topUnit) : visitor(new MetricVisitor(CI, p_topUnit)) 
+MetricASTConsumer::MetricASTConsumer(clang::ASTContext *CI, MetricUnit* p_topUnit, MetricVisitor::Options* p_options ) : visitor(new MetricVisitor(CI, p_topUnit, p_options)) 
 { 
 }
 

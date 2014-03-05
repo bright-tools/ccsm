@@ -34,6 +34,7 @@
 #include <ostream>
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include "MetricUnit.hpp"
 
@@ -46,10 +47,18 @@ protected:
 	std::string       m_currentFunctionName;
 	MetricUnit*       m_currentUnit;
 
+	bool ShouldIncludeFile( const std::string& p_fn ) const;
+	bool ShouldIncludeFunction( const std::string& p_fn ) const;
+
 public:
-    explicit MetricVisitor(clang::ASTContext* p_Context, MetricUnit* p_topUnit);
+	typedef struct
+	{
+		std::vector<std::string>* ExcludeFiles;
+		std::vector<std::string>* ExcludeFunctions;
+	} Options;
+	
+	explicit MetricVisitor(clang::ASTContext* p_Context, MetricUnit* p_topUnit,Options* p_options = NULL);
 	virtual ~MetricVisitor(void);
-	virtual bool VisitTranslationUnitDecl(clang::TranslationUnitDecl *func);
 	virtual bool VisitFunctionDecl(clang::FunctionDecl *func);
 	virtual bool VisitVarDecl(clang::VarDecl *p_varDec);
 	virtual bool VisitForStmt(clang::ForStmt *p_forSt);
@@ -67,6 +76,9 @@ public:
 	virtual bool VisitCallExpr(clang::CallExpr *p_callExpr);
 
 	void dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE );
+
+private:
+	Options* m_options;
 };
 
 class MetricASTConsumer : public clang::ASTConsumer
@@ -75,7 +87,7 @@ protected:
 	MetricVisitor *visitor;
 
 public:
-    explicit MetricASTConsumer(clang::ASTContext *CI, MetricUnit* p_topUnit);
+    explicit MetricASTConsumer(clang::ASTContext *CI, MetricUnit* p_topUnit, MetricVisitor::Options* p_options = NULL);
 
 	virtual ~MetricASTConsumer(void);
 	virtual void HandleTranslationUnit(clang::ASTContext &Context);

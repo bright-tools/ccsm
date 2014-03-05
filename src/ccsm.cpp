@@ -35,6 +35,7 @@
 #include "MetricMatcher.hpp"
 
 #include <string>
+#include <vector>
 
 
 using namespace clang;
@@ -53,10 +54,28 @@ cl::opt<std::string> ProjectRoot(
   cl::value_desc("filename"));
 #endif
 
-cl::list<std::string> SourcePaths(
+static cl::list<std::string> SourcePaths(
   cl::Positional,
   cl::desc("<source> [... <sourceN>]"),
   cl::OneOrMore);
+
+std::vector<std::string> ExcludeFunctionList;
+
+static cl::list<std::string, std::vector<std::string>> ExcludeFunctions(
+	"exclude-function",
+    cl::desc("Exclude specified function from the metrics"),
+	cl::CommaSeparated,
+	cl::ZeroOrMore,
+	cl::location( ExcludeFunctionList ));
+
+std::vector<std::string> ExcludeFileList;
+
+static cl::list<std::string, std::vector<std::string>> ExcludeFiles(
+	"exclude-file",
+    cl::desc("Exclude specified file from the metrics"),
+	cl::CommaSeparated,
+	cl::ZeroOrMore,
+	cl::location( ExcludeFileList ));
 
 static cl::opt<bool> NoGlobal(
   "disable-global",
@@ -86,13 +105,17 @@ static cl::opt<std::string> OutputFormat(
 );
 
 MetricUnit topUnit("Global", METRIC_UNIT_GLOBAL);
-
+MetricVisitor::Options options = {
+			&ExcludeFileList,
+			&ExcludeFunctionList
+};
 
 class MetricFrontendAction : public ASTFrontendAction {
 public:
     virtual ASTConsumer *CreateASTConsumer(CompilerInstance &CI, StringRef file) {
+		
 		// TODO: More elegant way of getting topUnit in.
-		return new MetricASTConsumer(&CI.getASTContext(),&topUnit); // pass CI pointer to ASTConsumer
+		return new MetricASTConsumer(&CI.getASTContext(),&topUnit,&options); // pass CI pointer to ASTConsumer
     }
 };
 

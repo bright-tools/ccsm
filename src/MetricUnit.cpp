@@ -328,6 +328,10 @@ MetricUnit* MetricUnit::getSubUnit( const std::string& p_name, const MetricUnitT
 			/* By default, every function/method has 1 return point */
 			ret_val->increment( METRIC_TYPE_RETURNPOINTS );
 		}
+		else if( p_type == METRIC_UNIT_FILE )
+		{
+			this->increment( METRIC_TYPE_FILES );
+		}
 		m_subUnits[ p_name ] = ret_val;
 	} else {
 		ret_val = (*name_it).second;
