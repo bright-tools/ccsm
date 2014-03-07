@@ -83,10 +83,11 @@ protected:
 	std::string m_name;
 	MetricUnitType_e m_type;
 	SubUnitMap_t m_subUnits;
+	MetricUnit* m_parent;
 public:
 	typedef uint16_t counter_t;
 
-	MetricUnit( const std::string& p_name, const MetricUnitType_e p_type );
+	MetricUnit( MetricUnit* const p_parent, const std::string& p_name, const MetricUnitType_e p_type );
 
 	void increment( const MetricType_e p_metricType );
 

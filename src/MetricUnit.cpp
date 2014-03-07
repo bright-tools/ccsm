@@ -153,7 +153,8 @@ const bool MetricUnit::m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ] = {
 	}
 };
 
-MetricUnit::MetricUnit( const std::string& p_name, const MetricUnitType_e p_type ) : m_name( p_name ), m_type( p_type )
+MetricUnit::MetricUnit( MetricUnit* const p_parent, const std::string& p_name, const MetricUnitType_e p_type ) : 
+			m_name( p_name ), m_type( p_type ), m_parent( p_parent )
 {
 	uint16_t loop;
 
@@ -320,7 +321,7 @@ MetricUnit* MetricUnit::getSubUnit( const std::string& p_name, const MetricUnitT
 	SubUnitMap_t::iterator name_it = m_subUnits.find( p_name );
 	if( name_it == m_subUnits.end() )
 	{
-		ret_val = new MetricUnit( p_name, p_type );
+		ret_val = new MetricUnit( this, p_name, p_type );
 
 		if(( p_type == METRIC_UNIT_FUNCTION ) ||
 		   ( p_type == METRIC_UNIT_METHOD ))

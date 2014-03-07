@@ -104,7 +104,7 @@ static cl::opt<std::string> OutputFormat(
 	cl::init("tree")
 );
 
-MetricUnit topUnit("Global", METRIC_UNIT_GLOBAL);
+MetricUnit topUnit( NULL, "Global", METRIC_UNIT_GLOBAL);
 MetricVisitor::Options options = {
 			&ExcludeFileList,
 			&ExcludeFunctionList
