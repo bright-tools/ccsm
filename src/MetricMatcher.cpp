@@ -121,9 +121,6 @@ bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 			/* Don't count external references */
 			if ( !p_varDec->hasExternalStorage() )
 			{
-#if defined( DEBUG_FN_TRACE_OUTOUT )
-				std::cout << "VisitVarDecl : Processing " << p_varDec->getNameAsString() << std::endl;
-#endif
 
 				SourceLocation loc = p_varDec->getLocation();
 				if( loc.isMacroID() )
@@ -136,7 +133,11 @@ bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 				m_currentFunctionName = "";
 				if( ShouldIncludeFile( m_currentFileName ))
 				{
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+				std::cout << "VisitVarDecl : Processing " << p_varDec->getNameAsString() << std::endl;
+#endif
 					m_currentUnit = m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE);
+					m_currentUnit->increment( METRIC_TYPE_VARIABLE );
 				}
 				else
 				{
@@ -145,10 +146,6 @@ bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 			}
 		}
 
-		if( m_currentUnit )
-		{
-			m_currentUnit->increment( METRIC_TYPE_VARIABLE );
-		}
 	}
 	return true;	
 }
