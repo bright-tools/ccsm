@@ -16,6 +16,8 @@
 
 #include "MetricUnit.hpp"
 
+#define IS_OUTPUT_TREE_FORM( _fmt ) (((_fmt) == METRIC_DUMP_FORMAT_TREE ) || ((_fmt) == METRIC_DUMP_FORMAT_SPARSE_TREE ))
+
 const std::string MetricUnit::m_namePrefix[ METRIC_UNIT_MAX ] = {
 	"",
 	"File: ",
@@ -254,6 +256,7 @@ void MetricUnit::dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ]
 	{
 		switch( p_fmt ) {
 		case METRIC_DUMP_FORMAT_TREE:
+		case METRIC_DUMP_FORMAT_SPARSE_TREE:
 			// TODO: Should be endl
 			sep = "\r\n";
 			break;
@@ -274,6 +277,7 @@ void MetricUnit::dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ]
 				unsigned loop;
 				for( loop = 0;
 					 loop < METRIC_TYPE_MAX;
+
 					 loop++ )
 				{
 					out << m_metricNames[loop] << sep;
@@ -282,7 +286,7 @@ void MetricUnit::dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ]
 			}
 		}
 
-		if( p_fmt == METRIC_DUMP_FORMAT_TREE ) {
+		if( IS_OUTPUT_TREE_FORM ( p_fmt )) {
 			out << m_namePrefix[m_type];
 		} 
 
@@ -296,11 +300,17 @@ void MetricUnit::dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ]
 			/* Filter out metrics which only apply at file/method level */
 			if(m_metricApplies[ m_type ][ loop ])
 			{
-				if( p_fmt == METRIC_DUMP_FORMAT_TREE ) {
-					out << m_dumpPrefix[ m_type ] << m_metricNames[loop] << ": ";
-				} 
-				out << getCounter((MetricType_e) loop ) << sep;
-			} else if( p_fmt != METRIC_DUMP_FORMAT_TREE )
+				counter_t val = getCounter((MetricType_e) loop );
+
+				if(( p_fmt != METRIC_DUMP_FORMAT_SPARSE_TREE ) ||
+				   ( val != 0 )) 
+				{
+					if( IS_OUTPUT_TREE_FORM( p_fmt )) {
+						out << m_dumpPrefix[ m_type ] << m_metricNames[loop] << ": ";
+					} 
+					out << val << sep;
+				}
+			} else if( !IS_OUTPUT_TREE_FORM( p_fmt ))
 			{
 				out << sep;
 			}

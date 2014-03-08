@@ -1,6 +1,6 @@
 /*
 
-   Copyright 2013 John Bailey
+   Copyright 2014 John Bailey
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -99,7 +99,7 @@ static cl::opt<bool> NoMethod(
 
 static cl::opt<std::string> OutputFormat(
 	"output-format",
-	cl::desc("Format of output - choose from tree, csv or tsv"),
+	cl::desc("Format of output - choose from tree, sparsetree, csv or tsv"),
 	cl::value_desc("fmt-string"),
 	cl::init("tree")
 );
@@ -168,6 +168,9 @@ int main(int argc, const char **argv) {
 		} else if( OutputFormat == "csv" )
 		{
 			fmt = METRIC_DUMP_FORMAT_CSV;
+		} else if( OutputFormat == "sparsetree" )
+		{
+			fmt = METRIC_DUMP_FORMAT_SPARSE_TREE;
 		} else
 		{
 			fmt = METRIC_DUMP_FORMAT_TREE;
