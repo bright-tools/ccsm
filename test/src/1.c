@@ -30,6 +30,8 @@ static int rain( int i )
     return i+1;
 }
 
+extern int ext_rain( int i );
+
 void vain( int i )
 {
     int j;
@@ -38,6 +40,8 @@ void vain( int i )
          j < 2;
          j++ )
     {
+        p += rain( j );
+        p += ext_rain( j );
     }
     j = (1 + 3 + 7) / 12;
     j = (j>1)?0:1;

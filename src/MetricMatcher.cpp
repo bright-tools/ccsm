@@ -201,6 +201,10 @@ bool MetricVisitor::VisitCallExpr(clang::CallExpr *p_callExpr)
 {
 	if( m_currentUnit )
 	{
+		if( p_callExpr->getCalleeDecl()->getAsFunction()->getBody() != NULL )
+		{
+			m_currentUnit->increment( METRIC_TYPE_LOCAL_FUNCTION_CALLS );
+		}
 		m_currentUnit->increment( METRIC_TYPE_FUNCTION_CALLS );
 	}
     return true;
