@@ -1,9 +1,13 @@
+/* A general comment */
+
 extern int z;
 int x,t;
+/* A comment associated with the y function */
 int y;
 
 extern int gain();
 
+/* A comment associated with the main() function */
 int main( void )
 {
 main_start:
@@ -13,6 +17,7 @@ main_start:
         {
             if( t == 3 )
             {
+                /* Some random comment */
                 return 2;
             }
         } else {

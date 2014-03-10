@@ -115,7 +115,9 @@ public:
     virtual ASTConsumer *CreateASTConsumer(CompilerInstance &CI, StringRef file) {
 		
 		// TODO: More elegant way of getting topUnit in.
-		return new MetricASTConsumer(&CI.getASTContext(),&topUnit,&options); // pass CI pointer to ASTConsumer
+		MetricASTConsumer* ret_val = new MetricASTConsumer(&CI.getASTContext(),&topUnit,&options); // pass CI pointer to ASTConsumer
+		CI.getPreprocessor().addCommentHandler(ret_val);
+		return ret_val;
     }
 };
 

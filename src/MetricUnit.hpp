@@ -57,6 +57,8 @@ typedef enum
 	METRIC_TYPE_LOCAL_FUNCTIONS,
 	METRIC_TYPE_FUNCTION_CALLS,
 	METRIC_TYPE_LOCAL_FUNCTION_CALLS,
+	METRIC_TYPE_BYTE_COUNT,
+	METRIC_TYPE_COMMENT_BYTE_COUNT,
 	METRIC_TYPE_MAX
 } MetricType_e;
 
@@ -91,7 +93,8 @@ public:
 
 	MetricUnit( MetricUnit* const p_parent, const std::string& p_name, const MetricUnitType_e p_type );
 
-	void increment( const MetricType_e p_metricType );
+	void increment( const MetricType_e p_metricType, const counter_t p_inc = 1 );
+	void set( const MetricType_e p_metricType, const MetricUnit::counter_t p_val );
 
 	void dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE ) const;
 

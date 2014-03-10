@@ -54,7 +54,9 @@ const std::string MetricUnit::m_metricNames[ METRIC_TYPE_MAX ] = {
 	"Modified McCabe",
 	"Local Functions",
 	"Function Calls",
-	"Local Function Calls"
+	"Local Function Calls",
+	"Size in bytes",
+	"Comments in bytes"
 };
 
 const bool MetricUnit::m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ] = {
@@ -82,6 +84,8 @@ const bool MetricUnit::m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ] = {
 			true, /* METRIC_TYPE_LOCAL_FUNCTIONS  */
 			false,/* METRIC_TYPE_FUNCTION_CALLS */
 			false,/* METRIC_TYPE_LOCAL_FUNCTION_CALLS */
+			true,/* METRIC_TYPE_BYTE_COUNT */
+			true,/* METRIC_TYPE_COMMENT_BYTE_COUNT */
 	},
 	{
 			false,/* METRIC_TYPE_FILES */
@@ -107,6 +111,8 @@ const bool MetricUnit::m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ] = {
 			true, /* METRIC_TYPE_LOCAL_FUNCTIONS  */
 			false,/* METRIC_TYPE_FUNCTION_CALLS */
 			false,/* METRIC_TYPE_LOCAL_FUNCTION_CALLS */
+			true,/* METRIC_TYPE_BYTE_COUNT */
+			true,/* METRIC_TYPE_COMMENT_BYTE_COUNT */
 	},
 	{
 			false, /* METRIC_TYPE_FILES */
@@ -132,6 +138,8 @@ const bool MetricUnit::m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ] = {
 			false, /* METRIC_TYPE_LOCAL_FUNCTIONS  */
 			true,/* METRIC_TYPE_FUNCTION_CALLS */
 			true,/* METRIC_TYPE_LOCAL_FUNCTION_CALLS */
+			false,/* METRIC_TYPE_BYTE_COUNT */
+			false,/* METRIC_TYPE_COMMENT_BYTE_COUNT */
 	},
 	{
 			false, /* METRIC_TYPE_FILES */
@@ -157,6 +165,8 @@ const bool MetricUnit::m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ] = {
 			false, /* METRIC_TYPE_LOCAL_FUNCTIONS  */
 			true,/* METRIC_TYPE_FUNCTION_CALLS */
             false,/* METRIC_TYPE_LOCAL_FUNCTION_CALLS */
+			false,/* METRIC_TYPE_BYTE_COUNT */
+			false,/* METRIC_TYPE_COMMENT_BYTE_COUNT */
 	}
 };
 
@@ -173,9 +183,15 @@ MetricUnit::MetricUnit( MetricUnit* const p_parent, const std::string& p_name, c
 	}
 }
 
-void MetricUnit::increment( const MetricType_e p_metricType )
+void MetricUnit::increment( const MetricType_e p_metricType, const counter_t p_inc )
 {
-	m_counters[ p_metricType ]++;
+	/* TODO: Handle over-flow */
+	m_counters[ p_metricType ]+= p_inc;
+}
+
+void MetricUnit::set( const MetricType_e p_metricType, const MetricUnit::counter_t p_val )
+{
+	m_counters[ p_metricType ] = p_val;
 }
 
 MetricUnitType_e MetricUnit::GetType( void ) const

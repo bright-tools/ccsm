@@ -147,6 +147,7 @@ bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 		}
 
 	}
+
 	return true;	
 }
 
@@ -298,12 +299,44 @@ bool MetricVisitor::VisitIfStmt(clang::IfStmt *p_ifSt) {
     return true;
 }
 
+void MetricVisitor::HandleComment(const std::string& p_fn, const std::string& p_comment )
+{
+	if( ShouldIncludeFile( m_currentFileName ))
+	{
+		m_topUnit->getSubUnit(p_fn, METRIC_UNIT_FILE)->increment( METRIC_TYPE_COMMENT_BYTE_COUNT, p_comment.length() );
+	}
+}
+
 void MetricVisitor::dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt )
 {
 	m_topUnit->dump( out, p_output, p_fmt );
 }
 
-MetricASTConsumer::MetricASTConsumer(clang::ASTContext *CI, MetricUnit* p_topUnit, MetricVisitor::Options* p_options ) : visitor(new MetricVisitor(CI, p_topUnit, p_options)) 
+bool MetricVisitor::TraverseDecl(clang::Decl *p_decl)
+{
+	if( p_decl->getKind() == clang::Decl::TranslationUnit )
+	{
+		for( clang::SourceManager::fileinfo_iterator x = astContext->getSourceManager().fileinfo_begin() ;
+			x != astContext->getSourceManager().fileinfo_end() ;
+			x++ )
+		{
+			std::string name = (*x).first->getName();
+#if 0
+			/* TODO: Cache not valid at this point, so NumLines not valid :-( */
+			std::cout << "   " << (*x).second->NumLines << std::endl;
+#endif
+			if( ShouldIncludeFile( name ))
+			{
+				MetricUnit* fileUnit = m_topUnit->getSubUnit(name, METRIC_UNIT_FILE);
+				fileUnit->set( METRIC_TYPE_BYTE_COUNT, (*x).first->getSize() );
+			}
+		}
+	}
+	return clang::RecursiveASTVisitor<MetricVisitor>::TraverseDecl( p_decl );
+}
+
+
+MetricASTConsumer::MetricASTConsumer(clang::ASTContext *CI, MetricUnit* p_topUnit, MetricVisitor::Options* p_options ) : visitor(new MetricVisitor(CI, p_topUnit, p_options)), CommentHandler()
 { 
 }
 
@@ -311,9 +344,29 @@ MetricASTConsumer::~MetricASTConsumer(void)
 {
 };
 
+bool MetricASTConsumer::HandleComment(clang::Preprocessor &PP, clang::SourceRange Loc) {
+
+    SourceLocation Start = Loc.getBegin();
+    SourceManager &SM = PP.getSourceManager();
+
+	/* Excude comments not in the main file (e.g. header files), for now.  If we didn't do this we'd risk
+	   multiply counting header files which are included more than once. */
+	if( SM.isInMainFile( Start ) )
+	{
+		std::string C(SM.getCharacterData(Start),
+					  SM.getCharacterData(Loc.getEnd()));
+
+		visitor->HandleComment(SM.getFilename( Start ).str(), C);
+
+	}
+    return false;
+}
+
+
 void MetricASTConsumer::HandleTranslationUnit(clang::ASTContext &Context) {
 	/* we can use ASTContext to get the TranslationUnitDecl, which is
 		a single Decl that collectively represents the entire source file */
+
 	visitor->TraverseDecl(Context.getTranslationUnitDecl());
 }
 

@@ -27,7 +27,9 @@
 #include "clang/AST/ASTConsumer.h"
 #include "clang/AST/RecursiveASTVisitor.h"
 #include "clang/AST/ASTContext.h"
+#include "clang/AST/CommentVisitor.h"
 #include "clang/Frontend/CompilerInstance.h"
+#include "clang/Lex/Preprocessor.h"
 
 #include "MetricUtils.hpp"
 
@@ -38,7 +40,7 @@
 
 #include "MetricUnit.hpp"
 
-class MetricVisitor : public clang::RecursiveASTVisitor<MetricVisitor>
+class MetricVisitor : public clang::RecursiveASTVisitor<MetricVisitor>, clang::comments::ConstCommentVisitor<MetricVisitor>
 {
 protected:
 	clang::ASTContext *astContext;
@@ -74,6 +76,9 @@ public:
 	virtual bool VisitStmt(clang::Stmt *p_statement);
 	virtual bool VisitIfStmt(clang::IfStmt *p_ifSt);
 	virtual bool VisitCallExpr(clang::CallExpr *p_callExpr);
+	void HandleComment(const std::string& p_fn,const std::string& p_comment );
+
+	virtual bool TraverseDecl(clang::Decl *p_decl);
 
 	void dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE );
 
@@ -81,7 +86,7 @@ private:
 	Options* m_options;
 };
 
-class MetricASTConsumer : public clang::ASTConsumer
+class MetricASTConsumer : public clang::ASTConsumer, public clang::CommentHandler
 {
 protected:
 	MetricVisitor *visitor;
@@ -91,7 +96,7 @@ public:
 
 	virtual ~MetricASTConsumer(void);
 	virtual void HandleTranslationUnit(clang::ASTContext &Context);
-
+	virtual bool HandleComment(clang::Preprocessor &PP, clang::SourceRange Loc);
 	void dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE );
 };
 
