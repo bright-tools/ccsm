@@ -56,7 +56,8 @@ const std::string MetricUnit::m_metricNames[ METRIC_TYPE_MAX ] = {
 	"Function Calls",
 	"Local Function Calls",
 	"Size in bytes",
-	"Comments in bytes"
+	"Comments in bytes",
+	"Comment Count"
 };
 
 const bool MetricUnit::m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ] = {
@@ -86,6 +87,7 @@ const bool MetricUnit::m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ] = {
 			false,/* METRIC_TYPE_LOCAL_FUNCTION_CALLS */
 			true,/* METRIC_TYPE_BYTE_COUNT */
 			true,/* METRIC_TYPE_COMMENT_BYTE_COUNT */
+			true,/* METRIC_TYPE_COMMENT_COUNT */
 	},
 	{
 			false,/* METRIC_TYPE_FILES */
@@ -113,6 +115,7 @@ const bool MetricUnit::m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ] = {
 			false,/* METRIC_TYPE_LOCAL_FUNCTION_CALLS */
 			true,/* METRIC_TYPE_BYTE_COUNT */
 			true,/* METRIC_TYPE_COMMENT_BYTE_COUNT */
+			true,/* METRIC_TYPE_COMMENT_COUNT */
 	},
 	{
 			false, /* METRIC_TYPE_FILES */
@@ -140,6 +143,7 @@ const bool MetricUnit::m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ] = {
 			true,/* METRIC_TYPE_LOCAL_FUNCTION_CALLS */
 			false,/* METRIC_TYPE_BYTE_COUNT */
 			false,/* METRIC_TYPE_COMMENT_BYTE_COUNT */
+			false,/* METRIC_TYPE_COMMENT_COUNT */
 	},
 	{
 			false, /* METRIC_TYPE_FILES */
@@ -167,6 +171,7 @@ const bool MetricUnit::m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ] = {
             false,/* METRIC_TYPE_LOCAL_FUNCTION_CALLS */
 			false,/* METRIC_TYPE_BYTE_COUNT */
 			false,/* METRIC_TYPE_COMMENT_BYTE_COUNT */
+			false,/* METRIC_TYPE_COMMENT_COUNT */
 	}
 };
 

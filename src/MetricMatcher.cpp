@@ -303,7 +303,9 @@ void MetricVisitor::HandleComment(const std::string& p_fn, const std::string& p_
 {
 	if( ShouldIncludeFile( m_currentFileName ))
 	{
-		m_topUnit->getSubUnit(p_fn, METRIC_UNIT_FILE)->increment( METRIC_TYPE_COMMENT_BYTE_COUNT, p_comment.length() );
+		MetricUnit* unit = m_topUnit->getSubUnit(p_fn, METRIC_UNIT_FILE);
+		unit->increment( METRIC_TYPE_COMMENT_BYTE_COUNT, p_comment.length() );
+		unit->increment( METRIC_TYPE_COMMENT_COUNT );
 	}
 }
 
@@ -350,7 +352,7 @@ bool MetricASTConsumer::HandleComment(clang::Preprocessor &PP, clang::SourceRang
     SourceManager &SM = PP.getSourceManager();
 
 	/* Excude comments not in the main file (e.g. header files), for now.  If we didn't do this we'd risk
-	   multiply counting header files which are included more than once. */
+	   multiply counting header files which are included more than once.	*/
 	if( SM.isInMainFile( Start ) )
 	{
 		std::string C(SM.getCharacterData(Start),
