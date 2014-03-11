@@ -9,6 +9,12 @@ set(SOURCES
   MetricUnit.cpp
   MetricUtils.hpp
   MetricUtils.cpp
+  MetricOptions.hpp
+  MetricOptions.cpp
+  MetricPPCustomer.hpp
+  MetricPPCustomer.cpp
+  MetricASTConsumer.hpp
+  MetricASTConsumer.cpp
 )
 
 add_clang_executable(ccsm ${SOURCES})

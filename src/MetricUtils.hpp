@@ -24,8 +24,6 @@
 #if !defined( METRIC_UTILS_HPP )
 #define       METRIC_UTILS_HPP
 
-#include "clang/Tooling/Tooling.h"
-#include "clang/Basic/SourceManager.h"
 #include "clang/AST/ASTContext.h"
 
 extern bool isLastExecutableStmtInFn(const clang::Stmt* const p_stmt, clang::ASTContext* p_context );

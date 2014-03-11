@@ -14,52 +14,26 @@
    limitations under the License.
 */
 
-#include <sstream>
-#include <iostream>
+#include "MetricUtils.hpp"
 
 #include "MetricMatcher.hpp"
 #include "clang/Basic/SourceManager.h"
-#include "clang/Lex/Lexer.h"
 #include "clang/AST/ASTContext.h"
+
+#include <sstream>
+#include <iostream>
 
 using namespace clang;
 using namespace std;
 
 //#define DEBUG_FN_TRACE_OUTOUT 1
 
-MetricVisitor::MetricVisitor(clang::ASTContext* p_Context, MetricUnit* p_topUnit, Options* p_options) : astContext(p_Context), m_topUnit( p_topUnit ), m_currentUnit( NULL ), m_options( p_options )
+MetricVisitor::MetricVisitor(clang::ASTContext* p_Context, MetricUnit* p_topUnit, MetricOptions* p_options) : astContext(p_Context), m_topUnit( p_topUnit ), m_currentUnit( NULL ), m_options( p_options )
 {
 }
 
 MetricVisitor::~MetricVisitor(void)
 {
-}
-
-bool MetricVisitor::ShouldIncludeFile( const std::string& p_fn ) const
-{
-	bool ret_val = true;
-	if (( m_options != NULL ) &&
-		( m_options->ExcludeFiles != NULL ))
-	{	
-		for( std::vector<std::string>::const_iterator it = m_options->ExcludeFiles->begin();
-			 it != m_options->ExcludeFiles->end();
-			 it++ )
-		{
-			if( p_fn.find( *it ) !=  string::npos )
-			{
-				ret_val = false;
-				break;
-			}
-		}
-	}
-	return ret_val;
-}
-
-bool MetricVisitor::ShouldIncludeFunction( const std::string& p_fn ) const
-{
-	return (( m_options == NULL ) ||
-			( m_options->ExcludeFunctions == NULL ) ||
-			( std::find( m_options->ExcludeFunctions->begin(), m_options->ExcludeFunctions->end(), p_fn ) == m_options->ExcludeFunctions->end() ));
 }
 
 bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
@@ -76,7 +50,8 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 		std::cout << "VisitFunctionDecl - " << m_currentFileName << "::"<< m_currentFunctionName << std::endl;
 #endif
 
-		if( ShouldIncludeFile( m_currentFileName ) && ShouldIncludeFunction( m_currentFunctionName ))
+		if( SHOULD_INCLUDE_FILE( m_options, m_currentFileName ) && 
+			SHOULD_INCLUDE_FUNCTION( m_options, m_currentFunctionName ))
 		{
 #if defined( DEBUG_FN_TRACE_OUTOUT )
 			std::cout << "VisitFunctionDecl - Should be included" << std::endl;
@@ -131,7 +106,7 @@ bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 				/* File-scope variable */
 				m_currentFileName = astContext->getSourceManager().getFilename( loc ).str();
 				m_currentFunctionName = "";
-				if( ShouldIncludeFile( m_currentFileName ))
+				if( SHOULD_INCLUDE_FILE( m_options, m_currentFileName ))
 				{
 #if defined( DEBUG_FN_TRACE_OUTOUT )
 				std::cout << "VisitVarDecl : Processing " << p_varDec->getNameAsString() << std::endl;
@@ -299,16 +274,6 @@ bool MetricVisitor::VisitIfStmt(clang::IfStmt *p_ifSt) {
     return true;
 }
 
-void MetricVisitor::HandleComment(const std::string& p_fn, const std::string& p_comment )
-{
-	if( ShouldIncludeFile( m_currentFileName ))
-	{
-		MetricUnit* unit = m_topUnit->getSubUnit(p_fn, METRIC_UNIT_FILE);
-		unit->increment( METRIC_TYPE_COMMENT_BYTE_COUNT, p_comment.length() );
-		unit->increment( METRIC_TYPE_COMMENT_COUNT );
-	}
-}
-
 void MetricVisitor::dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt )
 {
 	m_topUnit->dump( out, p_output, p_fmt );
@@ -327,7 +292,7 @@ bool MetricVisitor::TraverseDecl(clang::Decl *p_decl)
 			/* TODO: Cache not valid at this point, so NumLines not valid :-( */
 			std::cout << "   " << (*x).second->NumLines << std::endl;
 #endif
-			if( ShouldIncludeFile( name ))
+			if( SHOULD_INCLUDE_FILE( m_options, name ))
 			{
 				MetricUnit* fileUnit = m_topUnit->getSubUnit(name, METRIC_UNIT_FILE);
 				fileUnit->set( METRIC_TYPE_BYTE_COUNT, (*x).first->getSize() );
@@ -337,42 +302,3 @@ bool MetricVisitor::TraverseDecl(clang::Decl *p_decl)
 	return clang::RecursiveASTVisitor<MetricVisitor>::TraverseDecl( p_decl );
 }
 
-
-MetricASTConsumer::MetricASTConsumer(clang::ASTContext *CI, MetricUnit* p_topUnit, MetricVisitor::Options* p_options ) : visitor(new MetricVisitor(CI, p_topUnit, p_options)), CommentHandler()
-{ 
-}
-
-MetricASTConsumer::~MetricASTConsumer(void) 
-{
-};
-
-bool MetricASTConsumer::HandleComment(clang::Preprocessor &PP, clang::SourceRange Loc) {
-
-    SourceLocation Start = Loc.getBegin();
-    SourceManager &SM = PP.getSourceManager();
-
-	/* Excude comments not in the main file (e.g. header files), for now.  If we didn't do this we'd risk
-	   multiply counting header files which are included more than once.	*/
-	if( SM.isInMainFile( Start ) )
-	{
-		std::string C(SM.getCharacterData(Start),
-					  SM.getCharacterData(Loc.getEnd()));
-
-		visitor->HandleComment(SM.getFilename( Start ).str(), C);
-
-	}
-    return false;
-}
-
-
-void MetricASTConsumer::HandleTranslationUnit(clang::ASTContext &Context) {
-	/* we can use ASTContext to get the TranslationUnitDecl, which is
-		a single Decl that collectively represents the entire source file */
-
-	visitor->TraverseDecl(Context.getTranslationUnitDecl());
-}
-
-void MetricASTConsumer::dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt )
-{
-	visitor->dump( out, p_output, p_fmt );
-}

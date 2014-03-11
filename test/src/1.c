@@ -1,3 +1,6 @@
+#include "1.h"
+#include "1.h"
+
 /* A general comment */
 
 extern int z;

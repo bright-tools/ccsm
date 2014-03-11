@@ -23,24 +23,17 @@
 #if !defined( METRIC_MATCHER_HPP )
 #define       METRIC_MATCHER_HPP
 
-#include "clang/Tooling/Tooling.h"
-#include "clang/AST/ASTConsumer.h"
+#include "MetricUnit.hpp"
+#include "MetricOptions.hpp"
+
 #include "clang/AST/RecursiveASTVisitor.h"
 #include "clang/AST/ASTContext.h"
-#include "clang/AST/CommentVisitor.h"
-#include "clang/Frontend/CompilerInstance.h"
-#include "clang/Lex/Preprocessor.h"
-
-#include "MetricUtils.hpp"
 
 #include <ostream>
-#include <iostream>
 #include <string>
 #include <vector>
 
-#include "MetricUnit.hpp"
-
-class MetricVisitor : public clang::RecursiveASTVisitor<MetricVisitor>, clang::comments::ConstCommentVisitor<MetricVisitor>
+class MetricVisitor : public clang::RecursiveASTVisitor<MetricVisitor>
 {
 protected:
 	clang::ASTContext *astContext;
@@ -48,18 +41,11 @@ protected:
 	std::string       m_currentFileName;
 	std::string       m_currentFunctionName;
 	MetricUnit*       m_currentUnit;
-
-	bool ShouldIncludeFile( const std::string& p_fn ) const;
-	bool ShouldIncludeFunction( const std::string& p_fn ) const;
+	MetricOptions*    m_options;
 
 public:
-	typedef struct
-	{
-		std::vector<std::string>* ExcludeFiles;
-		std::vector<std::string>* ExcludeFunctions;
-	} Options;
 	
-	explicit MetricVisitor(clang::ASTContext* p_Context, MetricUnit* p_topUnit,Options* p_options = NULL);
+	explicit MetricVisitor(clang::ASTContext* p_Context, MetricUnit* p_topUnit,MetricOptions* p_options = NULL);
 	virtual ~MetricVisitor(void);
 	virtual bool VisitFunctionDecl(clang::FunctionDecl *func);
 	virtual bool VisitVarDecl(clang::VarDecl *p_varDec);
@@ -76,31 +62,11 @@ public:
 	virtual bool VisitStmt(clang::Stmt *p_statement);
 	virtual bool VisitIfStmt(clang::IfStmt *p_ifSt);
 	virtual bool VisitCallExpr(clang::CallExpr *p_callExpr);
-	void HandleComment(const std::string& p_fn,const std::string& p_comment );
 
 	virtual bool TraverseDecl(clang::Decl *p_decl);
 
 	void dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE );
 
-private:
-	Options* m_options;
 };
-
-class MetricASTConsumer : public clang::ASTConsumer, public clang::CommentHandler
-{
-protected:
-	MetricVisitor *visitor;
-
-public:
-    explicit MetricASTConsumer(clang::ASTContext *CI, MetricUnit* p_topUnit, MetricVisitor::Options* p_options = NULL);
-
-	virtual ~MetricASTConsumer(void);
-	virtual void HandleTranslationUnit(clang::ASTContext &Context);
-	virtual bool HandleComment(clang::Preprocessor &PP, clang::SourceRange Loc);
-	void dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE );
-};
-
-
-
 
 #endif

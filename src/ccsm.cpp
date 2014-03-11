@@ -15,44 +15,29 @@
    limitations under the License.
 */
 
+#include "MetricMatcher.hpp"
+#include "MetricOptions.hpp"
+#include "MetricASTConsumer.hpp"
+#include "MetricPPCustomer.hpp"
+
+#include "clang/Tooling/Tooling.h"
 #include "clang/Basic/SourceManager.h"
 #include "clang/Frontend/FrontendActions.h"
-#include "clang/Lex/Lexer.h"
 #include "clang/Tooling/CompilationDatabase.h"
-#include "clang/Tooling/Refactoring.h"
-#include "clang/Tooling/Tooling.h"
-#include "llvm/ADT/OwningPtr.h"
+#include "clang/Frontend/CompilerInstance.h"
 #include "llvm/Support/CommandLine.h"
-#include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Support/Signals.h"
 #include "llvm/Support/raw_ostream.h"
-#include "clang/Rewrite/Core/Rewriter.h"
-#include "clang/Rewrite/Frontend/Rewriters.h"
-
-
-#include "clang/Frontend/TextDiagnosticPrinter.h"
-
-#include "MetricMatcher.hpp"
 
 #include <string>
 #include <vector>
-
+#include <iostream>
 
 using namespace clang;
 using namespace clang::tooling;
 using namespace llvm;
 
 // Set up the command line options
-#if 0
-cl::opt<std::string> BuildPath(
-  cl::Positional,
-  cl::desc("<build-path>"));
-
-cl::opt<std::string> ProjectRoot(
-  "r",
-  cl::desc("Set project root directory"),
-  cl::value_desc("filename"));
-#endif
 
 static cl::list<std::string> SourcePaths(
   cl::Positional,
@@ -105,18 +90,18 @@ static cl::opt<std::string> OutputFormat(
 );
 
 MetricUnit topUnit( NULL, "Global", METRIC_UNIT_GLOBAL);
-MetricVisitor::Options options = {
-			&ExcludeFileList,
-			&ExcludeFunctionList
-};
+MetricOptions options( &ExcludeFileList, &ExcludeFunctionList );
+std::set<std::string> commentFileList;
 
 class MetricFrontendAction : public ASTFrontendAction {
 public:
     virtual ASTConsumer *CreateASTConsumer(CompilerInstance &CI, StringRef file) {
 		
-		// TODO: More elegant way of getting topUnit in.
+		// TODO: More elegant way of getting topUnit, options & commentFileList in.
 		MetricASTConsumer* ret_val = new MetricASTConsumer(&CI.getASTContext(),&topUnit,&options); // pass CI pointer to ASTConsumer
-		CI.getPreprocessor().addCommentHandler(ret_val);
+		MetricPPCustomer* customer = new MetricPPCustomer( &topUnit, &commentFileList, &options );
+		CI.getPreprocessor().addCommentHandler(customer);
+		CI.getPreprocessor().addPPCallbacks(customer);
 		return ret_val;
     }
 };

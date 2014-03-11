@@ -1,9 +1,9 @@
+#include "MetricUtils.hpp"
+
 #include "clang/Basic/SourceManager.h"
 #include "clang/Basic/SourceLocation.h"
 #include "clang/AST/Stmt.h"
 #include "clang/AST/Decl.h"
-
-#include "MetricUtils.hpp"
 
 #include <iostream>
 
