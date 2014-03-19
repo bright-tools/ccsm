@@ -12,6 +12,9 @@ particularly useful) by themselves, for example the count of the number of 'if'
 conditions.  Other metrics are built on these, such as the [McCabe cyclomatic
 complexity](http://en.wikipedia.org/wiki/Cyclomatic_complexity) measure.
 
+The aim is to also include metrics in order to support the set specified by
+[HIS](http://portal.automotive-his.de/images/pdf/SoftwareTest/his-sc-metriken.1.3.1_e.pdf).
+
 Output is hierachial - for example, the metrics relating to each function are
 output and the metrics for a file will include the functions relating to the
 functions within that file.  A global wrap-up provides a top-level overview of
@@ -104,6 +107,27 @@ Metric Details
 ==============
 
 TODO
+
+HIS Metrics Support
+-------------------
+
+| Metric      | Status                |
+|-------------|-----------------------|
+| COMF        | Not yet implemented   |
+| PATH        | Not yet implemented   |
+| GOTO        | Implemented           |
+| v(G)        | Implemented           |
+| CALLING     | Not yet implemeted    |
+| CALLS       | Not yet implemented   |
+| PARAM       | Not yet implemented   |
+| STMT        | Not yet implemented   |
+| LEVEL       | Not yet implemented   |
+| RETURN      | Partially implemented |
+| S           | Not planned           |
+| VOCF        | Not yet implemented   |
+| NOMV        | Not planned           |
+| NOMVPR      | Not planned           |
+| ap_cg_cycle | Not planned           |
 
 Building The Project
 ====================
