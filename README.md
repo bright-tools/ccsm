@@ -122,7 +122,7 @@ HIS Metrics Support
 | PARAM       | Implemented           |
 | STMT        | Not yet implemented   |
 | LEVEL       | Not yet implemented   |
-| RETURN      | Partially implemented |
+| RETURN      | Implemented           |
 | S           | Not planned           |
 | VOCF        | Not yet implemented   |
 | NOMV        | Not planned           |
