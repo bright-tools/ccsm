@@ -119,7 +119,7 @@ HIS Metrics Support
 | v(G)        | Implemented           |
 | CALLING     | Not yet implemeted    |
 | CALLS       | Not yet implemented   |
-| PARAM       | Not yet implemented   |
+| PARAM       | Implemented           |
 | STMT        | Not yet implemented   |
 | LEVEL       | Not yet implemented   |
 | RETURN      | Partially implemented |

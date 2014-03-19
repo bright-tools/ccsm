@@ -40,6 +40,9 @@ static int rain( int i )
 
 extern int ext_rain( int i );
 
+void vain( int i );
+extern void vain( int i );
+
 void vain( int i )
 {
     int j;

@@ -121,6 +121,12 @@ bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 			}
 		}
 
+	} else if( p_varDec->getKind() == clang::Decl::ParmVar )
+	{
+			if( m_currentUnit )
+			{
+				m_currentUnit->increment( METRIC_TYPE_FUNCTION_PARAMETERS );
+			}
 	}
 
 	return true;	
