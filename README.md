@@ -132,12 +132,16 @@ HIS Metrics Support
 Building The Project
 ====================
 
+TODO
+
 Code Structure
 ==============
 
-File              | Content
-------------------|--------
-ccsm.cpp          | main() function to process command line options, set up clang and invoke the processing of the AST via a MetricMatcher
-MetricUnit.cpp    | Class to support counting of the metrics, arranged th objects arranged in a hierachial structure
-MetricUtils.cpp   | Support functions for doing any significant AST processing not supported by clang out-of-the-box
-MetricMatcher.cpp | AST visitor which deals with processing the AST call-backs and recording the appropriate metrics via MetricUnit objects
+File                  | Content
+----------------------|--------
+ccsm.cpp              | main() function to process command line options, set up clang and invoke the processing of the AST via a MetricMatcher
+MetricASTConsumer.cpp | Class which received callbacks as new AST translation units are processed 
+MetricUnit.cpp        | Class to support counting of the metrics, arranged th objects arranged in a hierachial structure
+MetricUtils.cpp       | Support functions for doing any significant AST processing not supported by clang out-of-the-box
+MetricMatcher.cpp     | AST visitor which deals with processing the AST call-backs and recording the appropriate metrics via MetricUnit objects
+MetricPPConsumer.cpp  | Class to receive call-backs from the pre-processor in order to collect metrics relating to comments (not present in the AST tree)
