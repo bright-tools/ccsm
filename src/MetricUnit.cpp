@@ -62,6 +62,7 @@ const std::string MetricUnit::m_metricNames[ METRIC_TYPE_MAX ] = {
 	"Decisions",
 	"Loops",
 	"Nesting Level",
+	"No. different functions called"
 };
 
 const bool MetricUnit::m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ] = {
@@ -96,6 +97,7 @@ const bool MetricUnit::m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ] = {
 			true,/* METRIC_TYPE_DECISIONS */
 			true,/* METRIC_TYPE_LOOPS */
 			false,/* METRIC_TYPE_NESTING_LEVEL */
+			false,/* METRIC_TYPE_DIFFERENT_FUNCTIONS_CALLED */
 	},
 	{
 			false,/* METRIC_TYPE_FILES */
@@ -128,6 +130,7 @@ const bool MetricUnit::m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ] = {
 			true,/* METRIC_TYPE_DECISIONS */
 			true,/* METRIC_TYPE_LOOPS */
 			false,/* METRIC_TYPE_NESTING_LEVEL */
+			false,/* METRIC_TYPE_DIFFERENT_FUNCTIONS_CALLED */
 	},
 	{
 			false, /* METRIC_TYPE_FILES */
@@ -160,6 +163,7 @@ const bool MetricUnit::m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ] = {
 			true,/* METRIC_TYPE_DECISIONS */
 			true,/* METRIC_TYPE_LOOPS */
 			true,/* METRIC_TYPE_NESTING_LEVEL */
+			true,/* METRIC_TYPE_DIFFERENT_FUNCTIONS_CALLED */
 	},
 	{
 			false, /* METRIC_TYPE_FILES */
@@ -192,6 +196,7 @@ const bool MetricUnit::m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ] = {
 			true,/* METRIC_TYPE_DECISIONS */
 			true,/* METRIC_TYPE_LOOPS */
 			true,/* METRIC_TYPE_NESTING_LEVEL */
+			true,/* METRIC_TYPE_DIFFERENT_FUNCTIONS_CALLED */
 	}
 };
 

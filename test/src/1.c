@@ -52,6 +52,8 @@ void vain( int i )
          j++ )
     {
         p += rain( j );
+        p += rain( j );
+        p += rain( j );
         p += ext_rain( j );
     }
     j = (1 + 3 + 7) / 12;

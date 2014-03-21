@@ -31,7 +31,7 @@
 
 #include <ostream>
 #include <string>
-#include <vector>
+#include <set>
 
 class MetricVisitor : public clang::RecursiveASTVisitor<MetricVisitor>
 {
@@ -42,6 +42,7 @@ protected:
 	std::string       m_currentFunctionName;
 	MetricUnit*       m_currentUnit;
 	MetricOptions*    m_options;
+	std::set<std::string> m_fnsCalled;          
 
 public:
 	

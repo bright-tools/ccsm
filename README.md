@@ -118,7 +118,7 @@ HIS Metrics Support
 | GOTO        | Implemented           |
 | v(G)        | Implemented           |
 | CALLING     | Not yet implemeted    |
-| CALLS       | Not yet implemented   |
+| CALLS       | Implemented           |
 | PARAM       | Implemented           |
 | STMT        | Not yet implemented   |
 | LEVEL       | Not yet implemented   |

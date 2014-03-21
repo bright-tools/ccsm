@@ -43,6 +43,8 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 #endif
 	if( func->doesThisDeclarationHaveABody() )
 	{
+		m_fnsCalled.clear();
+
 		m_currentFileName = astContext->getSourceManager().getFilename( func->getLocation() ).str();
 		m_currentFunctionName = func->getQualifiedNameAsString();
 
@@ -187,7 +189,13 @@ bool MetricVisitor::VisitCallExpr(clang::CallExpr *p_callExpr)
 {
 	if( m_currentUnit )
 	{
-		if( p_callExpr->getCalleeDecl()->getAsFunction()->getBody() != NULL )
+		clang::FunctionDecl* p_calleeFn = p_callExpr->getCalleeDecl()->getAsFunction();
+
+		// Update the set containing the names of all the functions called
+		// TODO: Does this work for C++ namespacing?
+		m_fnsCalled.insert( p_calleeFn->getQualifiedNameAsString() );
+
+		if( p_calleeFn->getBody() != NULL )
 		{
 			m_currentUnit->increment( METRIC_TYPE_LOCAL_FUNCTION_CALLS );
 		}
@@ -295,6 +303,8 @@ void MetricVisitor::dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MA
 
 bool MetricVisitor::TraverseDecl(clang::Decl *p_decl)
 {
+	bool ret_val;
+
 	if( p_decl->getKind() == clang::Decl::TranslationUnit )
 	{
 		for( clang::SourceManager::fileinfo_iterator x = astContext->getSourceManager().fileinfo_begin() ;
@@ -313,6 +323,20 @@ bool MetricVisitor::TraverseDecl(clang::Decl *p_decl)
 			}
 		}
 	}
-	return clang::RecursiveASTVisitor<MetricVisitor>::TraverseDecl( p_decl );
+	
+	ret_val = clang::RecursiveASTVisitor<MetricVisitor>::TraverseDecl( p_decl );
+	
+	if( p_decl->getKind() == clang::Decl::Function )
+	{
+		if( p_decl->hasBody() )
+		{
+			if( m_currentUnit )
+			{
+				m_currentUnit->set( METRIC_TYPE_DIFFERENT_FUNCTIONS_CALLED, m_fnsCalled.size() );
+			}
+		}
+	}
+
+	return ret_val;
 }
 
