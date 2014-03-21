@@ -136,6 +136,7 @@ bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 bool MetricVisitor::VisitForStmt(clang::ForStmt *p_forSt) {
 	if( m_currentUnit )
 	{
+		m_currentUnit->increment( METRIC_TYPE_LOOPS );
 		m_currentUnit->increment( METRIC_TYPE_FORLOOP );
 	}
     return true;
@@ -161,6 +162,7 @@ bool MetricVisitor::VisitLabelStmt(clang::LabelStmt *p_LabelSt) {
 bool MetricVisitor::VisitWhileStmt(clang::WhileStmt *p_whileSt) {
 	if( m_currentUnit )
 	{
+		m_currentUnit->increment( METRIC_TYPE_LOOPS );
 		m_currentUnit->increment( METRIC_TYPE_WHILELOOP );
 	}
     return true;
@@ -196,6 +198,7 @@ bool MetricVisitor::VisitSwitchStmt(clang::SwitchStmt *p_switchSt) {
 	if( m_currentUnit )
 	{
 		m_currentUnit->increment( METRIC_TYPE_SWITCH );
+		m_currentUnit->increment( METRIC_TYPE_DECISIONS );
 	}
     return true;
 }
@@ -267,6 +270,7 @@ bool MetricVisitor::VisitIfStmt(clang::IfStmt *p_ifSt) {
 	std::cout << "VisitIfStmt - Recorded" << std::endl;
 #endif
 		m_currentUnit->increment( METRIC_TYPE_IF );
+		m_currentUnit->increment( METRIC_TYPE_DECISIONS );
 
 		if( p_ifSt->getElse() )
 		{

@@ -58,7 +58,9 @@ const std::string MetricUnit::m_metricNames[ METRIC_TYPE_MAX ] = {
 	"Size in bytes",
 	"Comments in bytes",
 	"Comment Count",
-	"Function Parameters"
+	"Function Parameters",
+	"Decisions",
+	"Loops"
 };
 
 const bool MetricUnit::m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ] = {
@@ -90,6 +92,8 @@ const bool MetricUnit::m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ] = {
 			true,/* METRIC_TYPE_COMMENT_BYTE_COUNT */
 			true,/* METRIC_TYPE_COMMENT_COUNT */
 			false,/* METRIC_TYPE_FUNCTION_PARAMETERS */
+			true,/* METRIC_TYPE_DECISIONS */
+			true,/* METRIC_TYPE_LOOPS */
 	},
 	{
 			false,/* METRIC_TYPE_FILES */
@@ -119,6 +123,8 @@ const bool MetricUnit::m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ] = {
 			true,/* METRIC_TYPE_COMMENT_BYTE_COUNT */
 			true,/* METRIC_TYPE_COMMENT_COUNT */
 			false,/* METRIC_TYPE_FUNCTION_PARAMETERS */
+			true,/* METRIC_TYPE_DECISIONS */
+			true,/* METRIC_TYPE_LOOPS */
 	},
 	{
 			false, /* METRIC_TYPE_FILES */
@@ -148,6 +154,8 @@ const bool MetricUnit::m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ] = {
 			false,/* METRIC_TYPE_COMMENT_BYTE_COUNT */
 			false,/* METRIC_TYPE_COMMENT_COUNT */
 			true,/* METRIC_TYPE_FUNCTION_PARAMETERS */
+			true,/* METRIC_TYPE_DECISIONS */
+			true,/* METRIC_TYPE_LOOPS */
 	},
 	{
 			false, /* METRIC_TYPE_FILES */
@@ -177,6 +185,8 @@ const bool MetricUnit::m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ] = {
 			false,/* METRIC_TYPE_COMMENT_BYTE_COUNT */
 			false,/* METRIC_TYPE_COMMENT_COUNT */
 			true,/* METRIC_TYPE_FUNCTION_PARAMETERS */
+			true,/* METRIC_TYPE_DECISIONS */
+			true,/* METRIC_TYPE_LOOPS */
 	}
 };
 
