@@ -27,5 +27,6 @@
 #include "clang/AST/ASTContext.h"
 
 extern bool isLastExecutableStmtInFn(const clang::Stmt* const p_stmt, clang::ASTContext* p_context );
+extern unsigned getControlDepth(const clang::Stmt* const p_stmt, clang::ASTContext* p_context );
 
 #endif

@@ -27,7 +27,7 @@ bool isLastExecutableStmtInFn(const clang::Stmt* const p_stmt, clang::ASTContext
 			/* If the parent's an condition then the child won't necessarily be the last statement to execute */
 			switch( stmt->getStmtClass() )
 			{
-				/* TODO: More needed here? */
+				/* TODO: More needed here? - case, default? */
 				case clang::Stmt::IfStmtClass:
 					ret_val = false;
 					break;
@@ -82,5 +82,44 @@ bool isLastExecutableStmtInFn(const clang::Stmt* const p_stmt, clang::ASTContext
 		}
     }
 
+	return ret_val;
+}
+
+unsigned getControlDepth(const clang::Stmt* const p_stmt, clang::ASTContext* p_context )
+{
+	unsigned ret_val = 0;
+
+	clang::SourceLocation loc,sloc;
+	clang::SourceManager &SM = p_context->getSourceManager();
+	clang::ASTContext::ParentVector ancestors = p_context->getParents( *p_stmt );
+
+	/* Examine all the parents */
+    for (clang::ASTContext::ParentVector::const_iterator I = ancestors.begin(),
+                                                         E = ancestors.end();
+         I != E;
+         ++I) {
+		/* Is the parent a Stmt? */
+		const clang::Stmt* stmt = I->get<clang::Stmt>();
+		if( stmt != NULL )
+		{
+			ret_val += getControlDepth( stmt, p_context );
+		}
+	}
+
+	switch( p_stmt->getStmtClass() )
+	{
+		case clang::Stmt::IfStmtClass:
+		case clang::Stmt::SwitchStmtClass:
+		case clang::Stmt::DoStmtClass:
+		case clang::Stmt::WhileStmtClass:
+		case clang::Stmt::ForStmtClass:
+//			std::cout << p_stmt->getStmtClassName() << "\n";
+			ret_val += 1;
+			break;
+		default:
+			break;
+	}
+
+		 
 	return ret_val;
 }

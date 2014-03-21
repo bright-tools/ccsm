@@ -78,22 +78,30 @@ void vain( int i )
         if(( j == 5 ) ||
            ( j == 6 ))
         {
-        } else if( 7 == 9 )
-        {
-        } else
-        {
-#if defined THIS_IS_DEFINED
-            if( 9 == 1 )
+        } else {
+            if( 7 == 9 )
             {
-            }
+            } else
+            {
+                while( 9 == 9 )
+                {
+                    if( 3 == 3 )
+                    {
+                    }
+                }
+#if defined THIS_IS_DEFINED
+                if( 9 == 1 )
+                {
+                }
 #endif
 #if defined THIS_IS_NOT_DEFINED
-            for( j = 0;
-                 j < 2;
-                 j++ )
-            {
-            }
+                for( j = 0;
+                     j < 2;
+                     j++ )
+                {
+                }
 #endif
+            }
         }
     }
     else
