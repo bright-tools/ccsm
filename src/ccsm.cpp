@@ -89,8 +89,17 @@ static cl::opt<std::string> OutputFormat(
 	cl::init("tree")
 );
 
+std::vector<std::string> OutputMetricList;
+
+static cl::list<std::string, std::vector<std::string>> OutputOnlyMetrics(
+	"output-metrics",
+    cl::desc("Only output the specified metrics"),
+	cl::CommaSeparated,
+	cl::ZeroOrMore,
+	cl::location( OutputMetricList ));
+
 MetricUnit topUnit( NULL, "Global", METRIC_UNIT_GLOBAL);
-MetricOptions options( &ExcludeFileList, &ExcludeFunctionList );
+MetricOptions options( &ExcludeFileList, &ExcludeFunctionList, &OutputMetricList );
 std::set<std::string> commentFileList;
 
 class MetricFrontendAction : public ASTFrontendAction {

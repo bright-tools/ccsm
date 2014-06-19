@@ -252,7 +252,16 @@ bool MetricVisitor::VisitBinaryOperator(clang::BinaryOperator *p_binOp) {
 			case clang::BO_LOr:
 				m_currentUnit->increment( METRIC_TYPE_LOGICAL_OR );
 				break;
+			case clang::BO_Assign:
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_ASSIGN );
+				break;
+			case clang::BO_Add:
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_ADDITION );
+				break;
 			default:
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+				std::cout << "VisitBinaryOperator - Unhandled operator" << std::endl;
+#endif
 				break;
 		}
 	}

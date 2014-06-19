@@ -16,8 +16,8 @@
 
 #include "MetricOptions.hpp"
 
-MetricOptions::MetricOptions( std::vector<std::string>* const p_excludeFiles, std::vector<std::string>* const p_excludeFunctions )
-	: ExcludeFiles( p_excludeFiles ), ExcludeFunctions( p_excludeFunctions )
+MetricOptions::MetricOptions( std::vector<std::string>* const p_excludeFiles, std::vector<std::string>* const p_excludeFunctions, std::vector<std::string>* const p_outputMetrics )
+	: ExcludeFiles( p_excludeFiles ), ExcludeFunctions( p_excludeFunctions ), OutputMetrics( p_outputMetrics )
 {
 }
 
@@ -48,5 +48,12 @@ bool MetricOptions::ShouldIncludeFunction( const std::string& p_fn ) const
 {
 	return (( ExcludeFunctions == NULL ) ||
 			( std::find( ExcludeFunctions->begin(), ExcludeFunctions->end(), p_fn ) == ExcludeFunctions->end() ));
+}
+
+bool MetricOptions::ShouldIncludeMetric( const std::string& p_name ) const
+{
+	return (( OutputMetrics == NULL ) ||
+		    ( OutputMetrics->size() == 0 ) ||
+			( std::find( OutputMetrics->begin(), OutputMetrics->end(), p_name ) == OutputMetrics->end() ));
 }
 
