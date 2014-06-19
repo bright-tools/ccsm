@@ -31,172 +31,38 @@ const std::string MetricUnit::m_dumpPrefix[ METRIC_UNIT_MAX ] = {
 	"\t\t"
 };
 
+const std::string MetricUnit::m_metricShortNames[ METRIC_TYPE_MAX ] = {
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _description  ) _short_name ,
+#include "metrics.def"
+#undef  METRIC
+};
+
 const std::string MetricUnit::m_metricNames[ METRIC_TYPE_MAX ] = {
-	"Files",
-	"Functions",
-	"IF statements",
-	"ELSE statements",
-	"FOR loops",
-	"RETURN statements",
-	"WHILE loops",
-	"SWITCH statements",
-	"CASE statements",
-	"DEFAULT statements",
-	"LOGICAL AND operators",
-	"LOGICAL OR operators",
-	"TERNARY operators",
-	"GOTO statements",
-	"LABEL statements",
-	"Variables",
-	"Return points",
-	"Statements",
-	"McCabe",
-	"Modified McCabe",
-	"Local Functions",
-	"Function Calls",
-	"Local Function Calls",
-	"Size in bytes",
-	"Comments in bytes",
-	"Comment Count",
-	"Function Parameters",
-	"Decisions",
-	"Loops",
-	"Nesting Level",
-	"No. different functions called"
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _description  ) _long_name ,
+#include "metrics.def"
+#undef  METRIC
 };
 
 const bool MetricUnit::m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ] = {
 	{
-			true, /* METRIC_TYPE_FILES */
-			true,/* METRIC_TYPE_FUNCTIONS */
-			true,/* METRIC_TYPE_IF */
-			true,/* METRIC_TYPE_ELSE */
-			true,/* METRIC_TYPE_FORLOOP */
-			true,/* METRIC_TYPE_RETURN */
-			true,/* METRIC_TYPE_WHILELOOP */
-			true,/* METRIC_TYPE_SWITCH */
-			true,/* METRIC_TYPE_CASE */
-			true,/* METRIC_TYPE_DEFAULT */
-			true,/* METRIC_TYPE_LOGICAL_AND */
-			true,/* METRIC_TYPE_LOGICAL_OR */
-			true,/* METRIC_TYPE_TERNARY */
-			true,/* METRIC_TYPE_GOTO */
-			true,/* METRIC_TYPE_LABEL */
-			true,/* METRIC_TYPE_VARIABLE */
-			true,/* METRIC_TYPE_RETURNPOINTS */
-			true,/* METRIC_TYPE_STATEMENTS */
-			false,/* METRIC_TYPE_CYCLOMATIC */
-			false,/* METRIC_TYPE_MODIFIED_CYCLOMATIC */
-			true, /* METRIC_TYPE_LOCAL_FUNCTIONS  */
-			false,/* METRIC_TYPE_FUNCTION_CALLS */
-			false,/* METRIC_TYPE_LOCAL_FUNCTION_CALLS */
-			true,/* METRIC_TYPE_BYTE_COUNT */
-			true,/* METRIC_TYPE_COMMENT_BYTE_COUNT */
-			true,/* METRIC_TYPE_COMMENT_COUNT */
-			false,/* METRIC_TYPE_FUNCTION_PARAMETERS */
-			true,/* METRIC_TYPE_DECISIONS */
-			true,/* METRIC_TYPE_LOOPS */
-			false,/* METRIC_TYPE_NESTING_LEVEL */
-			false,/* METRIC_TYPE_DIFFERENT_FUNCTIONS_CALLED */
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _description  ) _applies_global ,
+#include "metrics.def"
+#undef  METRIC
 	},
 	{
-			false,/* METRIC_TYPE_FILES */
-			true,/* METRIC_TYPE_FUNCTIONS */
-			true,/* METRIC_TYPE_IF */
-			true,/* METRIC_TYPE_ELSE */
-			true,/* METRIC_TYPE_FORLOOP */
-			true,/* METRIC_TYPE_RETURN */
-			true,/* METRIC_TYPE_WHILELOOP */
-			true,/* METRIC_TYPE_SWITCH */
-			true,/* METRIC_TYPE_CASE */
-			true,/* METRIC_TYPE_DEFAULT */
-			true,/* METRIC_TYPE_LOGICAL_AND */
-			true,/* METRIC_TYPE_LOGICAL_OR */
-			true,/* METRIC_TYPE_TERNARY */
-			true,/* METRIC_TYPE_GOTO */
-			true,/* METRIC_TYPE_LABEL */
-			true,/* METRIC_TYPE_VARIABLE */
-			true,/* METRIC_TYPE_RETURNPOINTS */
-			true,/* METRIC_TYPE_STATEMENTS */
-			false,/* METRIC_TYPE_CYCLOMATIC */
-			false,/* METRIC_TYPE_MODIFIED_CYCLOMATIC */
-			true, /* METRIC_TYPE_LOCAL_FUNCTIONS  */
-			false,/* METRIC_TYPE_FUNCTION_CALLS */
-			false,/* METRIC_TYPE_LOCAL_FUNCTION_CALLS */
-			true,/* METRIC_TYPE_BYTE_COUNT */
-			true,/* METRIC_TYPE_COMMENT_BYTE_COUNT */
-			true,/* METRIC_TYPE_COMMENT_COUNT */
-			false,/* METRIC_TYPE_FUNCTION_PARAMETERS */
-			true,/* METRIC_TYPE_DECISIONS */
-			true,/* METRIC_TYPE_LOOPS */
-			false,/* METRIC_TYPE_NESTING_LEVEL */
-			false,/* METRIC_TYPE_DIFFERENT_FUNCTIONS_CALLED */
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _description  ) _applies_file ,
+#include "metrics.def"
+#undef  METRIC
 	},
 	{
-			false, /* METRIC_TYPE_FILES */
-			false,/* METRIC_TYPE_FUNCTIONS */
-			true,/* METRIC_TYPE_IF */
-			true,/* METRIC_TYPE_ELSE */
-			true,/* METRIC_TYPE_FORLOOP */
-			true,/* METRIC_TYPE_RETURN */
-			true,/* METRIC_TYPE_WHILELOOP */
-			true,/* METRIC_TYPE_SWITCH */
-			true,/* METRIC_TYPE_CASE */
-			true,/* METRIC_TYPE_DEFAULT */
-			true,/* METRIC_TYPE_LOGICAL_AND */
-			true,/* METRIC_TYPE_LOGICAL_OR */
-			true,/* METRIC_TYPE_TERNARY */
-			true,/* METRIC_TYPE_GOTO */
-			true,/* METRIC_TYPE_LABEL */
-			true,/* METRIC_TYPE_VARIABLE */
-			true,/* METRIC_TYPE_RETURNPOINTS */
-			true,/* METRIC_TYPE_STATEMENTS */
-			true,/* METRIC_TYPE_CYCLOMATIC */
-			true,/* METRIC_TYPE_MODIFIED_CYCLOMATIC */
-			false, /* METRIC_TYPE_LOCAL_FUNCTIONS  */
-			true,/* METRIC_TYPE_FUNCTION_CALLS */
-			true,/* METRIC_TYPE_LOCAL_FUNCTION_CALLS */
-			false,/* METRIC_TYPE_BYTE_COUNT */
-			false,/* METRIC_TYPE_COMMENT_BYTE_COUNT */
-			false,/* METRIC_TYPE_COMMENT_COUNT */
-			true,/* METRIC_TYPE_FUNCTION_PARAMETERS */
-			true,/* METRIC_TYPE_DECISIONS */
-			true,/* METRIC_TYPE_LOOPS */
-			true,/* METRIC_TYPE_NESTING_LEVEL */
-			true,/* METRIC_TYPE_DIFFERENT_FUNCTIONS_CALLED */
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _description  ) _applies_function ,
+#include "metrics.def"
+#undef  METRIC
 	},
 	{
-			false, /* METRIC_TYPE_FILES */
-			false,/* METRIC_TYPE_FUNCTIONS */
-			true,/* METRIC_TYPE_IF */
-			true,/* METRIC_TYPE_ELSE */
-			true,/* METRIC_TYPE_FORLOOP */
-			true,/* METRIC_TYPE_RETURN */
-			true,/* METRIC_TYPE_WHILELOOP */
-			true,/* METRIC_TYPE_SWITCH */
-			true,/* METRIC_TYPE_CASE */
-			true,/* METRIC_TYPE_DEFAULT */
-			true,/* METRIC_TYPE_LOGICAL_AND */
-			true,/* METRIC_TYPE_LOGICAL_OR */
-			true,/* METRIC_TYPE_TERNARY */
-			true,/* METRIC_TYPE_GOTO */
-			true,/* METRIC_TYPE_LABEL */
-			true,/* METRIC_TYPE_VARIABLE */
-			true,/* METRIC_TYPE_RETURNPOINTS */
-			true,/* METRIC_TYPE_STATEMENTS */
-			true,/* METRIC_TYPE_CYCLOMATIC */
-			true,/* METRIC_TYPE_MODIFIED_CYCLOMATIC */
-			false, /* METRIC_TYPE_LOCAL_FUNCTIONS  */
-			true,/* METRIC_TYPE_FUNCTION_CALLS */
-            false,/* METRIC_TYPE_LOCAL_FUNCTION_CALLS */
-			false,/* METRIC_TYPE_BYTE_COUNT */
-			false,/* METRIC_TYPE_COMMENT_BYTE_COUNT */
-			false,/* METRIC_TYPE_COMMENT_COUNT */
-			true,/* METRIC_TYPE_FUNCTION_PARAMETERS */
-			true,/* METRIC_TYPE_DECISIONS */
-			true,/* METRIC_TYPE_LOOPS */
-			true,/* METRIC_TYPE_NESTING_LEVEL */
-			true,/* METRIC_TYPE_DIFFERENT_FUNCTIONS_CALLED */
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _description  ) _applies_method ,
+#include "metrics.def"
+#undef  METRIC
 	}
 };
 
@@ -279,6 +145,8 @@ MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType ) 
 						  getCounter( METRIC_TYPE_LOGICAL_OR ) +
 						  getCounter( METRIC_TYPE_TERNARY ) + 1;
 			}
+			break;
+		case METRIC_TYPE_VOCF:
 			break;
 		default:
 			ret_val  = m_counters[ p_metricType ];

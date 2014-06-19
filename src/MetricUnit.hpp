@@ -34,37 +34,9 @@ typedef enum
 
 typedef enum
 {
-	METRIC_TYPE_FILES = 0,
-	METRIC_TYPE_FUNCTIONS,
-	METRIC_TYPE_IF,
-	METRIC_TYPE_ELSE,
-	METRIC_TYPE_FORLOOP,
-	METRIC_TYPE_RETURN,
-	METRIC_TYPE_WHILELOOP,
-	METRIC_TYPE_SWITCH,
-	METRIC_TYPE_CASE,
-	METRIC_TYPE_DEFAULT,
-	METRIC_TYPE_LOGICAL_AND,
-	METRIC_TYPE_LOGICAL_OR,
-	METRIC_TYPE_TERNARY,
-	METRIC_TYPE_GOTO,
-	METRIC_TYPE_LABEL,
-	METRIC_TYPE_VARIABLE,
-	METRIC_TYPE_RETURNPOINTS,
-	METRIC_TYPE_STATEMENTS,
-	METRIC_TYPE_CYCLOMATIC,
-	METRIC_TYPE_MODIFIED_CYCLOMATIC,
-	METRIC_TYPE_LOCAL_FUNCTIONS,
-	METRIC_TYPE_FUNCTION_CALLS,
-	METRIC_TYPE_LOCAL_FUNCTION_CALLS,
-	METRIC_TYPE_BYTE_COUNT,
-	METRIC_TYPE_COMMENT_BYTE_COUNT,
-	METRIC_TYPE_COMMENT_COUNT,
-	METRIC_TYPE_FUNCTION_PARAMETERS,
-	METRIC_TYPE_DECISIONS,
-	METRIC_TYPE_LOOPS,
-	METRIC_TYPE_NESTING_LEVEL,
-	METRIC_TYPE_DIFFERENT_FUNCTIONS_CALLED,
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _description  ) _enum ,
+#include "metrics.def"
+#undef  METRIC
 	METRIC_TYPE_MAX
 } MetricType_e;
 
@@ -87,6 +59,7 @@ private:
 	static const std::string m_dumpPrefix[ METRIC_UNIT_MAX ];
 	static const std::string m_namePrefix[ METRIC_UNIT_MAX ];
 	static const std::string m_metricNames[ METRIC_TYPE_MAX ];
+	static const std::string m_metricShortNames[ METRIC_TYPE_MAX ];
 	static const bool        m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ];
 protected:
 	typedef std::map<std::string, MetricUnit*> SubUnitMap_t;
