@@ -1,0 +1,9 @@
+Global
+Member access (direct) operators: 2
+Member access (via pointer) operators: 0
+File: src\oper_member_access_direct.c
+	Member access (direct) operators: 2
+	Member access (via pointer) operators: 0
+	Function: main
+		Member access (direct) operators: 2
+		Member access (via pointer) operators: 0
