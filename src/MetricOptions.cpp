@@ -52,8 +52,41 @@ bool MetricOptions::ShouldIncludeFunction( const std::string& p_fn ) const
 
 bool MetricOptions::ShouldIncludeMetric( const std::string& p_name ) const
 {
-	return (( OutputMetrics == NULL ) ||
-		    ( OutputMetrics->size() == 0 ) ||
-			( std::find( OutputMetrics->begin(), OutputMetrics->end(), p_name ) == OutputMetrics->end() ));
+	bool ret_val = false;
+
+	if(( OutputMetrics == NULL ) ||
+	   ( OutputMetrics->size() == 0 ))
+	{
+		ret_val = true;
+	}
+	else
+	{
+		for( std::vector<std::string>::const_iterator it = OutputMetrics->begin();
+		     it != OutputMetrics->end();
+			 it++ )
+		{
+			size_t len = (*it).length();
+			size_t lmo = len - 1;
+
+			/* Check to see if last character is a wildcard */
+			if(( len > 0 ) && ((*it)[lmo] == '*' ))
+			{
+				if( p_name.substr( 0, lmo ) == (*it).substr( 0, lmo ))
+				{
+					ret_val = true;
+				}
+			}
+			else if( (*it) == p_name )
+			{
+				ret_val = true;
+			}
+
+			if( ret_val )
+			{
+				break;
+			}
+		}
+	}
+	return ret_val;
 }
 

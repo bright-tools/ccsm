@@ -171,7 +171,7 @@ int main(int argc, const char **argv) {
 		{
 			fmt = METRIC_DUMP_FORMAT_TREE;
 		}
-		topUnit.dump( std::cout, output, fmt );
+		topUnit.dump( std::cout, output, fmt, &options );
 	}
 	else
 	{

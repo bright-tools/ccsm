@@ -60,10 +60,15 @@ public:
 	virtual bool VisitDefaultStmt(clang::DefaultStmt *p_defaultSt);
 	virtual bool VisitCaseStmt(clang::CaseStmt *p_caseSt);
 	virtual bool VisitBinaryOperator(clang::BinaryOperator *p_binOp);
+	virtual bool VisitUnaryOperator(clang::UnaryOperator *p_uOp);
 	virtual bool VisitStmt(clang::Stmt *p_statement);
 	virtual bool VisitIfStmt(clang::IfStmt *p_ifSt);
+	virtual bool VisitExplicitCastExpr(clang::ExplicitCastExpr *p_castExpr);
 	virtual bool VisitCallExpr(clang::CallExpr *p_callExpr);
-	
+	virtual bool VisitArraySubscriptExpr (clang::ArraySubscriptExpr *p_subs);
+	virtual bool VisitMemberExpr( clang::MemberExpr* p_memberExpr );
+	virtual bool VisitUnaryExprOrTypeTraitExpr( clang::UnaryExprOrTypeTraitExpr* p_unaryExpr );
+
 	virtual bool TraverseDecl(clang::Decl *p_decl);
 
 	void dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE );

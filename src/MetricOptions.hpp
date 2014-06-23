@@ -43,5 +43,6 @@ public:
 
 #define SHOULD_INCLUDE_FILE( _m, _f ) (((_m)==NULL) || ((_m)->ShouldIncludeFile( _f )))
 #define SHOULD_INCLUDE_FUNCTION( _m, _f ) (((_m)==NULL) || ((_m)->ShouldIncludeFunction( _f )))
+#define SHOULD_INCLUDE_METRIC( _m, _t ) (((_m)==NULL) || ((_m)->ShouldIncludeMetric( _t )))
 
 #endif

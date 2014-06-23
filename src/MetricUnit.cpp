@@ -119,6 +119,65 @@ MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType ) 
 
 	switch( p_metricType ) 
 	{
+	    case METRIC_TYPE_OPERATOR_TYPES:
+			/* TODO: This doesn't deal with C++ only operators */
+			ret_val = (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_ASSIGN) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_ADDITION) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_SUBTRACTION) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_UNARY_PLUS) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_UNARY_MINUS) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_MULTIPLICATION) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_DIVISION) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_MODULO) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_INCREMENT_PRE ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_INCREMENT_POST ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_DECREMENT_PRE ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_DECREMENT_POST ) > 0) +
+
+				      (getCounter(METRIC_TYPE_OPERATOR_COMP_EQUAL) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_COMP_NOT_EQUAL) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_COMP_GREATER_THAN) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_COMP_LESS_THAN) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_COMP_GREATER_THAN_EQUAL) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_COMP_LESS_THAN_EQUAL) > 0) +
+
+					  (getCounter(METRIC_TYPE_OPERATOR_LOGICAL_NOT) > 0) +
+					  (getCounter(METRIC_TYPE_OPERATOR_LOGICAL_AND) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_LOGICAL_OR) > 0) +
+
+					  (getCounter(METRIC_TYPE_OPERATOR_BITWISE_NOT) > 0) +
+					  (getCounter(METRIC_TYPE_OPERATOR_BITWISE_AND) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_BITWISE_OR) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_BITWISE_XOR) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_SHIFT_LEFT) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_SHIFT_RIGHT) > 0) +
+
+					  (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_ADDITION_ASSIGN) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_SUBTRACTION_ASSIGN) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_MULTIPLICATION_ASSIGN) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_DIVISION_ASSIGN) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_MODULO_ASSIGN) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_BITWISE_AND_ASSIGN) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_BITWISE_OR_ASSIGN) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_BITWISE_XOR_ASSIGN) > 0) +
+					  (getCounter(METRIC_TYPE_OPERATOR_SHIFT_LEFT_ASSIGN) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_SHIFT_RIGHT_ASSIGN) > 0) +
+
+				      (getCounter(METRIC_TYPE_OPERATOR_ARRAY_SUBSCRIPT) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_DEREFERENCE) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_ADDRESS_OF) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_MEMBER_ACCESS_POINTER) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_MEMBER_ACCESS_DIRECT) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_PTR_TO_MEMBER_INDIRECT) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_PTR_TO_MEMBER_DIRECT) > 0) +
+
+					  (getCounter(METRIC_TYPE_FUNCTION_CALLS ) > 0) +
+					  (getCounter(METRIC_TYPE_OPERATOR_COMMA) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_TERNARY ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_SIZE_OF ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_ALIGN_OF ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_CAST ) > 0);
+		break;
 		case METRIC_TYPE_MODIFIED_CYCLOMATIC:
 			if(( m_type == METRIC_UNIT_FUNCTION ) ||
 			   ( m_type == METRIC_UNIT_METHOD ))
@@ -127,9 +186,9 @@ MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType ) 
 						  getCounter( METRIC_TYPE_IF ) +
 						  getCounter( METRIC_TYPE_WHILELOOP ) +
 						  getCounter( METRIC_TYPE_SWITCH ) +
-						  getCounter( METRIC_TYPE_LOGICAL_AND ) +
-						  getCounter( METRIC_TYPE_LOGICAL_OR ) +
-						  getCounter( METRIC_TYPE_TERNARY ) + 1;
+						  getCounter( METRIC_TYPE_OPERATOR_LOGICAL_AND ) +
+						  getCounter( METRIC_TYPE_OPERATOR_LOGICAL_OR ) +
+						  getCounter( METRIC_TYPE_OPERATOR_TERNARY ) + 1;
 			}
 			break;
 		case METRIC_TYPE_CYCLOMATIC:
@@ -141,9 +200,9 @@ MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType ) 
 						  getCounter( METRIC_TYPE_IF ) +
 						  getCounter( METRIC_TYPE_WHILELOOP ) +
 						  getCounter( METRIC_TYPE_CASE ) +
-						  getCounter( METRIC_TYPE_LOGICAL_AND ) +
-						  getCounter( METRIC_TYPE_LOGICAL_OR ) +
-						  getCounter( METRIC_TYPE_TERNARY ) + 1;
+						  getCounter( METRIC_TYPE_OPERATOR_LOGICAL_AND ) +
+						  getCounter( METRIC_TYPE_OPERATOR_LOGICAL_OR ) +
+						  getCounter( METRIC_TYPE_OPERATOR_TERNARY ) + 1;
 			}
 			break;
 		case METRIC_TYPE_VOCF:
@@ -162,7 +221,7 @@ MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType ) 
 	return ret_val;
 }
 
-void MetricUnit::dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt ) const
+void MetricUnit::dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt, const MetricOptions* const p_options ) const
 {
 	std::string sep;
 
@@ -194,7 +253,10 @@ void MetricUnit::dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ]
 
 					 loop++ )
 				{
-					out << m_metricNames[loop] << sep;
+					if( SHOULD_INCLUDE_METRIC( p_options, m_metricShortNames[ loop ] ) )
+					{
+						out << m_metricNames[loop] << sep;
+					}
 				}
 				out << std::endl;
 			}
@@ -212,7 +274,7 @@ void MetricUnit::dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ]
 			 loop++ )
 		{
 			/* Filter out metrics which only apply at file/method level */
-			if(m_metricApplies[ m_type ][ loop ])
+			if( SHOULD_INCLUDE_METRIC( p_options, m_metricShortNames[ loop ] ) && m_metricApplies[ m_type ][ loop ])
 			{
 				counter_t val = getCounter((MetricType_e) loop );
 
@@ -240,7 +302,7 @@ void MetricUnit::dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ]
 		 unitIt != m_subUnits.end();
 		 ++unitIt )
 	{
-		(*unitIt).second->dump( out, p_output, p_fmt );
+		(*unitIt).second->dump( out, p_output, p_fmt, p_options );
 	}
 }
 

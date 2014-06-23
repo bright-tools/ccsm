@@ -24,6 +24,8 @@
 #if !defined( METRIC_UNIT_HPP )
 #define       METRIC_UNIT_HPP
 
+#include "MetricOptions.hpp"
+
 typedef enum
 {
 	METRIC_DUMP_FORMAT_TREE,
@@ -75,7 +77,7 @@ public:
 	void increment( const MetricType_e p_metricType, const counter_t p_inc = 1 );
 	void set( const MetricType_e p_metricType, const MetricUnit::counter_t p_val );
 
-	void dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE ) const;
+	void dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE, const MetricOptions* const p_options = NULL ) const;
 
 	counter_t getCounter( const MetricType_e p_metricType ) const;
 

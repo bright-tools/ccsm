@@ -220,7 +220,7 @@ bool MetricVisitor::VisitConditionalOperator(clang::ConditionalOperator *p_condO
 #endif
 	if( m_currentUnit )
 	{
-		m_currentUnit->increment( METRIC_TYPE_TERNARY );
+		m_currentUnit->increment( METRIC_TYPE_OPERATOR_TERNARY );
 	}
     return true;
 }
@@ -241,22 +241,220 @@ bool MetricVisitor::VisitCaseStmt(clang::CaseStmt *p_caseSt) {
     return true;
 }
 
+bool MetricVisitor::VisitUnaryExprOrTypeTraitExpr( clang::UnaryExprOrTypeTraitExpr* p_unaryExpr )
+{
+	if( m_currentUnit )
+	{
+		switch( p_unaryExpr->getKind() )
+		{
+			case clang::UETT_SizeOf:
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_SIZE_OF );
+				break;
+			case clang::UETT_AlignOf:
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ALIGN_OF );
+				break;
+			case clang::UETT_VecStep:
+				/* TODO */
+				break;
+			default:
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+				std::cout << "VisitUnaryExprOrTypeTraitExpr - Unhandled operator" << std::endl;
+#endif
+				break;
+		}
+	}
+	return true;
+}
+
+bool MetricVisitor::VisitExplicitCastExpr(clang::ExplicitCastExpr *p_castExpr)
+{
+	if( m_currentUnit )
+	{
+		m_currentUnit->increment( METRIC_TYPE_OPERATOR_CAST );
+	}
+	return true;
+}
+
+bool MetricVisitor::VisitMemberExpr( clang::MemberExpr* p_memberExpr )
+{
+	if( m_currentUnit )
+	{
+		if( p_memberExpr->isArrow() )
+		{
+			m_currentUnit->increment( METRIC_TYPE_OPERATOR_MEMBER_ACCESS_POINTER );
+		} 
+		else
+		{
+			m_currentUnit->increment( METRIC_TYPE_OPERATOR_MEMBER_ACCESS_DIRECT );
+		}
+	}
+	return true;
+}
+
+bool MetricVisitor::VisitArraySubscriptExpr (clang::ArraySubscriptExpr *p_subs)
+{
+	if( m_currentUnit )
+	{
+		m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARRAY_SUBSCRIPT );
+	}
+	return true;
+}
+
+bool MetricVisitor::VisitUnaryOperator(clang::UnaryOperator *p_uOp) {
+	if( m_currentUnit )
+	{
+		switch( p_uOp->getOpcode() )
+		{
+			case clang::UO_PostInc:
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_INCREMENT_POST );
+				break;
+			case clang::UO_PostDec:
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_DECREMENT_POST );
+				break;
+			case clang::UO_PreInc:
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_INCREMENT_PRE );
+				break;
+			case clang::UO_PreDec:
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_DECREMENT_PRE);
+				break;
+			case clang::UO_AddrOf:
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ADDRESS_OF );
+				break;
+			case clang::UO_Deref:
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_DEREFERENCE );
+				break;
+			case clang::UO_Plus:
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_UNARY_PLUS );
+				break; 	
+			case clang::UO_Minus:
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_UNARY_MINUS );
+				break; 	
+			case clang::UO_Not:
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_BITWISE_NOT );
+				break; 	
+			case clang::UO_LNot:
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_LOGICAL_NOT );
+				break; 	
+			case clang::UO_Real:
+				/* TODO */
+				break; 	
+			case clang::UO_Imag:
+				/* TODO */
+				break; 	
+			case clang::UO_Extension:
+				/* TODO */
+				break;
+			default:
+
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+				std::cout << "VisitUnaryOperator - Unhandled operator" << std::endl;
+#endif
+				break;
+		}
+	}
+    return true;
+}
+
 bool MetricVisitor::VisitBinaryOperator(clang::BinaryOperator *p_binOp) {
 	if( m_currentUnit )
 	{
 		switch( p_binOp->getOpcode() )
 		{
+			case clang::BO_PtrMemD:
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_PTR_TO_MEMBER_DIRECT );
+				break;
+			case clang::BO_PtrMemI:	
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_PTR_TO_MEMBER_INDIRECT );
+				break;
+			case clang::BO_Mul:
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_MULTIPLICATION );
+				break;
+			case clang::BO_Div:	
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_DIVISION );
+				break;
+			case clang::BO_Rem: 	
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_MODULO );
+				break;
+			case clang::BO_Add: 	
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_ADDITION );
+				break;
+			case clang::BO_Sub: 	
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_SUBTRACTION );
+				break;
+			case clang::BO_Shl:	
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_SHIFT_LEFT );
+				break;
+			case clang::BO_Shr: 	
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_SHIFT_RIGHT );
+				break;
+			case clang::BO_LT: 	
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_COMP_LESS_THAN );
+				break;
+			case clang::BO_GT: 	
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_COMP_GREATER_THAN );
+				break;
+			case clang::BO_LE: 	
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_COMP_LESS_THAN_EQUAL );
+				break;
+			case clang::BO_GE: 	
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_COMP_GREATER_THAN_EQUAL );
+				break;
+			case clang::BO_EQ: 	
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_COMP_EQUAL );
+				break;
+			case clang::BO_NE: 	
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_COMP_NOT_EQUAL );
+				break;
+			case clang::BO_And: 	
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_BITWISE_AND );
+				break;
+			case clang::BO_Xor: 	
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_BITWISE_XOR );
+				break;
+			case clang::BO_Or: 	
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_BITWISE_OR );
+				break;
 			case clang::BO_LAnd:
-				m_currentUnit->increment( METRIC_TYPE_LOGICAL_AND );
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_LOGICAL_AND );
 				break;
 			case clang::BO_LOr:
-				m_currentUnit->increment( METRIC_TYPE_LOGICAL_OR );
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_LOGICAL_OR );
 				break;
 			case clang::BO_Assign:
 				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_ASSIGN );
 				break;
-			case clang::BO_Add:
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_ADDITION );
+			case clang::BO_MulAssign:
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_MULTIPLICATION_ASSIGN );
+				break;
+			case clang::BO_DivAssign:	
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_DIVISION_ASSIGN );
+				break;
+			case clang::BO_RemAssign: 	
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_MODULO_ASSIGN );
+				break;
+			case clang::BO_AddAssign: 	
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_ADDITION_ASSIGN );
+				break;
+			case clang::BO_SubAssign: 	
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_SUBTRACTION_ASSIGN );
+				break;
+			case clang::BO_ShlAssign: 	
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_SHIFT_LEFT_ASSIGN );
+				break;
+			case clang::BO_ShrAssign: 	
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_SHIFT_RIGHT_ASSIGN );
+				break;
+			case clang::BO_AndAssign:	
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_BITWISE_AND_ASSIGN );
+				break;
+			case clang::BO_XorAssign: 	
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_BITWISE_XOR_ASSIGN );
+				break;
+			case clang::BO_OrAssign: 	
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_BITWISE_OR_ASSIGN );
+				break;
+			case clang::BO_Comma:
+				m_currentUnit->increment( METRIC_TYPE_OPERATOR_COMMA );
 				break;
 			default:
 #if defined( DEBUG_FN_TRACE_OUTOUT )
@@ -307,7 +505,7 @@ bool MetricVisitor::VisitIfStmt(clang::IfStmt *p_ifSt) {
 
 void MetricVisitor::dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt )
 {
-	m_topUnit->dump( out, p_output, p_fmt );
+	m_topUnit->dump( out, p_output, p_fmt, m_options );
 }
 
 bool MetricVisitor::TraverseDecl(clang::Decl *p_decl)
