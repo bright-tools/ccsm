@@ -1,0 +1,25 @@
+Global
+File-scope total local variable declarations: 5
+File-scope static variable declarations: 1
+File-scope external variable declarations: 2
+Function-scope total local variable declarations: 8
+Function-scope static variable declarations: 1
+Function-scope register variable declarations: 1
+Function-scope auto variable declarations: 1
+Function-scope external variable declarations: 3
+File: src\var.c
+	File-scope total local variable declarations: 5
+	File-scope static variable declarations: 1
+	File-scope external variable declarations: 2
+	Function: example
+		Function-scope total local variable declarations: 4
+		Function-scope static variable declarations: 1
+		Function-scope register variable declarations: 1
+		Function-scope auto variable declarations: 0
+		Function-scope external variable declarations: 1
+	Function: main
+		Function-scope total local variable declarations: 4
+		Function-scope static variable declarations: 0
+		Function-scope register variable declarations: 0
+		Function-scope auto variable declarations: 1
+		Function-scope external variable declarations: 2
