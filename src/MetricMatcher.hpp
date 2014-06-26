@@ -68,6 +68,7 @@ public:
 	virtual bool VisitArraySubscriptExpr (clang::ArraySubscriptExpr *p_subs);
 	virtual bool VisitMemberExpr( clang::MemberExpr* p_memberExpr );
 	virtual bool VisitUnaryExprOrTypeTraitExpr( clang::UnaryExprOrTypeTraitExpr* p_unaryExpr );
+	
 
 	virtual bool TraverseDecl(clang::Decl *p_decl);
 

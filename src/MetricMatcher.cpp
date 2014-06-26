@@ -68,6 +68,10 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 			}
 		
 			m_currentUnit = fileUnit->getSubUnit(m_currentFunctionName, type);
+			if( func->isInlineSpecified() )
+			{
+				fileUnit->increment( METRIC_TYPE_INLINE_FUNCTIONS );
+			}
 
 			if( func->getLinkageAndVisibility().getLinkage() == InternalLinkage )
 			{
@@ -92,43 +96,92 @@ bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 	/* Check it's not something like a function parameter */
 	if( p_varDec->getKind() == clang::Decl::Var )
 	{
-		/* Check to see if this variable does not have a parent function/method */
-		if( !p_varDec->getParentFunctionOrMethod() )
+		clang::StorageClass sc = p_varDec->getStorageClass();
+
+		/* Check to see if this variable is file scope */
+		if( p_varDec->isFileVarDecl() )
 		{
-			/* Don't count external references */
-			if ( !p_varDec->hasExternalStorage() )
+
+			SourceLocation loc = p_varDec->getLocation();
+			if( loc.isMacroID() )
 			{
+				loc = astContext->getSourceManager().getFileLoc(loc);
+			}
 
-				SourceLocation loc = p_varDec->getLocation();
-				if( loc.isMacroID() )
-				{
-					loc = astContext->getSourceManager().getFileLoc(loc);
-				}
-
-				/* File-scope variable */
-				m_currentFileName = astContext->getSourceManager().getFilename( loc ).str();
-				m_currentFunctionName = "";
-				if( SHOULD_INCLUDE_FILE( m_options, m_currentFileName ))
-				{
+			m_currentFileName = astContext->getSourceManager().getFilename( loc ).str();
+			m_currentFunctionName = "";
+			if( SHOULD_INCLUDE_FILE( m_options, m_currentFileName ))
+			{
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-				std::cout << "VisitVarDecl : Processing " << p_varDec->getNameAsString() << std::endl;
+			std::cout << "VisitVarDecl : Processing file-scope var " << p_varDec->getNameAsString() << std::endl;
 #endif
-					m_currentUnit = m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE);
-					m_currentUnit->increment( METRIC_TYPE_VARIABLE );
+				m_currentUnit = m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE);
+				if ( sc == clang::SC_Extern )
+				{
+					m_currentUnit->increment( METRIC_TYPE_VARIABLE_FILE_EXTERN );
 				}
 				else
 				{
-					m_currentUnit = NULL;
+					m_currentUnit->increment( METRIC_TYPE_VARIABLE_FILE_LOCAL );
+					switch( sc )
+					{
+						case clang::SC_Static:
+							m_currentUnit->increment( METRIC_TYPE_VARIABLE_FILE_STATIC );
+							break;
+					}
+				}
+			}
+			else
+			{
+				m_currentUnit = NULL;
+			}
+		}
+		else
+		{
+			if( SHOULD_INCLUDE_FILE( m_options, m_currentFileName ))
+			{
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+		    	std::cout << "VisitVarDecl : Processing function-scope var " << p_varDec->getNameAsString() << std::endl;
+#endif
+				if ( sc == clang::SC_Extern )
+				{
+					m_currentUnit->increment( METRIC_TYPE_VARIABLE_FN_EXTERN );
+				}
+				else
+				{
+					m_currentUnit->increment( METRIC_TYPE_VARIABLE_FN_LOCAL );
+					switch( sc )
+					{
+						case clang::SC_Static:
+							m_currentUnit->increment( METRIC_TYPE_VARIABLE_FN_STATIC );
+							break;
+						case clang::SC_Register:
+							m_currentUnit->increment( METRIC_TYPE_VARIABLE_FN_REGISTER );
+							break;
+						case clang::SC_Auto:
+							m_currentUnit->increment( METRIC_TYPE_VARIABLE_FN_AUTO );
+							break;
+					}
 				}
 			}
 		}
-
-	} else if( p_varDec->getKind() == clang::Decl::ParmVar )
+#if 0
+        std::cout << "VisitVarDecl : Storage class " << p_varDec->getStorageClass() << std::endl;
+        std::cout << "VisitVarDecl : Has Local Storage: " << p_varDec->hasLocalStorage() << std::endl;
+        std::cout << "VisitVarDecl : Has Static Storage: " << p_varDec->isStaticLocal() << std::endl;
+        std::cout << "VisitVarDecl : Is Local Var Decl: " << p_varDec->isLocalVarDecl() << std::endl;
+        std::cout << "VisitVarDecl : Is File Var Decl: " << p_varDec->isFileVarDecl() << std::endl;
+#endif
+	} 
+	else if( p_varDec->getKind() == clang::Decl::ParmVar )
 	{
 			if( m_currentUnit )
 			{
 				m_currentUnit->increment( METRIC_TYPE_FUNCTION_PARAMETERS );
 			}
+	}
+	else
+	{
 	}
 
 	return true;	
