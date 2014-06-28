@@ -11,6 +11,9 @@ METRIC( METRIC_TYPE_CASE,                                     "STMT_CASE_CNT",  
 METRIC( METRIC_TYPE_DEFAULT,                                  "STMT_DEFAULT_CNT",               "DEFAULT statements",             				    true,  true,  true,  true,  "" )
 METRIC( METRIC_TYPE_GOTO,                                     "STMT_GOTO_CNT",                  "GOTO statements",							        true,  true,  true,  true,  "" )
 METRIC( METRIC_TYPE_LABEL,                                    "STMT_LABEL_CNT",                 "LABEL statements",                                 true,  true,  true,  true,  "" )
+/* TODO: Explicitly count anonymous typedefs? */
+METRIC( METRIC_TYPE_TYPEDEF_FILE,                             "TYPEDEF_FILE_CNT",               "File-scope typedefs",                              true,  true,  false, false, "" )
+METRIC( METRIC_TYPE_TYPEDEF_FN,                               "TYPEDEF_FN_CNT",                 "Function-scope typedefs",                          true,  true,  true,  true,  "" )
 METRIC( METRIC_TYPE_VARIABLE_FILE_LOCAL,                      "VAR_FILE_LOC_CNT",               "File-scope total local variable declarations",     true,  true,  false, false, "Includes auto and static but not extern" )
 METRIC( METRIC_TYPE_VARIABLE_FILE_STATIC,                     "VAR_FILE_LOC_STATIC_CNT",        "File-scope static variable declarations",          true,  true,  false, false, "" )
 METRIC( METRIC_TYPE_VARIABLE_FILE_EXTERN,                     "VAR_FILE_EXT_CNT",               "File-scope external variable declarations",        true,  true,  false, false, "" )

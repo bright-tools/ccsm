@@ -27,6 +27,7 @@
 #include "MetricOptions.hpp"
 
 #include "clang/AST/RecursiveASTVisitor.h"
+#include "clang/Frontend/CompilerInstance.h"
 #include "clang/AST/ASTContext.h"
 
 #include <ostream>
@@ -36,7 +37,8 @@
 class MetricVisitor : public clang::RecursiveASTVisitor<MetricVisitor>
 {
 protected:
-	clang::ASTContext *astContext;
+	clang::CompilerInstance &m_compilerInstance;
+	clang::ASTContext *m_astContext;
 	MetricUnit*		  m_topUnit;
 	std::string       m_currentFileName;
 	std::string       m_currentFunctionName;
@@ -46,7 +48,7 @@ protected:
 
 public:
 	
-	explicit MetricVisitor(clang::ASTContext* p_Context, MetricUnit* p_topUnit,MetricOptions* p_options = NULL);
+	explicit MetricVisitor(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit,MetricOptions* p_options = NULL);
 	virtual ~MetricVisitor(void);
 	virtual bool VisitFunctionDecl(clang::FunctionDecl *func);
 	virtual bool VisitVarDecl(clang::VarDecl *p_varDec);
@@ -68,7 +70,10 @@ public:
 	virtual bool VisitArraySubscriptExpr (clang::ArraySubscriptExpr *p_subs);
 	virtual bool VisitMemberExpr( clang::MemberExpr* p_memberExpr );
 	virtual bool VisitUnaryExprOrTypeTraitExpr( clang::UnaryExprOrTypeTraitExpr* p_unaryExpr );
+	virtual bool VisitTypedefDecl( clang::TypedefDecl* p_typeDef );
 	
+	void HandleLoc( clang::SourceLocation& p_loc );
+	void LexTokens();
 
 	virtual bool TraverseDecl(clang::Decl *p_decl);
 
