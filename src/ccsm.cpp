@@ -105,9 +105,8 @@ std::set<std::string> commentFileList;
 class MetricFrontendAction : public ASTFrontendAction {
 public:
     virtual ASTConsumer *CreateASTConsumer(CompilerInstance &CI, StringRef file) {
-		
 		// TODO: More elegant way of getting topUnit, options & commentFileList in.
-		MetricASTConsumer* ret_val = new MetricASTConsumer(&CI.getASTContext(),&topUnit,&options); // pass CI pointer to ASTConsumer
+		MetricASTConsumer* ret_val = new MetricASTConsumer(CI,&topUnit,&options); // pass CI pointer to ASTConsumer
 		MetricPPCustomer* customer = new MetricPPCustomer( &topUnit, &commentFileList, &options );
 		CI.getPreprocessor().addCommentHandler(customer);
 		CI.getPreprocessor().addPPCallbacks(customer);

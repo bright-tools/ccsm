@@ -16,7 +16,7 @@
 
 #include "MetricASTConsumer.hpp"
 
-MetricASTConsumer::MetricASTConsumer(clang::ASTContext *CI, MetricUnit* p_topUnit, MetricOptions* p_options ) : visitor(new MetricVisitor(CI, p_topUnit, p_options))
+MetricASTConsumer::MetricASTConsumer(clang::CompilerInstance &CI, MetricUnit* p_topUnit, MetricOptions* p_options ) : visitor(new MetricVisitor(CI, p_topUnit, p_options))
 { 
 }
 

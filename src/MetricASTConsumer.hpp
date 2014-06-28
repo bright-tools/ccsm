@@ -24,6 +24,7 @@
 
 #include "clang/AST/ASTConsumer.h"
 #include "clang/AST/ASTContext.h"
+#include "clang/Frontend/CompilerInstance.h"
 
 #include <ostream>
 #include <string>
@@ -39,7 +40,7 @@ protected:
 	MetricVisitor *visitor;
 
 public:
-    explicit MetricASTConsumer(clang::ASTContext *CI, MetricUnit* p_topUnit, MetricOptions* p_options = NULL);
+	explicit MetricASTConsumer(clang::CompilerInstance &CI, MetricUnit* p_topUnit, MetricOptions* p_options = NULL);
 
 	virtual ~MetricASTConsumer(void);
 	virtual void HandleTranslationUnit(clang::ASTContext &Context);
