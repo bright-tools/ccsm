@@ -1,3 +1,10 @@
+void dummy( void )
+{
+    /* This function shouldn't be counted due to the
+       --exclude-fuction parameter setting */
+    int t[7];
+}
+
 int main( void )
 {
     int x[5][2];

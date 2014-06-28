@@ -3,6 +3,16 @@ int q;
 extern int t,l;
 static int j;
 
+void dummy( void )
+{
+    /* This function shouldn't be counted due to the
+       --exclude-fuction parameter setting */
+    int o;
+    extern unsigned b;
+    static int r;
+    register int a;
+}
+
 void example( void )
 {
     int x;

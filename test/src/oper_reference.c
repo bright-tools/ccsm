@@ -1,3 +1,14 @@
+void dummy( void )
+{
+    /* This function shouldn't be counted due to the
+       --exclude-fuction parameter setting */
+
+    int o;
+    int *j;
+
+    j = &o;
+}
+
 int main( void )
 {
     int x;
