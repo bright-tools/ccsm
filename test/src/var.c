@@ -1,7 +1,6 @@
 int x,z,p;
 int q;
 extern int t,l;
-static int j;
 
 void dummy( void )
 {
@@ -21,6 +20,10 @@ void example( void )
     static int b;
     register int o;
 }
+
+/* This var is placed after a function to ensure that
+   it does not get included in the function's count */
+static int j;
 
 int main( void )
 {
