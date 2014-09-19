@@ -1,0 +1,7 @@
+Global
+Function-scope auto variable declarations: 4
+File: src\kw_auto.c
+	Function: main
+		Function-scope auto variable declarations: 3
+	Function: v
+		Function-scope auto variable declarations: 1
