@@ -1,8 +1,16 @@
 Global
+File: src/fn_call.h
 File: src\fn_call.c
 	Function: j
-		Function Calls: 5
-		No. different functions called: 3
+		Number of other functions calling this function: 1
+		Function Calls: 6
+		No. different functions called: 4
 	Function: k
+		Number of other functions calling this function: 0
 		Function Calls: 3
 		No. different functions called: 1
+File: src\fn_call2.c
+	Function: secondary_function
+		Number of other functions calling this function: 0
+		Function Calls: 0
+		No. different functions called: 0

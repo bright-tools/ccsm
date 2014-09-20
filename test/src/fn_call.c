@@ -1,7 +1,10 @@
 /* File to support
    OP_FN_CALL_CNT
+   FUNC_CALLED_BY
    testing
 */
+
+#include "fn_call.h"
 
 extern int foo( void );
 extern int moo( void );
@@ -17,6 +20,8 @@ int j( void )
     x+= foo();
     x+= moo();
     x+= too();
+
+    secondary_function();
 
     return x;
 }

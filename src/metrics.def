@@ -31,6 +31,7 @@ METRIC( METRIC_TYPE_LOCAL_FUNCTIONS,                          "FUNC_LOCAL_CNT", 
 METRIC( METRIC_TYPE_EXTERN_EXPL_FUNCTIONS,                    "FUNC_EXTERN_EXPL_CNT",           "External (explicit) functions declarations",		true,  true,  true,  true,  "" )
 METRIC( METRIC_TYPE_EXTERN_IMPL_FUNCTIONS,                    "FUNC_EXTERN_IMPL_CNT",           "External (implicit) functions declarations",		true,  true,  true,  true,  "" )
 METRIC( METRIC_TYPE_INLINE_FUNCTIONS,                         "FUNC_INLINE_CNT",                "Inline Functions",									true,  true,  false, false, "" )
+METRIC( METRIC_TYPE_CALLED_BY,                                "FUNC_CALLED_BY",                 "Number of other functions calling this function",  false, false, true,  true,  "" )
 METRIC( METRIC_TYPE_FUNCTION_CALLS,                           "OP_FN_CALL_CNT",                 "Function Calls",									false, false, true,  true,  "" )
 METRIC( METRIC_TYPE_DIFFERENT_FUNCTIONS_CALLED,               "OP_FN_CALL_UNIQUE_CNT",          "No. different functions called",					false, false, true,  true,  "Of the total number of functions called (see OP_FN_CALL_CNT), this represents the number of uniquely addressed functions.  Does not include functions called via function pointers" )
 METRIC( METRIC_TYPE_LOCAL_FUNCTION_CALLS,                     "LOCAL_FN_CALL_CNT",              "Local Function Calls",								false, false, true,  true,  "Does not include functions called via function pointers" )

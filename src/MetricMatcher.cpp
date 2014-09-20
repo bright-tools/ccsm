@@ -329,9 +329,28 @@ bool MetricVisitor::VisitCallExpr(clang::CallExpr *p_callExpr)
 		/* Check the function could be determined - probably not in the case of a function pointer */
 		if( p_calleeFn != NULL )
 		{
-			// Update the set containing the names of all the functions called
+			std::string calleeName = p_calleeFn->getQualifiedNameAsString();
+
+			/* Not registered this function as being called yet? */
 			// TODO: Does this work for C++ namespacing?
-			m_fnsCalled.insert( p_calleeFn->getQualifiedNameAsString() );
+			if( m_fnsCalled.find( calleeName ) == m_fnsCalled.end() ) {
+				// Update the set containing the names of all the functions called
+				m_fnsCalled.insert( calleeName );
+
+				/* TODO: This look-up doesn't work when the callee is in a different TU :-| */
+				Stmt* calleeBody = p_callExpr->getDirectCallee()->getBody();
+				if( calleeBody ) {
+					SourceLocation calleeBodyLocation = calleeBody->getLocStart();
+					std::string name = m_astContext->getSourceManager().getFilename(calleeBodyLocation);
+
+					if( ShouldIncludeFile( name ))
+					{
+						MetricUnit* fileUnit = m_topUnit->getSubUnit( name, METRIC_UNIT_FILE );
+						MetricUnit* targFn = fileUnit->getSubUnit( calleeName, METRIC_UNIT_FUNCTION );
+						targFn->increment( METRIC_TYPE_CALLED_BY );
+					}
+				}
+			}
 
 			if( p_calleeFn->getBody() != NULL )
 			{
