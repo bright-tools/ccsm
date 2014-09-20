@@ -1,15 +1,24 @@
 Global
 File-scope external variable declarations: 3
 Function-scope external variable declarations: 4
-External (explicit) functions declarations: 3
-External (implicit) functions declarations: 1
-Number of 'extern' tokens: 10
+External (explicit) functions declarations: 6
+External (implicit) functions declarations: 2
+Number of 'extern' tokens: 13
+File: src/kw_extern.h
+	File-scope external variable declarations: 0
+	External (explicit) functions declarations: 2
+	External (implicit) functions declarations: 0
+	Number of 'extern' tokens: 2
 File: src\kw_extern.c
 	File-scope external variable declarations: 3
-	External (explicit) functions declarations: 3
-	External (implicit) functions declarations: 1
-	Number of 'extern' tokens: 10
+	External (explicit) functions declarations: 4
+	External (implicit) functions declarations: 2
+	Number of 'extern' tokens: 11
 	Function: main
 		Function-scope external variable declarations: 2
+		External (explicit) functions declarations: 1
+		External (implicit) functions declarations: 1
 	Function: v
 		Function-scope external variable declarations: 2
+		External (explicit) functions declarations: 0
+		External (implicit) functions declarations: 0

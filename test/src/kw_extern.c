@@ -24,6 +24,9 @@ int main( void )
     auto int v;
     auto int a;
 
+    extern int zoo( void );
+    int ambg( void );
+
     if( 1 == 1 )
     {
         extern int j;
@@ -33,6 +36,7 @@ int main( void )
 }
 
 extern int t;
+#include "kw_extern.h"
 
 void v( void )
 {

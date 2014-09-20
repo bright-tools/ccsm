@@ -1,0 +1,8 @@
+Global
+File: src\fn_call.c
+	Function: j
+		Function Calls: 5
+		No. different functions called: 3
+	Function: k
+		Function Calls: 3
+		No. different functions called: 1
