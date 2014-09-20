@@ -11,3 +11,12 @@
 *.lai
 *.la
 *.a
+
+# Temporary files
+*.swp
+*.swo
+*.tmp
+
+# Transient files used during testing
+test/err.log
+test/out.log
