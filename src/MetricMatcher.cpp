@@ -106,6 +106,9 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 				case clang::SC_Extern:
 					m_currentUnit->increment( METRIC_TYPE_EXTERN_EXPL_FUNCTIONS );
 					break;
+				default:
+					/* Not currently of interest */
+					break;
 			}
 		}
 	}
@@ -241,6 +244,9 @@ bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 							break;
 						case clang::SC_Auto:
 							m_currentUnit->increment( METRIC_TYPE_VARIABLE_FN_AUTO );
+							break;
+						default:
+							/* Not currently of interest */
 							break;
 					}
 				}

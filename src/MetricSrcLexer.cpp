@@ -48,12 +48,17 @@ void MetricSrcLexer::CountToken( clang::Token& p_token )
 	switch( p_token.getKind() )
 	{
 		case clang::tok::raw_identifier:
+			{
 			std::string x = clang::StringRef(p_token.getRawIdentifierData(), p_token.getLength()).str();
 			std::map<std::string,MetricType_e>::const_iterator typeLookup = tokenToTypeMap.find( x );
 			if( typeLookup != tokenToTypeMap.end() )
 			{
 				m_currentUnit->increment( (*typeLookup).second );
 			}
+			}
+			break;
+		default:
+			/* TODO */
 			break;
 	}
 }
