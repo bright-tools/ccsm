@@ -69,6 +69,8 @@ protected:
 	MetricUnitType_e m_type;
 	SubUnitMap_t m_subUnits;
 	MetricUnit* m_parent;
+	bool m_processed;
+
 public:
 	typedef uint16_t counter_t;
 
@@ -87,6 +89,9 @@ public:
 
 	MetricUnitType_e GetType( void ) const;
 
+	bool hasBeenProcessed( void ) const;
+
+	void setProcessed( void );
 
 protected:
 	counter_t m_counters[ METRIC_TYPE_MAX ];

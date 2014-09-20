@@ -130,7 +130,7 @@ int main(int argc, const char **argv) {
         CompilationDatabase::autoDetectFromSource(SourcePaths[0], ErrorMessage)
       );
 
-    //  Still no compilation DB? - bail.
+    //  Still no compilation DB? - bail.	
     if (!Compilations)
     {
       llvm::report_fatal_error(ErrorMessage);

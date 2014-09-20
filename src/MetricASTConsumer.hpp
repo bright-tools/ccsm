@@ -33,11 +33,14 @@
 #include "MetricUnit.hpp"
 #include "MetricOptions.hpp"
 #include "MetricMatcher.hpp"
+#include "MetricSrcLexer.hpp"
 
 class MetricASTConsumer : public clang::ASTConsumer
 {
 protected:
-	MetricVisitor *visitor;
+	MetricVisitor  *visitor;
+	MetricSrcLexer *lexer;
+	MetricUnit     *m_topUnit;
 
 public:
 	explicit MetricASTConsumer(clang::CompilerInstance &CI, MetricUnit* p_topUnit, MetricOptions* p_options = NULL);

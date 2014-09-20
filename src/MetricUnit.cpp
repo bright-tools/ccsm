@@ -67,7 +67,7 @@ const bool MetricUnit::m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ] = {
 };
 
 MetricUnit::MetricUnit( MetricUnit* const p_parent, const std::string& p_name, const MetricUnitType_e p_type ) : 
-			m_name( p_name ), m_type( p_type ), m_parent( p_parent )
+					m_name( p_name ), m_type( p_type ), m_parent( p_parent ), m_processed( false )
 {
 	uint16_t loop;
 
@@ -329,4 +329,14 @@ MetricUnit* MetricUnit::getSubUnit( const std::string& p_name, const MetricUnitT
 		ret_val = (*name_it).second;
 	}
 	return ret_val;
+}
+
+bool MetricUnit::hasBeenProcessed( void ) const
+{
+	return m_processed;
+}
+
+void MetricUnit::setProcessed( void )
+{
+	m_processed = true;
 }

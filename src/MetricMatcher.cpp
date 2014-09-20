@@ -18,7 +18,6 @@
 
 #include "MetricMatcher.hpp"
 #include "clang/Basic/SourceManager.h"
-#include "clang/Lex/Preprocessor.h"
 
 #include <sstream>
 #include <iostream>
@@ -31,7 +30,8 @@ using namespace std;
 MetricVisitor::MetricVisitor(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, MetricOptions* p_options) : m_compilerInstance(p_CI), 
 																											   m_astContext(&(p_CI.getASTContext())),
 	                                                                                                           m_topUnit( p_topUnit ), 
-	                                                                                                           m_currentUnit( NULL ), m_options( p_options )
+	                                                                                                           m_currentUnit( NULL ), 
+																											   m_options( p_options )
 {
 }
 
@@ -44,23 +44,20 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 #if defined( DEBUG_FN_TRACE_OUTOUT )
 	std::cout << "VisitFunctionDecl" << std::endl;
 #endif
+
+	/* Deal with common actions which may be applicable to a decl valid at translation-unit level */
+	DeclCommon( func->getLexicalParent(), func );
+
+	/* Function body attached? */
 	if( func->doesThisDeclarationHaveABody() )
 	{
-		m_fnsCalled.clear();
-
 		m_currentFileName = m_astContext->getSourceManager().getFilename( func->getLocation() ).str();
 		m_currentFunctionName = func->getQualifiedNameAsString();
 
-#if defined( DEBUG_FN_TRACE_OUTOUT )
-		std::cout << "VisitFunctionDecl - " << m_currentFileName << "::"<< m_currentFunctionName << std::endl;
-#endif
-
-		if( SHOULD_INCLUDE_FILE( m_options, m_currentFileName ) && 
+		if( ShouldIncludeFile( m_currentFileName ) && 
 			SHOULD_INCLUDE_FUNCTION( m_options, m_currentFunctionName ))
 		{
-#if defined( DEBUG_FN_TRACE_OUTOUT )
-			std::cout << "VisitFunctionDecl - Should be included" << std::endl;
-#endif
+			/* Ensure that there is a file-level sub-unit */
 			MetricUnit* fileUnit = m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE);
 
 			MetricUnitType_e type = METRIC_UNIT_FUNCTION;
@@ -71,20 +68,45 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 			}
 		
 			m_currentUnit = fileUnit->getSubUnit(m_currentFunctionName, type);
+
 			if( func->isInlineSpecified() )
 			{
 				fileUnit->increment( METRIC_TYPE_INLINE_FUNCTIONS );
 			}
 
-			if( func->getLinkageAndVisibility().getLinkage() == InternalLinkage )
+			switch( func->getLinkageAndVisibility().getLinkage() )
 			{
-				fileUnit->increment( METRIC_TYPE_LOCAL_FUNCTIONS );
+				case clang::Linkage::InternalLinkage:
+					fileUnit->increment( METRIC_TYPE_LOCAL_FUNCTIONS );
+					break;
+				default:
+					/* Not interested at the moment */
+					break;
 			}
 			fileUnit->increment( METRIC_TYPE_FUNCTIONS );
 		}
 		else
 		{
+			/* Not including this function */
 			m_currentUnit = NULL;
+		}
+	}
+	else
+	{
+		/* No body to this function */
+
+		if( m_currentUnit )
+		{
+			switch( func->getStorageClass() )
+			{
+				case clang::SC_None:
+					/* No storage class specified - implicitly the function is extern */
+					m_currentUnit->increment( METRIC_TYPE_EXTERN_IMPL_FUNCTIONS );
+					break;
+				case clang::SC_Extern:
+					m_currentUnit->increment( METRIC_TYPE_EXTERN_EXPL_FUNCTIONS );
+					break;
+			}
 		}
 	}
 	return true;     
@@ -92,25 +114,50 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 
 bool MetricVisitor::VisitTypedefDecl( clang::TypedefDecl* p_typeDef )
 {
-	if( p_typeDef->isDefinedOutsideFunctionOrMethod() )
-	{
-		SourceLocation loc = p_typeDef->getLocation();
-		HandleLoc( loc );
+	/* Deal with common actions which may be applicable to a decl valid at translation-unit level */
+	DeclCommon( p_typeDef->getLexicalDeclContext(), p_typeDef );
 
-		if( m_currentUnit )
+	if( m_currentUnit )
+	{
+		/* Is it a "top level" decl? */
+		if( p_typeDef->isDefinedOutsideFunctionOrMethod() )
 		{
 			m_currentUnit->increment( METRIC_TYPE_TYPEDEF_FILE );
 		}
-	}
-	else
-	{
-		if( m_currentUnit )
+		else
 		{
 			m_currentUnit->increment( METRIC_TYPE_TYPEDEF_FN );
 		}
 	}
 
 	return true;
+}
+
+void MetricVisitor::CloseOutFnOrMtd( void )
+{
+	/* Check to see if we've just finished processing a function/method - if so, finish up any
+		required counts */
+	if( m_currentUnit )
+	{
+		MetricUnitType_e unitType = m_currentUnit->GetType();
+		if(( unitType == METRIC_UNIT_FUNCTION ) ||
+			( unitType == METRIC_UNIT_METHOD ))
+		{
+			m_currentUnit->set( METRIC_TYPE_DIFFERENT_FUNCTIONS_CALLED, m_fnsCalled.size() );
+			m_fnsCalled.clear();
+		}
+	}
+}
+
+void MetricVisitor::DeclCommon( const clang::DeclContext* p_declCtxt, const clang::Decl* p_decl )
+{
+	// Check to see if the decl is top-level - may need to update m_currentUnit after exiting a function.
+	if( p_declCtxt->getDeclKind() == clang::Decl::TranslationUnit )
+	{
+		CloseOutFnOrMtd();
+
+		HandleLoc( p_decl->getLocation() );
+	}
 }
 
 void MetricVisitor::HandleLoc( SourceLocation& p_loc )
@@ -123,7 +170,7 @@ void MetricVisitor::HandleLoc( SourceLocation& p_loc )
 	m_currentFileName = m_astContext->getSourceManager().getFilename( p_loc ).str();
 	m_currentFunctionName = "";
 
-	if( SHOULD_INCLUDE_FILE( m_options, m_currentFileName ))
+	if( ShouldIncludeFile( m_currentFileName ))
 	{
 		m_currentUnit = m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE);
 	}
@@ -138,23 +185,24 @@ bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 
 #if defined( DEBUG_FN_TRACE_OUTOUT )
 	std::cout << "VisitVarDecl : CONTEXT " << m_currentFileName << "::" << m_currentFunctionName << std::endl;
+	std::cout << "VisitVarDecl : Processing " << p_varDec->getNameAsString() << std::endl;
 #endif
 
-	/* Check it's not something like a function parameter */
-	if( p_varDec->getKind() == clang::Decl::Var )
+	/* Deal with common actions which may be applicable to a decl valid at translation-unit level */
+	DeclCommon( p_varDec->getLexicalDeclContext(), p_varDec );
+
+	if( m_currentUnit )
 	{
-		clang::StorageClass sc = p_varDec->getStorageClass();
-
-		/* Check to see if this variable is file scope */
-		if( p_varDec->isFileVarDecl() )
+		/* Check it's not something like a function parameter */
+		if( p_varDec->getKind() == clang::Decl::Var )
 		{
-			SourceLocation loc = p_varDec->getLocation();
-			HandleLoc( loc );
+			clang::StorageClass sc = p_varDec->getStorageClass();
 
-			if( m_currentUnit )
+			/* Check to see if this variable is file scope */
+			if( p_varDec->isFileVarDecl() )
 			{
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-			std::cout << "VisitVarDecl : Processing file-scope var " << p_varDec->getNameAsString() << std::endl;
+				std::cout << "VisitVarDecl : Processing file-scope var " << p_varDec->getNameAsString() << std::endl;
 #endif
 				if ( sc == clang::SC_Extern )
 				{
@@ -168,18 +216,14 @@ bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 						case clang::SC_Static:
 							m_currentUnit->increment( METRIC_TYPE_VARIABLE_FILE_STATIC );
 							break;
+						default:
+							/* Not currently interested */
+							break;
 					}
 				}
 			}
-
-		}
-		else
-		{
-			if( m_currentUnit )
+			else
 			{
-#if defined( DEBUG_FN_TRACE_OUTOUT )
-		    	std::cout << "VisitVarDecl : Processing function-scope var " << p_varDec->getNameAsString() << std::endl;
-#endif
 				if ( sc == clang::SC_Extern )
 				{
 					m_currentUnit->increment( METRIC_TYPE_VARIABLE_FN_EXTERN );
@@ -201,31 +245,22 @@ bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 					}
 				}
 			}
+		} 
+		else if( p_varDec->getKind() == clang::Decl::ParmVar )
+		{
+			m_currentUnit->increment( METRIC_TYPE_FUNCTION_PARAMETERS );
 		}
-#if 0
-        std::cout << "VisitVarDecl : Storage class " << p_varDec->getStorageClass() << std::endl;
-        std::cout << "VisitVarDecl : Has Local Storage: " << p_varDec->hasLocalStorage() << std::endl;
-        std::cout << "VisitVarDecl : Has Static Storage: " << p_varDec->isStaticLocal() << std::endl;
-        std::cout << "VisitVarDecl : Is Local Var Decl: " << p_varDec->isLocalVarDecl() << std::endl;
-        std::cout << "VisitVarDecl : Is File Var Decl: " << p_varDec->isFileVarDecl() << std::endl;
-#endif
-	} 
-	else if( p_varDec->getKind() == clang::Decl::ParmVar )
-	{
-			if( m_currentUnit )
-			{
-				m_currentUnit->increment( METRIC_TYPE_FUNCTION_PARAMETERS );
-			}
-	}
-	else
-	{
+		else
+		{
+		}
 	}
 
 	return true;	
 }
 
 // TODO: Lots of repetition here - template it?
-bool MetricVisitor::VisitForStmt(clang::ForStmt *p_forSt) {
+bool MetricVisitor::VisitForStmt(clang::ForStmt *p_forSt) 
+{
 	if( m_currentUnit )
 	{
 		m_currentUnit->set( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_forSt, m_astContext ));
@@ -235,7 +270,8 @@ bool MetricVisitor::VisitForStmt(clang::ForStmt *p_forSt) {
     return true;
 }
 
-bool MetricVisitor::VisitGotoStmt(clang::GotoStmt *p_gotoSt) {
+bool MetricVisitor::VisitGotoStmt(clang::GotoStmt *p_gotoSt) 
+{
 	if( m_currentUnit )
 	{
 		m_currentUnit->increment( METRIC_TYPE_GOTO );
@@ -244,7 +280,8 @@ bool MetricVisitor::VisitGotoStmt(clang::GotoStmt *p_gotoSt) {
     return true;
 }
 
-bool MetricVisitor::VisitLabelStmt(clang::LabelStmt *p_LabelSt) {
+bool MetricVisitor::VisitLabelStmt(clang::LabelStmt *p_LabelSt) 
+{
 	if( m_currentUnit )
 	{
 		m_currentUnit->increment( METRIC_TYPE_LABEL );
@@ -252,7 +289,8 @@ bool MetricVisitor::VisitLabelStmt(clang::LabelStmt *p_LabelSt) {
     return true;
 }
 
-bool MetricVisitor::VisitWhileStmt(clang::WhileStmt *p_whileSt) {
+bool MetricVisitor::VisitWhileStmt(clang::WhileStmt *p_whileSt) 
+{
 	if( m_currentUnit )
 	{
 		m_currentUnit->set( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_whileSt, m_astContext ));
@@ -262,7 +300,8 @@ bool MetricVisitor::VisitWhileStmt(clang::WhileStmt *p_whileSt) {
     return true;
 }
 
-bool MetricVisitor::VisitReturnStmt(clang::ReturnStmt *p_returnSt) {
+bool MetricVisitor::VisitReturnStmt(clang::ReturnStmt *p_returnSt) 
+{
 	if( m_currentUnit )
 	{
 		m_currentUnit->increment( METRIC_TYPE_RETURN );
@@ -281,20 +320,26 @@ bool MetricVisitor::VisitCallExpr(clang::CallExpr *p_callExpr)
 	{
 		clang::FunctionDecl* p_calleeFn = p_callExpr->getCalleeDecl()->getAsFunction();
 
-		// Update the set containing the names of all the functions called
-		// TODO: Does this work for C++ namespacing?
-		m_fnsCalled.insert( p_calleeFn->getQualifiedNameAsString() );
-
-		if( p_calleeFn->getBody() != NULL )
+		/* Check the function could be determined - probably not in the case of a function pointer */
+		if( p_calleeFn != NULL )
 		{
-			m_currentUnit->increment( METRIC_TYPE_LOCAL_FUNCTION_CALLS );
+			// Update the set containing the names of all the functions called
+			// TODO: Does this work for C++ namespacing?
+			m_fnsCalled.insert( p_calleeFn->getQualifiedNameAsString() );
+
+			if( p_calleeFn->getBody() != NULL )
+			{
+				m_currentUnit->increment( METRIC_TYPE_LOCAL_FUNCTION_CALLS );
+			}
 		}
 		m_currentUnit->increment( METRIC_TYPE_FUNCTION_CALLS );
 	}
+
     return true;
 }
 
-bool MetricVisitor::VisitSwitchStmt(clang::SwitchStmt *p_switchSt) {
+bool MetricVisitor::VisitSwitchStmt(clang::SwitchStmt *p_switchSt) 
+{
 	if( m_currentUnit )
 	{
 		m_currentUnit->set( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_switchSt, m_astContext ));
@@ -304,7 +349,8 @@ bool MetricVisitor::VisitSwitchStmt(clang::SwitchStmt *p_switchSt) {
     return true;
 }
 
-bool MetricVisitor::VisitConditionalOperator(clang::ConditionalOperator *p_condOp) {
+bool MetricVisitor::VisitConditionalOperator(clang::ConditionalOperator *p_condOp) 
+{
 #if defined( DEBUG_FN_TRACE_OUTOUT )
 	std::cout << "VisitConditionalOperator : " << m_currentFileName << "::" << m_currentFunctionName << std::endl;
 #endif
@@ -315,7 +361,8 @@ bool MetricVisitor::VisitConditionalOperator(clang::ConditionalOperator *p_condO
     return true;
 }
 
-bool MetricVisitor::VisitDefaultStmt(clang::DefaultStmt *p_defaultSt) {
+bool MetricVisitor::VisitDefaultStmt(clang::DefaultStmt *p_defaultSt) 
+{
 	if( m_currentUnit )
 	{
 		m_currentUnit->increment( METRIC_TYPE_DEFAULT );
@@ -323,7 +370,8 @@ bool MetricVisitor::VisitDefaultStmt(clang::DefaultStmt *p_defaultSt) {
     return true;
 }
 
-bool MetricVisitor::VisitCaseStmt(clang::CaseStmt *p_caseSt) {
+bool MetricVisitor::VisitCaseStmt(clang::CaseStmt *p_caseSt) 
+{
 	if( m_currentUnit )
 	{
 		m_currentUnit->increment( METRIC_TYPE_CASE );
@@ -390,7 +438,8 @@ bool MetricVisitor::VisitArraySubscriptExpr (clang::ArraySubscriptExpr *p_subs)
 	return true;
 }
 
-bool MetricVisitor::VisitUnaryOperator(clang::UnaryOperator *p_uOp) {
+bool MetricVisitor::VisitUnaryOperator(clang::UnaryOperator *p_uOp) 
+{
 	if( m_currentUnit )
 	{
 		switch( p_uOp->getOpcode() )
@@ -445,7 +494,8 @@ bool MetricVisitor::VisitUnaryOperator(clang::UnaryOperator *p_uOp) {
     return true;
 }
 
-bool MetricVisitor::VisitBinaryOperator(clang::BinaryOperator *p_binOp) {
+bool MetricVisitor::VisitBinaryOperator(clang::BinaryOperator *p_binOp) 
+{
 	if( m_currentUnit )
 	{
 		switch( p_binOp->getOpcode() )
@@ -557,8 +607,8 @@ bool MetricVisitor::VisitBinaryOperator(clang::BinaryOperator *p_binOp) {
 }
 
 
-bool MetricVisitor::VisitStmt(clang::Stmt *p_statement) {
-
+bool MetricVisitor::VisitStmt(clang::Stmt *p_statement) 
+{
 	if( m_currentUnit )
 	{
 		m_currentUnit->increment( METRIC_TYPE_STATEMENTS );
@@ -567,7 +617,8 @@ bool MetricVisitor::VisitStmt(clang::Stmt *p_statement) {
 }
 
 
-bool MetricVisitor::VisitIfStmt(clang::IfStmt *p_ifSt) {
+bool MetricVisitor::VisitIfStmt(clang::IfStmt *p_ifSt) 
+{
 #if defined( DEBUG_FN_TRACE_OUTOUT )
 	std::cout << "VisitIfStmt : CONTEXT " << m_currentFileName << "::" << m_currentFunctionName << std::endl;
 #endif
@@ -598,34 +649,70 @@ void MetricVisitor::dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MA
 	m_topUnit->dump( out, p_output, p_fmt, m_options );
 }
 
-void MetricVisitor::LexTokens( void )
+bool MetricVisitor::TraverseStmt(clang::Stmt *p_stmt)
 {
-	clang::SourceManager& SM = m_astContext->getSourceManager();
-		
-   const llvm::MemoryBuffer *FromFile = SM.getBuffer(SM.getMainFileID());
-   clang::Lexer RawLex(SM.getMainFileID(), FromFile, SM, m_astContext->getLangOpts());
-  
-   clang::Token RawTok;
-   do {
-     RawLex.LexFromRawLexer(RawTok);
-     // If we have an identifier with no identifier info for our raw token, look
-     // up the indentifier info.  This is important for equality comparison of
-     // identifier tokens.
-     if (RawTok.is(tok::raw_identifier))
-	 {
-       m_compilerInstance.getPreprocessor().LookUpIdentifierInfo(RawTok);
-	 }
- 
-	 m_compilerInstance.getPreprocessor().DumpToken(RawTok);
-   } while (RawTok.isNot(tok::eof));
+	if( p_stmt )
+	{
+		clang::Stmt::StmtClass stmtKind = p_stmt->getStmtClass();
+
+		switch( stmtKind )
+		{
+			default:
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+				std::cout << "TraverseStmt - Unhandled stmt type " << stmtKind << "(" << p_stmt->getStmtClassName() <<  ")\r\n";
+#endif
+				break;
+		}
+	}
+
+	return clang::RecursiveASTVisitor<MetricVisitor>::TraverseStmt( p_stmt );
 }
 
 bool MetricVisitor::TraverseDecl(clang::Decl *p_decl)
 {
-	bool ret_val;
+	clang::Decl::Kind declKind = p_decl->getKind();
 
-	if( p_decl->getKind() == clang::Decl::TranslationUnit )
+	switch( declKind )
 	{
+		case clang::Decl::Kind::TranslationUnit:
+		case clang::Decl::Kind::AccessSpec:
+		case clang::Decl::Kind::Block:
+		case clang::Decl::Kind::Captured:
+		case clang::Decl::Kind::ClassScopeFunctionSpecialization:
+		case clang::Decl::Kind::ClassTemplate:
+		case clang::Decl::Kind::ClassTemplatePartialSpecialization:
+		case clang::Decl::Kind::CXXConstructor:
+		case clang::Decl::Kind::CXXConversion:
+		case clang::Decl::Kind::CXXDestructor:
+		case clang::Decl::Kind::CXXMethod:
+		case clang::Decl::Kind::CXXRecord:
+		case clang::Decl::Kind::Empty:
+		case clang::Decl::Kind::Enum:
+		case clang::Decl::Kind::EnumConstant:
+		case clang::Decl::Kind::Field:
+		case clang::Decl::Kind::FileScopeAsm:
+		/* TODO: first* ?? */
+		case clang::Decl::Kind::Friend:
+		case clang::Decl::Kind::FriendTemplate:
+		case clang::Decl::Kind::Function:
+		case clang::Decl::Kind::FunctionTemplate:
+		case clang::Decl::Kind::ImplicitParam:
+		case clang::Decl::Kind::Import:
+		case clang::Decl::Kind::IndirectField:
+		case clang::Decl::Kind::Label:
+		/* TODO: last* ?? */
+		/* TODO: the rest of the types */
+			break;
+		default:
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+			std::cout << "TraverseDecl - Unhandled decl type " << declKind << "(" << p_decl->getDeclKindName() << ")\r\n";
+#endif
+			break;
+	}
+
+	if( declKind == clang::Decl::TranslationUnit )
+	{
+
 		clang::SourceManager& SM = m_astContext->getSourceManager();
 
 		for( clang::SourceManager::fileinfo_iterator x = SM.fileinfo_begin() ;
@@ -637,30 +724,35 @@ bool MetricVisitor::TraverseDecl(clang::Decl *p_decl)
 			/* TODO: Cache not valid at this point, so NumLines not valid :-( */
 			std::cout << "   " << (*x).second->NumLines << std::endl;
 #endif
-			if( SHOULD_INCLUDE_FILE( m_options, name ))
+			if( ShouldIncludeFile( name ))
 			{
 				MetricUnit* fileUnit = m_topUnit->getSubUnit(name, METRIC_UNIT_FILE);
 				fileUnit->set( METRIC_TYPE_BYTE_COUNT, (*x).first->getSize() );
 			}
 		}
-
-
-
 	}
 	
-	ret_val = clang::RecursiveASTVisitor<MetricVisitor>::TraverseDecl( p_decl );
-	
-	if( p_decl->getKind() == clang::Decl::Function )
+	bool retVal = clang::RecursiveASTVisitor<MetricVisitor>::TraverseDecl( p_decl );
+
+	if( declKind == clang::Decl::TranslationUnit )
 	{
-		if( p_decl->hasBody() )
-		{
-			if( m_currentUnit )
-			{
-				m_currentUnit->set( METRIC_TYPE_DIFFERENT_FUNCTIONS_CALLED, m_fnsCalled.size() );
-			}
-		}
+		CloseOutFnOrMtd();
 	}
 
-	return ret_val;
+	return retVal;
 }
 
+bool MetricVisitor::ShouldIncludeFile( const std::string& p_file )
+{
+	bool ret_val = false;
+	if( SHOULD_INCLUDE_FILE( m_options, p_file ) )
+	{
+		MetricUnit* fileUnit = m_topUnit->getSubUnit(p_file, METRIC_UNIT_FILE);
+
+		if(! fileUnit->hasBeenProcessed() )
+		{
+			ret_val = true;
+		}
+	}
+	return ( ret_val );
+}

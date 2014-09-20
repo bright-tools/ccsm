@@ -37,14 +37,19 @@
 class MetricVisitor : public clang::RecursiveASTVisitor<MetricVisitor>
 {
 protected:
-	clang::CompilerInstance &m_compilerInstance;
-	clang::ASTContext *m_astContext;
-	MetricUnit*		  m_topUnit;
-	std::string       m_currentFileName;
-	std::string       m_currentFunctionName;
-	MetricUnit*       m_currentUnit;
-	MetricOptions*    m_options;
-	std::set<std::string> m_fnsCalled;          
+	clang::CompilerInstance& m_compilerInstance;
+	clang::ASTContext*		 m_astContext;
+	MetricUnit*		         m_topUnit;
+	std::string				 m_currentFileName;
+	std::string				 m_currentFunctionName;
+	MetricUnit*				 m_currentUnit;
+	MetricOptions*			 m_options;
+	std::set<std::string>	 m_fnsCalled;          
+
+	void HandleLoc( clang::SourceLocation& p_loc );
+	void DeclCommon( const clang::DeclContext* p_declCtxt, const clang::Decl* p_decl );
+	void MetricVisitor::CloseOutFnOrMtd( void );
+	bool ShouldIncludeFile( const std::string& p_file );
 
 public:
 	
@@ -71,14 +76,10 @@ public:
 	virtual bool VisitMemberExpr( clang::MemberExpr* p_memberExpr );
 	virtual bool VisitUnaryExprOrTypeTraitExpr( clang::UnaryExprOrTypeTraitExpr* p_unaryExpr );
 	virtual bool VisitTypedefDecl( clang::TypedefDecl* p_typeDef );
-	
-	void HandleLoc( clang::SourceLocation& p_loc );
-	void LexTokens();
-
 	virtual bool TraverseDecl(clang::Decl *p_decl);
+	virtual bool TraverseStmt(clang::Stmt *p_stmt);
 
 	void dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE );
-
 };
 
 #endif
