@@ -69,6 +69,12 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 		
 			m_currentUnit = fileUnit->getSubUnit(m_currentFunctionName, type);
 
+			/* Obtain the buffer for the function body, then count the lines */ 
+			const char * start = m_astContext->getSourceManager().getCharacterData( func->getBody()->getLocStart() );
+			const char * end = m_astContext->getSourceManager().getCharacterData( func->getBody()->getLocEnd() );
+			StringRef buffer( start, end-start );
+			m_currentUnit->set( METRIC_TYPE_FUNCTION_LINE_COUNT, countNewlines( buffer ) );
+
 			if( func->isInlineSpecified() )
 			{
 				fileUnit->increment( METRIC_TYPE_INLINE_FUNCTIONS );
