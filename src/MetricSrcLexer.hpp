@@ -38,6 +38,7 @@ class MetricSrcLexer
 		std::string       m_currentFileName;
 
 		void CountToken( clang::Token& p_token );
+		void CountLines( clang::StringRef& p_buffer );
 
 	public:
 		MetricSrcLexer(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit,MetricOptions* p_options = NULL);

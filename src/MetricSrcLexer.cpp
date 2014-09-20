@@ -63,6 +63,18 @@ void MetricSrcLexer::CountToken( clang::Token& p_token )
 	}
 }
 
+void MetricSrcLexer::CountLines( clang::StringRef& p_buffer )
+{
+	size_t pos = 0;
+	size_t cnt = 0;
+	while(( pos = p_buffer.find( '\n', pos )) && ( pos != p_buffer.npos))
+	{
+		cnt++;
+		pos++;
+	}
+	m_currentUnit->set( METRIC_TYPE_LINE_COUNT, cnt );
+}
+
 void MetricSrcLexer::LexSources( clang::SourceManager& p_sm )
 {
 	for( clang::SourceManager::fileinfo_iterator it = p_sm.fileinfo_begin();
@@ -85,6 +97,8 @@ void MetricSrcLexer::LexSources( clang::SourceManager& p_sm )
 		{
 			m_currentFileName = fileName;
 			m_currentUnit = m_topUnit->getSubUnit(fileName, METRIC_UNIT_FILE);
+
+			CountLines( Buffer );
 
 			// Create a lexer starting at the beginning of this token.
 			clang::Lexer TheLexer(p_sm.getLocForStartOfFile(fid), m_compilerInstance.getASTContext().getLangOpts(),
