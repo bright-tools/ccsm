@@ -25,6 +25,7 @@
 
 #include "MetricUnit.hpp"
 #include "MetricOptions.hpp"
+#include "MetricUtils.hpp"
 
 #include "clang/AST/RecursiveASTVisitor.h"
 #include "clang/Frontend/CompilerInstance.h"
@@ -45,6 +46,7 @@ protected:
 	MetricUnit*				 m_currentUnit;
 	MetricOptions*			 m_options;
 	std::set<std::string>	 m_fnsCalled;          
+	SrcStartToFunctionMap_t  m_fnMap;
 
 	void HandleLoc( clang::SourceLocation& p_loc );
 	void DeclCommon( const clang::DeclContext* p_declCtxt, const clang::Decl* p_decl );
@@ -78,6 +80,8 @@ public:
 	virtual bool VisitTypedefDecl( clang::TypedefDecl* p_typeDef );
 	virtual bool TraverseDecl(clang::Decl *p_decl);
 	virtual bool TraverseStmt(clang::Stmt *p_stmt);
+
+	const SrcStartToFunctionMap_t* getFunctionMap( void ) const;
 
 	void dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE );
 };

@@ -1,7 +1,12 @@
 Global
 Inline Functions: 2
+Number of 'inline' tokens: 2
 File: src\inline.c
 	Inline Functions: 2
+	Number of 'inline' tokens: 2
 	Function: example
+		Number of 'inline' tokens: 1
 	Function: example2
+		Number of 'inline' tokens: 1
 	Function: main
+		Number of 'inline' tokens: 0

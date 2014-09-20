@@ -35,7 +35,7 @@ void MetricASTConsumer::HandleTranslationUnit(clang::ASTContext &Context) {
 	/* we can use ASTContext to get the TranslationUnitDecl, which is
 		a single Decl that collectively represents the entire source file */
 	visitor->TraverseDecl(Context.getTranslationUnitDecl());
-	lexer->LexSources(SM);
+	lexer->LexSources(SM, visitor->getFunctionMap() );
 
 	/* Flag that all of the source files included in this AST tree have been processed.
 	   TODO: This breaks the "def file idiom", as the first time the file is include it will be flagged as having been processed.  

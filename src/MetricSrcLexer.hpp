@@ -24,6 +24,7 @@
 
 #include "MetricUnit.hpp"
 #include "MetricOptions.hpp"
+#include "MetricUtils.hpp"
 
 #include "clang/AST/RecursiveASTVisitor.h"
 #include "clang/Frontend/CompilerInstance.h"
@@ -38,12 +39,13 @@ class MetricSrcLexer
 		std::string       m_currentFileName;
 
 		void CountToken( clang::Token& p_token );
+		std::string FindFunction( clang::SourceManager& p_sm, clang::SourceLocation& p_loc, const SrcStartToFunctionMap_t* const p_fnMap );
 
 	public:
 		MetricSrcLexer(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit,MetricOptions* p_options = NULL);
 	    virtual ~MetricSrcLexer(void);
 
-		void LexSources( clang::SourceManager& p_sm );
+		void LexSources( clang::SourceManager& p_sm, const SrcStartToFunctionMap_t* const p_fnMap );
 };
 
 #endif     // !defined( METRIC_SRC_LEXER_HPP )

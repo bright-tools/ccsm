@@ -1,0 +1,10 @@
+Global
+File: src\fn_size.c
+	Function: func0
+		Function (body) size in lines: 0
+	Function: func1
+		Function (body) size in lines: 1
+	Function: func2
+		Function (body) size in lines: 1
+	Function: func3
+		Function (body) size in lines: 6

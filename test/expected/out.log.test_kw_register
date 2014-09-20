@@ -5,5 +5,7 @@ File: src\kw_register.c
 	Number of 'register' tokens: 3
 	Function: main
 		Function-scope register variable declarations: 2
+		Number of 'register' tokens: 2
 	Function: v
 		Function-scope register variable declarations: 1
+		Number of 'register' tokens: 1

@@ -1,0 +1,13 @@
+C:\Users\catalyst\Documents\coverage\GIT\ccsm\test\src\fn_size.c:1:25: warning: control reaches end of non-void function [-Wreturn-type]
+unsigned func0( void ) {}
+                        ^
+C:\Users\catalyst\Documents\coverage\GIT\ccsm\test\src\fn_size.c:4:1: warning: control reaches end of non-void function [-Wreturn-type]
+}
+^
+C:\Users\catalyst\Documents\coverage\GIT\ccsm\test\src\fn_size.c:8:1: warning: control reaches end of non-void function [-Wreturn-type]
+}
+^
+C:\Users\catalyst\Documents\coverage\GIT\ccsm\test\src\fn_size.c:17:1: warning: control reaches end of non-void function [-Wreturn-type]
+}
+^
+4 warnings generated.

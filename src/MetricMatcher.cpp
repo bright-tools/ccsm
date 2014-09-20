@@ -54,6 +54,9 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 		m_currentFileName = m_astContext->getSourceManager().getFilename( func->getLocation() ).str();
 		m_currentFunctionName = func->getQualifiedNameAsString();
 
+		LocationNamePair_t endNamePair( func->getLocEnd(), m_currentFunctionName );
+		m_fnMap[ func->getLocStart() ] = endNamePair;
+
 		if( ShouldIncludeFile( m_currentFileName ) && 
 			SHOULD_INCLUDE_FUNCTION( m_options, m_currentFunctionName ))
 		{
@@ -786,4 +789,9 @@ bool MetricVisitor::ShouldIncludeFile( const std::string& p_file )
 		}
 	}
 	return ( ret_val );
+}
+
+const SrcStartToFunctionMap_t* MetricVisitor::getFunctionMap( void ) const
+{
+	return &m_fnMap;
 }

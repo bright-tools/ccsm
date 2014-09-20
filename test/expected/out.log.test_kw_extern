@@ -18,7 +18,9 @@ File: src\kw_extern.c
 		Function-scope external variable declarations: 2
 		External (explicit) functions declarations: 1
 		External (implicit) functions declarations: 1
+		Number of 'extern' tokens: 3
 	Function: v
 		Function-scope external variable declarations: 2
 		External (explicit) functions declarations: 0
 		External (implicit) functions declarations: 0
+		Number of 'extern' tokens: 2

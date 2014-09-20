@@ -46,6 +46,8 @@ void MetricSrcLexer::CountToken( clang::Token& p_token )
 	tokenToTypeMap["virtual"] = METRIC_TYPE_TOKEN_VIRTUAL;
 	tokenToTypeMap["mutable"] = METRIC_TYPE_TOKEN_MUTABLE;
 
+	clang::SourceLocation tokenLocation = p_token.getLocation();
+
 	switch( p_token.getKind() )
 	{
 		case clang::tok::raw_identifier:
@@ -64,7 +66,28 @@ void MetricSrcLexer::CountToken( clang::Token& p_token )
 	}
 }
 
-void MetricSrcLexer::LexSources( clang::SourceManager& p_sm )
+std::string MetricSrcLexer::FindFunction( clang::SourceManager& p_sm, clang::SourceLocation& p_loc, const SrcStartToFunctionMap_t* const p_fnMap )
+{
+	std::string ret_val = "";
+	SrcStartToFunctionMap_t::const_iterator it = p_fnMap->begin();
+
+	while(( ret_val == "" ) && ( it != p_fnMap->end()))
+	{
+		if(( p_loc == (*it).first ) || 
+		   ( p_sm.isBeforeInTranslationUnit( (*it).first, p_loc ) &&
+			 p_sm.isBeforeInTranslationUnit( p_loc, (*it).second.first )))
+		{
+			ret_val = (*it).second.second;
+		}
+
+		it++;
+	}
+
+	return ret_val;
+}
+
+
+void MetricSrcLexer::LexSources( clang::SourceManager& p_sm, const SrcStartToFunctionMap_t* const p_fnMap )
 {
 	for( clang::SourceManager::fileinfo_iterator it = p_sm.fileinfo_begin();
 		it != p_sm.fileinfo_end();
@@ -97,10 +120,31 @@ void MetricSrcLexer::LexSources( clang::SourceManager& p_sm )
 		
 			do
 			{
+				bool shouldLexToken = true;
 
 				TheLexer.LexFromRawLexer(result);
 
-				CountToken( result );
+				m_currentUnit = m_topUnit->getSubUnit(fileName, METRIC_UNIT_FILE);
+
+				/* TODO: Could optimise this by not doing the function look-up for every single token, but 
+				   determining whether or not the token's position has exceeded the range of the current function */
+				std::string funcName = FindFunction( p_sm, result.getLocation(), p_fnMap );
+				if( funcName != "" ) 
+				{
+					if( SHOULD_INCLUDE_FUNCTION( m_options, funcName ))
+					{
+						m_currentUnit = m_currentUnit->getSubUnit(funcName, METRIC_UNIT_FUNCTION);
+					}
+					else
+					{
+						shouldLexToken = false;
+					}
+				}
+
+				if( shouldLexToken )
+				{
+					CountToken( result );
+				}
 
 			} while (result.isNot(clang::tok::eof));
 		}
