@@ -32,35 +32,41 @@ const std::string MetricUnit::m_dumpPrefix[ METRIC_UNIT_MAX ] = {
 };
 
 const std::string MetricUnit::m_metricShortNames[ METRIC_TYPE_MAX ] = {
-#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _description  ) _short_name ,
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _description  ) _short_name ,
 #include "metrics.def"
 #undef  METRIC
 };
 
 const std::string MetricUnit::m_metricNames[ METRIC_TYPE_MAX ] = {
-#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _description  ) _long_name ,
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _description  ) _long_name ,
+#include "metrics.def"
+#undef  METRIC
+};
+
+const bool MetricUnit::m_metricIsCumulative[ METRIC_TYPE_MAX ] = {
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _description  ) _cumulative ,
 #include "metrics.def"
 #undef  METRIC
 };
 
 const bool MetricUnit::m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ] = {
 	{
-#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _description  ) _applies_global ,
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _description  ) _applies_global ,
 #include "metrics.def"
 #undef  METRIC
 	},
 	{
-#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _description  ) _applies_file ,
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _description  ) _applies_file ,
 #include "metrics.def"
 #undef  METRIC
 	},
 	{
-#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _description  ) _applies_function ,
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _description  ) _applies_function ,
 #include "metrics.def"
 #undef  METRIC
 	},
 	{
-#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _description  ) _applies_method ,
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _description  ) _applies_method ,
 #include "metrics.def"
 #undef  METRIC
 	}
@@ -209,11 +215,14 @@ MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType ) 
 			break;
 		default:
 			ret_val  = m_counters[ p_metricType ];
-			for( SubUnitMap_t::const_iterator unitIt = m_subUnits.begin();
-				 unitIt != m_subUnits.end();
-				 ++unitIt )
+			if( m_metricIsCumulative[ p_metricType ] )
 			{
-				ret_val += (*unitIt).second->getCounter( p_metricType );
+				for( SubUnitMap_t::const_iterator unitIt = m_subUnits.begin();
+					 unitIt != m_subUnits.end();
+					 ++unitIt )
+				{
+					ret_val += (*unitIt).second->getCounter( p_metricType );
+				}
 			}
 			break;
 	}
@@ -339,4 +348,10 @@ bool MetricUnit::hasBeenProcessed( void ) const
 void MetricUnit::setProcessed( void )
 {
 	m_processed = true;
+}
+
+bool MetricUnit::isFnOrMethod( void ) const
+{
+	return(( m_type == METRIC_UNIT_FUNCTION ) ||
+		   ( m_type == METRIC_UNIT_METHOD ));
 }

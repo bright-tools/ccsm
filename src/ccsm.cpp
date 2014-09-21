@@ -62,6 +62,11 @@ static cl::list<std::string, std::vector<std::string>> ExcludeFiles(
 	cl::ZeroOrMore,
 	cl::location( ExcludeFileList ));
 
+static cl::opt<bool> DumpTokens(
+  "dump-tokens",
+  cl::desc("Dump tokens as they are lexed")
+);
+
 static cl::opt<bool> NoGlobal(
   "disable-global",
   cl::desc("Disable output of stats at the global level")
@@ -119,6 +124,8 @@ int main(int argc, const char **argv) {
   llvm::OwningPtr<CompilationDatabase> Compilations(
         FixedCompilationDatabase::loadFromCommandLine(argc, argv));
   cl::ParseCommandLineOptions(argc, argv);
+
+  options.setDumpTokens( DumpTokens );
 
   if (!Compilations) {  // Couldn't find a compilation DB from the command line
     std::string ErrorMessage;

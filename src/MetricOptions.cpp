@@ -17,7 +17,7 @@
 #include "MetricOptions.hpp"
 
 MetricOptions::MetricOptions( std::vector<std::string>* const p_excludeFiles, std::vector<std::string>* const p_excludeFunctions, std::vector<std::string>* const p_outputMetrics )
-	: ExcludeFiles( p_excludeFiles ), ExcludeFunctions( p_excludeFunctions ), OutputMetrics( p_outputMetrics )
+	: ExcludeFiles( p_excludeFiles ), ExcludeFunctions( p_excludeFunctions ), OutputMetrics( p_outputMetrics ), m_dumpTokens( false )
 {
 }
 
@@ -90,3 +90,12 @@ bool MetricOptions::ShouldIncludeMetric( const std::string& p_name ) const
 	return ret_val;
 }
 
+void MetricOptions::setDumpTokens( const bool p_dump )
+{
+	m_dumpTokens = p_dump;
+}
+
+bool MetricOptions::getDumpTokens( void ) const
+{
+	return m_dumpTokens;
+}

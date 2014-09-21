@@ -33,13 +33,21 @@ class MetricSrcLexer
 {
 	protected:
 		clang::CompilerInstance &m_compilerInstance;
-		MetricUnit*		  m_topUnit;
-		MetricOptions*    m_options;
-		MetricUnit*       m_currentUnit;
-		std::string       m_currentFileName;
+		MetricUnit*		        m_topUnit;
+		MetricOptions*          m_options;
+		MetricUnit*             m_currentUnit;
+		std::string             m_currentFileName;
+		std::set<std::string>   m_currentFnNumerics;
+		std::set<std::string>   m_currentFnStrings;
+		std::set<std::string>   m_currentFnIdentifiers;
+		std::string             m_currentFunctionName;
+
+		static const std::map<std::string,MetricType_e> m_tokenToTypeMap;
+		static const std::map<clang::tok::TokenKind,MetricType_e> m_tokenKindToTypeMap;
 
 		void CountToken( clang::Token& p_token );
 		std::string FindFunction( clang::SourceManager& p_sm, clang::SourceLocation& p_loc, const SrcStartToFunctionMap_t* const p_fnMap );
+		void CloseOutFnOrMtd( void );
 
 	public:
 		MetricSrcLexer(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit,MetricOptions* p_options = NULL);

@@ -31,6 +31,7 @@ protected:
 	std::vector<std::string>* ExcludeFiles;
 	std::vector<std::string>* ExcludeFunctions;
 	std::vector<std::string>* OutputMetrics;
+	bool m_dumpTokens;
 public:
 	MetricOptions( std::vector<std::string>* const p_excludeFiles = NULL, 
 		           std::vector<std::string>* const p_excludeFunctions = NULL,
@@ -39,6 +40,8 @@ public:
 	bool ShouldIncludeFile( const std::string& p_fn ) const;
 	bool ShouldIncludeFunction( const std::string& p_fn ) const;
 	bool ShouldIncludeMetric( const std::string& p_name ) const;
+	void setDumpTokens( const bool p_dump );
+	bool getDumpTokens( void ) const;
 };
 
 #define SHOULD_INCLUDE_FILE( _m, _f ) (((_m)==NULL) || ((_m)->ShouldIncludeFile( _f )))
