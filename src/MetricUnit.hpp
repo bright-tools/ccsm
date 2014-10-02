@@ -36,7 +36,7 @@ typedef enum
 
 typedef enum
 {
-#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _description  ) _enum ,
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _description  ) _enum ,
 #include "metrics.def"
 #undef  METRIC
 	METRIC_TYPE_MAX
@@ -63,6 +63,7 @@ private:
 	static const std::string m_metricNames[ METRIC_TYPE_MAX ];
 	static const std::string m_metricShortNames[ METRIC_TYPE_MAX ];
 	static const bool        m_metricIsCumulative[ METRIC_TYPE_MAX ];
+	static const bool        m_metricReportLocal[ METRIC_TYPE_MAX ];
 	static const bool        m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ];
 protected:
 	typedef std::map<std::string, MetricUnit*> SubUnitMap_t;
@@ -73,7 +74,10 @@ protected:
 	bool m_processed;
 
 public:
+	/* See also counter_t_Max */
 	typedef uint16_t counter_t;
+
+	static const uint16_t counter_t_Max;
 
 	MetricUnit( MetricUnit* const p_parent, const std::string& p_name, const MetricUnitType_e p_type );
 
@@ -81,8 +85,10 @@ public:
 	void set( const MetricType_e p_metricType, const MetricUnit::counter_t p_val );
 
 	void dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE, const MetricOptions* const p_options = NULL ) const;
+	void dumpMetric( std::ostream& out, const MetricType_e p_metric, const MetricDumpFormat_e p_fmt, const std::string& p_sep, const bool p_recurse ) const;
 
-	counter_t getCounter( const MetricType_e p_metricType ) const;
+
+	counter_t getCounter( const MetricType_e p_metricType, const bool p_recurse = false ) const;
 
 	MetricUnit* getSubUnit( const std::string& p_name, const MetricUnitType_e p_type );
 

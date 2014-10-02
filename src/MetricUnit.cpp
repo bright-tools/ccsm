@@ -16,6 +16,8 @@
 
 #include "MetricUnit.hpp"
 
+#include <iostream>
+
 #define IS_OUTPUT_TREE_FORM( _fmt ) (((_fmt) == METRIC_DUMP_FORMAT_TREE ) || ((_fmt) == METRIC_DUMP_FORMAT_SPARSE_TREE ))
 
 const std::string MetricUnit::m_namePrefix[ METRIC_UNIT_MAX ] = {
@@ -32,45 +34,55 @@ const std::string MetricUnit::m_dumpPrefix[ METRIC_UNIT_MAX ] = {
 };
 
 const std::string MetricUnit::m_metricShortNames[ METRIC_TYPE_MAX ] = {
-#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _description  ) _short_name ,
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _description  ) _short_name ,
 #include "metrics.def"
 #undef  METRIC
 };
 
 const std::string MetricUnit::m_metricNames[ METRIC_TYPE_MAX ] = {
-#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _description  ) _long_name ,
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _description  ) _long_name ,
 #include "metrics.def"
 #undef  METRIC
 };
 
 const bool MetricUnit::m_metricIsCumulative[ METRIC_TYPE_MAX ] = {
-#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _description  ) _cumulative ,
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _description  ) _cumulative ,
 #include "metrics.def"
 #undef  METRIC
 };
 
+const bool MetricUnit::m_metricReportLocal[ METRIC_TYPE_MAX ] = {
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _description  ) _report_local ,
+#include "metrics.def"
+#undef  METRIC
+};
+
+
 const bool MetricUnit::m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ] = {
 	{
-#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _description  ) _applies_global ,
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _description  ) _applies_global ,
 #include "metrics.def"
 #undef  METRIC
 	},
 	{
-#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _description  ) _applies_file ,
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _description  ) _applies_file ,
 #include "metrics.def"
 #undef  METRIC
 	},
 	{
-#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _description  ) _applies_function ,
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _description  ) _applies_function ,
 #include "metrics.def"
 #undef  METRIC
 	},
 	{
-#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _description  ) _applies_method ,
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _description  ) _applies_method ,
 #include "metrics.def"
 #undef  METRIC
 	}
 };
+
+const uint16_t MetricUnit::counter_t_Max = UINT16_MAX;
+
 
 MetricUnit::MetricUnit( MetricUnit* const p_parent, const std::string& p_name, const MetricUnitType_e p_type ) : 
 					m_name( p_name ), m_type( p_type ), m_parent( p_parent ), m_processed( false )
@@ -87,8 +99,20 @@ MetricUnit::MetricUnit( MetricUnit* const p_parent, const std::string& p_name, c
 
 void MetricUnit::increment( const MetricType_e p_metricType, const counter_t p_inc )
 {
-	/* TODO: Handle over-flow */
-	m_counters[ p_metricType ]+= p_inc;
+	/* Check for over-flow */
+	if(( counter_t_Max - p_inc ) > m_counters[ p_metricType ] )
+	{
+		m_counters[ p_metricType ]+= p_inc;
+	} 
+	else
+	{
+		/* Protect against spamming out the same message over and over again */
+		if( m_counters[ p_metricType ] != counter_t_Max )
+		{
+			std::cerr << "Warning: Overflow of metric '" << p_metricType << "' within " << m_name <<  std::endl;
+		}
+		m_counters[ p_metricType ] = counter_t_Max;
+	}
 }
 
 void MetricUnit::set( const MetricType_e p_metricType, const MetricUnit::counter_t p_val )
@@ -119,7 +143,7 @@ MetricUnit::counter_t MetricUnit::getSubUnitCount( const MetricUnitType_e p_type
 	return ret_val;
 }
 
-MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType ) const
+MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType, const bool p_recurse ) const
 {
 	counter_t ret_val = 0;
 
@@ -183,10 +207,11 @@ MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType ) 
 				      (getCounter(METRIC_TYPE_OPERATOR_SIZE_OF ) > 0) +
 				      (getCounter(METRIC_TYPE_OPERATOR_ALIGN_OF ) > 0) +
 				      (getCounter(METRIC_TYPE_OPERATOR_CAST ) > 0);
+
+			/* TODO: Add recurse option? */
 		break;
 		case METRIC_TYPE_MODIFIED_CYCLOMATIC:
-			if(( m_type == METRIC_UNIT_FUNCTION ) ||
-			   ( m_type == METRIC_UNIT_METHOD ))
+			if( isFnOrMethod() )
 			{
 				ret_val = getCounter( METRIC_TYPE_FORLOOP ) +
 						  getCounter( METRIC_TYPE_IF ) +
@@ -195,11 +220,11 @@ MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType ) 
 						  getCounter( METRIC_TYPE_OPERATOR_LOGICAL_AND ) +
 						  getCounter( METRIC_TYPE_OPERATOR_LOGICAL_OR ) +
 						  getCounter( METRIC_TYPE_OPERATOR_TERNARY ) + 1;
+			/* TODO: Add recurse option? */
 			}
 			break;
 		case METRIC_TYPE_CYCLOMATIC:
-			if(( m_type == METRIC_UNIT_FUNCTION ) ||
-			   ( m_type == METRIC_UNIT_METHOD ))
+			if( isFnOrMethod() )
 			{
 				// TODO: What about the 'DEFAULT'?
 				ret_val = getCounter( METRIC_TYPE_FORLOOP ) +
@@ -209,25 +234,40 @@ MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType ) 
 						  getCounter( METRIC_TYPE_OPERATOR_LOGICAL_AND ) +
 						  getCounter( METRIC_TYPE_OPERATOR_LOGICAL_OR ) +
 						  getCounter( METRIC_TYPE_OPERATOR_TERNARY ) + 1;
+			/* TODO: Add recurse option? */
 			}
 			break;
 		case METRIC_TYPE_VOCF:
 			break;
 		default:
 			ret_val  = m_counters[ p_metricType ];
-			if( m_metricIsCumulative[ p_metricType ] )
+			if( p_recurse )
 			{
 				for( SubUnitMap_t::const_iterator unitIt = m_subUnits.begin();
 					 unitIt != m_subUnits.end();
 					 ++unitIt )
 				{
-					ret_val += (*unitIt).second->getCounter( p_metricType );
+					ret_val += (*unitIt).second->getCounter( p_metricType, p_recurse );
 				}
 			}
 			break;
 	}
 
 	return ret_val;
+}
+
+void MetricUnit::dumpMetric( std::ostream& out, const MetricType_e p_metric, const MetricDumpFormat_e p_fmt, const std::string& p_sep, const bool p_recurse ) const
+{
+	counter_t val = getCounter( p_metric, p_recurse );
+
+	if(( p_fmt != METRIC_DUMP_FORMAT_SPARSE_TREE ) ||
+		( val != 0 )) 
+	{
+		if( IS_OUTPUT_TREE_FORM( p_fmt )) {
+			out << m_dumpPrefix[ m_type ] << m_metricNames[ p_metric ] << ": ";
+		} 
+		out << val << p_sep;
+	}
 }
 
 void MetricUnit::dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt, const MetricOptions* const p_options ) const
@@ -262,9 +302,18 @@ void MetricUnit::dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ]
 
 					 loop++ )
 				{
+					const bool localAndCumulativeOutputs = m_metricIsCumulative[ loop ] && m_metricReportLocal[ loop ];
+
 					if( SHOULD_INCLUDE_METRIC( p_options, m_metricShortNames[ loop ] ) )
 					{
-						out << m_metricNames[loop] << sep;
+						out << m_metricNames[loop];
+
+						if( localAndCumulativeOutputs )
+						{
+							out << "(local)" << sep << m_metricNames[loop] << "(cumulative)";
+						
+						}
+						out << sep;
 					}
 				}
 				out << std::endl;
@@ -282,22 +331,25 @@ void MetricUnit::dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ]
 			 loop < METRIC_TYPE_MAX;
 			 loop++ )
 		{
+			/* TODO: duped above */
+			const bool localAndCumulativeOutputs = m_metricIsCumulative[ loop ] && m_metricReportLocal[ loop ];
+
 			/* Filter out metrics which only apply at file/method level */
 			if( SHOULD_INCLUDE_METRIC( p_options, m_metricShortNames[ loop ] ) && m_metricApplies[ m_type ][ loop ])
 			{
-				counter_t val = getCounter((MetricType_e) loop );
-
-				if(( p_fmt != METRIC_DUMP_FORMAT_SPARSE_TREE ) ||
-				   ( val != 0 )) 
+				if( localAndCumulativeOutputs )
 				{
-					if( IS_OUTPUT_TREE_FORM( p_fmt )) {
-						out << m_dumpPrefix[ m_type ] << m_metricNames[loop] << ": ";
-					} 
-					out << val << sep;
+					dumpMetric( out, (MetricType_e) loop, p_fmt, sep, false );
 				}
-			} else if( !IS_OUTPUT_TREE_FORM( p_fmt ))
+				dumpMetric( out, (MetricType_e) loop, p_fmt, sep, m_metricIsCumulative[ loop ] );
+			} 
+			else if( !IS_OUTPUT_TREE_FORM( p_fmt ))
 			{
 				out << sep;
+				if( localAndCumulativeOutputs )
+				{
+					out << sep;
+				}
 			}
 		}
 
@@ -323,8 +375,7 @@ MetricUnit* MetricUnit::getSubUnit( const std::string& p_name, const MetricUnitT
 	{
 		ret_val = new MetricUnit( this, p_name, p_type );
 
-		if(( p_type == METRIC_UNIT_FUNCTION ) ||
-		   ( p_type == METRIC_UNIT_METHOD ))
+		if( isFnOrMethod() )
 		{
 			/* By default, every function/method has 1 return point */
 			ret_val->increment( METRIC_TYPE_RETURNPOINTS );
