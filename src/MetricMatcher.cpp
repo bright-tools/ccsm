@@ -151,9 +151,7 @@ void MetricVisitor::CloseOutFnOrMtd( void )
 		required counts */
 	if( m_currentUnit )
 	{
-		MetricUnitType_e unitType = m_currentUnit->GetType();
-		if(( unitType == METRIC_UNIT_FUNCTION ) ||
-			( unitType == METRIC_UNIT_METHOD ))
+		if( m_currentUnit->isFnOrMethod() )
 		{
 			m_currentUnit->set( METRIC_TYPE_DIFFERENT_FUNCTIONS_CALLED, m_fnsCalled.size() );
 			m_fnsCalled.clear();
