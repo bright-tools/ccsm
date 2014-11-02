@@ -183,6 +183,10 @@ void MetricSrcLexer::CountToken( clang::Token& p_token )
 					{
 						m_currentFnIdentifiers.insert( tok_data );
 					}
+					else
+					{
+						m_currentFileIdentifiers.insert( tok_data );
+					}
 					m_currentUnit->increment( METRIC_TYPE_TOKEN_UNRESERVED_IDENTIFIERS );
 				}
 			}
@@ -193,7 +197,23 @@ void MetricSrcLexer::CountToken( clang::Token& p_token )
 			{
 				m_currentFnNumerics.insert( tok_data );
 			}
+			else
+			{
+				m_currentFileNumerics.insert( tok_data );
+			}
 			m_currentUnit->increment( METRIC_TYPE_TOKEN_NUMERIC_CONSTANTS );
+			break;
+		case clang::tok::char_constant:
+			tok_data = clang::StringRef(p_token.getLiteralData(), tok_len).str();
+			if( m_currentUnit->isFnOrMethod() )
+			{
+				m_currentFnCharConsts.insert( tok_data );
+			}
+			else
+			{
+				m_currentFileCharConsts.insert( tok_data );
+			}
+			m_currentUnit->increment( METRIC_TYPE_TOKEN_CHAR_CONSTS );
 			break;
 		case clang::tok::string_literal:
 			tok_data = clang::StringRef(p_token.getLiteralData(), tok_len).str();
@@ -201,7 +221,14 @@ void MetricSrcLexer::CountToken( clang::Token& p_token )
 			{
 				m_currentFnStrings.insert( tok_data );
 			}
+			else
+			{
+				m_currentFileStrings.insert( tok_data );
+			}
 			m_currentUnit->increment( METRIC_TYPE_TOKEN_STRING_LITERALS );
+			break;
+		case clang::tok::eof:
+			/* Not interested in registering end-of-file */
 			break;
 		default:
 			{
@@ -257,21 +284,21 @@ void MetricSrcLexer::CloseOutFnOrMtd( void )
 	/* Have a current unit? */
 	if( m_currentUnit != NULL )
 	{
-		MetricUnitType_e type = m_currentUnit->GetType();
-		
 		/* Is it of the appropriate type? */
 		if( m_currentUnit->isFnOrMethod() )
 		{
 			/* Close off accumulated metrics */
 
 			m_currentUnit->set( METRIC_TYPE_TOKEN_NUMERIC_CONSTANTS_UNIQ, m_currentFnNumerics.size() );
-			m_currentFnNumerics.clear();
 			m_currentUnit->set( METRIC_TYPE_TOKEN_STRING_LITERALS_UNIQ, m_currentFnStrings.size() );
-			m_currentFnStrings.clear();
 			m_currentUnit->set( METRIC_TYPE_TOKEN_UNRESERVED_IDENTIFIERS_UNIQ, m_currentFnIdentifiers.size() );
-			m_currentFnIdentifiers.clear();
+			m_currentUnit->set( METRIC_TYPE_TOKEN_CHAR_CONSTS_UNIQ, m_currentFnCharConsts.size() );
 		}
 	}
+	m_currentFnNumerics.clear();
+	m_currentFnStrings.clear();
+	m_currentFnIdentifiers.clear();
+	m_currentFnCharConsts.clear();
 }
 
 void MetricSrcLexer::LexSources( clang::SourceManager& p_sm, const SrcStartToFunctionMap_t* const p_fnMap )
@@ -294,10 +321,17 @@ void MetricSrcLexer::LexSources( clang::SourceManager& p_sm, const SrcStartToFun
  
 		if( SHOULD_INCLUDE_FILE( m_options, fileName ))
 		{
-			m_currentFileName = fileName;
-			m_currentUnit = m_topUnit->getSubUnit(fileName, METRIC_UNIT_FILE);
+			MetricUnit* fileUnit = m_topUnit->getSubUnit(fileName, METRIC_UNIT_FILE);
 
-			m_currentUnit->set( METRIC_TYPE_LINE_COUNT, countNewlines( Buffer ) );
+			m_currentFileNumerics.clear();
+			m_currentFileStrings.clear();
+			m_currentFileCharConsts.clear();
+			m_currentFileIdentifiers.clear();
+
+			m_currentFileName = fileName;
+			m_currentUnit = fileUnit;
+
+			fileUnit->set( METRIC_TYPE_LINE_COUNT, countNewlines( Buffer ) );
 
 			// Create a lexer starting at the beginning of this token.
 			clang::Lexer TheLexer(p_sm.getLocForStartOfFile(fid), m_compilerInstance.getASTContext().getLangOpts(),
@@ -347,6 +381,11 @@ void MetricSrcLexer::LexSources( clang::SourceManager& p_sm, const SrcStartToFun
 			} while (result.isNot(clang::tok::eof));
 
 			CloseOutFnOrMtd();
+			fileUnit->set( METRIC_TYPE_TOKEN_NUMERIC_CONSTANTS_UNIQ, m_currentFileNumerics.size() );
+			fileUnit->set( METRIC_TYPE_TOKEN_STRING_LITERALS_UNIQ, m_currentFileStrings.size() );
+			fileUnit->set( METRIC_TYPE_TOKEN_UNRESERVED_IDENTIFIERS_UNIQ, m_currentFileIdentifiers.size() );
+			fileUnit->set( METRIC_TYPE_TOKEN_CHAR_CONSTS_UNIQ, m_currentFileCharConsts.size() );
+// TODO: Need to differentiate between "non-function" and "whole-file" level counts - e.g. unique numerical constants that aren't in functions and unique numerical constants across the whole file
 		}
 	} 
 }

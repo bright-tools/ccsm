@@ -39,7 +39,14 @@ class MetricSrcLexer
 		std::string             m_currentFileName;
 		std::set<std::string>   m_currentFnNumerics;
 		std::set<std::string>   m_currentFnStrings;
+		std::set<std::string>   m_currentFnCharConsts;
 		std::set<std::string>   m_currentFnIdentifiers;
+
+		std::set<std::string>   m_currentFileNumerics;
+		std::set<std::string>   m_currentFileStrings;
+		std::set<std::string>   m_currentFileCharConsts;
+		std::set<std::string>   m_currentFileIdentifiers;
+
 		std::string             m_currentFunctionName;
 
 		static const std::map<std::string,MetricType_e> m_tokenToTypeMap;
