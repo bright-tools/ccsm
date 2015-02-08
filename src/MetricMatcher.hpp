@@ -46,7 +46,7 @@ protected:
 	MetricUnit*				 m_currentUnit;
 	MetricOptions*			 m_options;
 	std::set<std::string>	 m_fnsCalled;          
-	SrcStartToFunctionMap_t  m_fnMap;
+	SrcStartToFunctionMap_t* m_fnMap;
 
 	void HandleLoc( clang::SourceLocation& p_loc );
 	void DeclCommon( const clang::DeclContext* p_declCtxt, const clang::Decl* p_decl );
@@ -55,7 +55,7 @@ protected:
 
 public:
 	
-	explicit MetricVisitor(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit,MetricOptions* p_options = NULL);
+	explicit MetricVisitor(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit,MetricOptions* p_options = NULL,SrcStartToFunctionMap_t* p_fnMap = NULL);
 	virtual ~MetricVisitor(void);
 	virtual bool VisitFunctionDecl(clang::FunctionDecl *func);
 	virtual bool VisitVarDecl(clang::VarDecl *p_varDec);
@@ -83,7 +83,9 @@ public:
 
 	const SrcStartToFunctionMap_t* getFunctionMap( void ) const;
 
+#if 0
 	void dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE );
+#endif
 };
 
 #endif

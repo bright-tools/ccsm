@@ -21,6 +21,16 @@
 
 #include <iostream>
 
+const MetricSrcLexer::SemiConlonContainers_e MetricSrcLexer::m_sccStartLineEnding = SCC_Define;
+const MetricSrcLexer::SemiConlonContainers_e MetricSrcLexer::m_sccEndLineEnding = SCC_Define;
+
+const MetricSrcLexer::SemiConlonContainers_e MetricSrcLexer::m_sccStartParen = SCC_For;
+const MetricSrcLexer::SemiConlonContainers_e MetricSrcLexer::m_sccEndParen = SCC_For;
+
+const MetricSrcLexer::SemiConlonContainers_e MetricSrcLexer::m_sccStartBrace = SCC_Struct;
+const MetricSrcLexer::SemiConlonContainers_e MetricSrcLexer::m_sccEndBrace = SCC_Union;
+
+
 const static std::pair<std::string,MetricType_e> tokenToTypeMapData[] = {
 	std::make_pair("bool", METRIC_TYPE_TOKEN_BOOL),
 	std::make_pair("char", METRIC_TYPE_TOKEN_CHAR),
@@ -110,6 +120,11 @@ const static std::pair<clang::tok::TokenKind,MetricType_e> tokenKindToTypeMapDat
 	std::make_pair(clang::tok::slash, METRIC_TYPE_TOKEN_SLASH),
 	std::make_pair(clang::tok::slashequal, METRIC_TYPE_TOKEN_SLASH_ASSIGN),
 	std::make_pair(clang::tok::colon, METRIC_TYPE_TOKEN_COLON),
+	std::make_pair(clang::tok::kw_inline, METRIC_TYPE_TOKEN_INLINE),
+	std::make_pair(clang::tok::kw_typedef, METRIC_TYPE_TOKEN_TYPEDEF),
+	std::make_pair(clang::tok::kw_auto, METRIC_TYPE_TOKEN_AUTO),
+	std::make_pair(clang::tok::kw_extern, METRIC_TYPE_TOKEN_EXTERN),
+	std::make_pair(clang::tok::kw_register, METRIC_TYPE_TOKEN_REGISTER),
 	std::make_pair(clang::tok::coloncolon, METRIC_TYPE_TOKEN_COLONCOLON),
 	std::make_pair(clang::tok::less, METRIC_TYPE_TOKEN_LESS),
 	std::make_pair(clang::tok::lessless, METRIC_TYPE_TOKEN_LESSLESS),
@@ -149,6 +164,98 @@ MetricSrcLexer::~MetricSrcLexer(void)
 {
 }
 
+void MetricSrcLexer::HandleSemiToken( clang::Token& p_token )
+{
+	bool inScc = false;
+	for( unsigned checkLoop = 0 ; checkLoop < SCC_MAX ; checkLoop++ )
+	{
+		if( m_semiContainerDepth[ checkLoop ] )
+		{
+			inScc = true;
+			break;
+		}
+	}
+	if( !inScc )
+	{
+		m_currentUnit->increment( METRIC_TYPE_HIS_STATEMENT );
+		if( m_options->getDumpTokens() )
+		{
+			std::cout << ",statement-delimiter";
+		}
+
+	}
+}
+
+void MetricSrcLexer::HandleBasicToken( clang::Token& p_token )
+{
+	const clang::tok::TokenKind tokenKind = p_token.getKind();
+	MetricSrcLexer::SemiConlonContainers_e start;
+	MetricSrcLexer::SemiConlonContainers_e end;
+	bool checkSccStart = false;
+	bool checkSccEnd = false;
+
+	std::map<clang::tok::TokenKind,MetricType_e>::const_iterator typeLookup = m_tokenKindToTypeMap.find( tokenKind );
+
+	if( typeLookup != m_tokenKindToTypeMap.end() )
+	{
+		m_currentUnit->increment( (*typeLookup).second );
+	}
+	else
+	{
+		/* TODO */
+	}
+
+	switch( tokenKind )
+	{
+		case clang::tok::l_brace:
+			checkSccStart = true;
+			start = m_sccStartBrace;
+			end = m_sccEndBrace;
+			break;
+		case clang::tok::l_paren:
+			checkSccStart = true;
+			start = m_sccStartParen;
+			end = m_sccEndParen;
+			break;
+		case clang::tok::r_brace:
+			checkSccEnd = true;
+			start = m_sccStartBrace;
+			end = m_sccEndBrace;
+			break;
+		case clang::tok::r_paren:
+			checkSccEnd = true;
+			start = m_sccStartParen;
+			end = m_sccEndParen;
+			break;
+		default:
+			break;
+	}
+
+	if( checkSccStart )
+	{
+		for( signed checkLoop = start ; checkLoop <= end; checkLoop++ )
+		{
+			if( m_semiContainerOpen[ checkLoop ] ||
+				m_semiContainerDepth[ checkLoop ] )
+			{
+				m_semiContainerDepth[ checkLoop ]++;
+				m_semiContainerOpen[ checkLoop ] = false;
+			}
+		}
+	}
+	else if( checkSccEnd )
+	{
+		for( signed checkLoop = start ; checkLoop <= end ; checkLoop++ )
+		{
+			if( m_semiContainerDepth[ checkLoop ] )
+			{
+				m_semiContainerDepth[ checkLoop ]--;
+			}
+		}
+	}
+
+}
+
 void MetricSrcLexer::CountToken( clang::Token& p_token )
 {		
 	std::string tok_data;
@@ -172,6 +279,23 @@ void MetricSrcLexer::CountToken( clang::Token& p_token )
 						std::cout << ",reserved";
 					}
 					m_currentUnit->increment( (*typeLookup).second );
+					if( tok_data == "for" )
+					{
+						m_semiContainerOpen[ SCC_For ] = true;
+					}
+					else if( tok_data == "struct" )
+					{
+						m_semiContainerOpen[ SCC_Struct ] = true;
+					}
+					else if( tok_data == "union" )
+					{
+						m_semiContainerOpen[ SCC_Union ] = true;
+					}
+					else if(( tok_data == "define" ) && 
+						    ( m_lastToken == clang::tok::hash ))
+					{
+						m_semiContainerOpen[ SCC_Define ] = true;
+					}
 				}
 				else
 				{
@@ -227,20 +351,15 @@ void MetricSrcLexer::CountToken( clang::Token& p_token )
 			}
 			m_currentUnit->increment( METRIC_TYPE_TOKEN_STRING_LITERALS );
 			break;
+		case clang::tok::semi:
+			HandleSemiToken( p_token );
+			break;
 		case clang::tok::eof:
 			/* Not interested in registering end-of-file */
 			break;
 		default:
 			{
-				std::map<clang::tok::TokenKind,MetricType_e>::const_iterator typeLookup = m_tokenKindToTypeMap.find( p_token.getKind() );
-				if( typeLookup != m_tokenKindToTypeMap.end() )
-				{
-					m_currentUnit->increment( (*typeLookup).second );
-				}
-				else
-				{
-					/* TODO */
-				}
+				HandleBasicToken( p_token );
 			}
 			break;
 	}
@@ -251,8 +370,12 @@ void MetricSrcLexer::CountToken( clang::Token& p_token )
 		{
 			std::cout << "," << tok_data;
 		}
+			std::cout << "," << (long)(p_token.getKind());
+			std::cout << "," << (long)(p_token.getFlags());
 		std::cout << ")";
 	}
+
+	m_lastToken = p_token.getKind();
 }
 
 std::string MetricSrcLexer::FindFunction( clang::SourceManager& p_sm, clang::SourceLocation& p_loc, const SrcStartToFunctionMap_t* const p_fnMap )
@@ -301,16 +424,75 @@ void MetricSrcLexer::CloseOutFnOrMtd( void )
 	m_currentFnCharConsts.clear();
 }
 
-void MetricSrcLexer::LexSources( clang::SourceManager& p_sm, const SrcStartToFunctionMap_t* const p_fnMap )
+void MetricSrcLexer::LexSources( clang::CompilerInstance& p_ci, const SrcStartToFunctionMap_t* const p_fnMap )
 {
-	for( clang::SourceManager::fileinfo_iterator it = p_sm.fileinfo_begin();
-		it != p_sm.fileinfo_end();
+	clang::Preprocessor &PP = p_ci.getPreprocessor();
+	clang::SourceManager &SM = p_ci.getSourceManager();
+
+	// Start preprocessing the specified input file.
+	clang::Token result;
+	PP.EnterMainSourceFile();
+	PP.SetMacroExpansionOnlyInDirectives();
+	PP.SetCommentRetentionState(true,true);
+
+	do {
+		bool shouldLexToken = true;
+
+		PP.Lex(result);
+
+		std::string fileName = SM.getFilename( result.getLocation() ).str();
+
+//		CloseOutFnOrMtd();
+		// TODO: Need to differentiate between "non-function" and "whole-file" level counts - e.g. 
+		//  unique numerical constants that aren't in functions and unique numerical constants across the whole file
+		if( SHOULD_INCLUDE_FILE( m_options, fileName ))
+		{
+			/* TODO: Could optimise this by not doing the function look-up for every single token, but 
+				determining whether or not the token's position has exceeded the range of the current function */
+			std::string funcName = FindFunction( SM, result.getLocation(), p_fnMap );
+			if( funcName != m_currentFunctionName )
+			{
+				if( m_options->getDumpTokens() )
+				{
+					std::cout << "[fn:" << funcName << "]";
+				}
+				CloseOutFnOrMtd();
+			}
+			if( funcName != "" ) 
+			{
+				if( SHOULD_INCLUDE_FUNCTION( m_options, funcName ))
+				{
+					m_currentUnit = m_topUnit->getSubUnit(fileName, METRIC_UNIT_FILE)->getSubUnit(funcName, METRIC_UNIT_FUNCTION);
+				}
+				else
+				{
+					shouldLexToken = false;
+				}
+			}
+			else
+			{
+				m_currentUnit = m_topUnit->getSubUnit(fileName, METRIC_UNIT_FILE);
+			}
+			m_currentFunctionName = funcName;
+
+			if( shouldLexToken )
+			{
+				CountToken( result );
+			}
+		}
+	} while (result.isNot(clang::tok::eof));
+
+	for( clang::SourceManager::fileinfo_iterator it = SM.fileinfo_begin();
+		it != SM.fileinfo_end();
 		it++ )
 	{
 		bool Invalid = false;
-		clang::FileID fid = p_sm.translateFile( it->first );
-		clang::StringRef Buffer = p_sm.getBufferData(fid, &Invalid);
+		clang::FileID fid = SM.translateFile( it->first );
+		clang::StringRef Buffer = SM.getBufferData(fid, &Invalid);
+#if 0
+		const llvm::MemoryBuffer* mb = p_sm.getMemoryBufferForFile(it->first, &Invalid);
 		clang::Token result;
+#endif
 		std::string fileName = it->first->getName();
 
 		if (Invalid)
@@ -322,6 +504,9 @@ void MetricSrcLexer::LexSources( clang::SourceManager& p_sm, const SrcStartToFun
 		if( SHOULD_INCLUDE_FILE( m_options, fileName ))
 		{
 			MetricUnit* fileUnit = m_topUnit->getSubUnit(fileName, METRIC_UNIT_FILE);
+			fileUnit->set( METRIC_TYPE_LINE_COUNT, countNewlines( Buffer ) );
+
+#if 0
 
 			m_currentFileNumerics.clear();
 			m_currentFileStrings.clear();
@@ -331,19 +516,62 @@ void MetricSrcLexer::LexSources( clang::SourceManager& p_sm, const SrcStartToFun
 			m_currentFileName = fileName;
 			m_currentUnit = fileUnit;
 
-			fileUnit->set( METRIC_TYPE_LINE_COUNT, countNewlines( Buffer ) );
+			for( unsigned initLoop = 0 ; initLoop < SCC_MAX ; initLoop++ )
+			{
+				m_semiContainerDepth[ initLoop ] = 0;
+				m_semiContainerOpen[ initLoop ] = false;
+			}
+
+
+			clang::Preprocessor& pp = m_compilerInstance.getPreprocessor();
+
+#if 0 
+			  Preprocessor(IntrusiveRefCntPtr<PreprocessorOptions> PPOpts,
+               DiagnosticsEngine &diags, LangOptions &opts,
+               const TargetInfo *target,
+               SourceManager &SM, HeaderSearch &Headers,
+               ModuleLoader &TheModuleLoader,
+               IdentifierInfoLookup *IILookup = 0,
+               bool OwnsHeaderSearch = false,
+               bool DelayInitialization = false,
+               bool IncrProcessing = false);
+			  clang::DiagnosticOptions diagnosticOptions;
+clang::TextDiagnosticPrinter *pTextDiagnosticPrinter =
+    new clang::TextDiagnosticPrinter(
+        llvm::outs(),
+        diagnosticOptions);
+llvm::IntrusiveRefCntPtr<clang::DiagnosticIDs> pDiagIDs;
+			  clang::DiagnosticsEngine *pDiagnosticsEngine =
+    new clang::DiagnosticsEngine(pDiagIDs, pTextDiagnosticPrinter);
+			  clang::Preprocessor new_pp(pDiagnosticsEngine,
+				  pp.getDiagnostics(),
+				  pp.getTargetInfo(),
+				  pp.getSourceManager(),
+				  pp.getHeaderSearchInfo(),
+				  pp.getModuleLoader() );
+#endif
 
 			// Create a lexer starting at the beginning of this token.
-			clang::Lexer TheLexer(p_sm.getLocForStartOfFile(fid), m_compilerInstance.getASTContext().getLangOpts(),
-						   Buffer.begin(), Buffer.begin(), Buffer.end());
+#if 0
+			  clang::Lexer TheLexer(fid, 
+				                  mb,
+								  pp);
+#endif
+			clang::Lexer TheLexer( p_sm.getLocForStartOfFile(fid),
+				                  m_compilerInstance.getASTContext().getLangOpts(),
+					         	  Buffer.begin(), 
+								  Buffer.begin(), 
+								  Buffer.end());
 
 			TheLexer.SetCommentRetentionState(true);
+			m_lastToken = clang::tok::eof;
 
 			do
 			{
 				bool shouldLexToken = true;
 
 				TheLexer.LexFromRawLexer(result);
+				//new_pp.Lex( result );
 
 				/* TODO: Could optimise this by not doing the function look-up for every single token, but 
 				   determining whether or not the token's position has exceeded the range of the current function */
@@ -373,10 +601,18 @@ void MetricSrcLexer::LexSources( clang::SourceManager& p_sm, const SrcStartToFun
 				}
 				m_currentFunctionName = funcName;
 
+				if(( result.getKind() == 0 ) || result.needsCleaning() )
+				{
+					std::string x = TheLexer.getSpelling( result, p_sm, m_compilerInstance.getASTContext().getLangOpts(), NULL );
+
+					std::cout << std::endl << x << "/" << x.length() << std::endl;
+				}
+
 				if( shouldLexToken )
 				{
 					CountToken( result );
 				}
+
 
 			} while (result.isNot(clang::tok::eof));
 
@@ -386,6 +622,7 @@ void MetricSrcLexer::LexSources( clang::SourceManager& p_sm, const SrcStartToFun
 			fileUnit->set( METRIC_TYPE_TOKEN_UNRESERVED_IDENTIFIERS_UNIQ, m_currentFileIdentifiers.size() );
 			fileUnit->set( METRIC_TYPE_TOKEN_CHAR_CONSTS_UNIQ, m_currentFileCharConsts.size() );
 // TODO: Need to differentiate between "non-function" and "whole-file" level counts - e.g. unique numerical constants that aren't in functions and unique numerical constants across the whole file
+#endif
 		}
 	} 
 }

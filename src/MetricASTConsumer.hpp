@@ -25,6 +25,7 @@
 #include "clang/AST/ASTConsumer.h"
 #include "clang/AST/ASTContext.h"
 #include "clang/Frontend/CompilerInstance.h"
+#include "clang/Frontend/FrontendActions.h"
 
 #include <ostream>
 #include <string>
@@ -38,18 +39,31 @@
 class MetricASTConsumer : public clang::ASTConsumer
 {
 protected:
-	MetricVisitor  *visitor;
-	MetricSrcLexer *lexer;
-	MetricUnit     *m_topUnit;
+	clang::CompilerInstance& m_compilerInstance;
+	MetricOptions            *m_options;
+	MetricUnit               *m_topUnit;
+	SrcStartToFunctionMap_t  *m_fnMap;
 
 public:
-	explicit MetricASTConsumer(clang::CompilerInstance &CI, MetricUnit* p_topUnit, MetricOptions* p_options = NULL);
+	explicit MetricASTConsumer(clang::CompilerInstance &CI, MetricUnit* p_topUnit, MetricOptions* p_options = NULL, SrcStartToFunctionMap_t*  m_fnMap = NULL);
 
 	virtual ~MetricASTConsumer(void);
 	virtual void HandleTranslationUnit(clang::ASTContext &Context);
-	void dump( std::ostream& out, 
-		       const bool p_output[ METRIC_UNIT_MAX ], 
-			   const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE );
 };
+
+class MetricPPConsumer : public clang::PreprocessorFrontendAction
+{
+protected:
+	MetricOptions            *m_options;
+	MetricUnit               *m_topUnit;
+	SrcStartToFunctionMap_t  *m_fnMap;
+
+public:
+	explicit MetricPPConsumer(MetricUnit* p_topUnit, MetricOptions* p_options = NULL, SrcStartToFunctionMap_t*  m_fnMap = NULL);
+
+	virtual ~MetricPPConsumer(void);
+	virtual void ExecuteAction();
+};
+
 
 #endif

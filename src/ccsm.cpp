@@ -17,12 +17,10 @@
 
 #include "MetricMatcher.hpp"
 #include "MetricOptions.hpp"
-#include "MetricASTConsumer.hpp"
-#include "MetricPPCustomer.hpp"
+#include "MetricFrontendActors.hpp"
 
 #include "clang/Tooling/Tooling.h"
 #include "clang/Basic/SourceManager.h"
-#include "clang/Frontend/FrontendActions.h"
 #include "clang/Tooling/CompilationDatabase.h"
 #include "clang/Frontend/CompilerInstance.h"
 #include "llvm/Support/CommandLine.h"
@@ -87,11 +85,16 @@ static cl::opt<bool> NoMethod(
   cl::desc("Disable output of stats at the method level")
 );
 
-static cl::opt<std::string> OutputFormat(
+static cl::opt<MetricDumpFormat_e> OutputFormat(
 	"output-format",
-	cl::desc("Format of output - choose from tree, sparsetree, csv or tsv"),
-	cl::value_desc("fmt-string"),
-	cl::init("tree")
+	cl::desc("Format of output"),
+	cl::values(
+     clEnumValN(METRIC_DUMP_FORMAT_TSV,         "tsv",        "Tab Seperated Values"),
+     clEnumValN(METRIC_DUMP_FORMAT_CSV,         "csv",        "Comma Separated Values"),
+     clEnumValN(METRIC_DUMP_FORMAT_SPARSE_TREE, "sparsetree", "Sparse Tree (zero value nodes omitted)"),
+     clEnumValN(METRIC_DUMP_FORMAT_TREE,        "tree",       "Tree Structure"),
+    clEnumValEnd),
+	cl::init(METRIC_DUMP_FORMAT_TREE)
 );
 
 std::vector<std::string> OutputMetricList;
@@ -103,86 +106,80 @@ static cl::list<std::string, std::vector<std::string>> OutputOnlyMetrics(
 	cl::ZeroOrMore,
 	cl::location( OutputMetricList ));
 
-MetricUnit topUnit( NULL, "Global", METRIC_UNIT_GLOBAL);
-MetricOptions options( &ExcludeFileList, &ExcludeFunctionList, &OutputMetricList );
-std::set<std::string> commentFileList;
-
-class MetricFrontendAction : public ASTFrontendAction {
-public:
-    virtual ASTConsumer *CreateASTConsumer(CompilerInstance &CI, StringRef file) {
-		// TODO: More elegant way of getting topUnit, options & commentFileList in.
-		MetricASTConsumer* ret_val = new MetricASTConsumer(CI,&topUnit,&options); // pass CI pointer to ASTConsumer
-		MetricPPCustomer* customer = new MetricPPCustomer( &topUnit, &commentFileList, &options );
-		CI.getPreprocessor().addCommentHandler(customer);
-		CI.getPreprocessor().addPPCallbacks(customer);
-		return ret_val;
-    }
-};
-
 int main(int argc, const char **argv) {
-  llvm::sys::PrintStackTraceOnErrorSignal();
-  llvm::OwningPtr<CompilationDatabase> Compilations(
-        FixedCompilationDatabase::loadFromCommandLine(argc, argv));
-  cl::ParseCommandLineOptions(argc, argv);
+	MetricUnit topUnit( NULL, "Global", METRIC_UNIT_GLOBAL);
+	MetricOptions options( &ExcludeFileList, &ExcludeFunctionList, &OutputMetricList );
+	std::set<std::string> commentFileList;
+	SrcStartToFunctionMap_t srcMap;
 
-  options.setDumpTokens( DumpTokens );
+	llvm::sys::PrintStackTraceOnErrorSignal();
+	llvm::OwningPtr<CompilationDatabase> Compilations(
+			FixedCompilationDatabase::loadFromCommandLine(argc, argv));
+	cl::ParseCommandLineOptions(argc, argv);
 
-  if (!Compilations) {  // Couldn't find a compilation DB from the command line
-    std::string ErrorMessage;
-    Compilations.reset(
-#if 0
-      !BuildPath.empty() ?
-        CompilationDatabase::autoDetectFromDirectory(BuildPath, ErrorMessage) :
-#endif
-        CompilationDatabase::autoDetectFromSource(SourcePaths[0], ErrorMessage)
-      );
+	options.setDumpTokens( DumpTokens );
 
-    //  Still no compilation DB? - bail.	
-    if (!Compilations)
-    {
-      llvm::report_fatal_error(ErrorMessage);
-    }
-  }
-  ClangTool Tool(*Compilations, SourcePaths);
+	if (!Compilations) {  // Couldn't find a compilation DB from the command line
+		std::string ErrorMessage;
+		Compilations.reset(
+	#if 0
+		  !BuildPath.empty() ?
+			CompilationDatabase::autoDetectFromDirectory(BuildPath, ErrorMessage) :
+	#endif
+			CompilationDatabase::autoDetectFromSource(SourcePaths[0], ErrorMessage)
+		  );
 
-  int Result = Tool.run(newFrontendActionFactory<MetricFrontendAction>());
+		//  Still no compilation DB? - bail.	
+		if (!Compilations)
+		{
+		    llvm::report_fatal_error(ErrorMessage);
+		}
+	}
 
+	ClangTool Tool(*Compilations, SourcePaths);
+  
+	// First tool-run to gather metrics from the AST.  This is done separately from the second tool-rum
+	// as different pre-processor options are used
+	int Result = Tool.run(newASTMetricFrontendActionFactory(&options, &topUnit, &srcMap, &commentFileList));
+
+	// Success?
 	if( Result == 0 )
 	{
-		bool output[ METRIC_UNIT_MAX ] = { 0, };
-		if( !NoMethod ) {
-			output[ METRIC_UNIT_METHOD ] = true;
-		}
-		if( !NoFunction ) {
-			output[ METRIC_UNIT_FUNCTION ] = true;
-		}
-		if( !NoFile ) {
-			output[ METRIC_UNIT_FILE ] = true;
-		}
-		if( !NoGlobal ) {
-			output[ METRIC_UNIT_GLOBAL ] = true;
-		}
-		MetricDumpFormat_e fmt;
-		// TODO: Case sensitivity?  Detect invalid option?
-		if( OutputFormat == "tsv" )
+		// Second tool run to gather metrics from the pre-processor.  This is performed after the AST
+		//  generation as the details of the function locations gathered from the AST are used
+		//  for determining whether or not a function should be included
+		Result = Tool.run(newPPMetricFrontendActionFactory(&options, &topUnit, &srcMap));
+
+		// Success?
+		if( Result == 0 )
 		{
-			fmt = METRIC_DUMP_FORMAT_TSV;
-		} else if( OutputFormat == "csv" )
-		{
-			fmt = METRIC_DUMP_FORMAT_CSV;
-		} else if( OutputFormat == "sparsetree" )
-		{
-			fmt = METRIC_DUMP_FORMAT_SPARSE_TREE;
-		} else
-		{
-			fmt = METRIC_DUMP_FORMAT_TREE;
+			// Time to dump the results
+
+			bool output[ METRIC_UNIT_MAX ] = { 0, };
+			if( !NoMethod ) {
+				output[ METRIC_UNIT_METHOD ] = true;
+			}
+			if( !NoFunction ) {
+				output[ METRIC_UNIT_FUNCTION ] = true;
+			}
+			if( !NoFile ) {
+				output[ METRIC_UNIT_FILE ] = true;
+			}
+			if( !NoGlobal ) {
+				output[ METRIC_UNIT_GLOBAL ] = true;
+			}
+
+			topUnit.dump( std::cout, output, OutputFormat, &options );
 		}
-		topUnit.dump( std::cout, output, fmt, &options );
+		else
+		{
+			std::cout << "Tool.run returned " << Result << std::endl;
+		}
 	}
 	else
 	{
 		std::cout << "Tool.run returned " << Result << std::endl;
 	}
 
-  return Result;
+	return Result;
 }

@@ -16,8 +16,8 @@
 
 #include "MetricPPCustomer.hpp"
 
-MetricPPCustomer::MetricPPCustomer( MetricUnit* p_topUnit, std::set<std::string>* p_commentFileList, MetricOptions* p_options ) 
-	: m_topUnit( p_topUnit ), m_commentFileList( p_commentFileList ), m_options( p_options), clang::PPCallbacks(), CommentHandler()
+MetricPPCustomer::MetricPPCustomer( MetricUnit* p_topUnit, std::set<std::string>* p_commentFileList, MetricOptions* p_options, SrcStartToFunctionMap_t*  p_fnMap ) 
+	: m_topUnit( p_topUnit ), m_commentFileList( p_commentFileList ), m_options( p_options), m_fnMap( p_fnMap ), clang::PPCallbacks(), CommentHandler()
 {
 }
 
@@ -30,10 +30,14 @@ bool MetricPPCustomer::HandleComment(clang::Preprocessor &PP, clang::SourceRange
     clang::SourceLocation Start = Loc.getBegin();
     clang::SourceManager &SM = PP.getSourceManager();
 	std::string fileName = SM.getFilename( Start ).str();
-#if 1
-	/* Excude comments not in the main file (e.g. header files), for now.  If we didn't do this we'd risk
-	   multiply counting header files which are included more than once.	*/
-	if(( fileName == m_commentFile ) ||
+
+	/* Excude comments that are not:
+	     - Not in the main file and
+		 - Not in the file we're currently processing and
+		 - Are in a file we've already processed comments for
+    */
+	if(( SM.getFileID( Start )  == SM.getMainFileID() ) ||
+		( fileName == m_commentFile ) ||
 		( m_commentFileList->find( fileName ) == m_commentFileList->end() ))
 	{
 		std::string C(SM.getCharacterData(Start),
@@ -53,8 +57,8 @@ bool MetricPPCustomer::HandleComment(clang::Preprocessor &PP, clang::SourceRange
 	{
 		m_commentFile = "";
 	}
-#endif
-    return false;
+
+	return false;
 }
 
 void MetricPPCustomer::InclusionDirective (clang::SourceLocation HashLoc, const clang::Token &IncludeTok, clang::StringRef FileName, bool IsAngled, clang::CharSourceRange FilenameRange, const clang::FileEntry *File, clang::StringRef SearchPath, clang::StringRef RelativePath, const clang::Module *Imported)

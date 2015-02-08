@@ -19,5 +19,6 @@ typedef int oi_t;
 
 int main( void )
 {
-    return 0;
+    if( ! 0 ) {}
+    return 'a';
 }

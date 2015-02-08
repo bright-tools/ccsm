@@ -15,8 +15,10 @@ set(SOURCES
   MetricPPCustomer.cpp
   MetricASTConsumer.hpp
   MetricASTConsumer.cpp
-  MetricSrcLexer.hpp
   MetricSrcLexer.cpp
+  MetricSrcLexer.hpp
+  MetricFrontendActors.hpp
+  MetricFrontendActors.cpp
 )
 
 add_clang_executable(ccsm ${SOURCES})

@@ -4,7 +4,7 @@ File: src\oper_sizeof.c
 	Sizeof operators: 3
 	Function: main
 		Sizeof operators: 3
-File: C:\Users\catalyst\Documents\coverage\build5\Debug\bin\..\lib\clang\3.5.0\include\stdint.h
+ clang\3.5.0\include\stdint.h
 	Sizeof operators: 0
 File: c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include/codeanalysis\sourceannotations.h
 	Sizeof operators: 0

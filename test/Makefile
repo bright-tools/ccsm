@@ -1,11 +1,11 @@
-PFX     = @
-TGT     = /cygdrive/C/Users/catalyst/Documents/coverage/build5/Debug/bin/ccsm.exe
+PFX     = 
+TGT     = /cygdrive/C/Users/catalyst/Documents/coverage/build6/Debug/bin/ccsm.exe
 LOG_OUT = out.log
 LOG_OUT_T = out.log.tmp
 LOG_ERR = err.log
 LOG_ERR_T = err.log.tmp
-PP_ERR  = sed -e 's/\s.*src/ src/;' > $(LOG_ERR)
-PP_OUT  = sed -e 's/\s.*src/ src/;' > $(LOG_OUT)
+PP_ERR  = sed -e 's/\s.*src/ src/;s/.*clang/ clang/;' > $(LOG_ERR)
+PP_OUT  = sed -e 's/\s.*src/ src/;s/.*clang/ clang/;' > $(LOG_OUT)
 OUT     = 2>$(LOG_ERR_T) 1>$(LOG_OUT_T) && cat $(LOG_ERR_T) | $(PP_ERR) && cat $(LOG_OUT_T) | $(PP_OUT)
 TGT_E   = $(PFX) $(TGT)
 DIFF_OPT= -c -b
@@ -160,7 +160,7 @@ test_fn_size: test_file_size
 test_comments: STEP=test_comments
 test_comments: test_fn_size
 	@echo Test $(STEP): Comments metric
-	$(TGT_E) $(EXCLUDE) src/comment.c --output-metrics=COMMENT* -- $(OUT)
+	$(TGT_E) $(EXCLUDE) src/comment.c src/comment2.c --output-metrics=COMMENT* -- $(OUT)
 	$(CHECK_E)
 
 .PHONY: test_include
@@ -175,4 +175,11 @@ test_two_include: STEP=test_two_include
 test_two_include: test_include
 	@echo Test $(STEP): Test of same header file included in 2 source files
 	$(TGT_E) $(EXCLUDE) src/simple_include.c src/second_include.c --output-metrics=VAR* -- $(OUT)
+	$(CHECK_E)
+
+.PHONY: test_single_file
+test_single_file: STEP=test_single_file
+test_single_file: test_two_include
+	@echo Test $(STEP): Test of FILE_CNT (single file)
+	$(TGT_E) $(EXCLUDE) src/empty.c --output-metrics=FILE_CNT -- $(OUT)
 	$(CHECK_E)

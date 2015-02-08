@@ -17,25 +17,27 @@
 #include "MetricASTConsumer.hpp"
 #include "clang/Basic/SourceManager.h"
 
-MetricASTConsumer::MetricASTConsumer(clang::CompilerInstance &CI, MetricUnit* p_topUnit, MetricOptions* p_options ) : visitor(new MetricVisitor(CI, p_topUnit, p_options)), 
-																													  lexer(new MetricSrcLexer(CI, p_topUnit, p_options)),
-																													  m_topUnit( p_topUnit )
+MetricASTConsumer::MetricASTConsumer(clang::CompilerInstance &CI, MetricUnit* p_topUnit, MetricOptions* p_options, SrcStartToFunctionMap_t*  p_fnMap ) :
+																													  m_compilerInstance( CI ),
+																													  m_options( p_options ),
+																													  m_topUnit( p_topUnit ),
+																													  m_fnMap( p_fnMap )
 { 
 }
 
 MetricASTConsumer::~MetricASTConsumer(void) 
 {
-};
+}
 
-#include <iostream>
-
-void MetricASTConsumer::HandleTranslationUnit(clang::ASTContext &Context) {
+void MetricASTConsumer::HandleTranslationUnit(clang::ASTContext &Context) 
+{
 	clang::SourceManager& SM = Context.getSourceManager();
+	clang::TranslationUnitDecl* translationUnitDecl = Context.getTranslationUnitDecl();
+	MetricVisitor* visitor = new MetricVisitor(m_compilerInstance, m_topUnit, m_options, m_fnMap ); 
 
 	/* we can use ASTContext to get the TranslationUnitDecl, which is
 		a single Decl that collectively represents the entire source file */
-	visitor->TraverseDecl(Context.getTranslationUnitDecl());
-	lexer->LexSources(SM, visitor->getFunctionMap() );
+	visitor->TraverseDecl( translationUnitDecl );
 
 	/* Flag that all of the source files included in this AST tree have been processed.
 	   TODO: This breaks the "def file idiom", as the first time the file is include it will be flagged as having been processed.  
@@ -45,12 +47,30 @@ void MetricASTConsumer::HandleTranslationUnit(clang::ASTContext &Context) {
 		 it++ )
 	{
 		std::string fileName = it->first->getName();
-		MetricUnit* fileUnit = m_topUnit->getSubUnit(fileName, METRIC_UNIT_FILE);
-		fileUnit->setProcessed();
+		if( SHOULD_INCLUDE_FILE( m_options, fileName ) )
+		{
+			MetricUnit* fileUnit = m_topUnit->getSubUnit(fileName, METRIC_UNIT_FILE);
+			fileUnit->setProcessed();
+		}
 	}
+
+	delete( visitor );
 }
 
-void MetricASTConsumer::dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt )
+MetricPPConsumer::MetricPPConsumer(MetricUnit* p_topUnit, MetricOptions* p_options, SrcStartToFunctionMap_t*  p_fnMap ) 
+	: m_options( p_options ),
+      m_topUnit( p_topUnit ),
+      m_fnMap( p_fnMap ),
+	  clang::PreprocessorFrontendAction()
+{ 
+}
+
+MetricPPConsumer::~MetricPPConsumer(void) 
 {
-	visitor->dump( out, p_output, p_fmt );
+}
+
+void MetricPPConsumer::ExecuteAction()
+{
+	MetricSrcLexer srcLexer( getCompilerInstance(), m_topUnit, m_options );
+	srcLexer.LexSources( getCompilerInstance(), m_fnMap );
 }

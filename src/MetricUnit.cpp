@@ -17,6 +17,7 @@
 #include "MetricUnit.hpp"
 
 #include <iostream>
+#include <iomanip>
 
 #define IS_OUTPUT_TREE_FORM( _fmt ) (((_fmt) == METRIC_DUMP_FORMAT_TREE ) || ((_fmt) == METRIC_DUMP_FORMAT_SPARSE_TREE ))
 
@@ -34,25 +35,31 @@ const std::string MetricUnit::m_dumpPrefix[ METRIC_UNIT_MAX ] = {
 };
 
 const std::string MetricUnit::m_metricShortNames[ METRIC_TYPE_MAX ] = {
-#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _description  ) _short_name ,
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _scaling, _description  ) _short_name ,
 #include "metrics.def"
 #undef  METRIC
 };
 
 const std::string MetricUnit::m_metricNames[ METRIC_TYPE_MAX ] = {
-#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _description  ) _long_name ,
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _scaling, _description  ) _long_name ,
 #include "metrics.def"
 #undef  METRIC
 };
 
 const bool MetricUnit::m_metricIsCumulative[ METRIC_TYPE_MAX ] = {
-#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _description  ) _cumulative ,
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _scaling, _description  ) _cumulative ,
 #include "metrics.def"
 #undef  METRIC
 };
 
 const bool MetricUnit::m_metricReportLocal[ METRIC_TYPE_MAX ] = {
-#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _description  ) _report_local ,
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _scaling, _description  ) _report_local ,
+#include "metrics.def"
+#undef  METRIC
+};
+
+const uint32_t MetricUnit::m_metricScaling[ METRIC_TYPE_MAX ] = {
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _scaling, _description  ) _scaling ,
 #include "metrics.def"
 #undef  METRIC
 };
@@ -60,22 +67,22 @@ const bool MetricUnit::m_metricReportLocal[ METRIC_TYPE_MAX ] = {
 
 const bool MetricUnit::m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ] = {
 	{
-#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _description  ) _applies_global ,
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _scaling, _description  ) _applies_global ,
 #include "metrics.def"
 #undef  METRIC
 	},
 	{
-#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _description  ) _applies_file ,
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _scaling, _description  ) _applies_file ,
 #include "metrics.def"
 #undef  METRIC
 	},
 	{
-#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _description  ) _applies_function ,
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _scaling, _description  ) _applies_function ,
 #include "metrics.def"
 #undef  METRIC
 	},
 	{
-#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _description  ) _applies_method ,
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _scaling, _description  ) _applies_method ,
 #include "metrics.def"
 #undef  METRIC
 	}
@@ -151,90 +158,89 @@ MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType, c
 	{
 	    case METRIC_TYPE_OPERATOR_TYPES:
 			/* TODO: This doesn't deal with C++ only operators */
-			ret_val = (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_ASSIGN) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_ADDITION) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_SUBTRACTION) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_UNARY_PLUS) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_UNARY_MINUS) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_MULTIPLICATION) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_DIVISION) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_MODULO) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_INCREMENT_PRE ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_INCREMENT_POST ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_DECREMENT_PRE ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_DECREMENT_POST ) > 0) +
+			ret_val = (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_ASSIGN, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_ADDITION, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_SUBTRACTION, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_UNARY_PLUS, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_UNARY_MINUS, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_MULTIPLICATION, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_DIVISION, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_MODULO, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_INCREMENT_PRE, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_INCREMENT_POST, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_DECREMENT_PRE, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_DECREMENT_POST, p_recurse ) > 0) +
 
-				      (getCounter(METRIC_TYPE_OPERATOR_COMP_EQUAL) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_COMP_NOT_EQUAL) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_COMP_GREATER_THAN) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_COMP_LESS_THAN) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_COMP_GREATER_THAN_EQUAL) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_COMP_LESS_THAN_EQUAL) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_COMP_EQUAL, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_COMP_NOT_EQUAL, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_COMP_GREATER_THAN, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_COMP_LESS_THAN, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_COMP_GREATER_THAN_EQUAL, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_COMP_LESS_THAN_EQUAL, p_recurse ) > 0) +
 
-					  (getCounter(METRIC_TYPE_OPERATOR_LOGICAL_NOT) > 0) +
-					  (getCounter(METRIC_TYPE_OPERATOR_LOGICAL_AND) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_LOGICAL_OR) > 0) +
+					  (getCounter(METRIC_TYPE_OPERATOR_LOGICAL_NOT, p_recurse ) > 0) +
+					  (getCounter(METRIC_TYPE_OPERATOR_LOGICAL_AND, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_LOGICAL_OR, p_recurse ) > 0) +
 
-					  (getCounter(METRIC_TYPE_OPERATOR_BITWISE_NOT) > 0) +
-					  (getCounter(METRIC_TYPE_OPERATOR_BITWISE_AND) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_BITWISE_OR) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_BITWISE_XOR) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_SHIFT_LEFT) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_SHIFT_RIGHT) > 0) +
+					  (getCounter(METRIC_TYPE_OPERATOR_BITWISE_NOT, p_recurse ) > 0) +
+					  (getCounter(METRIC_TYPE_OPERATOR_BITWISE_AND, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_BITWISE_OR, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_BITWISE_XOR, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_SHIFT_LEFT, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_SHIFT_RIGHT, p_recurse ) > 0) +
 
-					  (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_ADDITION_ASSIGN) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_SUBTRACTION_ASSIGN) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_MULTIPLICATION_ASSIGN) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_DIVISION_ASSIGN) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_MODULO_ASSIGN) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_BITWISE_AND_ASSIGN) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_BITWISE_OR_ASSIGN) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_BITWISE_XOR_ASSIGN) > 0) +
-					  (getCounter(METRIC_TYPE_OPERATOR_SHIFT_LEFT_ASSIGN) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_SHIFT_RIGHT_ASSIGN) > 0) +
+					  (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_ADDITION_ASSIGN, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_SUBTRACTION_ASSIGN, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_MULTIPLICATION_ASSIGN, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_DIVISION_ASSIGN, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_MODULO_ASSIGN, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_BITWISE_AND_ASSIGN, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_BITWISE_OR_ASSIGN, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_BITWISE_XOR_ASSIGN, p_recurse ) > 0) +
+					  (getCounter(METRIC_TYPE_OPERATOR_SHIFT_LEFT_ASSIGN, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_SHIFT_RIGHT_ASSIGN, p_recurse ) > 0) +
 
-				      (getCounter(METRIC_TYPE_OPERATOR_ARRAY_SUBSCRIPT) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_DEREFERENCE) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_ADDRESS_OF) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_MEMBER_ACCESS_POINTER) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_MEMBER_ACCESS_DIRECT) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_PTR_TO_MEMBER_INDIRECT) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_PTR_TO_MEMBER_DIRECT) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_ARRAY_SUBSCRIPT, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_DEREFERENCE, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_ADDRESS_OF, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_MEMBER_ACCESS_POINTER, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_MEMBER_ACCESS_DIRECT, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_PTR_TO_MEMBER_INDIRECT, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_PTR_TO_MEMBER_DIRECT, p_recurse ) > 0) +
 
-					  (getCounter(METRIC_TYPE_FUNCTION_CALLS ) > 0) +
-					  (getCounter(METRIC_TYPE_OPERATOR_COMMA) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_TERNARY ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_SIZE_OF ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_ALIGN_OF ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_CAST ) > 0);
-
-			/* TODO: Add recurse option? */
+					  (getCounter(METRIC_TYPE_FUNCTION_CALLS, p_recurse ) > 0) +
+					  (getCounter(METRIC_TYPE_OPERATOR_COMMA, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_TERNARY, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_SIZE_OF, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_ALIGN_OF, p_recurse ) > 0) +
+				      (getCounter(METRIC_TYPE_OPERATOR_CAST, p_recurse ) > 0);
 		break;
+		case METRIC_TYPE_HIS_COMMENT_DENSITY:
+
+			break;
 		case METRIC_TYPE_MODIFIED_CYCLOMATIC:
 			if( isFnOrMethod() )
 			{
-				ret_val = getCounter( METRIC_TYPE_FORLOOP ) +
-						  getCounter( METRIC_TYPE_IF ) +
-						  getCounter( METRIC_TYPE_WHILELOOP ) +
-						  getCounter( METRIC_TYPE_SWITCH ) +
-						  getCounter( METRIC_TYPE_OPERATOR_LOGICAL_AND ) +
-						  getCounter( METRIC_TYPE_OPERATOR_LOGICAL_OR ) +
-						  getCounter( METRIC_TYPE_OPERATOR_TERNARY ) + 1;
-			/* TODO: Add recurse option? */
+				ret_val = getCounter( METRIC_TYPE_FORLOOP, p_recurse ) +
+						  getCounter( METRIC_TYPE_IF, p_recurse ) +
+						  getCounter( METRIC_TYPE_WHILELOOP, p_recurse ) +
+						  getCounter( METRIC_TYPE_SWITCH, p_recurse ) +
+						  getCounter( METRIC_TYPE_OPERATOR_LOGICAL_AND, p_recurse ) +
+						  getCounter( METRIC_TYPE_OPERATOR_LOGICAL_OR, p_recurse ) +
+						  getCounter( METRIC_TYPE_OPERATOR_TERNARY, p_recurse ) + 1;
 			}
 			break;
 		case METRIC_TYPE_CYCLOMATIC:
 			if( isFnOrMethod() )
 			{
 				// TODO: What about the 'DEFAULT'?
-				ret_val = getCounter( METRIC_TYPE_FORLOOP ) +
-						  getCounter( METRIC_TYPE_IF ) +
-						  getCounter( METRIC_TYPE_WHILELOOP ) +
-						  getCounter( METRIC_TYPE_CASE ) +
-						  getCounter( METRIC_TYPE_OPERATOR_LOGICAL_AND ) +
-						  getCounter( METRIC_TYPE_OPERATOR_LOGICAL_OR ) +
-						  getCounter( METRIC_TYPE_OPERATOR_TERNARY ) + 1;
-			/* TODO: Add recurse option? */
+				ret_val = getCounter( METRIC_TYPE_FORLOOP, p_recurse ) +
+						  getCounter( METRIC_TYPE_IF, p_recurse ) +
+						  getCounter( METRIC_TYPE_WHILELOOP, p_recurse ) +
+						  getCounter( METRIC_TYPE_CASE, p_recurse ) +
+						  getCounter( METRIC_TYPE_OPERATOR_LOGICAL_AND, p_recurse ) +
+						  getCounter( METRIC_TYPE_OPERATOR_LOGICAL_OR, p_recurse ) +
+						  getCounter( METRIC_TYPE_OPERATOR_TERNARY, p_recurse ) + 1;
 			}
 			break;
 		case METRIC_TYPE_VOCF:
@@ -266,7 +272,14 @@ void MetricUnit::dumpMetric( std::ostream& out, const MetricType_e p_metric, con
 		if( IS_OUTPUT_TREE_FORM( p_fmt )) {
 			out << m_dumpPrefix[ m_type ] << m_metricNames[ p_metric ] << ": ";
 		} 
-		out << val << p_sep;
+		if( m_metricScaling[ p_metric ] == 1 )
+		{
+			out << val << p_sep;
+		}
+		else
+		{
+			out << std::setprecision(6) << ((float)(val)) / m_metricScaling[ p_metric ] << p_sep;
+		}
 	}
 }
 

@@ -27,11 +27,13 @@ using namespace std;
 
 //#define DEBUG_FN_TRACE_OUTOUT 1
 
-MetricVisitor::MetricVisitor(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, MetricOptions* p_options) : m_compilerInstance(p_CI), 
+MetricVisitor::MetricVisitor(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, MetricOptions* p_options, SrcStartToFunctionMap_t* p_fnMap) : 
+	                                                                                                           m_compilerInstance(p_CI), 
 																											   m_astContext(&(p_CI.getASTContext())),
 	                                                                                                           m_topUnit( p_topUnit ), 
 	                                                                                                           m_currentUnit( NULL ), 
-																											   m_options( p_options )
+																											   m_options( p_options ),
+																											   m_fnMap( p_fnMap )
 {
 }
 
@@ -55,7 +57,10 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 		m_currentFunctionName = func->getQualifiedNameAsString();
 
 		LocationNamePair_t endNamePair( func->getLocEnd(), m_currentFunctionName );
-		m_fnMap[ func->getLocStart() ] = endNamePair;
+		if( m_fnMap != NULL )
+		{
+			(*m_fnMap)[ func->getLocStart() ] = endNamePair;
+		}
 
 		if( ShouldIncludeFile( m_currentFileName ) && 
 			SHOULD_INCLUDE_FUNCTION( m_options, m_currentFunctionName ))
@@ -676,10 +681,12 @@ bool MetricVisitor::VisitIfStmt(clang::IfStmt *p_ifSt)
     return true;
 }
 
+#if 0
 void MetricVisitor::dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt )
 {
 	m_topUnit->dump( out, p_output, p_fmt, m_options );
 }
+#endif
 
 bool MetricVisitor::TraverseStmt(clang::Stmt *p_stmt)
 {
@@ -791,5 +798,5 @@ bool MetricVisitor::ShouldIncludeFile( const std::string& p_file )
 
 const SrcStartToFunctionMap_t* MetricVisitor::getFunctionMap( void ) const
 {
-	return &m_fnMap;
+	return m_fnMap;
 }

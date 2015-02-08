@@ -36,7 +36,7 @@ typedef enum
 
 typedef enum
 {
-#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _description  ) _enum ,
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _scaling, _description  ) _enum ,
 #include "metrics.def"
 #undef  METRIC
 	METRIC_TYPE_MAX
@@ -64,6 +64,7 @@ private:
 	static const std::string m_metricShortNames[ METRIC_TYPE_MAX ];
 	static const bool        m_metricIsCumulative[ METRIC_TYPE_MAX ];
 	static const bool        m_metricReportLocal[ METRIC_TYPE_MAX ];
+	static const uint32_t    m_metricScaling[ METRIC_TYPE_MAX ];
 	static const bool        m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ];
 protected:
 	typedef std::map<std::string, MetricUnit*> SubUnitMap_t;

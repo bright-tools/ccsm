@@ -29,9 +29,29 @@
 #include "clang/AST/RecursiveASTVisitor.h"
 #include "clang/Frontend/CompilerInstance.h"
 
+#include <cstdint>
+
 class MetricSrcLexer
 {
 	protected:
+		typedef enum {
+			SCC_Define,
+			SCC_For,
+			SCC_Struct,
+			SCC_Union,
+			SCC_MAX
+		} SemiConlonContainers_e;
+
+		static const SemiConlonContainers_e m_sccStartLineEnding;
+		static const SemiConlonContainers_e m_sccEndLineEnding;
+
+		static const SemiConlonContainers_e m_sccStartParen;
+		static const SemiConlonContainers_e m_sccEndParen;
+
+		static const SemiConlonContainers_e m_sccStartBrace;
+		static const SemiConlonContainers_e m_sccEndBrace;
+
+		clang::tok::TokenKind   m_lastToken;
 		clang::CompilerInstance &m_compilerInstance;
 		MetricUnit*		        m_topUnit;
 		MetricOptions*          m_options;
@@ -48,6 +68,8 @@ class MetricSrcLexer
 		std::set<std::string>   m_currentFileIdentifiers;
 
 		std::string             m_currentFunctionName;
+		uint32_t				m_semiContainerDepth[ SCC_MAX ];
+		bool				    m_semiContainerOpen[ SCC_MAX ];
 
 		static const std::map<std::string,MetricType_e> m_tokenToTypeMap;
 		static const std::map<clang::tok::TokenKind,MetricType_e> m_tokenKindToTypeMap;
@@ -55,12 +77,15 @@ class MetricSrcLexer
 		void CountToken( clang::Token& p_token );
 		std::string FindFunction( clang::SourceManager& p_sm, clang::SourceLocation& p_loc, const SrcStartToFunctionMap_t* const p_fnMap );
 		void CloseOutFnOrMtd( void );
+		void HandleBasicToken( clang::Token& p_token );
+		void HandleSemiToken( clang::Token& p_token );
+
 
 	public:
-		MetricSrcLexer(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit,MetricOptions* p_options = NULL);
+		MetricSrcLexer(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, MetricOptions* p_options = NULL);
 	    virtual ~MetricSrcLexer(void);
 
-		void LexSources( clang::SourceManager& p_sm, const SrcStartToFunctionMap_t* const p_fnMap );
+		void LexSources( clang::CompilerInstance& p_ci, const SrcStartToFunctionMap_t* const p_fnMap );
 };
 
 #endif     // !defined( METRIC_SRC_LEXER_HPP )

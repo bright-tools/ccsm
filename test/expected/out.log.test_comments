@@ -1,9 +1,18 @@
 Global
-Comments in bytes: 119
-Comment Count: 5
+Comments in bytes: 695
+Comment Count: 17
 File: src/comment.h
-	Comments in bytes: 35
-	Comment Count: 2
-File: src\comment.c
-	Comments in bytes: 84
+	Comments in bytes: 80
 	Comment Count: 3
+File: src/comment_excluded.h
+	Comments in bytes: 85
+	Comment Count: 2
+File: src/comment_free.h
+	Comments in bytes: 0
+	Comment Count: 0
+File: src\comment.c
+	Comments in bytes: 215
+	Comment Count: 5
+File: src\comment2.c
+	Comments in bytes: 315
+	Comment Count: 7
