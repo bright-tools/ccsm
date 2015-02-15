@@ -1,0 +1,16 @@
+Global
+Functions: 6
+File: src/fn_call.h
+	Functions: 1
+	Function: header_function
+File: src/fn_call2.h
+	Functions: 1
+	Function: header_function2
+File: src\fn_call.c
+	Functions: 2
+	Function: j
+	Function: k
+File: src\fn_call2.c
+	Functions: 2
+	Function: j
+	Function: secondary_function

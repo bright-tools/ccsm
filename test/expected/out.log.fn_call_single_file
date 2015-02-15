@@ -9,8 +9,3 @@ File: src\fn_call.c
 		Number of other functions calling this function: 0
 		Function Calls: 3
 		No. different functions called: 1
-File: src\fn_call2.c
-	Function: secondary_function
-		Number of other functions calling this function: 0
-		Function Calls: 0
-		No. different functions called: 0

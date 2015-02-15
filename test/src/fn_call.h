@@ -3,4 +3,9 @@
 
 extern void secondary_function( void );
 
+void header_function( void )
+{
+    secondary_function();
+}
+
 #endif

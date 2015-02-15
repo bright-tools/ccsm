@@ -1,5 +1,5 @@
-PFX     = @
-TGT     = ../../../llvm-build/Debug/bin/ccsm.exe
+PFX     = 
+TGT     = ../../../build6/Debug/bin/ccsm.exe
 LOG_OUT = out.log
 LOG_OUT_T = out.log.tmp
 LOG_ERR = err.log
@@ -16,7 +16,7 @@ CHECK_E = $(PFX) diff $(DIFF_OPT) $(PASS_LOG) out.log && diff $(DIFF_OPT) $(PASS
 EXCLUDE = --exclude-function=dummy,dummy2
 
 .PHONY: all
-all: test_oper_array_subscript test_oper_deref test_oper_reference
+all:
 	@echo -e \\nAll tests done \(use 'all_force' target to force a retest\)
 
 .PHONY: retouch_tgt
@@ -56,29 +56,7 @@ test3: test2
 	$(TGT_E) src/1.c src/2.cpp -- $(OUT)
 	$(CHECK_E)
 
-.PHONY: test_oper_array_subscript
-test_oper_array_subscript: STEP=test_oper_array_subscript
-test_oper_array_subscript: $(PASS)/out.log.test_oper_array_subscript $(PASS)/err.log.test_oper_array_subscript
-$(PASS)/out.log.test_oper_array_subscript $(PASS)/err.log.test_oper_array_subscript: src/oper_array_subscript.c $(TGT) 
-	@echo Test $(STEP): Operator Count: Array Subscript
-	$(TGT_E) $(EXCLUDE) src/oper_array_subscript.c  --output-metrics=OP_ARRAY* -- $(OUT)
-	$(CHECK_E)
-
-.PHONY: test_oper_deref
-test_oper_deref: STEP=test_oper_deref
-test_oper_deref: $(PASS)/out.log.test_oper_deref $(PASS)/err.log.test_oper_deref
-$(PASS)/out.log.test_oper_deref $(PASS)/err.log.test_oper_deref: src/oper_deref.c $(TGT) 
-	@echo Test $(STEP): Operator Count: Pointer dereference
-	$(TGT_E) $(EXCLUDE) src/oper_deref.c  --output-metrics=OP_DEREF* -- $(OUT)
-	$(CHECK_E)
-
-.PHONY: test_oper_reference
-test_oper_reference: STEP=test_oper_reference
-test_oper_reference: $(PASS)/out.log.test_oper_reference $(PASS)/err.log.test_oper_reference
-$(PASS)/out.log.test_oper_reference $(PASS)/err.log.test_oper_reference: src/oper_reference.c $(TGT) 
-	@echo Test $(STEP): Operator Count: Rereference - "address of"
-	$(TGT_E) $(EXCLUDE) src/oper_reference.c  --output-metrics=OP_ADDR_OF_CNT -- $(OUT)
-	$(CHECK_E)
+include tests/*.mk
 
 .PHONY: test_oper_member_access_direct
 test_oper_member_access_direct: STEP=test_oper_member_access_direct
@@ -122,12 +100,6 @@ test_inline: test_var
 	$(TGT_E) $(EXCLUDE) src/inline.c --output-metrics=FUNC_INLINE*,TOK_INLINE -- $(OUT)
 	$(CHECK_E)
 
-.PHONY: test_fn_call
-test_fn_call: STEP=test_fn_call
-test_fn_call: test_inline
-	@echo Test $(STEP): Function call count
-	$(TGT_E) $(EXCLUDE) src/fn_call.c src/fn_call2.c --output-metrics=FUNC_CALLED_BY,OP_FN_CALL* -- $(OUT)
-	$(CHECK_E)
 
 .PHONY: test_typedef
 test_typedef: STEP=test_typedef
@@ -178,49 +150,16 @@ test_comments: test_fn_size
 	$(TGT_E) $(EXCLUDE) src/comment.c src/comment2.c --output-metrics=COMMENT* -- $(OUT)
 	$(CHECK_E)
 
-.PHONY: test_include
-test_include: STEP=test_include
-test_include: test_comments
-	@echo Test $(STEP): Simple test of include files
-	$(TGT_E) $(EXCLUDE) src/simple_include.c --output-metrics=VAR* -- $(OUT)
-	$(CHECK_E)
-
-.PHONY: test_two_include
-test_two_include: STEP=test_two_include
-test_two_include: test_include
-	@echo Test $(STEP): Test of same header file included in 2 source files
-	$(TGT_E) $(EXCLUDE) src/simple_include.c src/second_include.c --output-metrics=VAR* -- $(OUT)
-	$(CHECK_E)
-
-.PHONY: test_single_file
-test_single_file: STEP=test_single_file
-test_single_file: test_two_include
-	@echo Test $(STEP): Test of FILE_CNT \(single file\)
-	$(TGT_E) $(EXCLUDE) src/empty.c --output-metrics=FILE_CNT -- $(OUT)
-	$(CHECK_E)
-
-.PHONY: test_single_file_excluded
-test_single_file_excluded: STEP=test_single_file_excluded
-test_single_file_excluded: test_single_file
-	@echo Test $(STEP): Test of FILE_CNT \(single file excluded\)
-	$(TGT_E) $(EXCLUDE) src/empty.c --exclude-file empty.c --output-metrics=FILE_CNT -- $(OUT)
-	$(CHECK_E)
-
-.PHONY: test_single_file_multiple
-test_single_file_multiple: STEP=test_single_file_multiple
-test_single_file_multiple: test_single_file_excluded
-	@echo Test $(STEP): Test of FILE_CNT \(same file\)
-	$(TGT_E) $(EXCLUDE) src/empty.c src/empty.c --output-metrics=FILE_CNT -- $(OUT)
-	$(CHECK_E)
 # DO NOT DELETE
 
 src/1.c: src/1.h
+src/3.c: src/1.h
 src/comment.c: src/comment.h
 src/comment2.c: src/comment.h src/comment_free.h src/comment_excluded.h
 src/file_size.c: src/file_size.h
 src/file_size2.c: src/file_size.h
 src/fn_call.c: src/fn_call.h
-src/fn_call2.c: src/fn_call.h
+src/fn_call2.c: src/fn_call.h src/fn_call2.h
 src/kw_extern.c: src/kw_extern.h
 src/oper_sizeof.c: /usr/include/stdint.h /usr/include/bits/wordsize.h
 src/second_include.c: src/simple_include.h
