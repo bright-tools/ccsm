@@ -1,11 +1,11 @@
 PFX     = 
-TGT     = /cygdrive/C/Users/catalyst/Documents/coverage/build6/Debug/bin/ccsm.exe
+TGT     = ../../../llvm-build/Debug/bin/ccsm.exe
 LOG_OUT = out.log
 LOG_OUT_T = out.log.tmp
 LOG_ERR = err.log
 LOG_ERR_T = err.log.tmp
 PP_ERR  = sed -e 's/\s.*src/ src/;s/.*clang/ clang/;' > $(LOG_ERR)
-PP_OUT  = sed -e 's/\s.*src/ src/;s/.*clang/ clang/;' > $(LOG_OUT)
+PP_OUT  = sed -e 's/\s.*src/ src/;s/.*clang/ clang/;s/.*VC\\include/VC\\include/;' > $(LOG_OUT)
 OUT     = 2>$(LOG_ERR_T) 1>$(LOG_OUT_T) && cat $(LOG_ERR_T) | $(PP_ERR) && cat $(LOG_OUT_T) | $(PP_OUT)
 TGT_E   = $(PFX) $(TGT)
 DIFF_OPT= -c -b

@@ -4,19 +4,5 @@ File: src\oper_sizeof.c
 	Sizeof operators: 3
 	Function: main
 		Sizeof operators: 3
- clang\3.5.0\include\stdint.h
-	Sizeof operators: 0
-File: c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include/codeanalysis\sourceannotations.h
-	Sizeof operators: 0
-File: c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\crtdefs.h
-	Sizeof operators: 0
-File: c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\sal.h
-	Sizeof operators: 0
-File: c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdint.h
-	Sizeof operators: 0
-File: c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\use_ansi.h
-	Sizeof operators: 0
-File: c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\vadefs.h
-	Sizeof operators: 0
-File: c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\yvals.h
+ clang\3.7.0\include\stdint.h
 	Sizeof operators: 0

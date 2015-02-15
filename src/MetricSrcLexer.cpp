@@ -274,7 +274,7 @@ void MetricSrcLexer::CountToken( clang::Token& p_token )
 					{
 						std::cout << "raw_t,";
 					}
-				tok_data = clang::StringRef(p_token.getRawIdentifierData(), tok_len).str();
+					tok_data = p_token.getRawIdentifier();
 				std::map<std::string,MetricType_e>::const_iterator typeLookup = m_tokenToTypeMap.find( tok_data );
 				if( typeLookup != m_tokenToTypeMap.end() )
 				{

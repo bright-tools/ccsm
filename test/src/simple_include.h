@@ -15,6 +15,7 @@ int safe( void )
 {
     extern int q;
     int lp;
+    return 0;
 }
 
 /* This variable placed between two functions to check that it doesn't

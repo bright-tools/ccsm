@@ -13,15 +13,10 @@ bool isLastExecutableStmtInFn(const clang::Stmt* const p_stmt, clang::ASTContext
 	clang::SourceLocation loc,sloc;
 	clang::SourceManager &SM = p_context->getSourceManager();
 
-	clang::ASTContext::ParentVector ancestors = p_context->getParents( *p_stmt );
-
 	/* Examine all the parents */
-    for (clang::ASTContext::ParentVector::const_iterator I = ancestors.begin(),
-                                                         E = ancestors.end();
-         I != E;
-         ++I) {
+    for (const auto &Parent : p_context->getParents( *p_stmt ) ) {
 		/* Is the parent a Stmt? */
-		const clang::Stmt* stmt = I->get<clang::Stmt>();
+		const clang::Stmt* stmt = Parent.get<clang::Stmt>();
 		if( stmt != NULL )
 		{
 			/* If the parent's an condition then the child won't necessarily be the last statement to execute */
@@ -62,7 +57,7 @@ bool isLastExecutableStmtInFn(const clang::Stmt* const p_stmt, clang::ASTContext
 		else
 		{
 			/* Parent is not a statement - Decl? */
-			const clang::Decl* decl = I->get<clang::Decl>();
+			const clang::Decl* decl = Parent.get<clang::Decl>();
 			/* Function decl? */
 			if(( decl != NULL ) &&
 			   ( decl->getKind() == clang::Decl::Function ))
@@ -91,15 +86,12 @@ unsigned getControlDepth(const clang::Stmt* const p_stmt, clang::ASTContext* p_c
 
 	clang::SourceLocation loc,sloc;
 	clang::SourceManager &SM = p_context->getSourceManager();
-	clang::ASTContext::ParentVector ancestors = p_context->getParents( *p_stmt );
+	const auto ancestors = p_context->getParents( *p_stmt );
 
 	/* Examine all the parents */
-    for (clang::ASTContext::ParentVector::const_iterator I = ancestors.begin(),
-                                                         E = ancestors.end();
-         I != E;
-         ++I) {
+    for (const auto &Parent : p_context->getParents( *p_stmt ) ) {
 		/* Is the parent a Stmt? */
-		const clang::Stmt* stmt = I->get<clang::Stmt>();
+		const clang::Stmt* stmt = Parent.get<clang::Stmt>();
 		if( stmt != NULL )
 		{
 			ret_val += getControlDepth( stmt, p_context );

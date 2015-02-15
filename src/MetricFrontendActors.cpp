@@ -44,7 +44,7 @@ protected:
 	std::set<std::string>* m_commentFileList;
 public:
     ASTMetricFrontendActionFactory( MetricOptions* p_options, MetricUnit* p_topUnit, SrcStartToFunctionMap_t* p_srcMap, std::set<std::string>* p_commentFileList );
-    virtual clang::ASTConsumer *CreateASTConsumer(clang::CompilerInstance &CI, llvm::StringRef file);
+    virtual std::unique_ptr<clang::ASTConsumer> CreateASTConsumer(clang::CompilerInstance &CI, llvm::StringRef file);
 	virtual ~ASTMetricFrontendActionFactory();
 };
 
@@ -57,11 +57,11 @@ ASTMetricFrontendActionFactory::~ASTMetricFrontendActionFactory()
 {
 }
 
-clang::ASTConsumer* ASTMetricFrontendActionFactory::CreateASTConsumer(clang::CompilerInstance &CI, llvm::StringRef file) {
-    MetricASTConsumer* ret_val = new MetricASTConsumer(CI,m_topUnit,m_options,m_srcMap);
+std::unique_ptr<clang::ASTConsumer> ASTMetricFrontendActionFactory::CreateASTConsumer(clang::CompilerInstance &CI, llvm::StringRef file) {
+	std::unique_ptr<clang::ASTConsumer> ret_val = llvm::make_unique<MetricASTConsumer>(CI,m_topUnit,m_options,m_srcMap);
 	MetricPPCustomer* customer = new MetricPPCustomer( m_topUnit, m_commentFileList, m_options, m_srcMap );
     CI.getPreprocessor().addCommentHandler(customer);
-    CI.getPreprocessor().addPPCallbacks(customer);
+    CI.getPreprocessor().addPPCallbacks(llvm::make_unique<MetricPPCustomer>(*customer));
     return ret_val;
 }
 

@@ -113,7 +113,7 @@ int main(int argc, const char **argv) {
 	SrcStartToFunctionMap_t srcMap;
 
 	llvm::sys::PrintStackTraceOnErrorSignal();
-	llvm::OwningPtr<CompilationDatabase> Compilations(
+	std::unique_ptr<CompilationDatabase> Compilations(
 			FixedCompilationDatabase::loadFromCommandLine(argc, argv));
 	cl::ParseCommandLineOptions(argc, argv);
 
@@ -121,14 +121,13 @@ int main(int argc, const char **argv) {
 
 	if (!Compilations) {  // Couldn't find a compilation DB from the command line
 		std::string ErrorMessage;
-		Compilations.reset(
+		Compilations= 
 	#if 0
 		  !BuildPath.empty() ?
 			CompilationDatabase::autoDetectFromDirectory(BuildPath, ErrorMessage) :
 	#endif
-			CompilationDatabase::autoDetectFromSource(SourcePaths[0], ErrorMessage)
-		  );
-
+			CompilationDatabase::autoDetectFromSource(SourcePaths[0], ErrorMessage);
+		  
 		//  Still no compilation DB? - bail.	
 		if (!Compilations)
 		{

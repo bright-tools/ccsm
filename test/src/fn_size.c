@@ -1,10 +1,10 @@
-unsigned func0( void ) {}
+unsigned func0( void ) {return 0;}
 
-unsigned func1( void ) {
+unsigned func1( void ) {return 0;
 }
 
 unsigned func2( void )
-{
+{return 0;
 }
 
 unsigned func3( void )
@@ -13,5 +13,5 @@ unsigned func3( void )
 
     unsigned j;
 
-    /* Some padding */
+    /* Some padding */return 0;
 }
