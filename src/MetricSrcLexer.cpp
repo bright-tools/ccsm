@@ -46,7 +46,7 @@ const static std::pair<std::string,MetricType_e> tokenToTypeMapData[] = {
 	std::make_pair("friend", METRIC_TYPE_TOKEN_FRIEND),
 	std::make_pair("volatile", METRIC_TYPE_TOKEN_VOLATILE),
 	std::make_pair("extern", METRIC_TYPE_TOKEN_EXTERN),
-	std::make_pair("inline", METRIC_TYPE_TOKEN_INLINE),
+//	std::make_pair("inline", METRIC_TYPE_TOKEN_INLINE),
 	std::make_pair("register", METRIC_TYPE_TOKEN_REGISTER),
 	std::make_pair("static", METRIC_TYPE_TOKEN_STATIC),
 	std::make_pair("typedef", METRIC_TYPE_TOKEN_TYPEDEF),
@@ -270,6 +270,10 @@ void MetricSrcLexer::CountToken( clang::Token& p_token )
 	{
 		case clang::tok::raw_identifier:
 			{
+					if( m_options->getDumpTokens() )
+					{
+						std::cout << "raw_t,";
+					}
 				tok_data = clang::StringRef(p_token.getRawIdentifierData(), tok_len).str();
 				std::map<std::string,MetricType_e>::const_iterator typeLookup = m_tokenToTypeMap.find( tok_data );
 				if( typeLookup != m_tokenToTypeMap.end() )
@@ -381,24 +385,28 @@ void MetricSrcLexer::CountToken( clang::Token& p_token )
 std::string MetricSrcLexer::FindFunction( clang::SourceManager& p_sm, clang::SourceLocation& p_loc, const SrcStartToFunctionMap_t* const p_fnMap )
 {
 	std::string ret_val = "";
-	SrcStartToFunctionMap_t::const_iterator func_it = p_fnMap->begin();
-
-	/* While we've not found a matching function and there are still functions to consider ... */
-	while(( ret_val == "" ) && ( func_it != p_fnMap->end()))
+	unsigned fileIdHash = p_sm.getFileID( p_loc ).getHashValue();
+	SrcStartToFunctionMap_t::const_iterator file_it = p_fnMap->find(fileIdHash);
+	if( file_it != p_fnMap->end() )
 	{
-		/* Does the location we're considering match the function start or end or is it within those bounds? */
-		if(( p_loc == (*func_it).first ) || 
-		   ( p_loc == (*func_it).second.first ) ||
-		   ( p_sm.isBeforeInTranslationUnit( (*func_it).first, p_loc ) &&
-			 p_sm.isBeforeInTranslationUnit( p_loc, (*func_it).second.first )))
+		StartEndPair_t::const_iterator func_it = file_it->second.begin();
+
+		/* While we've not found a matching function and there are still functions to consider ... */
+		while(( ret_val == "" ) && ( func_it != file_it->second.end()))
 		{
-			ret_val = (*func_it).second.second;
+			/* Does the location we're considering match the function start or end or is it within those bounds? */
+			if(( p_loc == (*func_it).first ) || 
+				( p_loc == (*func_it).second.first ) ||
+				( (*func_it).first < p_loc ) &&
+				( p_loc < (*func_it).second.first ))
+			{
+				ret_val = (*func_it).second.second;
+				break;
+			}
+			/* Next function in the map */
+			func_it++;
 		}
-
-		/* Next function in the map */
-		func_it++;
 	}
-
 	return ret_val;
 }
 

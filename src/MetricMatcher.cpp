@@ -56,10 +56,11 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 		m_currentFileName = m_astContext->getSourceManager().getFilename( func->getLocation() ).str();
 		m_currentFunctionName = func->getQualifiedNameAsString();
 
-		LocationNamePair_t endNamePair( func->getLocEnd(), m_currentFunctionName );
 		if( m_fnMap != NULL )
 		{
-			(*m_fnMap)[ func->getLocStart() ] = endNamePair;
+			LocationNamePair_t endNamePair( func->getLocEnd(), m_currentFunctionName );
+			FileID fId = m_astContext->getSourceManager().getFileID( func->getLocation() );
+			(*m_fnMap)[ fId.getHashValue() ][ func->getLocStart() ] = endNamePair;
 		}
 
 		if( ShouldIncludeFile( m_currentFileName ) && 

@@ -183,3 +183,10 @@ test_single_file: test_two_include
 	@echo Test $(STEP): Test of FILE_CNT (single file)
 	$(TGT_E) $(EXCLUDE) src/empty.c --output-metrics=FILE_CNT -- $(OUT)
 	$(CHECK_E)
+
+.PHONY: test_single_file_excluded
+test_single_file_excluded: STEP=test_single_file_excluded
+test_single_file_excluded: test_single_file
+	@echo Test $(STEP): Test of FILE_CNT \(single file excluded\)
+	$(TGT_E) $(EXCLUDE) src/empty.c --exclude-file empty.c --output-metrics=FILE_CNT -- $(OUT)
+	$(CHECK_E)

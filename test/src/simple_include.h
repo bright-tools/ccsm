@@ -11,6 +11,16 @@ void dummy2( void )
     int j;
 }
 
+int safe( void )
+{
+    extern int q;
+    int lp;
+}
+
+/* This variable placed between two functions to check that it doesn't
+   get wrapped into one of their stats & is detected as being file-level */
+int qq;
+
 int simple( void )
 {
     return x + k;
