@@ -14,7 +14,7 @@ CHECK_E = $(PFX) diff $(DIFF_OPT) $(PASS)/out.log.$(STEP) out.log && diff $(DIFF
 EXCLUDE = --exclude-function=dummy,dummy2
 
 .PHONY: all
-all: test_two_include
+all: test_single_file_excluded
 	@echo -e \\nAll tests run OK
 
 .PHONY: clean
@@ -180,7 +180,7 @@ test_two_include: test_include
 .PHONY: test_single_file
 test_single_file: STEP=test_single_file
 test_single_file: test_two_include
-	@echo Test $(STEP): Test of FILE_CNT (single file)
+	@echo Test $(STEP): Test of FILE_CNT \(single file\)
 	$(TGT_E) $(EXCLUDE) src/empty.c --output-metrics=FILE_CNT -- $(OUT)
 	$(CHECK_E)
 
