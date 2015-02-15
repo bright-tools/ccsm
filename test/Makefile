@@ -1,4 +1,4 @@
-PFX     = 
+PFX     = @
 TGT     = ../../../llvm-build/Debug/bin/ccsm.exe
 LOG_OUT = out.log
 LOG_OUT_T = out.log.tmp
@@ -10,19 +10,32 @@ OUT     = 2>$(LOG_ERR_T) 1>$(LOG_OUT_T) && cat $(LOG_ERR_T) | $(PP_ERR) && cat $
 TGT_E   = $(PFX) $(TGT)
 DIFF_OPT= -c -b
 PASS    = expected
-CHECK_E = $(PFX) diff $(DIFF_OPT) $(PASS)/out.log.$(STEP) out.log && diff $(DIFF_OPT) $(PASS)/err.log.$(STEP) err.log 
+PASS_LOG= $(PASS)/out.log.$(STEP)
+PASS_ERR= $(PASS)/err.log.$(STEP)
+CHECK_E = $(PFX) diff $(DIFF_OPT) $(PASS_LOG) out.log && diff $(DIFF_OPT) $(PASS_ERR) err.log && touch $(PASS_ERR) $(PASS_LOG)
 EXCLUDE = --exclude-function=dummy,dummy2
 
 .PHONY: all
-all: test_single_file_excluded
-	@echo -e \\nAll tests run OK
+all: test_oper_array_subscript test_oper_deref test_oper_reference
+	@echo -e \\nAll tests done \(use 'all_force' target to force a retest\)
+
+.PHONY: retouch_tgt
+retouch_tgt:
+	$(PFX) touch $(TGT)
+
+.PHONY: depend
+depend:
+	$(PFX) makedepend.exe -o.c src/*.c
+
+.PHONY: all_force
+all_force: retouch_tgt all
 
 .PHONY: clean
 clean:
 	@echo Cleaning up
 	$(PFX) rm -rf $(LOG_OUT) $(LOG_ERR) $(LOG_ERR_T)
 
-.PHONY: test1
+test1: $(TGT) $(PASS)/out.log.$(STEP) $(PASS)/out.err.$(STEP)
 test1: STEP=1
 test1: clean
 	@echo Test $(STEP): Single C file
@@ -45,22 +58,24 @@ test3: test2
 
 .PHONY: test_oper_array_subscript
 test_oper_array_subscript: STEP=test_oper_array_subscript
-test_oper_array_subscript: 
-#test3
+test_oper_array_subscript: $(PASS)/out.log.test_oper_array_subscript $(PASS)/err.log.test_oper_array_subscript
+$(PASS)/out.log.test_oper_array_subscript $(PASS)/err.log.test_oper_array_subscript: src/oper_array_subscript.c $(TGT) 
 	@echo Test $(STEP): Operator Count: Array Subscript
 	$(TGT_E) $(EXCLUDE) src/oper_array_subscript.c  --output-metrics=OP_ARRAY* -- $(OUT)
 	$(CHECK_E)
 
 .PHONY: test_oper_deref
 test_oper_deref: STEP=test_oper_deref
-test_oper_deref: test_oper_array_subscript
+test_oper_deref: $(PASS)/out.log.test_oper_deref $(PASS)/err.log.test_oper_deref
+$(PASS)/out.log.test_oper_deref $(PASS)/err.log.test_oper_deref: src/oper_deref.c $(TGT) 
 	@echo Test $(STEP): Operator Count: Pointer dereference
 	$(TGT_E) $(EXCLUDE) src/oper_deref.c  --output-metrics=OP_DEREF* -- $(OUT)
 	$(CHECK_E)
 
 .PHONY: test_oper_reference
 test_oper_reference: STEP=test_oper_reference
-test_oper_reference: test_oper_deref
+test_oper_reference: $(PASS)/out.log.test_oper_reference $(PASS)/err.log.test_oper_reference
+$(PASS)/out.log.test_oper_reference $(PASS)/err.log.test_oper_reference: src/oper_reference.c $(TGT) 
 	@echo Test $(STEP): Operator Count: Rereference - "address of"
 	$(TGT_E) $(EXCLUDE) src/oper_reference.c  --output-metrics=OP_ADDR_OF_CNT -- $(OUT)
 	$(CHECK_E)
@@ -190,3 +205,23 @@ test_single_file_excluded: test_single_file
 	@echo Test $(STEP): Test of FILE_CNT \(single file excluded\)
 	$(TGT_E) $(EXCLUDE) src/empty.c --exclude-file empty.c --output-metrics=FILE_CNT -- $(OUT)
 	$(CHECK_E)
+
+.PHONY: test_single_file_multiple
+test_single_file_multiple: STEP=test_single_file_multiple
+test_single_file_multiple: test_single_file_excluded
+	@echo Test $(STEP): Test of FILE_CNT \(same file\)
+	$(TGT_E) $(EXCLUDE) src/empty.c src/empty.c --output-metrics=FILE_CNT -- $(OUT)
+	$(CHECK_E)
+# DO NOT DELETE
+
+src/1.c: src/1.h
+src/comment.c: src/comment.h
+src/comment2.c: src/comment.h src/comment_free.h src/comment_excluded.h
+src/file_size.c: src/file_size.h
+src/file_size2.c: src/file_size.h
+src/fn_call.c: src/fn_call.h
+src/fn_call2.c: src/fn_call.h
+src/kw_extern.c: src/kw_extern.h
+src/oper_sizeof.c: /usr/include/stdint.h /usr/include/bits/wordsize.h
+src/second_include.c: src/simple_include.h
+src/simple_include.c: src/simple_include.h
