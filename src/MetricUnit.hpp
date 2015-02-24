@@ -36,7 +36,7 @@ typedef enum
 
 typedef enum
 {
-#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _scaling, _description  ) _enum ,
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _multipass, _report_local, _scaling, _description  ) _enum ,
 #include "metrics.def"
 #undef  METRIC
 	METRIC_TYPE_MAX
@@ -66,6 +66,7 @@ private:
 	static const bool        m_metricReportLocal[ METRIC_TYPE_MAX ];
 	static const uint32_t    m_metricScaling[ METRIC_TYPE_MAX ];
 	static const bool        m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ];
+	static const bool        m_metricMultipass[ METRIC_TYPE_MAX ];
 protected:
 	typedef std::map<std::string, MetricUnit*> SubUnitMap_t;
 	std::string m_name;
@@ -77,6 +78,10 @@ protected:
 public:
 	/* See also counter_t_Max */
 	typedef uint16_t counter_t;
+
+	static bool isMultiPassAllowed( const MetricType_e p_type );
+
+	static std::string getMetricName( const MetricType_e p_type );
 
 	static const uint16_t counter_t_Max;
 
@@ -91,7 +96,7 @@ public:
 
 	counter_t getCounter( const MetricType_e p_metricType, const bool p_recurse = false ) const;
 
-	MetricUnit* getSubUnit( const std::string& p_name, const MetricUnitType_e p_type );
+	MetricUnit* getSubUnit( const std::string& p_name, const MetricUnitType_e p_type, const bool p_create = true );
 
 	counter_t getSubUnitCount( const MetricUnitType_e p_type ) const;
 

@@ -35,31 +35,38 @@ const std::string MetricUnit::m_dumpPrefix[ METRIC_UNIT_MAX ] = {
 };
 
 const std::string MetricUnit::m_metricShortNames[ METRIC_TYPE_MAX ] = {
-#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _scaling, _description  ) _short_name ,
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _multipass, _report_local, _scaling, _description  ) _short_name ,
 #include "metrics.def"
 #undef  METRIC
 };
 
 const std::string MetricUnit::m_metricNames[ METRIC_TYPE_MAX ] = {
-#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _scaling, _description  ) _long_name ,
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _multipass, _report_local, _scaling, _description  ) _long_name ,
 #include "metrics.def"
 #undef  METRIC
 };
 
+const bool MetricUnit::m_metricMultipass[ METRIC_TYPE_MAX ] = {
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _multipass, _report_local, _scaling, _description  ) _multipass ,
+#include "metrics.def"
+#undef  METRIC
+};
+
+
 const bool MetricUnit::m_metricIsCumulative[ METRIC_TYPE_MAX ] = {
-#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _scaling, _description  ) _cumulative ,
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _multipass, _report_local, _scaling, _description  ) _cumulative ,
 #include "metrics.def"
 #undef  METRIC
 };
 
 const bool MetricUnit::m_metricReportLocal[ METRIC_TYPE_MAX ] = {
-#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _scaling, _description  ) _report_local ,
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _multipass, _report_local, _scaling, _description  ) _report_local ,
 #include "metrics.def"
 #undef  METRIC
 };
 
 const uint32_t MetricUnit::m_metricScaling[ METRIC_TYPE_MAX ] = {
-#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _scaling, _description  ) _scaling ,
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _multipass, _report_local, _scaling, _description  ) _scaling ,
 #include "metrics.def"
 #undef  METRIC
 };
@@ -67,22 +74,22 @@ const uint32_t MetricUnit::m_metricScaling[ METRIC_TYPE_MAX ] = {
 
 const bool MetricUnit::m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ] = {
 	{
-#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _scaling, _description  ) _applies_global ,
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _multipass, _report_local, _scaling, _description  ) _applies_global ,
 #include "metrics.def"
 #undef  METRIC
 	},
 	{
-#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _scaling, _description  ) _applies_file ,
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _multipass, _report_local, _scaling, _description  ) _applies_file ,
 #include "metrics.def"
 #undef  METRIC
 	},
 	{
-#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _scaling, _description  ) _applies_function ,
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _multipass, _report_local, _scaling, _description  ) _applies_function ,
 #include "metrics.def"
 #undef  METRIC
 	},
 	{
-#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _report_local, _scaling, _description  ) _applies_method ,
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _multipass, _report_local, _scaling, _description  ) _applies_method ,
 #include "metrics.def"
 #undef  METRIC
 	}
@@ -380,24 +387,27 @@ void MetricUnit::dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ]
 	}
 }
 
-MetricUnit* MetricUnit::getSubUnit( const std::string& p_name, const MetricUnitType_e p_type )
+MetricUnit* MetricUnit::getSubUnit( const std::string& p_name, const MetricUnitType_e p_type, const bool p_create )
 {
 	MetricUnit* ret_val = NULL;
 	SubUnitMap_t::iterator name_it = m_subUnits.find( p_name );
 	if( name_it == m_subUnits.end() )
 	{
-		ret_val = new MetricUnit( this, p_name, p_type );
+		if( p_create )
+		{
+			ret_val = new MetricUnit( this, p_name, p_type );
 
-		if( isFnOrMethod() )
-		{
-			/* By default, every function/method has 1 return point */
-			ret_val->increment( METRIC_TYPE_RETURNPOINTS );
+			if( isFnOrMethod() )
+			{
+				/* By default, every function/method has 1 return point */
+				ret_val->increment( METRIC_TYPE_RETURNPOINTS );
+			}
+			else if( p_type == METRIC_UNIT_FILE )
+			{
+				this->increment( METRIC_TYPE_FILES );
+			}
+			m_subUnits[ p_name ] = ret_val;
 		}
-		else if( p_type == METRIC_UNIT_FILE )
-		{
-			this->increment( METRIC_TYPE_FILES );
-		}
-		m_subUnits[ p_name ] = ret_val;
 	} else {
 		ret_val = (*name_it).second;
 	}
@@ -418,4 +428,14 @@ bool MetricUnit::isFnOrMethod( void ) const
 {
 	return(( m_type == METRIC_UNIT_FUNCTION ) ||
 		   ( m_type == METRIC_UNIT_METHOD ));
+}
+
+bool MetricUnit::isMultiPassAllowed( const MetricType_e p_type )
+{
+	return m_metricMultipass[ p_type ];
+}
+
+std::string MetricUnit::getMetricName( const MetricType_e p_type )
+{
+	return m_metricNames[ p_type ];
 }

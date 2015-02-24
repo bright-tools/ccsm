@@ -31,7 +31,7 @@
 #include <string>
 #include <vector>
 
-#include "MetricUnit.hpp"
+#include "FunctionLocator.hpp"
 #include "MetricOptions.hpp"
 #include "MetricMatcher.hpp"
 #include "MetricSrcLexer.hpp"
@@ -42,10 +42,10 @@ protected:
 	clang::CompilerInstance& m_compilerInstance;
 	MetricOptions            *m_options;
 	MetricUnit               *m_topUnit;
-	SrcStartToFunctionMap_t  *m_fnMap;
+	GlobalFunctionLocator    *m_fnLocator;
 
 public:
-	explicit MetricASTConsumer(clang::CompilerInstance &CI, MetricUnit* p_topUnit, MetricOptions* p_options = NULL, SrcStartToFunctionMap_t*  m_fnMap = NULL);
+	explicit MetricASTConsumer(clang::CompilerInstance &CI, MetricUnit* p_topUnit, MetricOptions* p_options = NULL, GlobalFunctionLocator*  m_fnLocator = NULL);
 
 	virtual ~MetricASTConsumer(void);
 	virtual void HandleTranslationUnit(clang::ASTContext &Context);
@@ -56,10 +56,10 @@ class MetricPPConsumer : public clang::PreprocessorFrontendAction
 protected:
 	MetricOptions            *m_options;
 	MetricUnit               *m_topUnit;
-	SrcStartToFunctionMap_t  *m_fnMap;
+	GlobalFunctionLocator    *m_fnLocator;
 
 public:
-	explicit MetricPPConsumer(MetricUnit* p_topUnit, MetricOptions* p_options = NULL, SrcStartToFunctionMap_t*  m_fnMap = NULL);
+	explicit MetricPPConsumer(MetricUnit* p_topUnit, MetricOptions* p_options = NULL, GlobalFunctionLocator*  m_fnLocator = NULL);
 
 	virtual ~MetricPPConsumer(void);
 	virtual void ExecuteAction();

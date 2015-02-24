@@ -25,7 +25,7 @@
 
 #include "MetricUnit.hpp"
 #include "MetricOptions.hpp"
-#include "MetricUtils.hpp"
+#include "FunctionLocator.hpp"
 
 #include "clang/AST/RecursiveASTVisitor.h"
 #include "clang/Frontend/CompilerInstance.h"
@@ -38,24 +38,25 @@
 class MetricVisitor : public clang::RecursiveASTVisitor<MetricVisitor>
 {
 protected:
-	clang::CompilerInstance& m_compilerInstance;
-	clang::ASTContext*		 m_astContext;
-	MetricUnit*		         m_topUnit;
-	std::string				 m_currentFileName;
-	std::string				 m_currentFunctionName;
-	MetricUnit*				 m_currentUnit;
-	MetricOptions*			 m_options;
-	std::set<std::string>	 m_fnsCalled;          
-	SrcStartToFunctionMap_t* m_fnMap;
+	clang::CompilerInstance&        m_compilerInstance;
+	clang::ASTContext*		        m_astContext;
+	MetricUnit*		                m_topUnit;
+	std::string				        m_currentFileName;
+	std::string				        m_currentFunctionName;
+	MetricUnit*				        m_currentUnit;
+	MetricOptions*			        m_options;
+	std::set<std::string>	        m_fnsCalled;          
+	TranslationUnitFunctionLocator* m_fnLocator;
 
 	void HandleLoc( clang::SourceLocation& p_loc );
 	void DeclCommon( const clang::DeclContext* p_declCtxt, const clang::Decl* p_decl );
 	void MetricVisitor::CloseOutFnOrMtd( void );
 	bool ShouldIncludeFile( const std::string& p_file );
+	void IncrementMetric( MetricUnit* const p_unit, const MetricType_e p_metricType );
 
 public:
 	
-	explicit MetricVisitor(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit,MetricOptions* p_options = NULL,SrcStartToFunctionMap_t* p_fnMap = NULL);
+	explicit MetricVisitor(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit,MetricOptions* p_options = NULL,TranslationUnitFunctionLocator* p_fnLocator = NULL);
 	virtual ~MetricVisitor(void);
 	virtual bool VisitFunctionDecl(clang::FunctionDecl *func);
 	virtual bool VisitVarDecl(clang::VarDecl *p_varDec);
@@ -80,8 +81,6 @@ public:
 	virtual bool VisitTypedefDecl( clang::TypedefDecl* p_typeDef );
 	virtual bool TraverseDecl(clang::Decl *p_decl);
 	virtual bool TraverseStmt(clang::Stmt *p_stmt);
-
-	const SrcStartToFunctionMap_t* getFunctionMap( void ) const;
 
 #if 0
 	void dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE );

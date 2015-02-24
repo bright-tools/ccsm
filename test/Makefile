@@ -1,5 +1,5 @@
 PFX     = 
-TGT     = ../../../build6/Debug/bin/ccsm.exe
+TGT     = ../../../llvm-build/Debug/bin/ccsm.exe
 LOG_OUT = out.log
 LOG_OUT_T = out.log.tmp
 LOG_ERR = err.log

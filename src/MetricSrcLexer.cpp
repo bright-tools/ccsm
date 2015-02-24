@@ -382,34 +382,6 @@ void MetricSrcLexer::CountToken( clang::Token& p_token )
 	m_lastToken = p_token.getKind();
 }
 
-std::string MetricSrcLexer::FindFunction( clang::SourceManager& p_sm, clang::SourceLocation& p_loc, const SrcStartToFunctionMap_t* const p_fnMap )
-{
-	std::string ret_val = "";
-	unsigned fileIdHash = p_sm.getFileID( p_loc ).getHashValue();
-	SrcStartToFunctionMap_t::const_iterator file_it = p_fnMap->find(fileIdHash);
-	if( file_it != p_fnMap->end() )
-	{
-		StartEndPair_t::const_iterator func_it = file_it->second.begin();
-
-		/* While we've not found a matching function and there are still functions to consider ... */
-		while(( ret_val == "" ) && ( func_it != file_it->second.end()))
-		{
-			/* Does the location we're considering match the function start or end or is it within those bounds? */
-			if(( p_loc == (*func_it).first ) || 
-				( p_loc == (*func_it).second.first ) ||
-				( (*func_it).first < p_loc ) &&
-				( p_loc < (*func_it).second.first ))
-			{
-				ret_val = (*func_it).second.second;
-				break;
-			}
-			/* Next function in the map */
-			func_it++;
-		}
-	}
-	return ret_val;
-}
-
 void MetricSrcLexer::CloseOutFnOrMtd( void )
 {
 	/* Have a current unit? */
@@ -432,10 +404,15 @@ void MetricSrcLexer::CloseOutFnOrMtd( void )
 	m_currentFnCharConsts.clear();
 }
 
-void MetricSrcLexer::LexSources( clang::CompilerInstance& p_ci, const SrcStartToFunctionMap_t* const p_fnMap )
+void MetricSrcLexer::LexSources( clang::CompilerInstance& p_ci, const TranslationUnitFunctionLocator* const p_fnLocator )
 {
 	clang::Preprocessor &PP = p_ci.getPreprocessor();
 	clang::SourceManager &SM = p_ci.getSourceManager();
+
+	if( m_options->getDumpTokens() )
+	{
+		std::cout << std::endl << "[[Lexing]]" << std::endl;
+	}
 
 	// Start preprocessing the specified input file.
 	clang::Token result;
@@ -457,12 +434,12 @@ void MetricSrcLexer::LexSources( clang::CompilerInstance& p_ci, const SrcStartTo
 		{
 			/* TODO: Could optimise this by not doing the function look-up for every single token, but 
 				determining whether or not the token's position has exceeded the range of the current function */
-			std::string funcName = FindFunction( SM, result.getLocation(), p_fnMap );
+			std::string funcName = p_fnLocator->FindFunction( SM, result.getLocation() );
 			if( funcName != m_currentFunctionName )
 			{
 				if( m_options->getDumpTokens() )
 				{
-					std::cout << "[fn:" << funcName << "]";
+					std::cout << std::endl << "[fn:" << funcName << result.getLocation().getRawEncoding() <<  "]";
 				}
 				CloseOutFnOrMtd();
 			}

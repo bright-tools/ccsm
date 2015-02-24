@@ -16,6 +16,7 @@
 #include "MetricFrontendActors.hpp"
 #include "MetricASTConsumer.hpp"
 #include "MetricPPCustomer.hpp"
+#include "FunctionLocator.hpp"
 
 #include "clang/Frontend/CompilerInstance.h"
 
@@ -23,13 +24,13 @@ class ASTMetricConsumerFactory : public clang::ASTFrontendAction {
 protected:
     MetricOptions*           m_options;
     MetricUnit*              m_topUnit;
-    SrcStartToFunctionMap_t* m_srcMap;
+    GlobalFunctionLocator*   m_srcMap;
 public:
-    ASTMetricConsumerFactory( MetricOptions* p_options, MetricUnit* p_topUnit, SrcStartToFunctionMap_t* p_srcMap );
+    ASTMetricConsumerFactory( MetricOptions* p_options, MetricUnit* p_topUnit, GlobalFunctionLocator* p_srcMap );
 	virtual ~ASTMetricConsumerFactory();
 };
 
-ASTMetricConsumerFactory::ASTMetricConsumerFactory( MetricOptions* p_options, MetricUnit* p_topUnit, SrcStartToFunctionMap_t* p_srcMap )
+ASTMetricConsumerFactory::ASTMetricConsumerFactory( MetricOptions* p_options, MetricUnit* p_topUnit, GlobalFunctionLocator* p_srcMap )
 	: m_options( p_options ), m_topUnit( p_topUnit ), m_srcMap( p_srcMap )
 {
 
@@ -43,12 +44,12 @@ class ASTMetricFrontendActionFactory : public ASTMetricConsumerFactory {
 protected:
 	std::set<std::string>* m_commentFileList;
 public:
-    ASTMetricFrontendActionFactory( MetricOptions* p_options, MetricUnit* p_topUnit, SrcStartToFunctionMap_t* p_srcMap, std::set<std::string>* p_commentFileList );
+    ASTMetricFrontendActionFactory( MetricOptions* p_options, MetricUnit* p_topUnit, GlobalFunctionLocator* p_srcMap, std::set<std::string>* p_commentFileList );
     virtual std::unique_ptr<clang::ASTConsumer> CreateASTConsumer(clang::CompilerInstance &CI, llvm::StringRef file);
 	virtual ~ASTMetricFrontendActionFactory();
 };
 
-ASTMetricFrontendActionFactory::ASTMetricFrontendActionFactory( MetricOptions* p_options, MetricUnit* p_topUnit, SrcStartToFunctionMap_t* p_srcMap, std::set<std::string>* p_commentFileList )
+ASTMetricFrontendActionFactory::ASTMetricFrontendActionFactory( MetricOptions* p_options, MetricUnit* p_topUnit, GlobalFunctionLocator* p_srcMap, std::set<std::string>* p_commentFileList )
 	: m_commentFileList( p_commentFileList), ASTMetricConsumerFactory( p_options, p_topUnit , p_srcMap)
 {
 }
@@ -59,7 +60,7 @@ ASTMetricFrontendActionFactory::~ASTMetricFrontendActionFactory()
 
 std::unique_ptr<clang::ASTConsumer> ASTMetricFrontendActionFactory::CreateASTConsumer(clang::CompilerInstance &CI, llvm::StringRef file) {
 	std::unique_ptr<clang::ASTConsumer> ret_val = llvm::make_unique<MetricASTConsumer>(CI,m_topUnit,m_options,m_srcMap);
-	MetricPPCustomer* customer = new MetricPPCustomer( m_topUnit, m_commentFileList, m_options, m_srcMap );
+	MetricPPCustomer* customer = new MetricPPCustomer( m_topUnit, m_commentFileList, m_options );
     CI.getPreprocessor().addCommentHandler(customer);
     CI.getPreprocessor().addPPCallbacks(llvm::make_unique<MetricPPCustomer>(*customer));
     return ret_val;
@@ -69,10 +70,10 @@ class ASTFrontendActionFactory : public clang::tooling::FrontendActionFactory {
    protected:
     MetricOptions*           m_options;
     MetricUnit*              m_topUnit;
-    SrcStartToFunctionMap_t* m_srcMap;
-	std::set<std::string>* m_commentFileList;
+    GlobalFunctionLocator*   m_srcMap;
+	std::set<std::string>*   m_commentFileList;
    public:
-     ASTFrontendActionFactory( MetricOptions* p_options, MetricUnit* p_topUnit, SrcStartToFunctionMap_t* p_srcMap, std::set<std::string>* p_commentFileList )
+     ASTFrontendActionFactory( MetricOptions* p_options, MetricUnit* p_topUnit, GlobalFunctionLocator* p_srcMap, std::set<std::string>* p_commentFileList )
 	      : m_options( p_options), m_topUnit( p_topUnit ), m_srcMap( p_srcMap ), m_commentFileList( p_commentFileList ), clang::tooling::FrontendActionFactory()
 	 {
 	 }
@@ -84,7 +85,7 @@ class ASTFrontendActionFactory : public clang::tooling::FrontendActionFactory {
 	 }
 };
 
-clang::tooling::FrontendActionFactory* newASTMetricFrontendActionFactory( MetricOptions* p_options, MetricUnit* p_topUnit, SrcStartToFunctionMap_t* p_srcMap, std::set<std::string>* p_commentFileList  ) {
+clang::tooling::FrontendActionFactory* newASTMetricFrontendActionFactory( MetricOptions* p_options, MetricUnit* p_topUnit, GlobalFunctionLocator* p_srcMap, std::set<std::string>* p_commentFileList  ) {
    return new ASTFrontendActionFactory( p_options, p_topUnit, p_srcMap, p_commentFileList );
 }
 
@@ -92,9 +93,9 @@ class PPFrontendActionFactory : public clang::tooling::FrontendActionFactory {
    protected:
     MetricOptions*           m_options;
     MetricUnit*              m_topUnit;
-    SrcStartToFunctionMap_t* m_srcMap;
+    GlobalFunctionLocator*   m_srcMap;
    public:
-     PPFrontendActionFactory( MetricOptions* p_options, MetricUnit* p_topUnit, SrcStartToFunctionMap_t* p_srcMap )
+     PPFrontendActionFactory( MetricOptions* p_options, MetricUnit* p_topUnit, GlobalFunctionLocator* p_srcMap )
 	      : m_options( p_options), m_topUnit( p_topUnit ), m_srcMap( p_srcMap ), clang::tooling::FrontendActionFactory()
 	 {
 	 }
@@ -108,6 +109,6 @@ class PPFrontendActionFactory : public clang::tooling::FrontendActionFactory {
 	 }
 };
 
-clang::tooling::FrontendActionFactory* newPPMetricFrontendActionFactory( MetricOptions* p_options, MetricUnit* p_topUnit, SrcStartToFunctionMap_t* p_srcMap  ) {
+clang::tooling::FrontendActionFactory* newPPMetricFrontendActionFactory( MetricOptions* p_options, MetricUnit* p_topUnit, GlobalFunctionLocator* p_srcMap  ) {
    return new PPFrontendActionFactory( p_options, p_topUnit, p_srcMap );
 }

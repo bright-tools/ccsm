@@ -24,13 +24,13 @@
 
 #include "MetricOptions.hpp"
 #include "MetricUnit.hpp"
-#include "MetricUtils.hpp"
+#include "FunctionLocator.hpp"
 
 #include "clang/Frontend/FrontendActions.h"
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/Tooling/Tooling.h"
 
-extern clang::tooling::FrontendActionFactory* newPPMetricFrontendActionFactory( MetricOptions* p_options, MetricUnit* p_topUnit, SrcStartToFunctionMap_t* p_srcMap );
-extern clang::tooling::FrontendActionFactory* newASTMetricFrontendActionFactory( MetricOptions* p_options, MetricUnit* p_topUnit, SrcStartToFunctionMap_t* p_srcMap, std::set<std::string>* p_commentFileList );
+extern clang::tooling::FrontendActionFactory* newPPMetricFrontendActionFactory( MetricOptions* p_options, MetricUnit* p_topUnit, GlobalFunctionLocator* p_srcMap );
+extern clang::tooling::FrontendActionFactory* newASTMetricFrontendActionFactory( MetricOptions* p_options, MetricUnit* p_topUnit, GlobalFunctionLocator* p_srcMap, std::set<std::string>* p_commentFileList );
 
 #endif

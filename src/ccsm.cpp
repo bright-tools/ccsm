@@ -18,6 +18,7 @@
 #include "MetricMatcher.hpp"
 #include "MetricOptions.hpp"
 #include "MetricFrontendActors.hpp"
+#include "FunctionLocator.hpp"
 
 #include "clang/Tooling/Tooling.h"
 #include "clang/Basic/SourceManager.h"
@@ -110,7 +111,7 @@ int main(int argc, const char **argv) {
 	MetricUnit topUnit( NULL, "Global", METRIC_UNIT_GLOBAL);
 	MetricOptions options( &ExcludeFileList, &ExcludeFunctionList, &OutputMetricList );
 	std::set<std::string> commentFileList;
-	SrcStartToFunctionMap_t srcMap;
+	GlobalFunctionLocator srcMap;
 
 	llvm::sys::PrintStackTraceOnErrorSignal();
 	std::unique_ptr<CompilationDatabase> Compilations(

@@ -5,9 +5,15 @@
 */
 
 #include "fn_call.h"
+#include "empty.h"
 
 extern int foo( void );
 extern int moo( void );
+
+void dummy( void )
+{
+    secondary_function();
+}
 
 int j( void )
 {
@@ -22,6 +28,7 @@ int j( void )
     x+= too();
 
     secondary_function();
+    dummy();
 
     return x;
 }

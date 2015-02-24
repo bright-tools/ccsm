@@ -17,11 +17,11 @@
 #include "MetricASTConsumer.hpp"
 #include "clang/Basic/SourceManager.h"
 
-MetricASTConsumer::MetricASTConsumer(clang::CompilerInstance &CI, MetricUnit* p_topUnit, MetricOptions* p_options, SrcStartToFunctionMap_t*  p_fnMap ) :
+MetricASTConsumer::MetricASTConsumer(clang::CompilerInstance &CI, MetricUnit* p_topUnit, MetricOptions* p_options, GlobalFunctionLocator*  p_fnLocator ) :
 																													  m_compilerInstance( CI ),
 																													  m_options( p_options ),
 																													  m_topUnit( p_topUnit ),
-																													  m_fnMap( p_fnMap )
+																													  m_fnLocator( p_fnLocator )
 { 
 }
 
@@ -33,7 +33,10 @@ void MetricASTConsumer::HandleTranslationUnit(clang::ASTContext &Context)
 {
 	clang::SourceManager& SM = Context.getSourceManager();
 	clang::TranslationUnitDecl* translationUnitDecl = Context.getTranslationUnitDecl();
-	MetricVisitor* visitor = new MetricVisitor(m_compilerInstance, m_topUnit, m_options, m_fnMap ); 
+
+	TranslationUnitFunctionLocator* fnMap = m_fnLocator->getLocatorFor( SM.getFilename( translationUnitDecl->getLocation() ));
+
+	MetricVisitor* visitor = new MetricVisitor(m_compilerInstance, m_topUnit, m_options, fnMap ); 
 
 	/* we can use ASTContext to get the TranslationUnitDecl, which is
 		a single Decl that collectively represents the entire source file */
@@ -57,10 +60,10 @@ void MetricASTConsumer::HandleTranslationUnit(clang::ASTContext &Context)
 	delete( visitor );
 }
 
-MetricPPConsumer::MetricPPConsumer(MetricUnit* p_topUnit, MetricOptions* p_options, SrcStartToFunctionMap_t*  p_fnMap ) 
+MetricPPConsumer::MetricPPConsumer(MetricUnit* p_topUnit, MetricOptions* p_options, GlobalFunctionLocator*  p_fnLocator ) 
 	: m_options( p_options ),
       m_topUnit( p_topUnit ),
-      m_fnMap( p_fnMap ),
+      m_fnLocator( p_fnLocator ),
 	  clang::PreprocessorFrontendAction()
 { 
 }
@@ -72,5 +75,8 @@ MetricPPConsumer::~MetricPPConsumer(void)
 void MetricPPConsumer::ExecuteAction()
 {
 	MetricSrcLexer srcLexer( getCompilerInstance(), m_topUnit, m_options );
-	srcLexer.LexSources( getCompilerInstance(), m_fnMap );
+	clang::SourceManager& sm = getCompilerInstance().getSourceManager();
+	std::string mainFileName = sm.getFileEntryForID( sm.getMainFileID() )->getName();
+	
+	srcLexer.LexSources( getCompilerInstance(), m_fnLocator->getLocatorFor( mainFileName ) );
 }

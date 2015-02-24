@@ -16,8 +16,8 @@
 
 #include "MetricPPCustomer.hpp"
 
-MetricPPCustomer::MetricPPCustomer( MetricUnit* p_topUnit, std::set<std::string>* p_commentFileList, MetricOptions* p_options, SrcStartToFunctionMap_t*  p_fnMap ) 
-	: m_topUnit( p_topUnit ), m_commentFileList( p_commentFileList ), m_options( p_options), m_fnMap( p_fnMap ), clang::PPCallbacks(), CommentHandler()
+MetricPPCustomer::MetricPPCustomer( MetricUnit* p_topUnit, std::set<std::string>* p_commentFileList, MetricOptions* p_options ) 
+	: m_topUnit( p_topUnit ), m_commentFileList( p_commentFileList ), m_options( p_options), clang::PPCallbacks(), CommentHandler()
 {
 }
 

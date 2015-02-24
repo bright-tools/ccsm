@@ -24,7 +24,7 @@
 
 #include "MetricUnit.hpp"
 #include "MetricOptions.hpp"
-#include "MetricUtils.hpp"
+#include "FunctionLocator.hpp"
 
 #include "clang/AST/RecursiveASTVisitor.h"
 #include "clang/Frontend/CompilerInstance.h"
@@ -75,7 +75,6 @@ class MetricSrcLexer
 		static const std::map<clang::tok::TokenKind,MetricType_e> m_tokenKindToTypeMap;
 
 		void CountToken( clang::Token& p_token );
-		std::string FindFunction( clang::SourceManager& p_sm, clang::SourceLocation& p_loc, const SrcStartToFunctionMap_t* const p_fnMap );
 		void CloseOutFnOrMtd( void );
 		void HandleBasicToken( clang::Token& p_token );
 		void HandleSemiToken( clang::Token& p_token );
@@ -85,7 +84,7 @@ class MetricSrcLexer
 		MetricSrcLexer(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, MetricOptions* p_options = NULL);
 	    virtual ~MetricSrcLexer(void);
 
-		void LexSources( clang::CompilerInstance& p_ci, const SrcStartToFunctionMap_t* const p_fnMap );
+		void LexSources( clang::CompilerInstance& p_ci, const TranslationUnitFunctionLocator* const p_fnLocator );
 };
 
 #endif     // !defined( METRIC_SRC_LEXER_HPP )

@@ -25,13 +25,13 @@
 using namespace clang;
 using namespace std;
 
-MetricVisitor::MetricVisitor(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, MetricOptions* p_options, SrcStartToFunctionMap_t* p_fnMap) : 
+MetricVisitor::MetricVisitor(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, MetricOptions* p_options, TranslationUnitFunctionLocator* p_fnLocator) : 
 	                                                                                                           m_compilerInstance(p_CI), 
 																											   m_astContext(&(p_CI.getASTContext())),
 	                                                                                                           m_topUnit( p_topUnit ), 
 	                                                                                                           m_currentUnit( NULL ), 
 																											   m_options( p_options ),
-																											   m_fnMap( p_fnMap )
+																											   m_fnLocator( p_fnLocator )
 {
 }
 
@@ -54,11 +54,9 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 		m_currentFileName = m_astContext->getSourceManager().getFilename( func->getLocation() ).str();
 		m_currentFunctionName = func->getQualifiedNameAsString();
 
-		if( m_fnMap != NULL )
+		if( m_fnLocator != NULL )
 		{
-			LocationNamePair_t endNamePair( func->getLocEnd(), m_currentFunctionName );
-			FileID fId = m_astContext->getSourceManager().getFileID( func->getLocation() );
-			(*m_fnMap)[ fId.getHashValue() ][ func->getLocStart() ] = endNamePair;
+			m_fnLocator->addFunctionLocation( m_astContext, m_currentFunctionName, func->getBody() );
 		}
 
 		if( ShouldIncludeFile( m_currentFileName ) && 
@@ -84,19 +82,19 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 
 			if( func->isInlineSpecified() )
 			{
-				fileUnit->increment( METRIC_TYPE_INLINE_FUNCTIONS );
+				IncrementMetric( fileUnit, METRIC_TYPE_INLINE_FUNCTIONS );
 			}
 
 			switch( func->getLinkageAndVisibility().getLinkage() )
 			{
 				case clang::Linkage::InternalLinkage:
-					fileUnit->increment( METRIC_TYPE_LOCAL_FUNCTIONS );
+					IncrementMetric( fileUnit, METRIC_TYPE_LOCAL_FUNCTIONS );
 					break;
 				default:
 					/* Not interested at the moment */
 					break;
 			}
-			fileUnit->increment( METRIC_TYPE_FUNCTIONS );
+			IncrementMetric( fileUnit, METRIC_TYPE_FUNCTIONS );
 		}
 		else
 		{
@@ -114,10 +112,10 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 			{
 				case clang::SC_None:
 					/* No storage class specified - implicitly the function is extern */
-					m_currentUnit->increment( METRIC_TYPE_EXTERN_IMPL_FUNCTIONS );
+					IncrementMetric( m_currentUnit,  METRIC_TYPE_EXTERN_IMPL_FUNCTIONS );
 					break;
 				case clang::SC_Extern:
-					m_currentUnit->increment( METRIC_TYPE_EXTERN_EXPL_FUNCTIONS );
+					IncrementMetric( m_currentUnit, METRIC_TYPE_EXTERN_EXPL_FUNCTIONS );
 					break;
 				default:
 					/* Not currently of interest */
@@ -138,11 +136,11 @@ bool MetricVisitor::VisitTypedefDecl( clang::TypedefDecl* p_typeDef )
 		/* Is it a "top level" decl? */
 		if( p_typeDef->isDefinedOutsideFunctionOrMethod() )
 		{
-			m_currentUnit->increment( METRIC_TYPE_TYPEDEF_FILE );
+			IncrementMetric( m_currentUnit, METRIC_TYPE_TYPEDEF_FILE );
 		}
 		else
 		{
-			m_currentUnit->increment( METRIC_TYPE_TYPEDEF_FN );
+			IncrementMetric( m_currentUnit, METRIC_TYPE_TYPEDEF_FN );
 		}
 	}
 
@@ -220,15 +218,15 @@ bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 #endif
 				if ( sc == clang::SC_Extern )
 				{
-					m_currentUnit->increment( METRIC_TYPE_VARIABLE_FILE_EXTERN );
+					IncrementMetric( m_currentUnit, METRIC_TYPE_VARIABLE_FILE_EXTERN );
 				}
 				else
 				{
-					m_currentUnit->increment( METRIC_TYPE_VARIABLE_FILE_LOCAL );
+					IncrementMetric( m_currentUnit, METRIC_TYPE_VARIABLE_FILE_LOCAL );
 					switch( sc )
 					{
 						case clang::SC_Static:
-							m_currentUnit->increment( METRIC_TYPE_VARIABLE_FILE_STATIC );
+							IncrementMetric( m_currentUnit, METRIC_TYPE_VARIABLE_FILE_STATIC );
 							break;
 						default:
 							/* Not currently interested */
@@ -240,21 +238,21 @@ bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 			{
 				if ( sc == clang::SC_Extern )
 				{
-					m_currentUnit->increment( METRIC_TYPE_VARIABLE_FN_EXTERN );
+					IncrementMetric( m_currentUnit, METRIC_TYPE_VARIABLE_FN_EXTERN );
 				}
 				else
 				{
-					m_currentUnit->increment( METRIC_TYPE_VARIABLE_FN_LOCAL );
+					IncrementMetric( m_currentUnit, METRIC_TYPE_VARIABLE_FN_LOCAL );
 					switch( sc )
 					{
 						case clang::SC_Static:
-							m_currentUnit->increment( METRIC_TYPE_VARIABLE_FN_STATIC );
+							IncrementMetric( m_currentUnit, METRIC_TYPE_VARIABLE_FN_STATIC );
 							break;
 						case clang::SC_Register:
-							m_currentUnit->increment( METRIC_TYPE_VARIABLE_FN_REGISTER );
+							IncrementMetric( m_currentUnit, METRIC_TYPE_VARIABLE_FN_REGISTER );
 							break;
 						case clang::SC_Auto:
-							m_currentUnit->increment( METRIC_TYPE_VARIABLE_FN_AUTO );
+							IncrementMetric( m_currentUnit, METRIC_TYPE_VARIABLE_FN_AUTO );
 							break;
 						default:
 							/* Not currently of interest */
@@ -265,7 +263,7 @@ bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 		} 
 		else if( p_varDec->getKind() == clang::Decl::ParmVar )
 		{
-			m_currentUnit->increment( METRIC_TYPE_FUNCTION_PARAMETERS );
+			IncrementMetric( m_currentUnit, METRIC_TYPE_FUNCTION_PARAMETERS );
 		}
 		else
 		{
@@ -281,8 +279,8 @@ bool MetricVisitor::VisitForStmt(clang::ForStmt *p_forSt)
 	if( m_currentUnit )
 	{
 		m_currentUnit->set( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_forSt, m_astContext ));
-		m_currentUnit->increment( METRIC_TYPE_LOOPS );
-		m_currentUnit->increment( METRIC_TYPE_FORLOOP );
+		IncrementMetric( m_currentUnit, METRIC_TYPE_LOOPS );
+		IncrementMetric( m_currentUnit, METRIC_TYPE_FORLOOP );
 	}
     return true;
 }
@@ -291,7 +289,7 @@ bool MetricVisitor::VisitGotoStmt(clang::GotoStmt *p_gotoSt)
 {
 	if( m_currentUnit )
 	{
-		m_currentUnit->increment( METRIC_TYPE_GOTO );
+		IncrementMetric( m_currentUnit, METRIC_TYPE_GOTO );
 	}
 
     return true;
@@ -301,7 +299,7 @@ bool MetricVisitor::VisitLabelStmt(clang::LabelStmt *p_LabelSt)
 {
 	if( m_currentUnit )
 	{
-		m_currentUnit->increment( METRIC_TYPE_LABEL );
+		IncrementMetric( m_currentUnit, METRIC_TYPE_LABEL );
 	}
     return true;
 }
@@ -311,8 +309,8 @@ bool MetricVisitor::VisitWhileStmt(clang::WhileStmt *p_whileSt)
 	if( m_currentUnit )
 	{
 		m_currentUnit->set( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_whileSt, m_astContext ));
-		m_currentUnit->increment( METRIC_TYPE_LOOPS );
-		m_currentUnit->increment( METRIC_TYPE_WHILELOOP );
+		IncrementMetric( m_currentUnit, METRIC_TYPE_LOOPS );
+		IncrementMetric( m_currentUnit, METRIC_TYPE_WHILELOOP );
 	}
     return true;
 }
@@ -321,11 +319,11 @@ bool MetricVisitor::VisitReturnStmt(clang::ReturnStmt *p_returnSt)
 {
 	if( m_currentUnit )
 	{
-		m_currentUnit->increment( METRIC_TYPE_RETURN );
+		IncrementMetric( m_currentUnit, METRIC_TYPE_RETURN );
 
 		if( !isLastExecutableStmtInFn( p_returnSt, m_astContext ) )
 		{
-			m_currentUnit->increment( METRIC_TYPE_RETURNPOINTS );
+			IncrementMetric( m_currentUnit, METRIC_TYPE_RETURNPOINTS );
 		}
 	}
     return true;
@@ -333,6 +331,10 @@ bool MetricVisitor::VisitReturnStmt(clang::ReturnStmt *p_returnSt)
 
 bool MetricVisitor::VisitCallExpr(clang::CallExpr *p_callExpr)
 {
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+	std::cout << "VisitCallExpr : CONTEXT " << m_currentFileName << "::" << m_currentFunctionName << std::endl;
+#endif
+
 	if( m_currentUnit )
 	{
 		clang::FunctionDecl* p_calleeFn = p_callExpr->getCalleeDecl()->getAsFunction();
@@ -342,33 +344,82 @@ bool MetricVisitor::VisitCallExpr(clang::CallExpr *p_callExpr)
 		{
 			std::string calleeName = p_calleeFn->getQualifiedNameAsString();
 
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+			std::cout << "VisitCallExpr : Function call to " << calleeName << std::endl;
+#endif
+
 			/* Not registered this function as being called yet? */
 			// TODO: Does this work for C++ namespacing?
 			if( m_fnsCalled.find( calleeName ) == m_fnsCalled.end() ) {
+
 				// Update the set containing the names of all the functions called
 				m_fnsCalled.insert( calleeName );
 
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+				std::cout << "VisitCallExpr : Not yet registered as called" << std::endl;
+#endif
+
 				/* TODO: This look-up doesn't work when the callee is in a different TU :-| */
 				Stmt* calleeBody = p_callExpr->getDirectCallee()->getBody();
+
 				if( calleeBody ) {
+
 					SourceLocation calleeBodyLocation = calleeBody->getLocStart();
 					std::string name = m_astContext->getSourceManager().getFilename(calleeBodyLocation);
 
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+					std::cout << "VisitCallExpr : Found function body in " << name << std::endl;
+#endif
+
 					if( ShouldIncludeFile( name ))
 					{
-						MetricUnit* fileUnit = m_topUnit->getSubUnit( name, METRIC_UNIT_FILE );
-						MetricUnit* targFn = fileUnit->getSubUnit( calleeName, METRIC_UNIT_FUNCTION );
-						targFn->increment( METRIC_TYPE_CALLED_BY );
+						if( SHOULD_INCLUDE_FUNCTION( m_options, calleeName ))
+						{
+							MetricUnit* fileUnit = m_topUnit->getSubUnit( name, METRIC_UNIT_FILE );
+							MetricUnit* targFn = fileUnit->getSubUnit( calleeName, METRIC_UNIT_FUNCTION );
+							IncrementMetric( targFn, METRIC_TYPE_CALLED_BY );
+						}
+						else
+						{
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+							std::cout << "VisitCallExpr : Function is in list to be ignored" << std::endl;
+#endif
+						}
+					}
+					else
+					{
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+						std::cout << "VisitCallExpr : Function in ignored file" << std::endl;
+#endif
 					}
 				}
+				else
+				{
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+					std::cout << "VisitCallExpr : Function has no body" << std::endl;
+#endif
+				}
+			}
+			else
+			{
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+				std::cout << "VisitCallExpr : Already registered as called" << std::endl;
+#endif
 			}
 
 			if( p_calleeFn->getBody() != NULL )
 			{
-				m_currentUnit->increment( METRIC_TYPE_LOCAL_FUNCTION_CALLS );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_LOCAL_FUNCTION_CALLS );
 			}
 		}
-		m_currentUnit->increment( METRIC_TYPE_FUNCTION_CALLS );
+		else
+		{
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+			std::cout << "VisitCallExpr : Not able to determin name of called function" << std::endl;
+#endif
+			// TODO: Number of functions called isn't incremented, which might be misleading ... should document this behaviour at least
+		}
+		IncrementMetric( m_currentUnit, METRIC_TYPE_FUNCTION_CALLS );
 	}
 
     return true;
@@ -379,8 +430,8 @@ bool MetricVisitor::VisitSwitchStmt(clang::SwitchStmt *p_switchSt)
 	if( m_currentUnit )
 	{
 		m_currentUnit->set( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_switchSt, m_astContext ));
-		m_currentUnit->increment( METRIC_TYPE_SWITCH );
-		m_currentUnit->increment( METRIC_TYPE_DECISIONS );
+		IncrementMetric( m_currentUnit, METRIC_TYPE_SWITCH );
+		IncrementMetric( m_currentUnit, METRIC_TYPE_DECISIONS );
 	}
     return true;
 }
@@ -392,7 +443,7 @@ bool MetricVisitor::VisitConditionalOperator(clang::ConditionalOperator *p_condO
 #endif
 	if( m_currentUnit )
 	{
-		m_currentUnit->increment( METRIC_TYPE_OPERATOR_TERNARY );
+		IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_TERNARY );
 	}
     return true;
 }
@@ -401,7 +452,7 @@ bool MetricVisitor::VisitDefaultStmt(clang::DefaultStmt *p_defaultSt)
 {
 	if( m_currentUnit )
 	{
-		m_currentUnit->increment( METRIC_TYPE_DEFAULT );
+		IncrementMetric( m_currentUnit, METRIC_TYPE_DEFAULT );
 	}
     return true;
 }
@@ -410,7 +461,7 @@ bool MetricVisitor::VisitCaseStmt(clang::CaseStmt *p_caseSt)
 {
 	if( m_currentUnit )
 	{
-		m_currentUnit->increment( METRIC_TYPE_CASE );
+		IncrementMetric( m_currentUnit, METRIC_TYPE_CASE );
 	}
     return true;
 }
@@ -422,10 +473,10 @@ bool MetricVisitor::VisitUnaryExprOrTypeTraitExpr( clang::UnaryExprOrTypeTraitEx
 		switch( p_unaryExpr->getKind() )
 		{
 			case clang::UETT_SizeOf:
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_SIZE_OF );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_SIZE_OF );
 				break;
 			case clang::UETT_AlignOf:
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ALIGN_OF );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ALIGN_OF );
 				break;
 			case clang::UETT_VecStep:
 				/* TODO */
@@ -444,7 +495,7 @@ bool MetricVisitor::VisitExplicitCastExpr(clang::ExplicitCastExpr *p_castExpr)
 {
 	if( m_currentUnit )
 	{
-		m_currentUnit->increment( METRIC_TYPE_OPERATOR_CAST );
+		IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_CAST );
 	}
 	return true;
 }
@@ -455,11 +506,11 @@ bool MetricVisitor::VisitMemberExpr( clang::MemberExpr* p_memberExpr )
 	{
 		if( p_memberExpr->isArrow() )
 		{
-			m_currentUnit->increment( METRIC_TYPE_OPERATOR_MEMBER_ACCESS_POINTER );
+			IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_MEMBER_ACCESS_POINTER );
 		} 
 		else
 		{
-			m_currentUnit->increment( METRIC_TYPE_OPERATOR_MEMBER_ACCESS_DIRECT );
+			IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_MEMBER_ACCESS_DIRECT );
 		}
 	}
 	return true;
@@ -469,7 +520,7 @@ bool MetricVisitor::VisitArraySubscriptExpr (clang::ArraySubscriptExpr *p_subs)
 {
 	if( m_currentUnit )
 	{
-		m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARRAY_SUBSCRIPT );
+		IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ARRAY_SUBSCRIPT );
 	}
 	return true;
 }
@@ -481,34 +532,34 @@ bool MetricVisitor::VisitUnaryOperator(clang::UnaryOperator *p_uOp)
 		switch( p_uOp->getOpcode() )
 		{
 			case clang::UO_PostInc:
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_INCREMENT_POST );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ARITHMETIC_INCREMENT_POST );
 				break;
 			case clang::UO_PostDec:
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_DECREMENT_POST );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ARITHMETIC_DECREMENT_POST );
 				break;
 			case clang::UO_PreInc:
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_INCREMENT_PRE );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ARITHMETIC_INCREMENT_PRE );
 				break;
 			case clang::UO_PreDec:
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_DECREMENT_PRE);
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ARITHMETIC_DECREMENT_PRE);
 				break;
 			case clang::UO_AddrOf:
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ADDRESS_OF );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ADDRESS_OF );
 				break;
 			case clang::UO_Deref:
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_DEREFERENCE );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_DEREFERENCE );
 				break;
 			case clang::UO_Plus:
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_UNARY_PLUS );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ARITHMETIC_UNARY_PLUS );
 				break; 	
 			case clang::UO_Minus:
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_UNARY_MINUS );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ARITHMETIC_UNARY_MINUS );
 				break; 	
 			case clang::UO_Not:
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_BITWISE_NOT );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_BITWISE_NOT );
 				break; 	
 			case clang::UO_LNot:
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_LOGICAL_NOT );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_LOGICAL_NOT );
 				break; 	
 			case clang::UO_Real:
 				/* TODO */
@@ -537,100 +588,100 @@ bool MetricVisitor::VisitBinaryOperator(clang::BinaryOperator *p_binOp)
 		switch( p_binOp->getOpcode() )
 		{
 			case clang::BO_PtrMemD:
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_PTR_TO_MEMBER_DIRECT );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_PTR_TO_MEMBER_DIRECT );
 				break;
 			case clang::BO_PtrMemI:	
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_PTR_TO_MEMBER_INDIRECT );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_PTR_TO_MEMBER_INDIRECT );
 				break;
 			case clang::BO_Mul:
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_MULTIPLICATION );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ARITHMETIC_MULTIPLICATION );
 				break;
 			case clang::BO_Div:	
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_DIVISION );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ARITHMETIC_DIVISION );
 				break;
 			case clang::BO_Rem: 	
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_MODULO );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ARITHMETIC_MODULO );
 				break;
 			case clang::BO_Add: 	
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_ADDITION );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ARITHMETIC_ADDITION );
 				break;
 			case clang::BO_Sub: 	
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_SUBTRACTION );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ARITHMETIC_SUBTRACTION );
 				break;
 			case clang::BO_Shl:	
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_SHIFT_LEFT );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_SHIFT_LEFT );
 				break;
 			case clang::BO_Shr: 	
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_SHIFT_RIGHT );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_SHIFT_RIGHT );
 				break;
 			case clang::BO_LT: 	
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_COMP_LESS_THAN );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_COMP_LESS_THAN );
 				break;
 			case clang::BO_GT: 	
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_COMP_GREATER_THAN );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_COMP_GREATER_THAN );
 				break;
 			case clang::BO_LE: 	
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_COMP_LESS_THAN_EQUAL );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_COMP_LESS_THAN_EQUAL );
 				break;
 			case clang::BO_GE: 	
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_COMP_GREATER_THAN_EQUAL );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_COMP_GREATER_THAN_EQUAL );
 				break;
 			case clang::BO_EQ: 	
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_COMP_EQUAL );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_COMP_EQUAL );
 				break;
 			case clang::BO_NE: 	
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_COMP_NOT_EQUAL );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_COMP_NOT_EQUAL );
 				break;
 			case clang::BO_And: 	
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_BITWISE_AND );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_BITWISE_AND );
 				break;
 			case clang::BO_Xor: 	
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_BITWISE_XOR );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_BITWISE_XOR );
 				break;
 			case clang::BO_Or: 	
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_BITWISE_OR );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_BITWISE_OR );
 				break;
 			case clang::BO_LAnd:
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_LOGICAL_AND );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_LOGICAL_AND );
 				break;
 			case clang::BO_LOr:
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_LOGICAL_OR );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_LOGICAL_OR );
 				break;
 			case clang::BO_Assign:
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_ASSIGN );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ARITHMETIC_ASSIGN );
 				break;
 			case clang::BO_MulAssign:
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_MULTIPLICATION_ASSIGN );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ARITHMETIC_MULTIPLICATION_ASSIGN );
 				break;
 			case clang::BO_DivAssign:	
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_DIVISION_ASSIGN );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ARITHMETIC_DIVISION_ASSIGN );
 				break;
 			case clang::BO_RemAssign: 	
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_MODULO_ASSIGN );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ARITHMETIC_MODULO_ASSIGN );
 				break;
 			case clang::BO_AddAssign: 	
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_ADDITION_ASSIGN );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ARITHMETIC_ADDITION_ASSIGN );
 				break;
 			case clang::BO_SubAssign: 	
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_ARITHMETIC_SUBTRACTION_ASSIGN );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ARITHMETIC_SUBTRACTION_ASSIGN );
 				break;
 			case clang::BO_ShlAssign: 	
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_SHIFT_LEFT_ASSIGN );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_SHIFT_LEFT_ASSIGN );
 				break;
 			case clang::BO_ShrAssign: 	
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_SHIFT_RIGHT_ASSIGN );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_SHIFT_RIGHT_ASSIGN );
 				break;
 			case clang::BO_AndAssign:	
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_BITWISE_AND_ASSIGN );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_BITWISE_AND_ASSIGN );
 				break;
 			case clang::BO_XorAssign: 	
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_BITWISE_XOR_ASSIGN );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_BITWISE_XOR_ASSIGN );
 				break;
 			case clang::BO_OrAssign: 	
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_BITWISE_OR_ASSIGN );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_BITWISE_OR_ASSIGN );
 				break;
 			case clang::BO_Comma:
-				m_currentUnit->increment( METRIC_TYPE_OPERATOR_COMMA );
+				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_COMMA );
 				break;
 			default:
 #if defined( DEBUG_FN_TRACE_OUTOUT )
@@ -647,7 +698,7 @@ bool MetricVisitor::VisitStmt(clang::Stmt *p_statement)
 {
 	if( m_currentUnit )
 	{
-		m_currentUnit->increment( METRIC_TYPE_STATEMENTS );
+		IncrementMetric( m_currentUnit, METRIC_TYPE_STATEMENTS );
 	}
 	return true;
 }
@@ -665,13 +716,13 @@ bool MetricVisitor::VisitIfStmt(clang::IfStmt *p_ifSt)
 	std::cout << "VisitIfStmt - Recorded" << std::endl;
 #endif
 		m_currentUnit->set( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_ifSt, m_astContext ));
-		m_currentUnit->increment( METRIC_TYPE_IF );
-		m_currentUnit->increment( METRIC_TYPE_DECISIONS );
+		IncrementMetric( m_currentUnit, METRIC_TYPE_IF );
+		IncrementMetric( m_currentUnit, METRIC_TYPE_DECISIONS );
 
 		if( p_ifSt->getElse() )
 		{
 			// TODO: This means that "else if" statements get counted as both an IF and an ELSE, which may not be what everyone wants
-			m_currentUnit->increment( METRIC_TYPE_ELSE );
+			IncrementMetric( m_currentUnit, METRIC_TYPE_ELSE );
 		}
 	} else {
 		/* TODO */
@@ -780,22 +831,34 @@ bool MetricVisitor::TraverseDecl(clang::Decl *p_decl)
 	return retVal;
 }
 
+void MetricVisitor::IncrementMetric( MetricUnit* const p_unit, const MetricType_e p_metricType )
+{
+	MetricUnit* fileUnit = m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE, false);
+
+	if( fileUnit )
+	{
+		
+		//std::cout << "XX" << m_currentFileName << std::endl;
+
+		if(( ! fileUnit->hasBeenProcessed() ) || ( MetricUnit::isMultiPassAllowed( p_metricType )))
+		{
+			p_unit->increment( p_metricType );
+		}
+		else
+		{
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+			std::cout << "Not incrementing metric " << MetricUnit::getMetricName( p_metricType ) << std::endl;
+#endif
+		}
+	}
+}
+
 bool MetricVisitor::ShouldIncludeFile( const std::string& p_file )
 {
 	bool ret_val = false;
 	if( SHOULD_INCLUDE_FILE( m_options, p_file ) )
 	{
-		MetricUnit* fileUnit = m_topUnit->getSubUnit(p_file, METRIC_UNIT_FILE);
-
-		if(! fileUnit->hasBeenProcessed() )
-		{
-			ret_val = true;
-		}
+		ret_val = true;
 	}
 	return ( ret_val );
-}
-
-const SrcStartToFunctionMap_t* MetricVisitor::getFunctionMap( void ) const
-{
-	return m_fnMap;
 }

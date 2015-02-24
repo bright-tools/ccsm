@@ -30,9 +30,5 @@ extern bool isLastExecutableStmtInFn(const clang::Stmt* const p_stmt, clang::AST
 extern unsigned getControlDepth(const clang::Stmt* const p_stmt, clang::ASTContext* p_context );
 extern size_t   countNewlines( clang::StringRef& p_buffer );
 
-typedef std::pair< clang::SourceLocation, std::string >      LocationNamePair_t;
-typedef std::map< clang::SourceLocation, LocationNamePair_t> StartEndPair_t;
-/** Maps file ID to a map of ... */
-typedef std::map< unsigned, StartEndPair_t> SrcStartToFunctionMap_t;
 
 #endif
