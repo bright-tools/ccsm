@@ -29,12 +29,14 @@ MetricASTConsumer::~MetricASTConsumer(void)
 {
 }
 
+#include <iostream>
+
 void MetricASTConsumer::HandleTranslationUnit(clang::ASTContext &Context) 
 {
 	clang::SourceManager& SM = Context.getSourceManager();
 	clang::TranslationUnitDecl* translationUnitDecl = Context.getTranslationUnitDecl();
 
-	TranslationUnitFunctionLocator* fnMap = m_fnLocator->getLocatorFor( SM.getFilename( translationUnitDecl->getLocation() ));
+	TranslationUnitFunctionLocator* fnMap = m_fnLocator->getLocatorFor( SM.getFileEntryForID( SM.getMainFileID() )->getName() );
 
 	MetricVisitor* visitor = new MetricVisitor(m_compilerInstance, m_topUnit, m_options, fnMap ); 
 

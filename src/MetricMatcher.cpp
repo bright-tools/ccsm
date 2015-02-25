@@ -56,7 +56,7 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 
 		if( m_fnLocator != NULL )
 		{
-			m_fnLocator->addFunctionLocation( m_astContext, m_currentFunctionName, func->getBody() );
+			m_fnLocator->addFunctionLocation( m_astContext, m_currentFunctionName, func );
 		}
 
 		if( ShouldIncludeFile( m_currentFileName ) && 

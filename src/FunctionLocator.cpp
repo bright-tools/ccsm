@@ -43,6 +43,20 @@ TranslationUnitFunctionLocator* GlobalFunctionLocator::getLocatorFor( const std:
 #endif
 }
 
+void GlobalFunctionLocator::dump( std::ostream& p_out ) const
+{
+	MainSrcToFnLocMap_t::const_iterator it;
+
+	for( it = m_map.begin();
+		 it != m_map.end();
+		 it++ )
+	{
+		p_out << "Translation Unit: " << it->first << std::endl;
+		it->second.dump( p_out );
+	}
+}
+
+
 GlobalFunctionLocator::~GlobalFunctionLocator()
 {
 #if 0
@@ -55,11 +69,11 @@ GlobalFunctionLocator::~GlobalFunctionLocator()
 #endif
 }
 
-void TranslationUnitFunctionLocator::addFunctionLocation( const clang::ASTContext* const p_context, const std::string& p_name, const clang::Stmt* const p_body  )
+void TranslationUnitFunctionLocator::addFunctionLocation( const clang::ASTContext* const p_context, const std::string& p_name, const clang::FunctionDecl * const p_func  )
 {
-	clang::SourceLocation endLoc = p_body->getLocEnd();
-	clang::SourceLocation startLoc = p_body->getLocStart();
-	clang::FileID fId = p_context->getSourceManager().getFileID( p_body->getLocStart() );
+	clang::SourceLocation endLoc = p_func->getBody()->getLocEnd();
+	clang::SourceLocation startLoc = p_func->getLocStart();
+	clang::FileID fId = p_context->getSourceManager().getFileID( p_func->getLocStart() );
 	unsigned int hashVal = fId.getHashValue();
 
 //	std::cout << "addFunctionLocation : Adding to function map: " << p_name << " " << hashVal << " ( " << startLoc.getRawEncoding() << " to " << endLoc.getRawEncoding() << ")" << std::endl;
@@ -68,6 +82,25 @@ void TranslationUnitFunctionLocator::addFunctionLocation( const clang::ASTContex
 	m_map[ hashVal ][ startLoc ] = endNamePair;
 }
 
+void TranslationUnitFunctionLocator::dump( std::ostream& p_out ) const
+{
+	SrcStartToFunctionMap_t::const_iterator it;
+
+	for( it = m_map.begin();
+		 it != m_map.end();
+		 it++ )
+	{
+		p_out << " File ID: " << it->first << std::endl;
+		StartEndPair_t::const_iterator pit;
+
+		for( pit = it->second.begin();
+			 pit != it->second.end();
+			 pit++ )
+		{
+			p_out << "  Function: " << pit->second.second << " (" << pit->first.getRawEncoding() << "-" << pit->second.first.getRawEncoding() << ")" << std::endl;
+		}
+	}
+}
 
 std::string TranslationUnitFunctionLocator::FindFunction( const clang::SourceManager& p_SourceManager, clang::SourceLocation& p_loc ) const
 {

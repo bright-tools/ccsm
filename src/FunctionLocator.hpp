@@ -41,8 +41,10 @@ private:
 
 	SrcStartToFunctionMap_t m_map;
 public:
-	void addFunctionLocation( const clang::ASTContext* const p_context, const std::string& p_name, const clang::Stmt* const p_body );
+	void addFunctionLocation( const clang::ASTContext* const p_context, const std::string& p_name, const clang::FunctionDecl * const p_func );
 	std::string FindFunction( const clang::SourceManager& p_SourceManager, clang::SourceLocation& p_loc ) const;
+
+	void dump( std::ostream& p_out ) const;
 };
 
 class GlobalFunctionLocator
@@ -55,6 +57,7 @@ class GlobalFunctionLocator
 	public:
         TranslationUnitFunctionLocator* getLocatorFor( const std::string p_fileName );
 		virtual ~GlobalFunctionLocator();
+		void dump( std::ostream& p_out ) const;
 };
 
 #endif

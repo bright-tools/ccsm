@@ -66,6 +66,11 @@ static cl::opt<bool> DumpTokens(
   cl::desc("Dump tokens as they are lexed")
 );
 
+static cl::opt<bool> DumpFnMap(
+  "dump-function-map",
+  cl::desc("Dump the mapping of files/functions/locations")
+);
+
 static cl::opt<bool> NoGlobal(
   "disable-global",
   cl::desc("Disable output of stats at the global level")
@@ -167,6 +172,11 @@ int main(int argc, const char **argv) {
 			}
 			if( !NoGlobal ) {
 				output[ METRIC_UNIT_GLOBAL ] = true;
+			}
+
+			if( DumpFnMap )
+			{
+				srcMap.dump( std::cout );
 			}
 
 			topUnit.dump( std::cout, output, OutputFormat, &options );
