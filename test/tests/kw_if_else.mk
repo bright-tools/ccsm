@@ -7,4 +7,3 @@ $(PASS)/out.log.test_kw_if_else $(PASS)/err.log.test_kw_if_else: src/kw_if_else.
 	@echo Test $(STEP): Token/Statement Count: If/Else
 	$(TGT_E) $(EXCLUDE) src/kw_if_else.c  --output-metrics=STMT_IF_CNT,TOK_IF,STMT_ELSE_CNT,TOK_ELSE -- $(OUT)
 	$(CHECK_E)
-

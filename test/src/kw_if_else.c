@@ -1,4 +1,4 @@
-#include "stmt_if.h"
+#include "kw_if_else.h"
 
 #define CHECK_MACRO(_x) do { if( _x ) { err = 1; } else { err = 7; } } while( 0 )
 
