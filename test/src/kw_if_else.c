@@ -1,6 +1,6 @@
 #include "stmt_if.h"
 
-#define CHECK_MACRO(_x) do { if( _x ) { err = 1; } } while( 0 )
+#define CHECK_MACRO(_x) do { if( _x ) { err = 1; } else { err = 7; } } while( 0 )
 
 int err;
 
@@ -16,6 +16,10 @@ int main( void )
         if( x == 1 )
 	{
             err = 0;
+	}
+	else
+	{
+            err = 2;
 	}
     }
 

@@ -1,0 +1,25 @@
+Global
+IF statements: 7
+ELSE statements: 5
+Number of 'else' tokens: 2
+Number of 'if' tokens: 4
+File: src/stmt_if.h
+	IF statements: 3
+	ELSE statements: 2
+	Number of 'else' tokens: 1
+	Number of 'if' tokens: 2
+	Function: x_if
+		IF statements: 3
+		ELSE statements: 2
+		Number of 'else' tokens: 1
+		Number of 'if' tokens: 2
+File: src\stmt_if.c
+	IF statements: 4
+	ELSE statements: 3
+	Number of 'else' tokens: 1
+	Number of 'if' tokens: 2
+	Function: main
+		IF statements: 4
+		ELSE statements: 3
+		Number of 'else' tokens: 1
+		Number of 'if' tokens: 2

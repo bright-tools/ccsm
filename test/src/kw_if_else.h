@@ -3,7 +3,7 @@
 
 /* This is some if() in a comment */
 
-#define IF( _if ) do { if( _if ) { err = 2; } } while( 0 ) 
+#define IF( _if ) do { if( _if ) { err = 2; } else { err = 77; } } while( 0 ) 
 
 extern int err;
 
@@ -15,7 +15,11 @@ inline int x_if( int y_if )
 
     if( y_if )
     {
-        ret_val = 1;
+        ret_val = 99;
+        if( err == 0 )
+	{
+            ret_val = 1;
+	}
     }
     else
     {
