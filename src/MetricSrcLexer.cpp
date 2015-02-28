@@ -30,70 +30,6 @@ const MetricSrcLexer::SemiConlonContainers_e MetricSrcLexer::m_sccEndParen = SCC
 const MetricSrcLexer::SemiConlonContainers_e MetricSrcLexer::m_sccStartBrace = SCC_Struct;
 const MetricSrcLexer::SemiConlonContainers_e MetricSrcLexer::m_sccEndBrace = SCC_Union;
 
-
-const static std::pair<std::string,MetricType_e> tokenToTypeMapData[] = {
-	std::make_pair("bool", METRIC_TYPE_TOKEN_BOOL),
-	std::make_pair("char", METRIC_TYPE_TOKEN_CHAR),
-	std::make_pair("double", METRIC_TYPE_TOKEN_DOUBLE),
-	std::make_pair("float", METRIC_TYPE_TOKEN_FLOAT),
-	std::make_pair("int", METRIC_TYPE_TOKEN_INT),
-	std::make_pair("long", METRIC_TYPE_TOKEN_LONG),
-	std::make_pair("short", METRIC_TYPE_TOKEN_SHORT),
-	std::make_pair("signed", METRIC_TYPE_TOKEN_SIGNED),
-	std::make_pair("unsigned", METRIC_TYPE_TOKEN_UNSIGNED),
-	std::make_pair("void", METRIC_TYPE_TOKEN_VOID),
-	std::make_pair("const", METRIC_TYPE_TOKEN_CONST),
-	std::make_pair("friend", METRIC_TYPE_TOKEN_FRIEND),
-	std::make_pair("volatile", METRIC_TYPE_TOKEN_VOLATILE),
-	std::make_pair("extern", METRIC_TYPE_TOKEN_EXTERN),
-//	std::make_pair("inline", METRIC_TYPE_TOKEN_INLINE),
-	std::make_pair("register", METRIC_TYPE_TOKEN_REGISTER),
-	std::make_pair("static", METRIC_TYPE_TOKEN_STATIC),
-	std::make_pair("typedef", METRIC_TYPE_TOKEN_TYPEDEF),
-	std::make_pair("virtual", METRIC_TYPE_TOKEN_VIRTUAL),
-	std::make_pair("mutable", METRIC_TYPE_TOKEN_MUTABLE),
-	std::make_pair("auto", METRIC_TYPE_TOKEN_AUTO),
-	std::make_pair("asm", METRIC_TYPE_TOKEN_ASM),
-	std::make_pair("break", METRIC_TYPE_TOKEN_BREAK),
-	std::make_pair("case", METRIC_TYPE_TOKEN_CASE),
-	std::make_pair("class", METRIC_TYPE_TOKEN_CLASS),
-	std::make_pair("continue", METRIC_TYPE_TOKEN_CONTINUE),
-	std::make_pair("default", METRIC_TYPE_TOKEN_DEFAULT),
-	std::make_pair("delete", METRIC_TYPE_TOKEN_DELETE),
-	std::make_pair("do", METRIC_TYPE_TOKEN_DO),
-//	std::make_pair("else", METRIC_TYPE_TOKEN_ELSE),
-	std::make_pair("enum", METRIC_TYPE_TOKEN_ENUM),
-	std::make_pair("for", METRIC_TYPE_TOKEN_FOR),
-	std::make_pair("goto", METRIC_TYPE_TOKEN_GOTO),
-//	std::make_pair("if", METRIC_TYPE_TOKEN_IF),
-	std::make_pair("new", METRIC_TYPE_TOKEN_NEW),
-	std::make_pair("operator", METRIC_TYPE_TOKEN_OPERATOR),
-	std::make_pair("private", METRIC_TYPE_TOKEN_PRIVATE),
-	std::make_pair("protected", METRIC_TYPE_TOKEN_PROTECTED),
-	std::make_pair("public", METRIC_TYPE_TOKEN_PUBLIC),
-	std::make_pair("return", METRIC_TYPE_TOKEN_RETURN),
-	std::make_pair("sizeof", METRIC_TYPE_TOKEN_SIZEOF),
-	std::make_pair("struct", METRIC_TYPE_TOKEN_STRUCT),
-	std::make_pair("switch", METRIC_TYPE_TOKEN_SWITCH),
-	std::make_pair("this", METRIC_TYPE_TOKEN_THIS),
-	std::make_pair("union", METRIC_TYPE_TOKEN_UNION),
-	std::make_pair("while", METRIC_TYPE_TOKEN_WHILE),
-	std::make_pair("namespace", METRIC_TYPE_TOKEN_NAMESPACE),
-	std::make_pair("using", METRIC_TYPE_TOKEN_USING),
-	std::make_pair("try", METRIC_TYPE_TOKEN_TRY),
-	std::make_pair("catch", METRIC_TYPE_TOKEN_CATCH),
-	std::make_pair("throw", METRIC_TYPE_TOKEN_THROW),
-	std::make_pair("typeid", METRIC_TYPE_TOKEN_TYPEID),
-	std::make_pair("template", METRIC_TYPE_TOKEN_TEMPLATE),
-	std::make_pair("explicit", METRIC_TYPE_TOKEN_EXPLICIT),
-	std::make_pair("true", METRIC_TYPE_TOKEN_TRUE),
-	std::make_pair("false", METRIC_TYPE_TOKEN_FALSE),
-	std::make_pair("typename", METRIC_TYPE_TOKEN_TYPENAME)
-};
-
-const std::map<std::string,MetricType_e> MetricSrcLexer::m_tokenToTypeMap( tokenToTypeMapData,
-    tokenToTypeMapData + sizeof tokenToTypeMapData / sizeof tokenToTypeMapData[0]);
-
 const static std::pair<clang::tok::TokenKind,MetricType_e> tokenKindToTypeMapData[] = {
 	std::make_pair(clang::tok::exclaim, METRIC_TYPE_TOKEN_NOT),
 	std::make_pair(clang::tok::exclaimequal, METRIC_TYPE_TOKEN_NOT),
@@ -123,10 +59,64 @@ const static std::pair<clang::tok::TokenKind,MetricType_e> tokenKindToTypeMapDat
 	std::make_pair(clang::tok::kw_inline, METRIC_TYPE_TOKEN_INLINE),
 	std::make_pair(clang::tok::kw_typedef, METRIC_TYPE_TOKEN_TYPEDEF),
 	std::make_pair(clang::tok::kw_auto, METRIC_TYPE_TOKEN_AUTO),
+	std::make_pair(clang::tok::kw_for, METRIC_TYPE_TOKEN_FOR),
 	std::make_pair(clang::tok::kw_extern, METRIC_TYPE_TOKEN_EXTERN),
 	std::make_pair(clang::tok::kw_register, METRIC_TYPE_TOKEN_REGISTER),
 	std::make_pair(clang::tok::kw_if,METRIC_TYPE_TOKEN_IF),
 	std::make_pair(clang::tok::kw_else,METRIC_TYPE_TOKEN_ELSE),
+	std::make_pair(clang::tok::kw_bool, METRIC_TYPE_TOKEN_BOOL),
+	std::make_pair(clang::tok::kw_char, METRIC_TYPE_TOKEN_CHAR),
+	std::make_pair(clang::tok::kw_double, METRIC_TYPE_TOKEN_DOUBLE),
+	std::make_pair(clang::tok::kw_float, METRIC_TYPE_TOKEN_FLOAT),
+	std::make_pair(clang::tok::kw_int, METRIC_TYPE_TOKEN_INT),
+	std::make_pair(clang::tok::kw_long, METRIC_TYPE_TOKEN_LONG),
+	std::make_pair(clang::tok::kw_short, METRIC_TYPE_TOKEN_SHORT),
+	std::make_pair(clang::tok::kw_signed, METRIC_TYPE_TOKEN_SIGNED),
+	std::make_pair(clang::tok::kw_unsigned, METRIC_TYPE_TOKEN_UNSIGNED),
+	std::make_pair(clang::tok::kw_void, METRIC_TYPE_TOKEN_VOID),
+	std::make_pair(clang::tok::kw_const, METRIC_TYPE_TOKEN_CONST),
+	std::make_pair(clang::tok::kw_friend, METRIC_TYPE_TOKEN_FRIEND),
+	std::make_pair(clang::tok::kw_volatile, METRIC_TYPE_TOKEN_VOLATILE),
+	std::make_pair(clang::tok::kw_extern, METRIC_TYPE_TOKEN_EXTERN),
+	std::make_pair(clang::tok::kw_register, METRIC_TYPE_TOKEN_REGISTER),
+	std::make_pair(clang::tok::kw_static, METRIC_TYPE_TOKEN_STATIC),
+	std::make_pair(clang::tok::kw_typedef, METRIC_TYPE_TOKEN_TYPEDEF),
+	std::make_pair(clang::tok::kw_virtual, METRIC_TYPE_TOKEN_VIRTUAL),
+	std::make_pair(clang::tok::kw_mutable, METRIC_TYPE_TOKEN_MUTABLE),
+	std::make_pair(clang::tok::kw_auto, METRIC_TYPE_TOKEN_AUTO),
+	std::make_pair(clang::tok::kw_asm, METRIC_TYPE_TOKEN_ASM),
+	std::make_pair(clang::tok::kw_break, METRIC_TYPE_TOKEN_BREAK),
+	std::make_pair(clang::tok::kw_case, METRIC_TYPE_TOKEN_CASE),
+	std::make_pair(clang::tok::kw_class, METRIC_TYPE_TOKEN_CLASS),
+	std::make_pair(clang::tok::kw_continue, METRIC_TYPE_TOKEN_CONTINUE),
+	std::make_pair(clang::tok::kw_default, METRIC_TYPE_TOKEN_DEFAULT),
+	std::make_pair(clang::tok::kw_delete, METRIC_TYPE_TOKEN_DELETE),
+	std::make_pair(clang::tok::kw_do, METRIC_TYPE_TOKEN_DO),
+	std::make_pair(clang::tok::kw_enum, METRIC_TYPE_TOKEN_ENUM),
+	std::make_pair(clang::tok::kw_goto, METRIC_TYPE_TOKEN_GOTO),
+	std::make_pair(clang::tok::kw_new, METRIC_TYPE_TOKEN_NEW),
+	std::make_pair(clang::tok::kw_operator, METRIC_TYPE_TOKEN_OPERATOR),
+	std::make_pair(clang::tok::kw_private, METRIC_TYPE_TOKEN_PRIVATE),
+	std::make_pair(clang::tok::kw_protected, METRIC_TYPE_TOKEN_PROTECTED),
+	std::make_pair(clang::tok::kw_public, METRIC_TYPE_TOKEN_PUBLIC),
+	std::make_pair(clang::tok::kw_return, METRIC_TYPE_TOKEN_RETURN),
+	std::make_pair(clang::tok::kw_sizeof, METRIC_TYPE_TOKEN_SIZEOF),
+	std::make_pair(clang::tok::kw_struct, METRIC_TYPE_TOKEN_STRUCT),
+	std::make_pair(clang::tok::kw_switch, METRIC_TYPE_TOKEN_SWITCH),
+	std::make_pair(clang::tok::kw_this, METRIC_TYPE_TOKEN_THIS),
+	std::make_pair(clang::tok::kw_union, METRIC_TYPE_TOKEN_UNION),
+	std::make_pair(clang::tok::kw_while, METRIC_TYPE_TOKEN_WHILE),
+	std::make_pair(clang::tok::kw_namespace, METRIC_TYPE_TOKEN_NAMESPACE),
+	std::make_pair(clang::tok::kw_using, METRIC_TYPE_TOKEN_USING),
+	std::make_pair(clang::tok::kw_try, METRIC_TYPE_TOKEN_TRY),
+	std::make_pair(clang::tok::kw_catch, METRIC_TYPE_TOKEN_CATCH),
+	std::make_pair(clang::tok::kw_throw, METRIC_TYPE_TOKEN_THROW),
+	std::make_pair(clang::tok::kw_typeid, METRIC_TYPE_TOKEN_TYPEID),
+	std::make_pair(clang::tok::kw_template, METRIC_TYPE_TOKEN_TEMPLATE),
+	std::make_pair(clang::tok::kw_explicit, METRIC_TYPE_TOKEN_EXPLICIT),
+	std::make_pair(clang::tok::kw_true, METRIC_TYPE_TOKEN_TRUE),
+	std::make_pair(clang::tok::kw_false, METRIC_TYPE_TOKEN_FALSE),
+	std::make_pair(clang::tok::kw_typename, METRIC_TYPE_TOKEN_TYPENAME),
 	std::make_pair(clang::tok::coloncolon, METRIC_TYPE_TOKEN_COLONCOLON),
 	std::make_pair(clang::tok::less, METRIC_TYPE_TOKEN_LESS),
 	std::make_pair(clang::tok::lessless, METRIC_TYPE_TOKEN_LESSLESS),
@@ -201,9 +191,52 @@ void MetricSrcLexer::HandleBasicToken( clang::Token& p_token )
 	if( typeLookup != m_tokenKindToTypeMap.end() )
 	{
 		m_currentUnit->increment( (*typeLookup).second );
+		switch( (*typeLookup).second )
+		{
+			case clang::tok::kw_for:
+				m_semiContainerOpen[ SCC_For ] = true;
+				break;
+			case clang::tok::kw_struct:
+				m_semiContainerOpen[ SCC_Struct ] = true;
+				break;
+			case clang::tok::kw_union:
+				m_semiContainerOpen[ SCC_Union ] = true;
+				break;
+			default:
+				break;
+#if 0
+					else if(( tok_data == "define" ) && 
+						    ( m_lastToken == clang::tok::hash ))
+					{
+						m_semiContainerOpen[ SCC_Define ] = true;
+					}
+#endif
+		}
+
 	}
 	else
 	{
+		if( p_token.isAnyIdentifier() )
+		{
+			std::string tok_data = p_token.getIdentifierInfo()->getName();
+			if( m_options->getDumpTokens() )
+			{
+				std::cout << ",unreserved:"<<tok_data;
+			}
+			if( m_currentUnit->isFnOrMethod() )
+			{
+				m_currentFnIdentifiers.insert( tok_data );
+			}
+			else
+			{
+				m_currentFileIdentifiers.insert( tok_data );
+			}
+			m_currentUnit->increment( METRIC_TYPE_TOKEN_UNRESERVED_IDENTIFIERS );
+		}
+		else
+		{
+			/* TODO */
+		}
 		/* TODO */
 	}
 
@@ -270,6 +303,7 @@ void MetricSrcLexer::CountToken( clang::Token& p_token )
 
 	switch( p_token.getKind() )
 	{
+#if 0
 		case clang::tok::raw_identifier:
 			{
 					if( m_options->getDumpTokens() )
@@ -321,6 +355,7 @@ void MetricSrcLexer::CountToken( clang::Token& p_token )
 				}
 			}
 			break;
+#endif
 		case clang::tok::numeric_constant:
 			tok_data = clang::StringRef(p_token.getLiteralData(), tok_len).str();
 			if( m_currentUnit->isFnOrMethod() )
@@ -359,6 +394,9 @@ void MetricSrcLexer::CountToken( clang::Token& p_token )
 			break;
 		case clang::tok::semi:
 			HandleSemiToken( p_token );
+			break;
+		case clang::tok::comment:
+			/* TODO */
 			break;
 		case clang::tok::eof:
 			/* Not interested in registering end-of-file */

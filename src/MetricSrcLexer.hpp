@@ -71,7 +71,6 @@ class MetricSrcLexer
 		uint32_t				m_semiContainerDepth[ SCC_MAX ];
 		bool				    m_semiContainerOpen[ SCC_MAX ];
 
-		static const std::map<std::string,MetricType_e> m_tokenToTypeMap;
 		static const std::map<clang::tok::TokenKind,MetricType_e> m_tokenKindToTypeMap;
 
 		void CountToken( clang::Token& p_token );
