@@ -1,0 +1,15 @@
+Global
+FOR loops: 7
+Number of 'for' tokens: 4
+File: src/kw_for.h
+	FOR loops: 3
+	Number of 'for' tokens: 2
+	Function: x_for
+		FOR loops: 3
+		Number of 'for' tokens: 2
+File: src\kw_for.c
+	FOR loops: 4
+	Number of 'for' tokens: 2
+	Function: main
+		FOR loops: 4
+		Number of 'for' tokens: 2
