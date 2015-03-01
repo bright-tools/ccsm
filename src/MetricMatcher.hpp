@@ -53,6 +53,7 @@ protected:
 	void MetricVisitor::CloseOutFnOrMtd( void );
 	bool ShouldIncludeFile( const std::string& p_file );
 	void IncrementMetric( MetricUnit* const p_unit, const MetricType_e p_metricType );
+	void IncrementMetric( MetricUnit* const p_unit, const MetricType_e p_metricType, const MetricUnit* const p_file );
 
 public:
 	

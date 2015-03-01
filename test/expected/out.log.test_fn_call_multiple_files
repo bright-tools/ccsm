@@ -2,29 +2,35 @@ Global
 File: src/empty.h
 File: src/fn_call.h
 	Function: header_function
-		Number of other functions calling this function: 1
+		Number of local functions calling this function: 2
 		Function Calls: 1
 		No. different functions called: 1
+		Local Function Calls: 1
 File: src/fn_call2.h
 	Function: header_function2
-		Number of other functions calling this function: 0
+		Number of local functions calling this function: 0
 		Function Calls: 1
 		No. different functions called: 1
+		Local Function Calls: 1
 File: src\fn_call.c
 	Function: j
-		Number of other functions calling this function: 1
-		Function Calls: 7
-		No. different functions called: 5
+		Number of local functions calling this function: 1
+		Function Calls: 8
+		No. different functions called: 6
+		Local Function Calls: 2
 	Function: k
-		Number of other functions calling this function: 0
+		Number of local functions calling this function: 0
 		Function Calls: 3
 		No. different functions called: 1
+		Local Function Calls: 2
 File: src\fn_call2.c
 	Function: j
-		Number of other functions calling this function: 2
+		Number of local functions calling this function: 2
 		Function Calls: 0
 		No. different functions called: 0
+		Local Function Calls: 0
 	Function: secondary_function
-		Number of other functions calling this function: 0
+		Number of local functions calling this function: 1
 		Function Calls: 2
 		No. different functions called: 2
+		Local Function Calls: 2

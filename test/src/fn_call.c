@@ -21,6 +21,8 @@ int j( void )
 
     int x;
 
+    header_function();
+
     x = foo();
     x+= foo();
     x+= foo();

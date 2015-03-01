@@ -377,7 +377,7 @@ bool MetricVisitor::VisitCallExpr(clang::CallExpr *p_callExpr)
 						{
 							MetricUnit* fileUnit = m_topUnit->getSubUnit( name, METRIC_UNIT_FILE );
 							MetricUnit* targFn = fileUnit->getSubUnit( calleeName, METRIC_UNIT_FUNCTION );
-							IncrementMetric( targFn, METRIC_TYPE_CALLED_BY );
+							IncrementMetric( targFn, METRIC_TYPE_CALLED_BY, fileUnit );
 						}
 						else
 						{
@@ -837,7 +837,15 @@ void MetricVisitor::IncrementMetric( MetricUnit* const p_unit, const MetricType_
 
 	if( fileUnit )
 	{
-		if(( ! fileUnit->hasBeenProcessed( METRIC_UNIT_PROCESS_AST ) ) || ( MetricUnit::isMultiPassAllowed( p_metricType )))
+		IncrementMetric( p_unit, p_metricType, fileUnit );
+	}
+}
+
+void MetricVisitor::IncrementMetric( MetricUnit* const p_unit, const MetricType_e p_metricType, const MetricUnit* const p_file )
+{
+	if( p_file )
+	{
+		if(( ! p_file->hasBeenProcessed( METRIC_UNIT_PROCESS_AST ) ) || ( MetricUnit::isMultiPassAllowed( p_metricType )))
 		{
 			p_unit->increment( p_metricType );
 		}
