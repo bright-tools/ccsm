@@ -837,10 +837,7 @@ void MetricVisitor::IncrementMetric( MetricUnit* const p_unit, const MetricType_
 
 	if( fileUnit )
 	{
-		
-		//std::cout << "XX" << m_currentFileName << std::endl;
-
-		if(( ! fileUnit->hasBeenProcessed() ) || ( MetricUnit::isMultiPassAllowed( p_metricType )))
+		if(( ! fileUnit->hasBeenProcessed( METRIC_UNIT_PROCESS_AST ) ) || ( MetricUnit::isMultiPassAllowed( p_metricType )))
 		{
 			p_unit->increment( p_metricType );
 		}

@@ -99,9 +99,16 @@ const uint16_t MetricUnit::counter_t_Max = UINT16_MAX;
 
 
 MetricUnit::MetricUnit( MetricUnit* const p_parent, const std::string& p_name, const MetricUnitType_e p_type ) : 
-					m_name( p_name ), m_type( p_type ), m_parent( p_parent ), m_processed( false )
+					m_name( p_name ), m_type( p_type ), m_parent( p_parent )
 {
 	uint16_t loop;
+
+	for( loop = 0;
+		 loop < METRIC_UNIT_PROCESS_MAX;
+		 loop++ )
+	{
+		m_processed[ loop ] = false;
+	}
 
 	for( loop = 0;
 		 loop < METRIC_TYPE_MAX;
@@ -414,14 +421,14 @@ MetricUnit* MetricUnit::getSubUnit( const std::string& p_name, const MetricUnitT
 	return ret_val;
 }
 
-bool MetricUnit::hasBeenProcessed( void ) const
+bool MetricUnit::hasBeenProcessed( const MetricUnitProcessingType_e p_type ) const
 {
-	return m_processed;
+	return m_processed[ p_type ];
 }
 
-void MetricUnit::setProcessed( void )
+void MetricUnit::setProcessed( const MetricUnitProcessingType_e p_type )
 {
-	m_processed = true;
+	m_processed[ p_type ] = true;
 }
 
 bool MetricUnit::isFnOrMethod( void ) const

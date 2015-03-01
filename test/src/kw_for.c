@@ -1,4 +1,5 @@
 #include "kw_for.h"
+#include "kw_for.h"
 
 #define FIX_MACRO(_x) do { unsigned i; for( i = 0; i < _x ; i++ ) { err += _x; } } while( 0 )
 

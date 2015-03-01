@@ -13,3 +13,6 @@ File: src\kw_for.c
 	Function: main
 		FOR loops: 4
 		Number of 'for' tokens: 2
+File: src\kw_for2.c
+	FOR loops: 0
+	Number of 'for' tokens: 0

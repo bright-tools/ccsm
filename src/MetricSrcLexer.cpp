@@ -472,33 +472,42 @@ void MetricSrcLexer::LexSources( clang::CompilerInstance& p_ci, const Translatio
 		//  unique numerical constants that aren't in functions and unique numerical constants across the whole file
 		if( SHOULD_INCLUDE_FILE( m_options, fileName ))
 		{
-			/* TODO: Could optimise this by not doing the function look-up for every single token, but 
-				determining whether or not the token's position has exceeded the range of the current function */
-			std::string funcName = p_fnLocator->FindFunction( SM, result.getLocation() );
-			if( funcName != m_currentFunctionName )
+			MetricUnit* fileUnit = m_topUnit->getSubUnit(fileName, METRIC_UNIT_FILE);
+
+			if( !fileUnit->hasBeenProcessed( METRIC_UNIT_PROCESS_LEX ))
 			{
-				if(( funcName.length() > 0 ) && m_options->getDumpTokens() )
+				/* TODO: Could optimise this by not doing the function look-up for every single token, but 
+					determining whether or not the token's position has exceeded the range of the current function */
+				std::string funcName = p_fnLocator->FindFunction( SM, result.getLocation() );
+				if( funcName != m_currentFunctionName )
 				{
-					std::cout << std::endl << "[fn:" << funcName << "@" << result.getLocation().getRawEncoding() <<  "]";
+					if(( funcName.length() > 0 ) && m_options->getDumpTokens() )
+					{
+						std::cout << std::endl << "[fn:" << funcName << "@" << result.getLocation().getRawEncoding() <<  "]";
+					}
+					CloseOutFnOrMtd();
 				}
-				CloseOutFnOrMtd();
-			}
-			if( funcName != "" ) 
-			{
-				if( SHOULD_INCLUDE_FUNCTION( m_options, funcName ))
+				if( funcName != "" ) 
 				{
-					m_currentUnit = m_topUnit->getSubUnit(fileName, METRIC_UNIT_FILE)->getSubUnit(funcName, METRIC_UNIT_FUNCTION);
+					if( SHOULD_INCLUDE_FUNCTION( m_options, funcName ))
+					{
+						m_currentUnit = fileUnit->getSubUnit(funcName, METRIC_UNIT_FUNCTION);
+					}
+					else
+					{
+						shouldLexToken = false;
+					}
 				}
 				else
 				{
-					shouldLexToken = false;
+					m_currentUnit = fileUnit;
 				}
+				m_currentFunctionName = funcName;
 			}
 			else
 			{
-				m_currentUnit = m_topUnit->getSubUnit(fileName, METRIC_UNIT_FILE);
+				shouldLexToken = false;
 			}
-			m_currentFunctionName = funcName;
 
 			if( shouldLexToken )
 			{
@@ -530,7 +539,7 @@ void MetricSrcLexer::LexSources( clang::CompilerInstance& p_ci, const Translatio
 		{
 			MetricUnit* fileUnit = m_topUnit->getSubUnit(fileName, METRIC_UNIT_FILE);
 			fileUnit->set( METRIC_TYPE_LINE_COUNT, countNewlines( Buffer ) );
-
+			fileUnit->setProcessed( METRIC_UNIT_PROCESS_LEX );
 #if 0
 
 			m_currentFileNumerics.clear();

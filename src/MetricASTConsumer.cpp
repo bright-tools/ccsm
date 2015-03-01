@@ -52,10 +52,11 @@ void MetricASTConsumer::HandleTranslationUnit(clang::ASTContext &Context)
 		 it++ )
 	{
 		std::string fileName = it->first->getName();
+
 		if( SHOULD_INCLUDE_FILE( m_options, fileName ) )
 		{
 			MetricUnit* fileUnit = m_topUnit->getSubUnit(fileName, METRIC_UNIT_FILE);
-			fileUnit->setProcessed();
+			fileUnit->setProcessed( METRIC_UNIT_PROCESS_AST);
 		}
 	}
 

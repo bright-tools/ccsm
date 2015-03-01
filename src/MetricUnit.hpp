@@ -51,6 +51,12 @@ typedef enum
 	METRIC_UNIT_MAX
 } MetricUnitType_e;
 
+typedef enum {
+	METRIC_UNIT_PROCESS_AST,
+	METRIC_UNIT_PROCESS_LEX,
+	METRIC_UNIT_PROCESS_MAX
+} MetricUnitProcessingType_e;
+
 #include <string>
 #include <map>
 #include <stdint.h>
@@ -73,7 +79,7 @@ protected:
 	MetricUnitType_e m_type;
 	SubUnitMap_t m_subUnits;
 	MetricUnit* m_parent;
-	bool m_processed;
+	bool m_processed[ METRIC_UNIT_PROCESS_MAX ];
 
 public:
 	/* See also counter_t_Max */
@@ -102,11 +108,11 @@ public:
 
 	MetricUnitType_e GetType( void ) const;
 
-	bool hasBeenProcessed( void ) const;
+	bool hasBeenProcessed( const MetricUnitProcessingType_e p_type ) const;
 
 	bool isFnOrMethod( void ) const;
 
-	void setProcessed( void );
+	void setProcessed( const MetricUnitProcessingType_e p_type );
 
 protected:
 	counter_t m_counters[ METRIC_TYPE_MAX ];
