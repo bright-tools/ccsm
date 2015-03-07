@@ -120,7 +120,7 @@ Take for example:
     {
         CHECK_FOR_ERROR();
 
-The fragment of some_function in the above code does not contain any 'if' tokens until the CHECK_FOR_ERROR macro is expanded.
+The fragment of some_function in the above code does not contain any 'if' tokens until the `CHECK_FOR_ERROR` macro is expanded.
 
 Due to the fact that some people like to treat macros as a form of encapsulation and don't want the contents of macros counting towards function metrics while other people do, CCSM provides metrics for both, allowing the user to pick and choose.
 
@@ -128,23 +128,23 @@ Due to the fact that some people like to treat macros as a form of encapsulation
 HIS Metrics Support
 -------------------
 
-| Metric      | Status                                   | Description     |
-|-------------|------------------------------------------|-----------------|
-| COMF        | Implemented - TOK_HIS_COMF               | Comment density.  Ratio of comments to 'statements' |
-| PATH        | Not yet implemented                      | |
-| GOTO        | Implemented - STMT_GOTO_CNT and TOK_GOTO | Number of GOTO statements |
-| v(G)        | Implemented - TOK_MCCABE and STMT_MCCABE | Cyclomatic complexity     |
-| CALLING     | Not yet implemeted          |
-| CALLS       | Implemented - OP_FN_CALL_CNT             | Number of different functions called.  Note that functions called via function pointer are not counted |
-| PARAM       | Implemented - STMT_HIS_PARAM             | Number of function parameters.  Note that only one variant of this metric exists as parameters hidden within macros are still parameters. |
-| STMT        | Implemented - TOK_HIS_STMT               | Number of instructions per function. |
-| LEVEL       | Not yet implemented         |
-| RETURN      | Implemented - RETURN_POINT_CNT           | Number of return points in a function.  Note that only one variant of this metric exists as return points hidden within macros are still return points.  Note Issue #54 with respect to this metric. |
-| S           | Not planned                 |
-| VOCF        | Not yet implemented         |
-| NOMV        | Not planned                 |
-| NOMVPR      | Not planned                 |
-| ap_cg_cycle | Not planned                 |
+| Metric      | Status                                       | Description     |
+|-------------|----------------------------------------------|-----------------|
+| COMF        | Implemented - `TOK_HIS_COMF`                 | Comment density.  Ratio of comments to 'statements' |
+| PATH        | Not yet implemented                          | |
+| GOTO        | Implemented - `STMT_GOTO_CNT` and `TOK_GOTO` | Number of GOTO statements |
+| v(G)        | Implemented - `TOK_MCCABE` and `STMT_MCCABE` | Cyclomatic complexity     |
+| CALLING     | Not yet implemeted                           | |
+| CALLS       | Implemented - `OP_FN_CALL_CNT`               | Number of different functions called.  Note that functions called via function pointer are not counted |
+| PARAM       | Implemented - `STMT_HIS_PARAM`               | Number of function parameters.  Note that only one variant of this metric exists as parameters hidden within macros are still parameters. |
+| STMT        | Implemented - `TOK_HIS_STMT`                 | Number of instructions per function. |
+| LEVEL       | Not yet implemented                          | |
+| RETURN      | Implemented - `RETURN_POINT_CNT`             | Number of return points in a function.  Note that only one variant of this metric exists as return points hidden within macros are still return points.  Note Issue #54 with respect to this metric. |
+| S           | Not planned                                  | |
+| VOCF        | Not yet implemented                          | |
+| NOMV        | Not planned                                  | |
+| NOMVPR      | Not planned                                  | |
+| ap_cg_cycle | Not planned                                  | |
 
 Building The Project
 ====================
@@ -166,7 +166,7 @@ MetricPPConsumer.cpp  | Class to receive call-backs from the pre-processor in or
 McCabe Complexity
 =================
 
-The MCCABE metric is based on the McCabe method of calculating 
+The `TOK_MCCABE` and `STMT_MCCAKE` metrics are based on the McCabe method of calculating 
 [cyclomatic complexity](http://www.mccabe.com/pdf/mccabe-nist235r.pdf).
 
 > Cyclomatic complexity is defined for each module to be e - n + 2, where e and n are the number
