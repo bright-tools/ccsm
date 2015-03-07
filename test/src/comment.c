@@ -1,5 +1,7 @@
 #include "comment.h"
 
+/* comment.c::No statements in this file! */
+
 /* comment.c::This is a comment */
 
 /* comment.c::This is the second comment */

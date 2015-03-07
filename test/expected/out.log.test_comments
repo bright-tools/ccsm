@@ -1,18 +1,22 @@
 Global
-Comments in bytes: 695
 Comment Count: 17
+Comment density: 1
+Statement count: 10
 File: src/comment.h
-	Comments in bytes: 80
 	Comment Count: 3
-File: src/comment_excluded.h
-	Comments in bytes: 85
-	Comment Count: 2
+	Comment density: 1
+	Statement count: 1
 File: src/comment_free.h
-	Comments in bytes: 0
 	Comment Count: 0
+	Comment density: 0
+	Statement count: 0
 File: src\comment.c
-	Comments in bytes: 215
-	Comment Count: 5
+	Comment Count: 6
+	Comment density: 0
+	Statement count: 0
 File: src\comment2.c
-	Comments in bytes: 315
-	Comment Count: 7
+	Comment Count: 8
+	Comment density: 0.888
+	Statement count: 9
+	Function: some_func
+		Statement count: 7

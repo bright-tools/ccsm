@@ -191,7 +191,7 @@ void MetricSrcLexer::HandleBasicToken( clang::Token& p_token )
 	if( typeLookup != m_tokenKindToTypeMap.end() )
 	{
 		m_currentUnit->increment( (*typeLookup).second );
-		switch( (*typeLookup).second )
+		switch( tokenKind )
 		{
 			case clang::tok::kw_for:
 				m_semiContainerOpen[ SCC_For ] = true;
@@ -452,6 +452,12 @@ void MetricSrcLexer::LexSources( clang::CompilerInstance& p_ci, const Translatio
 	if( m_options->getDumpTokens() )
 	{
 		std::cout << std::endl << "Start lexing translation unit: " << SM.getFileEntryForID( SM.getMainFileID() )->getName() << std::endl;
+	}
+
+	for( unsigned initLoop = 0 ; initLoop < SCC_MAX ; initLoop++ )
+	{
+		m_semiContainerDepth[ initLoop ] = 0;
+		m_semiContainerOpen[ initLoop ] = false;
 	}
 
 	// Start preprocessing the specified input file.

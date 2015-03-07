@@ -228,9 +228,37 @@ MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType, c
 				      (getCounter(METRIC_TYPE_OPERATOR_SIZE_OF, p_recurse ) > 0) +
 				      (getCounter(METRIC_TYPE_OPERATOR_ALIGN_OF, p_recurse ) > 0) +
 				      (getCounter(METRIC_TYPE_OPERATOR_CAST, p_recurse ) > 0);
-		break;
+			break;
 		case METRIC_TYPE_HIS_COMMENT_DENSITY:
-
+			{
+				counter_t stmtCount = getCounter( METRIC_TYPE_HIS_STATEMENT, p_recurse );
+				/* Div-by-zero protection */
+				if( stmtCount > 0 )
+				{
+					ret_val = ((float)getCounter( METRIC_TYPE_COMMENT_COUNT, p_recurse ) / stmtCount) * 1000;
+					/* Clip at 1.0 */
+					if( ret_val > 1000 )
+					{
+						ret_val = 1000;
+					}
+				}
+				else
+				{
+					ret_val = 0;
+				}
+			}
+			break;
+		case METRIC_TYPE_TOK_MODIFIED_CYCLOMATIC:
+			if( isFnOrMethod() )
+			{
+				ret_val = getCounter( METRIC_TYPE_TOKEN_FOR, p_recurse ) +
+						  getCounter( METRIC_TYPE_TOKEN_IF, p_recurse ) +
+						  getCounter( METRIC_TYPE_TOKEN_WHILE, p_recurse ) +
+						  getCounter( METRIC_TYPE_TOKEN_SWITCH, p_recurse ) +
+						  getCounter( METRIC_TYPE_TOKEN_AMPAMP, p_recurse ) +
+						  getCounter( METRIC_TYPE_TOKEN_PIPEPIPE, p_recurse ) +
+						  getCounter( METRIC_TYPE_TOKEN_QUESTION, p_recurse ) + 1;
+			}
 			break;
 		case METRIC_TYPE_MODIFIED_CYCLOMATIC:
 			if( isFnOrMethod() )
@@ -242,6 +270,18 @@ MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType, c
 						  getCounter( METRIC_TYPE_OPERATOR_LOGICAL_AND, p_recurse ) +
 						  getCounter( METRIC_TYPE_OPERATOR_LOGICAL_OR, p_recurse ) +
 						  getCounter( METRIC_TYPE_OPERATOR_TERNARY, p_recurse ) + 1;
+			}
+			break;
+		case METRIC_TYPE_TOK_CYCLOMATIC:
+			if( isFnOrMethod() )
+			{
+				ret_val = getCounter( METRIC_TYPE_TOKEN_FOR, p_recurse ) +
+						  getCounter( METRIC_TYPE_TOKEN_IF, p_recurse ) +
+						  getCounter( METRIC_TYPE_TOKEN_WHILE, p_recurse ) +
+						  getCounter( METRIC_TYPE_TOKEN_CASE, p_recurse ) +
+						  getCounter( METRIC_TYPE_TOKEN_AMPAMP, p_recurse ) +
+						  getCounter( METRIC_TYPE_TOKEN_PIPEPIPE, p_recurse ) +
+						  getCounter( METRIC_TYPE_TOKEN_QUESTION, p_recurse ) + 1;
 			}
 			break;
 		case METRIC_TYPE_CYCLOMATIC:

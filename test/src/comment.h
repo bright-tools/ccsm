@@ -7,4 +7,12 @@
 
 // C++ style Comment
 
+typedef struct
+{
+    unsigned k;
+    unsigned v;
+    unsigned o;
+    unsigned l;
+} sample_s;
+
 #endif
