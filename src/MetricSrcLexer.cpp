@@ -459,50 +459,62 @@ void MetricSrcLexer::LexSources( clang::CompilerInstance& p_ci, const Translatio
 	PP.EnterMainSourceFile();
 	PP.SetMacroExpansionOnlyInDirectives();
 	PP.SetCommentRetentionState(true,true);
+	clang::SourceLocation fnStart;
+	clang::SourceLocation fnEnd;
+	m_currentFileName = "";
 
 	do {
+		clang::SourceLocation tokenLoc;
 		bool shouldLexToken = true;
 
 		PP.Lex(result);
 
-		std::string fileName = SM.getFilename( result.getLocation() ).str();
+		tokenLoc = result.getLocation();
+		std::string fileName = SM.getFilename( tokenLoc ).str();
 
-//		CloseOutFnOrMtd();
 		// TODO: Need to differentiate between "non-function" and "whole-file" level counts - e.g. 
 		//  unique numerical constants that aren't in functions and unique numerical constants across the whole file
 		if( SHOULD_INCLUDE_FILE( m_options, fileName ))
 		{
 			MetricUnit* fileUnit = m_topUnit->getSubUnit(fileName, METRIC_UNIT_FILE);
 
+			// Not lex'd this file yet?
 			if( !fileUnit->hasBeenProcessed( METRIC_UNIT_PROCESS_LEX ))
 			{
-				/* TODO: Could optimise this by not doing the function look-up for every single token, but 
-					determining whether or not the token's position has exceeded the range of the current function */
-				std::string funcName = p_fnLocator->FindFunction( SM, result.getLocation() );
-				if( funcName != m_currentFunctionName )
+				// Check to see if we need to do a new function name lookup
+				if(( m_currentFunctionName == "" ) || ( tokenLoc.getRawEncoding() > fnEnd.getRawEncoding() ) || ( tokenLoc.getRawEncoding() < fnStart.getRawEncoding() ))
 				{
+					std::string funcName = p_fnLocator->FindFunction( SM, tokenLoc, &fnEnd );
+					fnStart = tokenLoc;
+
 					if(( funcName.length() > 0 ) && m_options->getDumpTokens() )
 					{
-						std::cout << std::endl << "[fn:" << funcName << "@" << result.getLocation().getRawEncoding() <<  "]";
+						std::cout << std::endl << "[fn:" << funcName << "@" << tokenLoc.getRawEncoding() << "-" << fnEnd.getRawEncoding() << "]";
 					}
-					CloseOutFnOrMtd();
-				}
-				if( funcName != "" ) 
-				{
-					if( SHOULD_INCLUDE_FUNCTION( m_options, funcName ))
+
+					m_currentFunctionName = funcName;
+
+					if( m_currentFunctionName != "" ) 
 					{
-						m_currentUnit = fileUnit->getSubUnit(funcName, METRIC_UNIT_FUNCTION);
+						if( SHOULD_INCLUDE_FUNCTION( m_options, m_currentFunctionName ))
+						{
+							m_currentUnit = fileUnit->getSubUnit(m_currentFunctionName, METRIC_UNIT_FUNCTION);
+						}
+						else
+						{
+							m_currentUnit = NULL;
+						}
 					}
 					else
 					{
-						shouldLexToken = false;
+						m_currentUnit = fileUnit;
 					}
 				}
-				else
+
+				if( m_currentUnit == NULL )
 				{
-					m_currentUnit = fileUnit;
+					shouldLexToken = false;
 				}
-				m_currentFunctionName = funcName;
 			}
 			else
 			{

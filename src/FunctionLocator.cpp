@@ -102,7 +102,7 @@ void TranslationUnitFunctionLocator::dump( std::ostream& p_out ) const
 	}
 }
 
-std::string TranslationUnitFunctionLocator::FindFunction( const clang::SourceManager& p_SourceManager, clang::SourceLocation& p_loc ) const
+std::string TranslationUnitFunctionLocator::FindFunction( const clang::SourceManager& p_SourceManager, clang::SourceLocation& p_loc, clang::SourceLocation* p_end ) const
 {
 	std::string ret_val = "";
 	unsigned fileIdHash = p_SourceManager.getFileID( p_loc ).getHashValue();
@@ -121,6 +121,10 @@ std::string TranslationUnitFunctionLocator::FindFunction( const clang::SourceMan
 				( p_loc < (*func_it).second.first ))
 			{
 				ret_val = (*func_it).second.second;
+				if( p_end != NULL )
+				{
+					*p_end = (*func_it).second.first;
+				}
 				break;
 			}
 			/* Next function in the map */
