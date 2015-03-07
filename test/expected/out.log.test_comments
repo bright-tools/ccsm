@@ -1,7 +1,7 @@
 Global
-Comment Count: 17
+Comment Count: 18
 Comment density: 1
-Statement count: 10
+Statement count: 12
 File: src/comment.h
 	Comment Count: 3
 	Comment density: 1
@@ -15,8 +15,8 @@ File: src\comment.c
 	Comment density: 0
 	Statement count: 0
 File: src\comment2.c
-	Comment Count: 8
-	Comment density: 0.888
-	Statement count: 9
+	Comment Count: 9
+	Comment density: 0.818
+	Statement count: 11
 	Function: some_func
-		Statement count: 7
+		Statement count: 9

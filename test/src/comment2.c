@@ -13,6 +13,8 @@
 
 // comment2.c::This is a C++ style comment
 
+#define SOME_MACRO() x++; x++; x++; x++; x++ /* Loads of X increment! */
+
 int x;
 
 typedef struct
@@ -35,6 +37,8 @@ void some_func( void )
         x--;
     }
 
+    SOME_MACRO();
+
     for( i = 0; i < 100 ; i++ )
     {
         x++;
@@ -45,6 +49,8 @@ void some_func( void )
             x -= 10000;
 	}
     }
+
+    SOME_MACRO();
 }
 
 void dummy( void )
