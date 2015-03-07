@@ -13,12 +13,15 @@ inline int x_return( int y_return )
 
     if( y_return > 100 )
     {
+	/* Return point 1 */
         return 1;
     } else if( y_return > 50 )
     {
+	/* Return point 2 */
 	return 2;
     } else
     {
+	/* Return point 3 */
 	return 3;
     }
 }
