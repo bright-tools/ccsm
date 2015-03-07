@@ -1,10 +1,8 @@
 Global
 RETURN statements: 9
-Return points: 11
 Number of 'return' tokens: 6
 File: src/kw_return.h
 	RETURN statements: 4
-	Return points: 5
 	Number of 'return' tokens: 3
 	Function: x_return
 		RETURN statements: 4
@@ -12,7 +10,6 @@ File: src/kw_return.h
 		Number of 'return' tokens: 3
 File: src\kw_return.c
 	RETURN statements: 5
-	Return points: 6
 	Number of 'return' tokens: 3
 	Function: main
 		RETURN statements: 4
@@ -28,5 +25,4 @@ File: src\kw_return.c
 		Number of 'return' tokens: 1
 File: src\kw_return2.c
 	RETURN statements: 0
-	Return points: 0
 	Number of 'return' tokens: 0
