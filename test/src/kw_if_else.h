@@ -3,7 +3,7 @@
 
 /* This is some if() in a comment */
 
-#define IF( _if ) do { if( _if ) { err = 2; } else { err = 77; } } while( 0 ) 
+#define IF( _if ) do { if( _if == 0 ) { err = 2; } else if( _if < 0 ) { err = 99;} else { err = 77; } } while( 0 ) 
 
 extern int err;
 

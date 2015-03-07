@@ -17,6 +17,10 @@ int main( void )
 	{
             err = 0;
 	}
+	else if( x == 2 )
+	{
+	    err = 3;
+	}
 	else
 	{
             err = 2;
