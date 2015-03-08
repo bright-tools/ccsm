@@ -39,10 +39,29 @@ MetricVisitor::~MetricVisitor(void)
 {
 }
 
+void MetricVisitor::UpdateCurrentFileName( const clang::SourceLocation &loc )
+{
+	clang::SourceManager& sm =  m_astContext->getSourceManager();
+	SourceLocation sLoc = loc;
+	std::string declFn = sm.getFilename( sLoc ).str();
+
+	while( m_options->isDefFile( declFn ) && sLoc.isValid() )
+	{
+		clang::FullSourceLoc sl = m_astContext->getFullLoc( sLoc );
+		sLoc = sm.getIncludeLoc( sl.getFileID() );
+		if( sLoc.isValid() )
+		{
+			declFn = sm.getFilename( sLoc ).str();
+		}
+	} 
+
+	m_currentFileName = declFn;
+}
+
 bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
     
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-	std::cout << "VisitFunctionDecl" << std::endl;
+	std::cout << "VisitFunctionDecl - CONTEXT " << m_currentFileName << "::" << m_currentFunctionName << std::endl;
 #endif
 
 	/* Deal with common actions which may be applicable to a decl valid at translation-unit level */
@@ -50,8 +69,15 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 
 	/* Function body attached? */
 	if( func->doesThisDeclarationHaveABody() )
-	{
-		m_currentFileName = m_astContext->getSourceManager().getFilename( func->getLocation() ).str();
+	{		
+		SourceLocation funcLoc = func->getLocation();
+		if( funcLoc.isMacroID() )
+		{
+			funcLoc = m_astContext->getSourceManager().getFileLoc( funcLoc );
+		}
+
+		UpdateCurrentFileName( funcLoc );
+		
 		m_currentFunctionName = func->getQualifiedNameAsString();
 
 		if( m_fnLocator != NULL )
@@ -128,6 +154,10 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 
 bool MetricVisitor::VisitTypedefDecl( clang::TypedefDecl* p_typeDef )
 {
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+	std::cout << "VisitTypedefDecl - CONTEXT " << m_currentFileName << "::" << m_currentFunctionName << std::endl;
+#endif
+
 	/* Deal with common actions which may be applicable to a decl valid at translation-unit level */
 	DeclCommon( p_typeDef->getLexicalDeclContext(), p_typeDef );
 
@@ -163,6 +193,10 @@ void MetricVisitor::CloseOutFnOrMtd( void )
 
 void MetricVisitor::DeclCommon( const clang::DeclContext* p_declCtxt, const clang::Decl* p_decl )
 {
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+	std::cout << "DeclCommon - CONTEXT " << m_currentFileName << "::" << m_currentFunctionName << std::endl;
+#endif
+
 	// Check to see if the decl is top-level - may need to update m_currentUnit after exiting a function.
 	if( p_declCtxt->getDeclKind() == clang::Decl::TranslationUnit )
 	{
@@ -179,8 +213,8 @@ void MetricVisitor::HandleLoc( SourceLocation& p_loc )
 		p_loc = m_astContext->getSourceManager().getFileLoc( p_loc );
     }
 
-	m_currentFileName = m_astContext->getSourceManager().getFilename( p_loc ).str();
 	m_currentFunctionName = "";
+	UpdateCurrentFileName( p_loc );
 
 	if( ShouldIncludeFile( m_currentFileName ))
 	{
@@ -276,6 +310,10 @@ bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 // TODO: Lots of repetition here - template it?
 bool MetricVisitor::VisitForStmt(clang::ForStmt *p_forSt) 
 {
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+	std::cout << "VisitForStmt - CONTEXT " << m_currentFileName << "::" << m_currentFunctionName << std::endl;
+#endif
+
 	if( m_currentUnit )
 	{
 		m_currentUnit->set( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_forSt, m_astContext ));

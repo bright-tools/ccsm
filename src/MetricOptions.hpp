@@ -31,15 +31,20 @@ protected:
 	std::vector<std::string>* ExcludeFiles;
 	std::vector<std::string>* ExcludeFunctions;
 	std::vector<std::string>* OutputMetrics;
+	std::vector<std::string>* DefFiles;
 	bool m_dumpTokens;
+
+	bool isFileInList( const std::vector<std::string>* const p_list, const std::string& p_name ) const;
 public:
 	MetricOptions( std::vector<std::string>* const p_excludeFiles = NULL, 
 		           std::vector<std::string>* const p_excludeFunctions = NULL,
-				   std::vector<std::string>* const p_outputMetrics = NULL );
+				   std::vector<std::string>* const p_outputMetrics = NULL,
+				   std::vector<std::string>* const p_defFiles = NULL );
 	virtual ~MetricOptions();
 	bool ShouldIncludeFile( const std::string& p_fn ) const;
 	bool ShouldIncludeFunction( const std::string& p_fn ) const;
 	bool ShouldIncludeMetric( const std::string& p_name ) const;
+	bool isDefFile( const std::string& p_name ) const;
 	void setDumpTokens( const bool p_dump );
 	bool getDumpTokens( void ) const;
 };

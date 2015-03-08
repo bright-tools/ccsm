@@ -61,6 +61,15 @@ static cl::list<std::string, std::vector<std::string>> ExcludeFiles(
 	cl::ZeroOrMore,
 	cl::location( ExcludeFileList ));
 
+std::vector<std::string> IncludeInParentFileList;
+
+static cl::list<std::string, std::vector<std::string>> IncludeInParentFiles(
+	"def-file",
+    cl::desc("Specifies files whose contents should not be individually counted and should be included in the including file.  Intended to help support the def file idiom"),
+	cl::CommaSeparated,
+	cl::ZeroOrMore,
+	cl::location( IncludeInParentFileList ));
+
 static cl::opt<bool> DumpTokens(
   "dump-tokens",
   cl::desc("Dump tokens as they are lexed")
@@ -114,7 +123,7 @@ static cl::list<std::string, std::vector<std::string>> OutputOnlyMetrics(
 
 int main(int argc, const char **argv) {
 	MetricUnit topUnit( NULL, "Global", METRIC_UNIT_GLOBAL);
-	MetricOptions options( &ExcludeFileList, &ExcludeFunctionList, &OutputMetricList );
+	MetricOptions options( &ExcludeFileList, &ExcludeFunctionList, &OutputMetricList, &IncludeInParentFileList );
 	std::set<std::string> commentFileList;
 	GlobalFunctionLocator srcMap;
 

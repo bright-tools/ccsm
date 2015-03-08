@@ -78,7 +78,6 @@ class MetricSrcLexer
 		void HandleBasicToken( clang::Token& p_token );
 		void HandleSemiToken( clang::Token& p_token );
 
-
 	public:
 		MetricSrcLexer(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, MetricOptions* p_options = NULL);
 	    virtual ~MetricSrcLexer(void);

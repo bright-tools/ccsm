@@ -44,16 +44,15 @@ void MetricASTConsumer::HandleTranslationUnit(clang::ASTContext &Context)
 		a single Decl that collectively represents the entire source file */
 	visitor->TraverseDecl( translationUnitDecl );
 
-	/* Flag that all of the source files included in this AST tree have been processed.
-	   TODO: This breaks the "def file idiom", as the first time the file is include it will be flagged as having been processed.  
-	         See issue #47 */
+	/* Flag that all of the source files included in this AST tree have been processed. */
 	for( clang::SourceManager::fileinfo_iterator it = SM.fileinfo_begin();
 		 it != SM.fileinfo_end();
 		 it++ )
 	{
 		std::string fileName = it->first->getName();
 
-		if( SHOULD_INCLUDE_FILE( m_options, fileName ) )
+		if( SHOULD_INCLUDE_FILE( m_options, fileName ) &&
+			!(m_options->isDefFile( fileName )))
 		{
 			MetricUnit* fileUnit = m_topUnit->getSubUnit(fileName, METRIC_UNIT_FILE);
 			fileUnit->setProcessed( METRIC_UNIT_PROCESS_AST);

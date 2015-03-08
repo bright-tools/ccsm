@@ -1,0 +1,163 @@
+Global
+Files: 4
+Functions: 15
+RETURN statements: 10
+File-scope typedefs: 1
+File-scope total local variable declarations: 5
+Statements: 25
+Size in bytes: 663
+Size in lines: 37
+Number of 'typedef' tokens: 1
+Number of 'enum' tokens: 1
+Number of '(' tokens: 25
+Number of ')' tokens: 25
+Number of '{' tokens: 1
+Number of '}' tokens: 1
+Number of (unreserved) identifier tokens: 52
+Statement count: 1
+File: src/def_file.def
+	Size in bytes: 64
+	Size in lines: 5
+File: src/def_file.h
+	Functions: 10
+	RETURN statements: 5
+	File-scope total local variable declarations: 5
+	Statements: 15
+	Size in bytes: 319
+	Size in lines: 17
+	Number of '(' tokens: 15
+	Number of ')' tokens: 15
+	Number of (unreserved) identifier tokens: 30
+	Function: EMPTYare
+		Return points: 1
+		Statements: 1
+		Statement based McCabe: 1
+		Statement based Modified McCabe: 1
+		Token based McCabe: 1
+		Token based Modified McCabe: 1
+	Function: EMPTYhello
+		Return points: 1
+		Statements: 1
+		Statement based McCabe: 1
+		Statement based Modified McCabe: 1
+		Token based McCabe: 1
+		Token based Modified McCabe: 1
+	Function: EMPTYhow
+		Return points: 1
+		Statements: 1
+		Statement based McCabe: 1
+		Statement based Modified McCabe: 1
+		Token based McCabe: 1
+		Token based Modified McCabe: 1
+	Function: EMPTYthere
+		Return points: 1
+		Statements: 1
+		Statement based McCabe: 1
+		Statement based Modified McCabe: 1
+		Token based McCabe: 1
+		Token based Modified McCabe: 1
+	Function: EMPTYyou
+		Return points: 1
+		Statements: 1
+		Statement based McCabe: 1
+		Statement based Modified McCabe: 1
+		Token based McCabe: 1
+		Token based Modified McCabe: 1
+	Function: FUNCare
+		RETURN statements: 1
+		Return points: 1
+		Statements: 2
+		Statement based McCabe: 1
+		Statement based Modified McCabe: 1
+		Token based McCabe: 1
+		Token based Modified McCabe: 1
+	Function: FUNChello
+		RETURN statements: 1
+		Return points: 1
+		Statements: 2
+		Statement based McCabe: 1
+		Statement based Modified McCabe: 1
+		Token based McCabe: 1
+		Token based Modified McCabe: 1
+	Function: FUNChow
+		RETURN statements: 1
+		Return points: 1
+		Statements: 2
+		Statement based McCabe: 1
+		Statement based Modified McCabe: 1
+		Token based McCabe: 1
+		Token based Modified McCabe: 1
+	Function: FUNCthere
+		RETURN statements: 1
+		Return points: 1
+		Statements: 2
+		Statement based McCabe: 1
+		Statement based Modified McCabe: 1
+		Token based McCabe: 1
+		Token based Modified McCabe: 1
+	Function: FUNCyou
+		RETURN statements: 1
+		Return points: 1
+		Statements: 2
+		Statement based McCabe: 1
+		Statement based Modified McCabe: 1
+		Token based McCabe: 1
+		Token based Modified McCabe: 1
+File: src\def_file.c
+	Functions: 5
+	RETURN statements: 5
+	File-scope typedefs: 1
+	Statements: 10
+	Size in bytes: 257
+	Size in lines: 14
+	Number of 'typedef' tokens: 1
+	Number of 'enum' tokens: 1
+	Number of '(' tokens: 10
+	Number of ')' tokens: 10
+	Number of '{' tokens: 1
+	Number of '}' tokens: 1
+	Number of (unreserved) identifier tokens: 22
+	Statement count: 1
+	Function: JUNKare
+		RETURN statements: 1
+		Return points: 1
+		Statements: 2
+		Statement based McCabe: 1
+		Statement based Modified McCabe: 1
+		Token based McCabe: 1
+		Token based Modified McCabe: 1
+	Function: JUNKhello
+		RETURN statements: 1
+		Return points: 1
+		Statements: 2
+		Statement based McCabe: 1
+		Statement based Modified McCabe: 1
+		Token based McCabe: 1
+		Token based Modified McCabe: 1
+	Function: JUNKhow
+		RETURN statements: 1
+		Return points: 1
+		Statements: 2
+		Statement based McCabe: 1
+		Statement based Modified McCabe: 1
+		Token based McCabe: 1
+		Token based Modified McCabe: 1
+	Function: JUNKthere
+		RETURN statements: 1
+		Return points: 1
+		Statements: 2
+		Statement based McCabe: 1
+		Statement based Modified McCabe: 1
+		Token based McCabe: 1
+		Token based Modified McCabe: 1
+	Function: JUNKyou
+		RETURN statements: 1
+		Return points: 1
+		Statements: 2
+		Statement based McCabe: 1
+		Statement based Modified McCabe: 1
+		Token based McCabe: 1
+		Token based Modified McCabe: 1
+File: src\def_file2.c
+	Size in bytes: 23
+	Size in lines: 1

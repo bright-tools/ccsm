@@ -11,6 +11,8 @@ set(SOURCES
   MetricUtils.cpp
   MetricOptions.hpp
   MetricOptions.cpp
+  MetricPPIncludeHandler.hpp
+  MetricPPIncludeHandler.cpp
   MetricPPCustomer.hpp
   MetricPPCustomer.cpp
   MetricASTConsumer.hpp

@@ -16,6 +16,7 @@
 
 #include "MetricSrcLexer.hpp"
 #include "MetricUtils.hpp"
+#include "MetricPPIncludeHandler.hpp"
 #include "clang/Lex/Preprocessor.h"
 #include "clang/AST/ASTContext.h"
 
@@ -465,9 +466,11 @@ void MetricSrcLexer::LexSources( clang::CompilerInstance& p_ci, const Translatio
 	PP.EnterMainSourceFile();
 	PP.SetMacroExpansionOnlyInDirectives();
 	PP.SetCommentRetentionState(true,true);
+	PP.addPPCallbacks( llvm::make_unique<MetricPPIncludeHandler>( m_options, m_currentFileName ) );
 	clang::SourceLocation fnStart;
 	clang::SourceLocation fnEnd;
-	m_currentFileName = "";
+	m_currentFileName = SM.getFileEntryForID( SM.getMainFileID() )->getName();
+	MetricUnit* fileUnit = NULL;
 
 	do {
 		clang::SourceLocation tokenLoc;
@@ -482,7 +485,11 @@ void MetricSrcLexer::LexSources( clang::CompilerInstance& p_ci, const Translatio
 		//  unique numerical constants that aren't in functions and unique numerical constants across the whole file
 		if( SHOULD_INCLUDE_FILE( m_options, fileName ))
 		{
-			MetricUnit* fileUnit = m_topUnit->getSubUnit(fileName, METRIC_UNIT_FILE);
+			if( !m_options->isDefFile( fileName ))
+			{
+				m_currentFileName = fileName;
+			}
+			fileUnit = m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE);
 
 			// Not lex'd this file yet?
 			if( !fileUnit->hasBeenProcessed( METRIC_UNIT_PROCESS_LEX ))

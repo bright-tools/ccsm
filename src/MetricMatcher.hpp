@@ -50,10 +50,12 @@ protected:
 
 	void HandleLoc( clang::SourceLocation& p_loc );
 	void DeclCommon( const clang::DeclContext* p_declCtxt, const clang::Decl* p_decl );
-	void MetricVisitor::CloseOutFnOrMtd( void );
+	void CloseOutFnOrMtd( void );
 	bool ShouldIncludeFile( const std::string& p_file );
 	void IncrementMetric( MetricUnit* const p_unit, const MetricType_e p_metricType );
 	void IncrementMetric( MetricUnit* const p_unit, const MetricType_e p_metricType, const MetricUnit* const p_file );
+	void UpdateCurrentFileName( const clang::SourceLocation &loc );
+
 
 public:
 	

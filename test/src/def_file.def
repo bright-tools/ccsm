@@ -1,0 +1,5 @@
+DEF( hello )
+DEF( there )
+DEF( how )
+DEF( are )
+DEF( you )

@@ -16,8 +16,13 @@
 
 #include "MetricOptions.hpp"
 
-MetricOptions::MetricOptions( std::vector<std::string>* const p_excludeFiles, std::vector<std::string>* const p_excludeFunctions, std::vector<std::string>* const p_outputMetrics )
-	: ExcludeFiles( p_excludeFiles ), ExcludeFunctions( p_excludeFunctions ), OutputMetrics( p_outputMetrics ), m_dumpTokens( false )
+MetricOptions::MetricOptions( std::vector<std::string>* const p_excludeFiles, 
+							  std::vector<std::string>* const p_excludeFunctions, 
+							  std::vector<std::string>* const p_outputMetrics, 
+							  std::vector<std::string>* const p_defFiles )
+	: ExcludeFiles( p_excludeFiles ), ExcludeFunctions( p_excludeFunctions ), 
+	  OutputMetrics( p_outputMetrics ), DefFiles( p_defFiles ),
+	  m_dumpTokens( false )
 {
 }
 
@@ -25,23 +30,33 @@ MetricOptions::~MetricOptions()
 {
 }
 
-bool MetricOptions::ShouldIncludeFile( const std::string& p_fn ) const
+bool MetricOptions::isFileInList( const std::vector<std::string>* const p_list, const std::string& p_name ) const
 {
-	bool ret_val = true;
-	if ( ExcludeFiles != NULL )
+	bool ret_val = false;
+	if ( p_list != NULL )
 	{	
-		for( std::vector<std::string>::const_iterator it = ExcludeFiles->begin();
-			 it != ExcludeFiles->end();
+		for( std::vector<std::string>::const_iterator it = p_list->begin();
+			 it != p_list->end();
 			 it++ )
 		{
-			if( p_fn.find( *it ) !=  std::string::npos )
+			if( p_name.find( *it ) !=  std::string::npos )
 			{
-				ret_val = false;
+				ret_val = true;
 				break;
 			}
 		}
 	}
 	return ret_val;
+}
+
+bool MetricOptions::isDefFile( const std::string& p_fn ) const
+{
+	return isFileInList( DefFiles, p_fn );
+}
+
+bool MetricOptions::ShouldIncludeFile( const std::string& p_fn ) const
+{
+	return !isFileInList( ExcludeFiles, p_fn );
 }
 
 bool MetricOptions::ShouldIncludeFunction( const std::string& p_fn ) const
