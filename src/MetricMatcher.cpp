@@ -39,11 +39,21 @@ MetricVisitor::~MetricVisitor(void)
 {
 }
 
-void MetricVisitor::UpdateCurrentFileName( const clang::SourceLocation &loc )
+std::string MetricVisitor::getDefResolvedFileName( const clang::SourceLocation &loc )
 {
 	clang::SourceManager& sm =  m_astContext->getSourceManager();
 	SourceLocation sLoc = loc;
+
+	if( sLoc.isMacroID() )
+	{
+		sLoc = m_astContext->getSourceManager().getFileLoc( sLoc );
+	}
+
 	std::string declFn = sm.getFilename( sLoc ).str();
+
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+	std::cout << "getDefResolvedFileName - CONTEXT " << m_currentFileName << "::" << m_currentFunctionName << std::endl;
+#endif
 
 	while( m_options->isDefFile( declFn ) && sLoc.isValid() )
 	{
@@ -55,7 +65,12 @@ void MetricVisitor::UpdateCurrentFileName( const clang::SourceLocation &loc )
 		}
 	} 
 
-	m_currentFileName = declFn;
+	return declFn;
+}
+
+void MetricVisitor::UpdateCurrentFileName( const clang::SourceLocation &loc )
+{
+	m_currentFileName = getDefResolvedFileName( loc );
 }
 
 bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
@@ -71,10 +86,6 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 	if( func->doesThisDeclarationHaveABody() )
 	{		
 		SourceLocation funcLoc = func->getLocation();
-		if( funcLoc.isMacroID() )
-		{
-			funcLoc = m_astContext->getSourceManager().getFileLoc( funcLoc );
-		}
 
 		UpdateCurrentFileName( funcLoc );
 		
@@ -208,11 +219,6 @@ void MetricVisitor::DeclCommon( const clang::DeclContext* p_declCtxt, const clan
 
 void MetricVisitor::HandleLoc( SourceLocation& p_loc )
 {
-	if( p_loc.isMacroID() )
-	{
-		p_loc = m_astContext->getSourceManager().getFileLoc( p_loc );
-    }
-
 	m_currentFunctionName = "";
 	UpdateCurrentFileName( p_loc );
 
@@ -403,7 +409,7 @@ bool MetricVisitor::VisitCallExpr(clang::CallExpr *p_callExpr)
 				if( calleeBody ) {
 
 					SourceLocation calleeBodyLocation = calleeBody->getLocStart();
-					std::string name = m_astContext->getSourceManager().getFilename(calleeBodyLocation);
+					std::string name = getDefResolvedFileName( calleeBodyLocation );
 
 #if defined( DEBUG_FN_TRACE_OUTOUT )
 					std::cout << "VisitCallExpr : Found function body in " << name << std::endl;

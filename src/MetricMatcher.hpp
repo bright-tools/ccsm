@@ -55,7 +55,7 @@ protected:
 	void IncrementMetric( MetricUnit* const p_unit, const MetricType_e p_metricType );
 	void IncrementMetric( MetricUnit* const p_unit, const MetricType_e p_metricType, const MetricUnit* const p_file );
 	void UpdateCurrentFileName( const clang::SourceLocation &loc );
-
+	std::string getDefResolvedFileName( const clang::SourceLocation &loc );
 
 public:
 	

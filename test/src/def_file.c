@@ -12,3 +12,9 @@ typedef enum
 #define DEF( _x ) void JUNK ## _x ( void ) { return; }
 #include "def_file.def"
 #undef  DEF
+
+int main( void )
+{
+    JUNKthere();
+    return 0;
+}

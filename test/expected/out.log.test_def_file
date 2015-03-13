@@ -1,20 +1,25 @@
 Global
 Files: 4
-Functions: 15
-RETURN statements: 10
+Functions: 16
+RETURN statements: 11
 File-scope typedefs: 1
 File-scope total local variable declarations: 5
-Statements: 25
-Size in bytes: 663
-Size in lines: 37
+Statements: 31
+Size in bytes: 722
+Size in lines: 43
+Number of different types of C operator: 1
+Number of 'int' tokens: 1
+Number of 'void' tokens: 1
 Number of 'typedef' tokens: 1
 Number of 'enum' tokens: 1
-Number of '(' tokens: 25
-Number of ')' tokens: 25
-Number of '{' tokens: 1
-Number of '}' tokens: 1
-Number of (unreserved) identifier tokens: 52
-Statement count: 1
+Number of 'return' tokens: 1
+Number of '(' tokens: 27
+Number of ')' tokens: 27
+Number of '{' tokens: 2
+Number of '}' tokens: 2
+Number of numerical constant tokens: 1
+Number of (unreserved) identifier tokens: 54
+Statement count: 3
 File: src/def_file.def
 	Size in bytes: 64
 	Size in lines: 5
@@ -104,20 +109,25 @@ File: src/def_file.h
 		Token based McCabe: 1
 		Token based Modified McCabe: 1
 File: src\def_file.c
-	Functions: 5
-	RETURN statements: 5
+	Functions: 6
+	RETURN statements: 6
 	File-scope typedefs: 1
-	Statements: 10
-	Size in bytes: 257
-	Size in lines: 14
+	Statements: 16
+	Size in bytes: 316
+	Size in lines: 20
+	Number of different types of C operator: 1
+	Number of 'int' tokens: 1
+	Number of 'void' tokens: 1
 	Number of 'typedef' tokens: 1
 	Number of 'enum' tokens: 1
-	Number of '(' tokens: 10
-	Number of ')' tokens: 10
-	Number of '{' tokens: 1
-	Number of '}' tokens: 1
-	Number of (unreserved) identifier tokens: 22
-	Statement count: 1
+	Number of 'return' tokens: 1
+	Number of '(' tokens: 12
+	Number of ')' tokens: 12
+	Number of '{' tokens: 2
+	Number of '}' tokens: 2
+	Number of numerical constant tokens: 1
+	Number of (unreserved) identifier tokens: 24
+	Statement count: 3
 	Function: JUNKare
 		RETURN statements: 1
 		Return points: 1
@@ -150,6 +160,7 @@ File: src\def_file.c
 		Statement based Modified McCabe: 1
 		Token based McCabe: 1
 		Token based Modified McCabe: 1
+		Number of local functions calling this function: 1
 	Function: JUNKyou
 		RETURN statements: 1
 		Return points: 1
@@ -158,6 +169,29 @@ File: src\def_file.c
 		Statement based Modified McCabe: 1
 		Token based McCabe: 1
 		Token based Modified McCabe: 1
+	Function: main
+		RETURN statements: 1
+		Return points: 1
+		Statements: 6
+		Statement based McCabe: 1
+		Statement based Modified McCabe: 1
+		Token based McCabe: 1
+		Token based Modified McCabe: 1
+		Function Calls: 1
+		No. different functions called: 1
+		Local Function Calls: 1
+		Function (body) size in lines: 3
+		Number of different types of C operator: 1
+		Number of 'int' tokens: 1
+		Number of 'void' tokens: 1
+		Number of 'return' tokens: 1
+		Number of '(' tokens: 2
+		Number of ')' tokens: 2
+		Number of '{' tokens: 1
+		Number of '}' tokens: 1
+		Number of numerical constant tokens: 1
+		Number of (unreserved) identifier tokens: 2
+		Statement count: 2
 File: src\def_file2.c
 	Size in bytes: 23
 	Size in lines: 1
