@@ -8,6 +8,36 @@ void dummy( void )
     NEST_MACRO( 1, 2, j );
 }
 
+unsigned elifer( unsigned x, unsigned y, unsigned z )
+{
+    unsigned ret = 0;
+
+    if( x < 10 )
+    {
+        /* Nesting level 1 */
+        ret = 0;
+    } else if( x > 100 )
+    {
+        /* Nesting level 2 */
+        if( y )
+        {
+            /* Nesting level 3 */
+            ret = 100;
+        } else if( z )
+        {
+            /* Nesting level 4 */
+            ret = 200;
+        }
+    }
+    else
+    {
+        /* Nesting level 2 */
+        ret = 50;
+    }
+
+    return ret;
+}
+
 unsigned elser( unsigned x, unsigned y, unsigned z )
 {
     unsigned ret = 0;
