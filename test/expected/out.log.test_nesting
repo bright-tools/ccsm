@@ -1,0 +1,10 @@
+Global
+File: src/nesting.h
+File: src\nesting.c
+	Function: elser
+		Nesting Level: 4
+	Function: main
+		Nesting Level: 3
+File: src\nesting2.c
+	Function: something
+		Nesting Level: 7

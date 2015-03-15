@@ -141,6 +141,14 @@ void MetricUnit::set( const MetricType_e p_metricType, const MetricUnit::counter
 	m_counters[ p_metricType ] = p_val;
 }
 
+void MetricUnit::setMax(const MetricType_e p_metricType, const MetricUnit::counter_t p_val)
+{
+	if (p_val > m_counters[p_metricType])
+	{
+		m_counters[p_metricType] = p_val;
+	}
+}
+
 MetricUnitType_e MetricUnit::GetType( void ) const
 {
 	return m_type;

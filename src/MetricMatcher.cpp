@@ -322,8 +322,8 @@ bool MetricVisitor::VisitForStmt(clang::ForStmt *p_forSt)
 
 	if( m_currentUnit )
 	{
-		m_currentUnit->set( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_forSt, m_astContext ));
-		IncrementMetric( m_currentUnit, METRIC_TYPE_LOOPS );
+		m_currentUnit->setMax( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_forSt, m_astContext ));
+		IncrementMetric(m_currentUnit, METRIC_TYPE_LOOPS);
 		IncrementMetric( m_currentUnit, METRIC_TYPE_FORLOOP );
 	}
     return true;
@@ -350,13 +350,30 @@ bool MetricVisitor::VisitLabelStmt(clang::LabelStmt *p_LabelSt)
 
 bool MetricVisitor::VisitWhileStmt(clang::WhileStmt *p_whileSt) 
 {
-	if( m_currentUnit )
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+	std::cout << "VisitWhileStmt - CONTEXT " << m_currentFileName << "::" << m_currentFunctionName << std::endl;
+#endif
+	if (m_currentUnit)
 	{
-		m_currentUnit->set( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_whileSt, m_astContext ));
+		m_currentUnit->setMax( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_whileSt, m_astContext ));
 		IncrementMetric( m_currentUnit, METRIC_TYPE_LOOPS );
 		IncrementMetric( m_currentUnit, METRIC_TYPE_WHILELOOP );
 	}
     return true;
+}
+
+bool MetricVisitor::VisitDoStmt(clang::DoStmt *p_doSt)
+{
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+	std::cout << "VisitDoStmt - CONTEXT " << m_currentFileName << "::" << m_currentFunctionName << std::endl;
+#endif
+	if (m_currentUnit)
+	{
+		m_currentUnit->setMax(METRIC_TYPE_NESTING_LEVEL, getControlDepth(p_doSt, m_astContext));
+		IncrementMetric(m_currentUnit, METRIC_TYPE_LOOPS);
+// TODO		IncrementMetric(m_currentUnit, METRIC_TYPE_WHILELOOP);
+	}
+	return true;
 }
 
 bool MetricVisitor::VisitReturnStmt(clang::ReturnStmt *p_returnSt) 
@@ -473,8 +490,8 @@ bool MetricVisitor::VisitSwitchStmt(clang::SwitchStmt *p_switchSt)
 {
 	if( m_currentUnit )
 	{
-		m_currentUnit->set( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_switchSt, m_astContext ));
-		IncrementMetric( m_currentUnit, METRIC_TYPE_SWITCH );
+		m_currentUnit->setMax( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_switchSt, m_astContext ));
+		IncrementMetric(m_currentUnit, METRIC_TYPE_SWITCH);
 		IncrementMetric( m_currentUnit, METRIC_TYPE_DECISIONS );
 	}
     return true;
@@ -759,8 +776,8 @@ bool MetricVisitor::VisitIfStmt(clang::IfStmt *p_ifSt)
 #if defined( DEBUG_FN_TRACE_OUTOUT )
 	std::cout << "VisitIfStmt - Recorded" << std::endl;
 #endif
-		m_currentUnit->set( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_ifSt, m_astContext ));
-		IncrementMetric( m_currentUnit, METRIC_TYPE_IF );
+		m_currentUnit->setMax( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_ifSt, m_astContext ));
+		IncrementMetric(m_currentUnit, METRIC_TYPE_IF);
 		IncrementMetric( m_currentUnit, METRIC_TYPE_DECISIONS );
 
 		if( p_ifSt->getElse() )

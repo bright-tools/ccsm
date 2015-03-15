@@ -96,6 +96,9 @@ public:
 	void increment( const MetricType_e p_metricType, const counter_t p_inc = 1 );
 	void set( const MetricType_e p_metricType, const MetricUnit::counter_t p_val );
 
+	/* Sets a metric to the maximum of the current value and the specified value */
+	void setMax(const MetricType_e p_metricType, const MetricUnit::counter_t p_val);
+
 	void dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE, const MetricOptions* const p_options = NULL ) const;
 	void dumpMetric( std::ostream& out, const MetricType_e p_metric, const MetricDumpFormat_e p_fmt, const std::string& p_sep, const bool p_recurse ) const;
 

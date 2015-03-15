@@ -66,6 +66,7 @@ public:
 	virtual bool VisitForStmt(clang::ForStmt *p_forSt);
 	virtual bool VisitGotoStmt(clang::GotoStmt *p_gotoSt);
 	virtual bool VisitLabelStmt(clang::LabelStmt *p_LabelSt);
+	virtual bool VisitDoStmt(clang::DoStmt *p_doSt);
 	virtual bool VisitWhileStmt(clang::WhileStmt *p_whileSt);
 	virtual bool VisitReturnStmt(clang::ReturnStmt *p_returnSt);
 	virtual bool VisitSwitchStmt(clang::SwitchStmt *p_switchSt);

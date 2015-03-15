@@ -61,7 +61,7 @@ METRIC( METRIC_TYPE_FUNCTION_LINE_COUNT,                      "FUNC_LINE_CNT",  
 METRIC( METRIC_TYPE_FUNCTION_PARAMETERS,                      "STMT_HIS_PARAM",                 "Function Parameters",								false, false, true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_DECISIONS,                                "TODO",                           "Decisions",										true,  true,  true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_LOOPS,                                    "TODO",                           "Loops",											true,  true,  true,  true,  true,       false,     false,        1,        "" )
-METRIC( METRIC_TYPE_NESTING_LEVEL,                            "TODO",                           "Nesting Level",									false, false, true,  true,  true,       false,     false,        1,        "" )
+METRIC( METRIC_TYPE_NESTING_LEVEL,                            "FUNC_NESTING",                   "Nesting Level",									false, false, true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_VOCF,                                     "HIS_VOCF",                       "VOCF",												true,  true,  true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_OPERATOR_ARITHMETIC_ASSIGN,               "OP_ASSIGN_CNT",                  "Basic assignment operators",						true,  true,  true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_OPERATOR_ARITHMETIC_ADDITION,             "OP_ADD_CNT",                     "Addition operators",								true,  true,  true,  true,  true,       false,     false,        1,        "" )

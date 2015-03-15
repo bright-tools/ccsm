@@ -105,8 +105,10 @@ unsigned getControlDepth(const clang::Stmt* const p_stmt, clang::ASTContext* p_c
 		case clang::Stmt::DoStmtClass:
 		case clang::Stmt::WhileStmtClass:
 		case clang::Stmt::ForStmtClass:
-//			std::cout << p_stmt->getStmtClassName() << "\n";
 			ret_val += 1;
+#if 0
+			std::cout << p_stmt->getStmtClassName() << ": " << ret_val << "\n";
+#endif
 			break;
 		default:
 			break;
