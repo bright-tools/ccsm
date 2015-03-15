@@ -32,6 +32,7 @@ with open( def_dir + os.sep + 'metrics.def' ) as fh:
         if results:
             all_metrics.add( results.group( 1 ))
 
+metrics_without_test = 0
 # Dump out the mapping of metrics to test files
 for metric in all_metrics:
     out = ""
@@ -40,4 +41,9 @@ for metric in all_metrics:
             if len( out ):
                 out = out + ", "
             out = out + filename
+    if( len( out ) == 0 ):
+        metrics_without_test = metrics_without_test + 1
     print metric + ": " + out
+
+print
+print "%d metrics without test" % (metrics_without_test)
