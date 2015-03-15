@@ -19,6 +19,7 @@
 #include "MetricOptions.hpp"
 #include "MetricFrontendActors.hpp"
 #include "FunctionLocator.hpp"
+#include "MetricLinkageResolver.hpp"
 
 #include "clang/Tooling/Tooling.h"
 #include "clang/Basic/SourceManager.h"
@@ -159,6 +160,10 @@ int main(int argc, const char **argv) {
 	// Success?
 	if( Result == 0 )
 	{
+		// Now that all TUs have been processed, try to resolve function references which couldn't be 
+		//  resolved during the processing of individual translation units
+		resolveLinkages( &topUnit );
+
 		// Second tool run to gather metrics from the pre-processor.  This is performed after the AST
 		//  generation as the details of the function locations gathered from the AST are used
 		//  for determining whether or not a function should be included

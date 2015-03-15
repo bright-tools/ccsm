@@ -23,6 +23,8 @@ set(SOURCES
   MetricFrontendActors.cpp
   FunctionLocator.hpp
   FunctionLocator.cpp
+  MetricLinkageResolver.hpp
+  MetricLinkageResolver.cpp
 )
 
 add_clang_executable(ccsm ${SOURCES})

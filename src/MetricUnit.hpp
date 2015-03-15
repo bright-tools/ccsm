@@ -59,6 +59,7 @@ typedef enum {
 
 #include <string>
 #include <map>
+#include <set>
 #include <stdint.h>
 
 class MetricUnit
@@ -80,8 +81,14 @@ protected:
 	SubUnitMap_t m_subUnits;
 	MetricUnit* m_parent;
 	bool m_processed[ METRIC_UNIT_PROCESS_MAX ];
+	bool m_hasExternalLinkage;
+	/* for METRIC_UNIT_FUNCTION types, a list of fuction calls where the target function body was not visible when the
+	   function hosting the call was processed */
+	std::set<std::string> m_unresolvedFnCalls;
 
 public:
+	typedef std::map<std::string, MetricUnit*> FunctionMap_t;
+
 	/* See also counter_t_Max */
 	typedef uint16_t counter_t;
 
@@ -93,8 +100,15 @@ public:
 
 	MetricUnit( MetricUnit* const p_parent, const std::string& p_name, const MetricUnitType_e p_type );
 
+	void addUnresolvedFn(const std::string& p_fnName);
+	const std::set<std::string>& getUnresolvedFns() const;
+
 	void increment( const MetricType_e p_metricType, const counter_t p_inc = 1 );
 	void set( const MetricType_e p_metricType, const MetricUnit::counter_t p_val );
+
+	void setExternalLinkage(const bool p_isExternal = true);
+	bool hasExternalLinkage(void) const;
+	FunctionMap_t getAllFunctionMap(void);
 
 	/* Sets a metric to the maximum of the current value and the specified value */
 	void setMax(const MetricType_e p_metricType, const MetricUnit::counter_t p_val);

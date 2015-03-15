@@ -127,6 +127,9 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 				case clang::Linkage::InternalLinkage:
 					IncrementMetric( fileUnit, METRIC_TYPE_LOCAL_FUNCTIONS );
 					break;
+				case clang::Linkage::ExternalLinkage:
+					m_currentUnit->setExternalLinkage();
+					break;
 				default:
 					/* Not interested at the moment */
 					break;
@@ -149,7 +152,7 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 			{
 				case clang::SC_None:
 					/* No storage class specified - implicitly the function is extern */
-					IncrementMetric( m_currentUnit,  METRIC_TYPE_EXTERN_IMPL_FUNCTIONS );
+					IncrementMetric( m_currentUnit, METRIC_TYPE_EXTERN_IMPL_FUNCTIONS );
 					break;
 				case clang::SC_Extern:
 					IncrementMetric( m_currentUnit, METRIC_TYPE_EXTERN_EXPL_FUNCTIONS );
@@ -423,7 +426,9 @@ bool MetricVisitor::VisitCallExpr(clang::CallExpr *p_callExpr)
 				/* TODO: This look-up doesn't work when the callee is in a different TU :-| */
 				Stmt* calleeBody = p_callExpr->getDirectCallee()->getBody();
 
-				if( calleeBody ) {
+				if( calleeBody ) 
+				{
+					/* Called function is visible from the current position */
 
 					SourceLocation calleeBodyLocation = calleeBody->getLocStart();
 					std::string name = getDefResolvedFileName( calleeBodyLocation );
@@ -459,6 +464,10 @@ bool MetricVisitor::VisitCallExpr(clang::CallExpr *p_callExpr)
 #if defined( DEBUG_FN_TRACE_OUTOUT )
 					std::cout << "VisitCallExpr : Function has no body" << std::endl;
 #endif
+					/* Function body not visible from the current position */
+
+					/* Add function to list of those which were not resolvable */
+					m_currentUnit->addUnresolvedFn(calleeName);
 				}
 			}
 			else

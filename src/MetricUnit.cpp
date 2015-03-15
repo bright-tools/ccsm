@@ -99,7 +99,8 @@ const uint16_t MetricUnit::counter_t_Max = UINT16_MAX;
 
 
 MetricUnit::MetricUnit( MetricUnit* const p_parent, const std::string& p_name, const MetricUnitType_e p_type ) : 
-					m_name( p_name ), m_type( p_type ), m_parent( p_parent )
+		m_name(p_name), m_type(p_type), 
+		m_parent(p_parent), m_hasExternalLinkage( false )
 {
 	uint16_t loop;
 
@@ -140,6 +141,50 @@ void MetricUnit::set( const MetricType_e p_metricType, const MetricUnit::counter
 {
 	m_counters[ p_metricType ] = p_val;
 }
+
+void MetricUnit::addUnresolvedFn(const std::string& p_fnName)
+{
+	m_unresolvedFnCalls.insert(p_fnName);
+}
+
+const std::set<std::string>& MetricUnit::getUnresolvedFns() const
+{
+	return m_unresolvedFnCalls;
+}
+
+void MetricUnit::setExternalLinkage(const bool p_isExternal)
+{
+	m_hasExternalLinkage = p_isExternal;
+}
+
+MetricUnit::FunctionMap_t MetricUnit::getAllFunctionMap(void)
+{
+	FunctionMap_t retVal;
+
+	for (SubUnitMap_t::const_iterator fileIt = m_subUnits.begin();
+		fileIt != m_subUnits.end();
+		++fileIt)
+	{
+		if ((*fileIt).second->GetType() == METRIC_UNIT_FILE)
+		{
+			for (SubUnitMap_t::const_iterator funcIt = (*fileIt).second->m_subUnits.begin();
+				funcIt != (*fileIt).second->m_subUnits.end();
+				++funcIt)
+			{
+				retVal[(*funcIt).first] = (*funcIt).second;
+			}
+		}
+	}
+
+
+	return retVal;
+}
+
+bool MetricUnit::hasExternalLinkage(void) const
+{
+	return m_hasExternalLinkage;
+}
+
 
 void MetricUnit::setMax(const MetricType_e p_metricType, const MetricUnit::counter_t p_val)
 {
