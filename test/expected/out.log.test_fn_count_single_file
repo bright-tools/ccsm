@@ -1,11 +1,12 @@
 Global
-Functions: 3
+Functions: 4
 File: src/empty.h
 	Functions: 0
 File: src/fn_call.h
 	Functions: 1
 	Function: header_function
 File: src\fn_call.c
-	Functions: 2
+	Functions: 3
 	Function: j
 	Function: k
+	Function: p

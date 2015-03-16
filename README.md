@@ -134,7 +134,7 @@ HIS Metrics Support
 | PATH        | Not yet implemented                          | |
 | GOTO        | Implemented - `STMT_GOTO_CNT` and `TOK_GOTO` | Number of GOTO statements |
 | v(G)        | Implemented - `TOK_MCCABE` and `STMT_MCCABE` | Cyclomatic complexity     |
-| CALLING     | Not yet implemeted                           | |
+| CALLING     | Implemented - `HIS_CALLING`                  | Number of different functions calling this function.  Note that functions called via function pointer are not counted.|
 | CALLS       | Implemented - `OP_FN_CALL_CNT`               | Number of different functions called.  Note that functions called via function pointer are not counted |
 | PARAM       | Implemented - `STMT_HIS_PARAM`               | Number of function parameters.  Note that only one variant of this metric exists as parameters hidden within macros are still parameters. |
 | STMT        | Implemented - `TOK_HIS_STMT`                 | Number of instructions per function. |

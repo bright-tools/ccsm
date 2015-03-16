@@ -223,6 +223,10 @@ MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType, c
 
 	switch( p_metricType ) 
 	{
+		case METRIC_TYPE_HIS_CALLING:
+			ret_val = getCounter(METRIC_TYPE_CALLED_BY_LOCAL, p_recurse) +
+				      getCounter(METRIC_TYPE_CALLED_BY_EXTERN, p_recurse);
+			break;
 	    case METRIC_TYPE_OPERATOR_TYPES:
 			/* TODO: This doesn't deal with C++ only operators */
 			ret_val = (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_ASSIGN, p_recurse ) > 0) +

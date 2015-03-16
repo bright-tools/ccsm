@@ -3,17 +3,30 @@ File: src/empty.h
 File: src/fn_call.h
 	Function: header_function
 		Number of local functions calling this function: 1
+		Number of external functions calling this function: 0
 		Function Calls: 1
 		No. different functions called: 1
 		Local Function Calls: 0
+		Number of functions which call this function: 1
 File: src\fn_call.c
 	Function: j
-		Number of local functions calling this function: 1
+		Number of local functions calling this function: 2
+		Number of external functions calling this function: 0
 		Function Calls: 8
 		No. different functions called: 6
 		Local Function Calls: 2
+		Number of functions which call this function: 2
 	Function: k
 		Number of local functions calling this function: 0
+		Number of external functions calling this function: 0
 		Function Calls: 3
 		No. different functions called: 1
 		Local Function Calls: 2
+		Number of functions which call this function: 0
+	Function: p
+		Number of local functions calling this function: 0
+		Number of external functions calling this function: 0
+		Function Calls: 1
+		No. different functions called: 1
+		Local Function Calls: 1
+		Number of functions which call this function: 0

@@ -161,6 +161,7 @@ File: src\def_file.c
 		Token based McCabe: 1
 		Token based Modified McCabe: 1
 		Number of local functions calling this function: 1
+		Number of functions which call this function: 1
 	Function: JUNKyou
 		RETURN statements: 1
 		Return points: 1

@@ -423,7 +423,7 @@ bool MetricVisitor::VisitCallExpr(clang::CallExpr *p_callExpr)
 				std::cout << "VisitCallExpr : Not yet registered as called" << std::endl;
 #endif
 
-				/* TODO: This look-up doesn't work when the callee is in a different TU :-| */
+				/* This look-up will only find functions where the body is visible from to the current TU */
 				Stmt* calleeBody = p_callExpr->getDirectCallee()->getBody();
 
 				if( calleeBody ) 
@@ -443,7 +443,7 @@ bool MetricVisitor::VisitCallExpr(clang::CallExpr *p_callExpr)
 						{
 							MetricUnit* fileUnit = m_topUnit->getSubUnit( name, METRIC_UNIT_FILE );
 							MetricUnit* targFn = fileUnit->getSubUnit( calleeName, METRIC_UNIT_FUNCTION );
-							IncrementMetric( targFn, METRIC_TYPE_CALLED_BY, fileUnit );
+							IncrementMetric( targFn, METRIC_TYPE_CALLED_BY_LOCAL, fileUnit );
 						}
 						else
 						{

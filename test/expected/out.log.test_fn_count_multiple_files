@@ -1,5 +1,5 @@
 Global
-Functions: 6
+Functions: 7
 File: src/empty.h
 	Functions: 0
 File: src/fn_call.h
@@ -9,9 +9,10 @@ File: src/fn_call2.h
 	Functions: 1
 	Function: header_function2
 File: src\fn_call.c
-	Functions: 2
+	Functions: 3
 	Function: j
 	Function: k
+	Function: p
 File: src\fn_call2.c
 	Functions: 2
 	Function: j

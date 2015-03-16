@@ -16,18 +16,21 @@ File: src\fn_call_similar1.c
 	Number of '--' tokens: 0
 	Function: o
 		Number of local functions calling this function: 1
+		Number of external functions calling this function: 0
 		Function Calls: 0
 		No. different functions called: 0
 		Number of '++' tokens: 1
 		Number of '--' tokens: 0
 	Function: t
 		Number of local functions calling this function: 1
+		Number of external functions calling this function: 0
 		Function Calls: 0
 		No. different functions called: 0
 		Number of '++' tokens: 1
 		Number of '--' tokens: 0
 	Function: y
 		Number of local functions calling this function: 0
+		Number of external functions calling this function: 0
 		Function Calls: 2
 		No. different functions called: 2
 		Number of '++' tokens: 0
@@ -37,18 +40,21 @@ File: src\fn_call_similar2.c
 	Number of '--' tokens: 2
 	Function: o
 		Number of local functions calling this function: 1
+		Number of external functions calling this function: 0
 		Function Calls: 0
 		No. different functions called: 0
 		Number of '++' tokens: 0
 		Number of '--' tokens: 1
 	Function: p
 		Number of local functions calling this function: 1
+		Number of external functions calling this function: 0
 		Function Calls: 0
 		No. different functions called: 0
 		Number of '++' tokens: 0
 		Number of '--' tokens: 1
 	Function: y
 		Number of local functions calling this function: 0
+		Number of external functions calling this function: 0
 		Function Calls: 2
 		No. different functions called: 2
 		Number of '++' tokens: 0

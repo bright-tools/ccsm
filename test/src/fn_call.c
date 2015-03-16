@@ -1,6 +1,6 @@
 /* File to support
    OP_FN_CALL_CNT
-   FUNC_CALLED_BY
+   FUNC_CALLED_BY_LOCAL
    testing
 */
 
@@ -48,4 +48,10 @@ int k( void )
     x+= (*fp)();
 
     return x;
+}
+
+int p( void )
+{
+    /* A second function which also calls j() */
+    return j();
 }

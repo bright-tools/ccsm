@@ -40,7 +40,7 @@ extern void resolveLinkages(MetricUnit* p_topUnit)
 				/* First matching function with external linkage will be assocated with the call */
 				if (fns->second->hasExternalLinkage())
 				{
-					fns->second->increment(METRIC_TYPE_CALLED_BY);
+					fns->second->increment(METRIC_TYPE_CALLED_BY_EXTERN);
 					break;
 				}
 				fns++;
