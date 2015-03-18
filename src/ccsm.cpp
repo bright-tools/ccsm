@@ -26,6 +26,7 @@
 #include "clang/Tooling/CompilationDatabase.h"
 #include "clang/Frontend/CompilerInstance.h"
 #include "llvm/Support/CommandLine.h"
+#include "clang/Tooling/CommonOptionsParser.h"
 #include "llvm/Support/Signals.h"
 #include "llvm/Support/raw_ostream.h"
 
@@ -39,12 +40,9 @@ using namespace llvm;
 
 // Set up the command line options
 
-static cl::list<std::string> SourcePaths(
-  cl::Positional,
-  cl::desc("<source> [... <sourceN>]"),
-  cl::OneOrMore);
-
 std::vector<std::string> ExcludeFunctionList;
+
+static llvm::cl::OptionCategory CCSMToolCategory("ccsm options");
 
 static cl::list<std::string, std::vector<std::string>> ExcludeFunctions(
 	"exclude-function",
@@ -60,7 +58,8 @@ static cl::list<std::string, std::vector<std::string>> ExcludeFiles(
     cl::desc("Exclude specified file from the metrics"),
 	cl::CommaSeparated,
 	cl::ZeroOrMore,
-	cl::location( ExcludeFileList ));
+	cl::location( ExcludeFileList ),
+	cl::cat(CCSMToolCategory));
 
 std::vector<std::string> IncludeInParentFileList;
 
@@ -69,36 +68,43 @@ static cl::list<std::string, std::vector<std::string>> IncludeInParentFiles(
     cl::desc("Specifies files whose contents should not be individually counted and should be included in the including file.  Intended to help support the def file idiom"),
 	cl::CommaSeparated,
 	cl::ZeroOrMore,
-	cl::location( IncludeInParentFileList ));
+	cl::location(IncludeInParentFileList),
+	cl::cat(CCSMToolCategory));
 
 static cl::opt<bool> DumpTokens(
   "dump-tokens",
-  cl::desc("Dump tokens as they are lexed")
+  cl::desc("Dump tokens as they are lexed"),
+  cl::cat(CCSMToolCategory)
 );
 
 static cl::opt<bool> DumpFnMap(
   "dump-function-map",
-  cl::desc("Dump the mapping of files/functions/locations")
+  cl::desc("Dump the mapping of files/functions/locations"),
+  cl::cat(CCSMToolCategory)
 );
 
 static cl::opt<bool> NoGlobal(
   "disable-global",
-  cl::desc("Disable output of stats at the global level")
+  cl::desc("Disable output of stats at the global level"),
+  cl::cat(CCSMToolCategory)
 );
 
 static cl::opt<bool> NoFile(
   "disable-file",
-  cl::desc("Disable output of stats at the file level")
+  cl::desc("Disable output of stats at the file level"),
+  cl::cat(CCSMToolCategory)
 );
 
 static cl::opt<bool> NoFunction(
   "disable-function",
-  cl::desc("Disable output of stats at the function level")
+  cl::desc("Disable output of stats at the function level"),
+  cl::cat(CCSMToolCategory)
 );
 
 static cl::opt<bool> NoMethod(
   "disable-method",
-  cl::desc("Disable output of stats at the method level")
+  cl::desc("Disable output of stats at the method level"),
+  cl::cat(CCSMToolCategory)
 );
 
 static cl::opt<MetricDumpFormat_e> OutputFormat(
@@ -110,7 +116,8 @@ static cl::opt<MetricDumpFormat_e> OutputFormat(
      clEnumValN(METRIC_DUMP_FORMAT_SPARSE_TREE, "sparsetree", "Sparse Tree (zero value nodes omitted)"),
      clEnumValN(METRIC_DUMP_FORMAT_TREE,        "tree",       "Tree Structure"),
     clEnumValEnd),
-	cl::init(METRIC_DUMP_FORMAT_TREE)
+	cl::init(METRIC_DUMP_FORMAT_TREE),
+	cl::cat(CCSMToolCategory)
 );
 
 std::vector<std::string> OutputMetricList;
@@ -120,7 +127,8 @@ static cl::list<std::string, std::vector<std::string>> OutputOnlyMetrics(
     cl::desc("Only output the specified metrics"),
 	cl::CommaSeparated,
 	cl::ZeroOrMore,
-	cl::location( OutputMetricList ));
+	cl::location(OutputMetricList),
+	cl::cat(CCSMToolCategory));
 
 int main(int argc, const char **argv) {
 	MetricUnit topUnit( NULL, "Global", METRIC_UNIT_GLOBAL);
@@ -129,30 +137,12 @@ int main(int argc, const char **argv) {
 	GlobalFunctionLocator srcMap;
 
 	llvm::sys::PrintStackTraceOnErrorSignal();
-	std::unique_ptr<CompilationDatabase> Compilations(
-			FixedCompilationDatabase::loadFromCommandLine(argc, argv));
-	cl::ParseCommandLineOptions(argc, argv);
+	CommonOptionsParser OptionsParser(argc, argv, CCSMToolCategory);
 
 	options.setDumpTokens( DumpTokens );
 
-	if (!Compilations) {  // Couldn't find a compilation DB from the command line
-		std::string ErrorMessage;
-		Compilations= 
-	#if 0
-		  !BuildPath.empty() ?
-			CompilationDatabase::autoDetectFromDirectory(BuildPath, ErrorMessage) :
-	#endif
-			CompilationDatabase::autoDetectFromSource(SourcePaths[0], ErrorMessage);
-		  
-		//  Still no compilation DB? - bail.	
-		if (!Compilations)
-		{
-		    llvm::report_fatal_error(ErrorMessage);
-		}
-	}
+	ClangTool Tool(OptionsParser.getCompilations(), OptionsParser.getSourcePathList());
 
-	ClangTool Tool(*Compilations, SourcePaths);
-  
 	// First tool-run to gather metrics from the AST.  This is done separately from the second tool-rum
 	// as different pre-processor options are used
 	int Result = Tool.run(newASTMetricFrontendActionFactory(&options, &topUnit, &srcMap, &commentFileList));
