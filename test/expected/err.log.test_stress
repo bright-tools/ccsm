@@ -1,0 +1,32 @@
+F:\WORK\GIT\ccsm\test\bacnet-stack-0.8.2\src\address.c:216:13: warning: 'fopen' is deprecated: This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details. [-Wdeprecated-declarations]
+    pFile = fopen(pFilename, "r");
+            ^
+F:\Apps\Microsoft Visual Studio 12.0\VC\include\stdio.h:211:72: note: 'fopen' has been explicitly marked deprecated here
+_Check_return_ _CRT_INSECURE_DEPRECATE(fopen_s) _CRTIMP FILE * __cdecl fopen(_In_z_ const char * _Filename, _In_z_ const char * _Mode);
+                                                                       ^
+F:\WORK\GIT\ccsm\test\bacnet-stack-0.8.2\src\address.c:221:21: warning: 'sscanf' is deprecated: This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details. [-Wdeprecated-declarations]
+                if (sscanf(line, "%7ld %79s %5u %79s %4u", &device_id,
+                    ^
+F:\Apps\Microsoft Visual Studio 12.0\VC\include\stdio.h:304:70: note: 'sscanf' has been explicitly marked deprecated here
+_Check_return_ _CRT_INSECURE_DEPRECATE(sscanf_s) _CRTIMP int __cdecl sscanf(_In_z_ const char * _Src, _In_z_ _Scanf_format_string_ const char * _Format, ...);
+                                                                     ^
+F:\WORK\GIT\ccsm\test\bacnet-stack-0.8.2\src\address.c:225:25: warning: 'sscanf' is deprecated: This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details. [-Wdeprecated-declarations]
+                        sscanf(mac_string, "%2x:%2x:%2x:%2x:%2x:%2x", &mac[0],
+                        ^
+F:\Apps\Microsoft Visual Studio 12.0\VC\include\stdio.h:304:70: note: 'sscanf' has been explicitly marked deprecated here
+_Check_return_ _CRT_INSECURE_DEPRECATE(sscanf_s) _CRTIMP int __cdecl sscanf(_In_z_ const char * _Src, _In_z_ _Scanf_format_string_ const char * _Format, ...);
+                                                                     ^
+F:\WORK\GIT\ccsm\test\bacnet-stack-0.8.2\src\address.c:234:29: warning: 'sscanf' is deprecated: This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details. [-Wdeprecated-declarations]
+                            sscanf(sadr_string, "%2x:%2x:%2x:%2x:%2x:%2x",
+                            ^
+F:\Apps\Microsoft Visual Studio 12.0\VC\include\stdio.h:304:70: note: 'sscanf' has been explicitly marked deprecated here
+_Check_return_ _CRT_INSECURE_DEPRECATE(sscanf_s) _CRTIMP int __cdecl sscanf(_In_z_ const char * _Src, _In_z_ _Scanf_format_string_ const char * _Format, ...);
+                                                                     ^
+4 warnings generated.
+F:\WORK\GIT\ccsm\test\bacnet-stack-0.8.2\src\indtext.c:97:17: warning: 'stricmp' is deprecated: The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _stricmp. See online help for details. [-Wdeprecated-declarations]
+            if (stricmp(data_list->pString, search_name) == 0) {
+                ^
+F:\Apps\Microsoft Visual Studio 12.0\VC\include\string.h:253:69: note: 'stricmp' has been explicitly marked deprecated here
+_Check_return_ _CRT_NONSTDC_DEPRECATE(_stricmp) _CRTIMP int __cdecl stricmp(_In_z_ const char * _Str1, _In_z_ const char * _Str2);
+                                                                    ^
+1 warning generated.
