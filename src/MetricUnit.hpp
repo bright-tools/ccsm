@@ -90,13 +90,13 @@ public:
 	typedef std::map<std::string, MetricUnit*> FunctionMap_t;
 
 	/* See also counter_t_Max */
-	typedef uint16_t counter_t;
+	typedef uint32_t counter_t;
 
 	static bool isMultiPassAllowed( const MetricType_e p_type );
 
 	static std::string getMetricName( const MetricType_e p_type );
 
-	static const uint16_t counter_t_Max;
+	static const uint32_t counter_t_Max;
 
 	MetricUnit( MetricUnit* const p_parent, const std::string& p_name, const MetricUnitType_e p_type );
 

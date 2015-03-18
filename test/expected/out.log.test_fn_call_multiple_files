@@ -49,7 +49,7 @@ File: src\fn_call2.c
 	Function: secondary_function
 		Number of local functions calling this function: 1
 		Number of external functions calling this function: 1
-		Function Calls: 2
+		Function Calls: 3
 		No. different functions called: 2
 		Local Function Calls: 2
 		Number of functions which call this function: 2

@@ -73,6 +73,210 @@ void MetricVisitor::UpdateCurrentFileName( const clang::SourceLocation &loc )
 	m_currentFileName = getDefResolvedFileName( loc );
 }
 
+MetricUnit::counter_t MetricVisitor::getSwitchPathCount(const clang::SwitchStmt* const p_stmt, uint16_t depth)
+{
+	MetricUnit::counter_t pathSum = 0;
+	// If the switch is based on an enum and all enum values are covered then effectively there should be no need for
+	//  a default
+	// TODO: Not necessarily true - just because an enum is being used it does not stop other values
+	//  being assigned to the variable
+	bool hasDefault = p_stmt->isAllEnumCasesCovered();
+	const clang::SwitchCase* switchCase = p_stmt->getSwitchCaseList();
+
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+	std::string blanks(depth, ' ');
+#endif
+
+	do
+	{
+		const clang::Stmt* subStmt = switchCase->getSubStmt();
+
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+		std::cout << blanks << "getSwitchPathCount - Case is " << subStmt->getStmtClassName() << std::endl;
+#endif
+
+		/* Check that it's not a fall-through */
+		if ((subStmt->getStmtClass() != Stmt::CaseStmtClass) &&
+			(subStmt->getStmtClass() != Stmt::DefaultStmtClass))
+		{
+			/* Check there actually is a substatement */
+			if (subStmt != nullptr)
+			{
+				pathSum += getPathCount(subStmt, depth);
+			}
+		}
+		else
+		{
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+			std::cout << blanks << "getSwitchPathCount - Fallthrough" << std::endl;
+#endif
+		}
+
+		/* This case a 'default' statement? */
+		if (switchCase->getStmtClass() == clang::Stmt::DefaultStmtClass)
+		{
+			hasDefault = true;
+		}
+
+		switchCase = switchCase->getNextSwitchCase();
+
+	} while (switchCase != nullptr);
+	
+	/* If there wasn't an explicit default in the set of cases, add an implicit one */
+	if (!hasDefault)
+	{
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+		std::cout << blanks << "getSwitchPathCount - Adding implicit default" << std::endl;
+#endif
+		pathSum++;
+	}
+
+	return pathSum;
+}
+
+MetricUnit::counter_t MetricVisitor::getIfPathCount(const clang::IfStmt* const p_stmt, uint16_t depth)
+{
+	MetricUnit::counter_t pathSum = 0;
+	const clang::IfStmt* ifStmt = p_stmt;
+
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+	std::string blanks(depth, ' ');
+#endif
+
+	/* Loops across 'if', 'else if' and 'else' constructs */
+	while (ifStmt != nullptr)
+	{
+		MetricUnit::counter_t thenCount = 1;
+		/* Default to one gives an count for an implicit else block in the case that there is not one in the code */
+		MetricUnit::counter_t elseCount = 1;
+
+		/* Get the path count for the 'then' block */
+		thenCount = getPathCount(ifStmt->getThen(), depth);
+
+		/* Is there an else block? */
+		if (ifStmt->getElse() != nullptr)
+		{
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+			std::cout << blanks << "getIfPathCount - Else is " << ifStmt->getElse()->getStmtClassName() << std::endl;
+#endif
+
+			/* Is it an 'else if'? */
+			if (ifStmt->getElse()->getStmtClass() == clang::Stmt::IfStmtClass)
+			{
+				/* Process the contents of the 'else if' next time round the while */
+				ifStmt = static_cast<const IfStmt*>(ifStmt->getElse());
+				/* No need to count an implicit else */
+				elseCount = 0;
+			}
+			else
+			{
+				/* Not an 'else if', just an 'else', so count that and no more while loop iteration required */
+				elseCount = getPathCount(ifStmt->getElse(), depth);
+				ifStmt = nullptr;
+			}
+		}
+		else
+		{
+			ifStmt = nullptr;
+		}
+
+		pathSum += (thenCount + elseCount);
+	}
+
+	return pathSum;
+}
+
+MetricUnit::counter_t MetricVisitor::getPathCount(const clang::Stmt* const p_stmt, uint16_t depth)
+{
+	// TODO: Return this for null, too?
+	MetricUnit::counter_t ret_val = 1;
+	// TODO: Need to check that there are no GOTOs before doing the path count
+
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+	std::string blanks(depth, ' ');
+	std::cout << blanks << "getPathCount - CONTEXT " << m_currentFileName << "::" << m_currentFunctionName << std::endl;
+	std::cout << blanks << "getPathCount - " << p_stmt->getStmtClassName() << std::endl;
+#endif
+
+	if (p_stmt != nullptr)
+	{
+
+		uint16_t thisDepth = depth + 1;
+
+		switch (p_stmt->getStmtClass())
+		{
+		case clang::Stmt::StmtClass::IfStmtClass:
+			ret_val = getIfPathCount(static_cast<const IfStmt*>(p_stmt), thisDepth);
+			break;
+		case clang::Stmt::StmtClass::SwitchStmtClass:
+			ret_val = getSwitchPathCount(static_cast<const SwitchStmt*>(p_stmt), thisDepth);
+			break;
+		case clang::Stmt::StmtClass::WhileStmtClass:
+			ret_val = 1+getPathCount((static_cast<const WhileStmt*>(p_stmt)->getBody()), thisDepth);
+			break;
+		case clang::Stmt::StmtClass::ForStmtClass:
+			ret_val = 1+getPathCount((static_cast<const ForStmt*>(p_stmt)->getBody()), thisDepth);
+			break;
+		case clang::Stmt::StmtClass::DoStmtClass:
+			ret_val = 1+getPathCount((static_cast<const DoStmt*>(p_stmt)->getBody()), thisDepth);
+			break;
+		default:
+			ret_val = getOtherPathCount(p_stmt, thisDepth);
+			break;
+		}
+
+	}
+
+	return ret_val;
+}
+
+MetricUnit::counter_t MetricVisitor::getOtherPathCount(const clang::Stmt* const p_stmt, uint16_t depth)
+{
+	MetricUnit::counter_t ret_val = 1;
+	// TODO: Need to check that there are no GOTOs before doing the path count
+
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+	std::string blanks(depth, ' ');
+#endif
+
+	// Iterate all child statements
+	for (clang::Stmt::const_child_iterator it = p_stmt->child_begin();
+		 it != p_stmt->child_end();
+	 	 it++)
+	{
+		clang::Stmt::StmtClass clss = (*it)->getStmtClass();
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+		std::cout << blanks << "getOtherPathCount - processing " << (*it)->getStmtClassName() << std::endl;
+#endif
+
+		// For statement classes which have an effect on the path
+		switch (clss)
+		{
+			case clang::Stmt::StmtClass::IfStmtClass:
+			case clang::Stmt::StmtClass::SwitchStmtClass:
+			case clang::Stmt::StmtClass::CompoundStmtClass:
+			case clang::Stmt::StmtClass::WhileStmtClass:
+			case clang::Stmt::StmtClass::DoStmtClass:
+			case clang::Stmt::StmtClass::ForStmtClass:
+				ret_val *= getPathCount(*it, depth);
+				break;
+			default:
+				break;
+		}
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+		std::cout << blanks << "getOtherPathCount - Updated: " << ret_val << std::endl;
+#endif
+	}
+
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+	std::cout << blanks << "getOtherPathCount - Done: " << ret_val << std::endl;
+#endif
+
+	return ret_val;
+}
+
+#undef DEBUG_FN_TRACE_OUTOUT
+
 bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
     
 #if defined( DEBUG_FN_TRACE_OUTOUT )
@@ -121,6 +325,8 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 			{
 				IncrementMetric( fileUnit, METRIC_TYPE_INLINE_FUNCTIONS );
 			}
+
+			m_currentUnit->set(METRIC_TYPE_FUNCTION_PATHS, getPathCount(func->getBody()));
 
 			switch( func->getLinkageAndVisibility().getLinkage() )
 			{
@@ -401,95 +607,106 @@ bool MetricVisitor::VisitCallExpr(clang::CallExpr *p_callExpr)
 
 	if( m_currentUnit )
 	{
-		clang::FunctionDecl* p_calleeFn = p_callExpr->getCalleeDecl()->getAsFunction();
-
-		/* Check the function could be determined - probably not in the case of a function pointer */
-		if( p_calleeFn != NULL )
+		clang::Decl* calleeDecl = p_callExpr->getCalleeDecl();
+		if (calleeDecl)
 		{
-			std::string calleeName = p_calleeFn->getQualifiedNameAsString();
+			clang::FunctionDecl* p_calleeFn = calleeDecl->getAsFunction();
+
+			/* Check the function could be determined - probably not in the case of a function pointer */
+			if (p_calleeFn != NULL)
+			{
+				std::string calleeName = p_calleeFn->getQualifiedNameAsString();
 
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-			std::cout << "VisitCallExpr : Function call to " << calleeName << std::endl;
+				std::cout << "VisitCallExpr : Function call to " << calleeName << std::endl;
 #endif
 
-			/* Not registered this function as being called yet? */
-			// TODO: Does this work for C++ namespacing?
-			if( m_fnsCalled.find( calleeName ) == m_fnsCalled.end() ) {
+				/* Not registered this function as being called yet? */
+				// TODO: Does this work for C++ namespacing?
+				if (m_fnsCalled.find(calleeName) == m_fnsCalled.end()) {
 
-				// Update the set containing the names of all the functions called
-				m_fnsCalled.insert( calleeName );
+					// Update the set containing the names of all the functions called
+					m_fnsCalled.insert(calleeName);
 
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-				std::cout << "VisitCallExpr : Not yet registered as called" << std::endl;
+					std::cout << "VisitCallExpr : Not yet registered as called" << std::endl;
 #endif
 
-				/* This look-up will only find functions where the body is visible from to the current TU */
-				Stmt* calleeBody = p_callExpr->getDirectCallee()->getBody();
+					/* This look-up will only find functions where the body is visible from to the current TU */
+					Stmt* calleeBody = p_callExpr->getDirectCallee()->getBody();
 
-				if( calleeBody ) 
-				{
-					/* Called function is visible from the current position */
-
-					SourceLocation calleeBodyLocation = calleeBody->getLocStart();
-					std::string name = getDefResolvedFileName( calleeBodyLocation );
-
-#if defined( DEBUG_FN_TRACE_OUTOUT )
-					std::cout << "VisitCallExpr : Found function body in " << name << std::endl;
-#endif
-
-					if( ShouldIncludeFile( name ))
+					if (calleeBody)
 					{
-						if( SHOULD_INCLUDE_FUNCTION( m_options, calleeName ))
+						/* Called function is visible from the current position */
+
+						SourceLocation calleeBodyLocation = calleeBody->getLocStart();
+						std::string name = getDefResolvedFileName(calleeBodyLocation);
+
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+						std::cout << "VisitCallExpr : Found function body in " << name << std::endl;
+#endif
+
+						if (ShouldIncludeFile(name))
 						{
-							MetricUnit* fileUnit = m_topUnit->getSubUnit( name, METRIC_UNIT_FILE );
-							MetricUnit* targFn = fileUnit->getSubUnit( calleeName, METRIC_UNIT_FUNCTION );
-							IncrementMetric( targFn, METRIC_TYPE_CALLED_BY_LOCAL, fileUnit );
+							if (SHOULD_INCLUDE_FUNCTION(m_options, calleeName))
+							{
+								MetricUnit* fileUnit = m_topUnit->getSubUnit(name, METRIC_UNIT_FILE);
+								MetricUnit* targFn = fileUnit->getSubUnit(calleeName, METRIC_UNIT_FUNCTION);
+								IncrementMetric(targFn, METRIC_TYPE_CALLED_BY_LOCAL, fileUnit);
+							}
+							else
+							{
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+								std::cout << "VisitCallExpr : Function is in list to be ignored" << std::endl;
+#endif
+							}
 						}
 						else
 						{
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-							std::cout << "VisitCallExpr : Function is in list to be ignored" << std::endl;
+							std::cout << "VisitCallExpr : Function in ignored file" << std::endl;
 #endif
 						}
 					}
 					else
 					{
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-						std::cout << "VisitCallExpr : Function in ignored file" << std::endl;
+						std::cout << "VisitCallExpr : Function has no body" << std::endl;
 #endif
+						/* Function body not visible from the current position */
+
+						/* Add function to list of those which were not resolvable */
+						m_currentUnit->addUnresolvedFn(calleeName);
 					}
 				}
 				else
 				{
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-					std::cout << "VisitCallExpr : Function has no body" << std::endl;
+					std::cout << "VisitCallExpr : Already registered as called" << std::endl;
 #endif
-					/* Function body not visible from the current position */
+				}
 
-					/* Add function to list of those which were not resolvable */
-					m_currentUnit->addUnresolvedFn(calleeName);
+				if (p_calleeFn->getBody() != NULL)
+				{
+					IncrementMetric(m_currentUnit, METRIC_TYPE_LOCAL_FUNCTION_CALLS);
 				}
 			}
 			else
 			{
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-				std::cout << "VisitCallExpr : Already registered as called" << std::endl;
+				std::cout << "VisitCallExpr : Not able to determin name of called function" << std::endl;
 #endif
-			}
-
-			if( p_calleeFn->getBody() != NULL )
-			{
-				IncrementMetric( m_currentUnit, METRIC_TYPE_LOCAL_FUNCTION_CALLS );
+				// TODO: Number of functions called isn't incremented, which might be misleading ... should document this behaviour at least
 			}
 		}
 		else
 		{
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-			std::cout << "VisitCallExpr : Not able to determin name of called function" << std::endl;
+			std::cout << "VisitCallExpr : Not able to get decl for function call" << std::endl;
 #endif
-			// TODO: Number of functions called isn't incremented, which might be misleading ... should document this behaviour at least
+			/* Decl not available! */
 		}
-		IncrementMetric( m_currentUnit, METRIC_TYPE_FUNCTION_CALLS );
+		IncrementMetric(m_currentUnit, METRIC_TYPE_FUNCTION_CALLS);
 	}
 
     return true;

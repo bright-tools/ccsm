@@ -95,7 +95,7 @@ const bool MetricUnit::m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ] = {
 	}
 };
 
-const uint16_t MetricUnit::counter_t_Max = UINT16_MAX;
+const uint32_t MetricUnit::counter_t_Max = UINT32_MAX;
 
 
 MetricUnit::MetricUnit( MetricUnit* const p_parent, const std::string& p_name, const MetricUnitType_e p_type ) : 

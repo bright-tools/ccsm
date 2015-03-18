@@ -345,7 +345,7 @@ HIS Metrics Support
 | Metric      | Status                                       | Description     |
 |-------------|----------------------------------------------|-----------------|
 | COMF        | Implemented - `TOK_HIS_COMF`                 | Comment density.  Ratio of comments to 'statements' |
-| PATH        | Not yet implemented                          | |
+| PATH        | Implemented - `FUNC_PATHS`                   | Number of non-cyclic execution paths in the function |
 | GOTO        | Implemented - `STMT_GOTO_CNT` and `TOK_GOTO` | Number of GOTO statements |
 | v(G)        | Implemented - `TOK_MCCABE` and `STMT_MCCABE` | Cyclomatic complexity     |
 | CALLING     | Implemented - `HIS_CALLING`                  | Number of different functions calling this function.  Note that functions called via function pointer are not counted.|

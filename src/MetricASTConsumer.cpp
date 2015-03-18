@@ -36,6 +36,10 @@ void MetricASTConsumer::HandleTranslationUnit(clang::ASTContext &Context)
 	clang::SourceManager& SM = Context.getSourceManager();
 	clang::TranslationUnitDecl* translationUnitDecl = Context.getTranslationUnitDecl();
 
+#if 0
+	std::cout << "HandleTranslationUnit::Processing " << SM.getFileEntryForID(SM.getMainFileID())->getName() << std::endl;
+#endif
+
 	TranslationUnitFunctionLocator* fnMap = m_fnLocator->getLocatorFor( SM.getFileEntryForID( SM.getMainFileID() )->getName() );
 
 	MetricVisitor* visitor = new MetricVisitor(m_compilerInstance, m_topUnit, m_options, fnMap ); 

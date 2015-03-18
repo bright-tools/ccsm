@@ -1,0 +1,27 @@
+Global
+File: src/func_path.h
+File: src/nesting.h
+File: src\func_path.c
+	Function: t1
+		Number of paths through the function: 3
+	Function: t2
+		Number of paths through the function: 2
+	Function: t3
+		Number of paths through the function: 2
+	Function: t4
+		Number of paths through the function: 2
+	Function: t5
+		Number of paths through the function: 4
+	Function: t6
+		Number of paths through the function: 2
+File: src\func_path2.c
+File: src\nesting.c
+	Function: elifer
+		Number of paths through the function: 5
+	Function: elser
+		Number of paths through the function: 10
+	Function: main
+		Number of paths through the function: 4
+File: src\nesting2.c
+	Function: something
+		Number of paths through the function: 9
