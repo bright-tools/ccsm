@@ -40,6 +40,7 @@ File: src/def_file.h
 		Statement based Modified McCabe: 1
 		Token based McCabe: 1
 		Token based Modified McCabe: 1
+		Number of paths through the function: 1
 	Function: EMPTYhello
 		Return points: 1
 		Statements: 1
@@ -47,6 +48,7 @@ File: src/def_file.h
 		Statement based Modified McCabe: 1
 		Token based McCabe: 1
 		Token based Modified McCabe: 1
+		Number of paths through the function: 1
 	Function: EMPTYhow
 		Return points: 1
 		Statements: 1
@@ -54,6 +56,7 @@ File: src/def_file.h
 		Statement based Modified McCabe: 1
 		Token based McCabe: 1
 		Token based Modified McCabe: 1
+		Number of paths through the function: 1
 	Function: EMPTYthere
 		Return points: 1
 		Statements: 1
@@ -61,6 +64,7 @@ File: src/def_file.h
 		Statement based Modified McCabe: 1
 		Token based McCabe: 1
 		Token based Modified McCabe: 1
+		Number of paths through the function: 1
 	Function: EMPTYyou
 		Return points: 1
 		Statements: 1
@@ -68,6 +72,7 @@ File: src/def_file.h
 		Statement based Modified McCabe: 1
 		Token based McCabe: 1
 		Token based Modified McCabe: 1
+		Number of paths through the function: 1
 	Function: FUNCare
 		RETURN statements: 1
 		Return points: 1
@@ -76,6 +81,7 @@ File: src/def_file.h
 		Statement based Modified McCabe: 1
 		Token based McCabe: 1
 		Token based Modified McCabe: 1
+		Number of paths through the function: 1
 	Function: FUNChello
 		RETURN statements: 1
 		Return points: 1
@@ -84,6 +90,7 @@ File: src/def_file.h
 		Statement based Modified McCabe: 1
 		Token based McCabe: 1
 		Token based Modified McCabe: 1
+		Number of paths through the function: 1
 	Function: FUNChow
 		RETURN statements: 1
 		Return points: 1
@@ -92,6 +99,7 @@ File: src/def_file.h
 		Statement based Modified McCabe: 1
 		Token based McCabe: 1
 		Token based Modified McCabe: 1
+		Number of paths through the function: 1
 	Function: FUNCthere
 		RETURN statements: 1
 		Return points: 1
@@ -100,6 +108,7 @@ File: src/def_file.h
 		Statement based Modified McCabe: 1
 		Token based McCabe: 1
 		Token based Modified McCabe: 1
+		Number of paths through the function: 1
 	Function: FUNCyou
 		RETURN statements: 1
 		Return points: 1
@@ -108,6 +117,7 @@ File: src/def_file.h
 		Statement based Modified McCabe: 1
 		Token based McCabe: 1
 		Token based Modified McCabe: 1
+		Number of paths through the function: 1
 File: src\def_file.c
 	Functions: 6
 	RETURN statements: 6
@@ -136,6 +146,7 @@ File: src\def_file.c
 		Statement based Modified McCabe: 1
 		Token based McCabe: 1
 		Token based Modified McCabe: 1
+		Number of paths through the function: 1
 	Function: JUNKhello
 		RETURN statements: 1
 		Return points: 1
@@ -144,6 +155,7 @@ File: src\def_file.c
 		Statement based Modified McCabe: 1
 		Token based McCabe: 1
 		Token based Modified McCabe: 1
+		Number of paths through the function: 1
 	Function: JUNKhow
 		RETURN statements: 1
 		Return points: 1
@@ -152,6 +164,7 @@ File: src\def_file.c
 		Statement based Modified McCabe: 1
 		Token based McCabe: 1
 		Token based Modified McCabe: 1
+		Number of paths through the function: 1
 	Function: JUNKthere
 		RETURN statements: 1
 		Return points: 1
@@ -161,6 +174,7 @@ File: src\def_file.c
 		Token based McCabe: 1
 		Token based Modified McCabe: 1
 		Number of local functions calling this function: 1
+		Number of paths through the function: 1
 		Number of functions which call this function: 1
 	Function: JUNKyou
 		RETURN statements: 1
@@ -170,6 +184,7 @@ File: src\def_file.c
 		Statement based Modified McCabe: 1
 		Token based McCabe: 1
 		Token based Modified McCabe: 1
+		Number of paths through the function: 1
 	Function: main
 		RETURN statements: 1
 		Return points: 1
@@ -179,6 +194,7 @@ File: src\def_file.c
 		Token based McCabe: 1
 		Token based Modified McCabe: 1
 		Function Calls: 1
+		Number of paths through the function: 1
 		No. different functions called: 1
 		Local Function Calls: 1
 		Function (body) size in lines: 3
