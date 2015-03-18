@@ -16,6 +16,7 @@
 *.swp
 *.swo
 *.tmp
+*~
 
 # Transient files used during testing
 test/err.log
