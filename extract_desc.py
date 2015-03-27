@@ -22,9 +22,9 @@ with open( def_dir + os.sep + 'metrics.def' ) as fh:
         results = re.match( mtrc_def_mtch_re, line )
         if results:
 	    output = ['','','']
-	    for i in range(1, column_count):
-	    	output[i-1] = results.group(i)
+	    for i in range(0, column_count):
+	    	output[i] = results.group(i+1)
 	    if( escape_pipe ):
-	    	for i in range(1, column_count):
-	    	    output[i-1] = output[i-1].replace("|","<code>&#124;</code>")
+	    	for i in range(0, column_count):
+	    	    output[i] = output[i].replace("|","<code>&#124;</code>")
             print "| " + output[0] + " | " + output[1] + " | " + output[2] + " |"

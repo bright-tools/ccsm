@@ -122,10 +122,10 @@ Metric Details
 | STMT_LABEL_CNT | LABEL statements |  |
 | TYPEDEF_FILE_CNT | File-scope typedefs |  |
 | TYPEDEF_FN_CNT | Function-scope typedefs |  |
-| VAR_FILE_LOC_CNT | File-scope total local variable declarations |  |
+| VAR_FILE_LOC_CNT | File-scope total local variable declarations | Includes auto and static but not extern |
 | VAR_FILE_LOC_STATIC_CNT | File-scope static variable declarations |  |
 | VAR_FILE_EXT_CNT | File-scope external variable declarations |  |
-| VAR_FN_LOC_CNT | Function-scope total local variable declarations |  |
+| VAR_FN_LOC_CNT | Function-scope total local variable declarations | Includes auto and static but not extern |
 | VAR_FN_LOC_STATIC_CNT | Function-scope static variable declarations |  |
 | VAR_FN_LOC_REG_CNT | Function-scope register variable declarations |  |
 | VAR_FN_LOC_AUTO_CNT | Function-scope auto variable declarations |  |
@@ -144,13 +144,13 @@ Metric Details
 | FUNC_CALLED_BY_EXTERN | Number of external functions calling this function |  |
 | OP_FN_CALL_CNT | Function Calls |  |
 | FUNC_PATHS | Number of paths through the function |  |
-| OP_FN_CALL_UNIQUE_CNT | No. different functions called |  |
-| LOCAL_FN_CALL_CNT | Local Function Calls |  |
+| OP_FN_CALL_UNIQUE_CNT | No. different functions called | Of the total number of functions called (see OP_FN_CALL_CNT), this represents the number of uniquely addressed functions.  Does not include functions called via function pointers |
+| LOCAL_FN_CALL_CNT | Local Function Calls | Does not include functions called via function pointers |
 | FILE_SIZE | Size in bytes |  |
-| FILE_LINE_CNT | Size in lines |  |
-| COMMENT_BYTE_CNT | Comments in bytes |  |
-| COMMENT_CNT | Comment Count |  |
-| FUNC_LINE_CNT | Function (body) size in lines |  |
+| FILE_LINE_CNT | Size in lines | Counts number of newlines in the file |
+| COMMENT_BYTE_CNT | Comments in bytes | Counts the total number of bytes which are used in comments.  Note that --exclude-function does not have any effect on this metric. |
+| COMMENT_CNT | Comment Count | Counts the total number of comments.  Note that --exclude-function does not have any effect on this metric. |
+| FUNC_LINE_CNT | Function (body) size in lines | Counts number of newlines in the function body |
 | STMT_HIS_PARAM | Function Parameters |  |
 | TODO | Decisions |  |
 | TODO | Loops |  |
@@ -318,8 +318,8 @@ Metric Details
 | TOK_UNRESERVED_IDENTIFIERS_UNIQ | Number of unique (unreserved) identifier tokens |  |
 | TOK_CHAR_CONSTS | Number of character constants |  |
 | TOK_CHAR_CONSTS_UNIQ | Number of unique character constants |  |
-| TOK_HIS_COMF | Comment density |  |
-| TOK_HIS_STMT | Statement count |  |
+| TOK_HIS_COMF | Comment density | Relationship of the number of comments to the number of statements.  HIS metric. |
+| TOK_HIS_STMT | Statement count | Number of 'statements' |
 | HIS_CALLING | Number of functions which call this function |  |
 
 Token & Statement Based Metrics
