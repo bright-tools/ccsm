@@ -4346,7 +4346,7 @@ File: src\bacdcode.c
 		IF statements: 1
 		ELSE statements: 1
 		RETURN statements: 2
-		Return points: 3
+		Return points: 2
 		Statements: 45
 		Statement based McCabe: 2
 		Statement based Modified McCabe: 2
@@ -5009,7 +5009,7 @@ File: src\bacdcode.c
 		IF statements: 1
 		ELSE statements: 1
 		RETURN statements: 2
-		Return points: 3
+		Return points: 2
 		Statements: 45
 		Statement based McCabe: 2
 		Statement based Modified McCabe: 2
@@ -5337,7 +5337,7 @@ File: src\bacdcode.c
 		IF statements: 1
 		ELSE statements: 1
 		RETURN statements: 2
-		Return points: 3
+		Return points: 2
 		Statements: 21
 		Statement based McCabe: 2
 		Statement based Modified McCabe: 2
@@ -9120,7 +9120,7 @@ File: src\bacreal.c
 		IF statements: 1
 		ELSE statements: 1
 		RETURN statements: 2
-		Return points: 3
+		Return points: 2
 		Statements: 26
 		Statement based McCabe: 2
 		Statement based Modified McCabe: 2
@@ -9198,7 +9198,7 @@ File: src\bacreal.c
 		IF statements: 1
 		ELSE statements: 1
 		RETURN statements: 2
-		Return points: 3
+		Return points: 2
 		Statements: 26
 		Statement based McCabe: 2
 		Statement based Modified McCabe: 2
@@ -9432,7 +9432,7 @@ File: src\bacstr.c
 		IF statements: 1
 		ELSE statements: 1
 		RETURN statements: 2
-		Return points: 3
+		Return points: 2
 		Statements: 16
 		Statement based McCabe: 2
 		Statement based Modified McCabe: 2
@@ -10910,7 +10910,7 @@ File: src\bactext.c
 		IF statements: 2
 		ELSE statements: 2
 		RETURN statements: 3
-		Return points: 4
+		Return points: 3
 		Statements: 30
 		Statement based McCabe: 3
 		Statement based Modified McCabe: 3
@@ -12826,7 +12826,7 @@ File: src\datetime.c
 		IF statements: 1
 		ELSE statements: 1
 		RETURN statements: 2
-		Return points: 3
+		Return points: 2
 		Statements: 37
 		Statement based McCabe: 4
 		Statement based Modified McCabe: 4
@@ -12866,7 +12866,7 @@ File: src\datetime.c
 		ELSE statements: 2
 		RETURN statements: 3
 		Function-scope total local variable declarations: 1
-		Return points: 4
+		Return points: 3
 		Statements: 71
 		Statement based McCabe: 5
 		Statement based Modified McCabe: 5
@@ -13727,7 +13727,7 @@ File: src\fifo.c
 		ELSE statements: 1
 		RETURN statements: 2
 		Function-scope total local variable declarations: 2
-		Return points: 3
+		Return points: 2
 		Statements: 28
 		Statement based McCabe: 2
 		Statement based Modified McCabe: 2
@@ -15096,7 +15096,7 @@ File: src\indtext.c
 		IF statements: 1
 		ELSE statements: 1
 		RETURN statements: 2
-		Return points: 3
+		Return points: 2
 		Statements: 27
 		Statement based McCabe: 2
 		Statement based Modified McCabe: 2

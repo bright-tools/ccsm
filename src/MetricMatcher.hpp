@@ -38,6 +38,12 @@
 class MetricVisitor : public clang::RecursiveASTVisitor<MetricVisitor>
 {
 protected:
+	typedef struct
+	{
+		MetricUnit::counter_t path_count;
+		bool                  path_has_return;
+	} PathResults;
+
 	clang::CompilerInstance&        m_compilerInstance;
 	clang::ASTContext*		        m_astContext;
 	MetricUnit*		                m_topUnit;
@@ -56,10 +62,10 @@ protected:
 	void IncrementMetric( MetricUnit* const p_unit, const MetricType_e p_metricType, const MetricUnit* const p_file );
 	void UpdateCurrentFileName( const clang::SourceLocation &loc );
 	std::string getDefResolvedFileName( const clang::SourceLocation &loc );
-	MetricUnit::counter_t getPathCount(const clang::Stmt* const p_stmt, uint16_t depth = 0);
-	MetricUnit::counter_t getOtherPathCount(const clang::Stmt* const p_stmt, uint16_t depth = 0);
-	MetricUnit::counter_t getIfPathCount(const clang::IfStmt* const p_stmt, uint16_t depth = 0);
-	MetricUnit::counter_t getSwitchPathCount(const clang::SwitchStmt* const p_stmt, uint16_t depth = 0);
+	PathResults getPathCount(const clang::Stmt* const p_stmt, uint16_t depth = 0);
+	PathResults getOtherPathCount(const clang::Stmt* const p_stmt, uint16_t depth = 0);
+	PathResults getIfPathCount(const clang::IfStmt* const p_stmt, uint16_t depth = 0);
+	PathResults getSwitchPathCount(const clang::SwitchStmt* const p_stmt, uint16_t depth = 0);
 
 public:
 	

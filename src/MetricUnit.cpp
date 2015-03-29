@@ -501,12 +501,7 @@ MetricUnit* MetricUnit::getSubUnit( const std::string& p_name, const MetricUnitT
 		{
 			ret_val = new MetricUnit( this, p_name, p_type );
 
-			if( ret_val->isFnOrMethod() )
-			{
-				/* By default, every function/method has 1 return point */
-				ret_val->increment( METRIC_TYPE_RETURNPOINTS );
-			}
-			else if( p_type == METRIC_UNIT_FILE )
+			if( p_type == METRIC_UNIT_FILE )
 			{
 				this->increment( METRIC_TYPE_FILES );
 			}
