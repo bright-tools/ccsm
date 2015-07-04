@@ -82,14 +82,11 @@ void TranslationUnitFunctionLocator::addFunctionLocation(const clang::ASTContext
 	if (m_options.getPrototypesAreFileScope())
 	{
 		startLoc = p_func->getBody()->getLocStart();
-		std::cout << "xx";
 	}
 	else
 	{
-		std::cout << "yy";
 		startLoc = p_func->getLocStart();
 	}
-	startLoc.dump(p_context->getSourceManager());
 	clang::FileID fId = p_context->getSourceManager().getFileID(p_func->getLocStart());
 	unsigned int hashVal = fId.getHashValue();
 
