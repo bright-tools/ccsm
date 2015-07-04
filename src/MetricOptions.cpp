@@ -136,3 +136,13 @@ bool MetricOptions::getUseShortNames(void) const
 {
 	return m_useShortNames;
 }
+
+void MetricOptions::setPrototypesAreFileScope(const bool p_proto)
+{
+	m_prototypesAreFileScope = p_proto;
+}
+
+bool MetricOptions::getPrototypesAreFileScope(void) const
+{
+	return m_prototypesAreFileScope;
+}

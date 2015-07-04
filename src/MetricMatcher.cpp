@@ -440,8 +440,6 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 	}
 	else
 	{
-		/* No body to this function */
-
 		if( m_currentUnit )
 		{
 			switch( func->getStorageClass() )
@@ -495,15 +493,9 @@ bool MetricVisitor::VisitTypedefDecl( clang::TypedefDecl* p_typeDef )
 
 	if( m_currentUnit )
 	{
-		/* Is it a "top level" decl? */
-		if( p_typeDef->isDefinedOutsideFunctionOrMethod() )
-		{
-			IncrementMetric( m_currentUnit, METRIC_TYPE_TYPEDEF_FILE );
-		}
-		else
-		{
-			IncrementMetric( m_currentUnit, METRIC_TYPE_TYPEDEF_FN );
-		}
+		/* TODO: Need to hunt the typedef for qualifiers, such as const */
+
+		IncrementMetric(m_currentUnit, METRIC_TYPE_TYPEDEF);
 	}
 
 	return true;
@@ -566,36 +558,60 @@ bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 
 	if( m_currentUnit )
 	{
+		MetricUnit* owner = m_currentUnit;
+
+		/* Only interested in local qualifiers, not those which have been added by typedef, etc. */
+		const bool isLocalVolatile = p_varDec->getType().isLocalVolatileQualified();
+		const bool isLocalConst = p_varDec->getType().isLocalConstQualified();
+		/* Interested in the absolute qualifiers associated with the variable */
+		const bool isVolatile = p_varDec->getType().isVolatileQualified();
+		const bool isConst = p_varDec->getType().isConstQualified();
+
+		if (m_options->getPrototypesAreFileScope() &&
+			(p_varDec->getKind() == clang::Decl::ParmVar))
+		{
+			owner = m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE);
+		}
+
+		if (isLocalVolatile)
+		{
+			IncrementMetric(owner, METRIC_TYPE_VOLATILE);
+		}
+		if (isLocalConst)
+		{
+			IncrementMetric(owner, METRIC_TYPE_CONST);
+		}
+		{
+			const clang::Type* zz = p_varDec->getType().getTypePtr();
+			if (zz->getTypeClass() == clang::Type::Pointer)
+			{
+				const clang::PointerType *array_type = llvm::dyn_cast<clang::PointerType>(zz);
+				if (array_type->getPointeeType().isConstQualified())
+				{
+					IncrementMetric(owner, METRIC_TYPE_CONST);
+				}
+			}
+		}
+
 		/* Check it's not a function parameter */
-		if ( p_varDec->getKind() == clang::Decl::Var )
+		if (p_varDec->getKind() == clang::Decl::Var)
 		{
 			// TODO: This is the declared storage class rather than the computed storage class.  There may be a difference - which version should the metrics reflect?
 			clang::StorageClass sc = p_varDec->getStorageClass();
-			const bool isVolatile = p_varDec->getType().isVolatileQualified();
-			const bool isConst = p_varDec->getType().isConstQualified();
-
-			if (isVolatile)
-			{
-				IncrementMetric(m_currentUnit, METRIC_TYPE_VOLATILE);
-			}
-			if (isConst)
-			{
-				IncrementMetric(m_currentUnit, METRIC_TYPE_CONST);
-			}
 
 			/* Check to see if this variable is file scope */
-			if( p_varDec->isFileVarDecl() )
+			if (p_varDec->isFileVarDecl())
 			{
 #if defined( DEBUG_FN_TRACE_OUTOUT )
 				std::cout << "VisitVarDecl : Processing file-scope var " << p_varDec->getNameAsString() << std::endl;
 #endif
-				if ( sc == clang::SC_Extern )
+				if (sc == clang::SC_Extern)
 				{
-					IncrementMetric( m_currentUnit, METRIC_TYPE_VARIABLE_FILE_EXTERN );
+					IncrementMetric(m_currentUnit, METRIC_TYPE_VARIABLE_FILE_EXTERN);
 				}
 				else
 				{
-					IncrementMetric( m_currentUnit, METRIC_TYPE_VARIABLE_FILE_LOCAL );
+					IncrementMetric(m_currentUnit, METRIC_TYPE_VARIABLE_FILE_LOCAL);
 					if (isVolatile)
 					{
 						IncrementMetric(m_currentUnit, METRIC_TYPE_VARIABLE_FILE_VOLATILE);
@@ -606,24 +622,24 @@ bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 					}
 					switch (sc)
 					{
-						case clang::SC_Static:
-							IncrementMetric( m_currentUnit, METRIC_TYPE_VARIABLE_FILE_STATIC );
-							break;
-						default:
-							/* Not currently interested */
-							break;
+					case clang::SC_Static:
+						IncrementMetric(m_currentUnit, METRIC_TYPE_VARIABLE_FILE_STATIC);
+						break;
+					default:
+						/* Not currently interested */
+						break;
 					}
 				}
 			}
 			else
 			{
-				if ( sc == clang::SC_Extern )
+				if (sc == clang::SC_Extern)
 				{
-					IncrementMetric( m_currentUnit, METRIC_TYPE_VARIABLE_FN_EXTERN );
+					IncrementMetric(m_currentUnit, METRIC_TYPE_VARIABLE_FN_EXTERN);
 				}
 				else
 				{
-					IncrementMetric( m_currentUnit, METRIC_TYPE_VARIABLE_FN_LOCAL );
+					IncrementMetric(m_currentUnit, METRIC_TYPE_VARIABLE_FN_LOCAL);
 					if (isVolatile)
 					{
 						IncrementMetric(m_currentUnit, METRIC_TYPE_VARIABLE_FN_VOLATILE);
@@ -634,19 +650,19 @@ bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 					}
 					switch (sc)
 					{
-						case clang::SC_Static:
-							IncrementMetric( m_currentUnit, METRIC_TYPE_VARIABLE_FN_STATIC );
-							break;
-						case clang::SC_Register:
-							IncrementMetric( m_currentUnit, METRIC_TYPE_VARIABLE_FN_REGISTER );
-							break;
-						case clang::SC_Auto:
-							IncrementMetric( m_currentUnit, METRIC_TYPE_VARIABLE_FN_AUTO );
-							IncrementMetric(m_currentUnit, METRIC_TYPE_AUTO);
-							break;
-						default:
-							/* Not currently of interest */
-							break;
+					case clang::SC_Static:
+						IncrementMetric(m_currentUnit, METRIC_TYPE_VARIABLE_FN_STATIC);
+						break;
+					case clang::SC_Register:
+						IncrementMetric(m_currentUnit, METRIC_TYPE_VARIABLE_FN_REGISTER);
+						break;
+					case clang::SC_Auto:
+						IncrementMetric(m_currentUnit, METRIC_TYPE_VARIABLE_FN_AUTO);
+						IncrementMetric(m_currentUnit, METRIC_TYPE_AUTO);
+						break;
+					default:
+						/* Not currently of interest */
+						break;
 					}
 				}
 			}
@@ -654,10 +670,10 @@ bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 			/* If the decl has an initialiser then it's a statement */
 			if (p_varDec->getAnyInitializer() != NULL)
 			{
-				IncrementMetric(m_currentUnit, METRIC_TYPE_STATEMENTS );
+				IncrementMetric(m_currentUnit, METRIC_TYPE_STATEMENTS);
 			}
-		} 
-		else if( p_varDec->getKind() == clang::Decl::ParmVar )
+
+		} else if (p_varDec->getKind() == clang::Decl::ParmVar)
 		{
 			IncrementMetric( m_currentUnit, METRIC_TYPE_FUNCTION_PARAMETERS );
 		}

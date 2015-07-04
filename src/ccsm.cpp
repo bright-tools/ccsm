@@ -82,42 +82,49 @@ static cl::opt<bool> UseShortNames(
 static cl::opt<bool> DumpTokens(
   "dump-tokens",
   cl::desc("Dump tokens as they are lexed"),
+  cl::init(false),
   cl::cat(CCSMToolCategory)
 );
 
 static cl::opt<bool> DumpAST(
 	"dump-ast",
 	cl::desc("Dump AST when it is processed"),
+	cl::init(false),
 	cl::cat(CCSMToolCategory)
 );
 
 static cl::opt<bool> DumpFnMap(
   "dump-function-map",
   cl::desc("Dump the mapping of files/functions/locations"),
+  cl::init(false),
   cl::cat(CCSMToolCategory)
 );
 
 static cl::opt<bool> NoGlobal(
   "disable-global",
   cl::desc("Disable output of stats at the global level"),
+  cl::init(false),
   cl::cat(CCSMToolCategory)
 );
 
 static cl::opt<bool> NoFile(
   "disable-file",
   cl::desc("Disable output of stats at the file level"),
+  cl::init(false),
   cl::cat(CCSMToolCategory)
 );
 
 static cl::opt<bool> NoFunction(
   "disable-function",
   cl::desc("Disable output of stats at the function level"),
+  cl::init(false),
   cl::cat(CCSMToolCategory)
 );
 
 static cl::opt<bool> NoMethod(
   "disable-method",
   cl::desc("Disable output of stats at the method level"),
+  cl::init(false),
   cl::cat(CCSMToolCategory)
 );
 
@@ -134,6 +141,13 @@ static cl::opt<MetricDumpFormat_e> OutputFormat(
 	cl::cat(CCSMToolCategory)
 );
 
+static cl::opt<bool> PrototypesAreFileScope(
+	"prototypes-are-filescope",
+	cl::desc("The prototype part of a function declaration should be included in the file scope metrics, not the function scope"),
+	cl::init(false),
+	cl::cat(CCSMToolCategory)
+	);
+
 std::vector<std::string> OutputMetricList;
 
 static cl::list<std::string, std::vector<std::string>> OutputOnlyMetrics(
@@ -148,7 +162,7 @@ int main(int argc, const char **argv) {
 	MetricUnit topUnit( NULL, "Global", METRIC_UNIT_GLOBAL);
 	MetricOptions options( &ExcludeFileList, &ExcludeFunctionList, &OutputMetricList, &IncludeInParentFileList );
 	std::set<std::string> commentFileList;
-	GlobalFunctionLocator srcMap;
+	GlobalFunctionLocator srcMap( options );
 
 	llvm::sys::PrintStackTraceOnErrorSignal();
 	CommonOptionsParser OptionsParser(argc, argv, CCSMToolCategory);
@@ -156,6 +170,7 @@ int main(int argc, const char **argv) {
 	options.setDumpTokens( DumpTokens );
 	options.setDumpAST(DumpAST);
 	options.setUseShortNames(UseShortNames);
+	options.setPrototypesAreFileScope(PrototypesAreFileScope);
 
 	ClangTool Tool(OptionsParser.getCompilations(), OptionsParser.getSourcePathList());
 

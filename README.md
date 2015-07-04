@@ -424,6 +424,45 @@ Once expanded, the above is clearly a declaration, as compared to:
 
 which, once expanded, is not a declaration.
 
+Function and File Scoping
+=========================
+
+Considering the following code snippet:
+
+    unsigned local_var;
+
+    unsigned adder( unsigned x, unsigned y );
+
+    unsigned subber( unsigned x, unsigned y );
+    {
+        unsigned ret_val;
+        if( y > x )
+        {
+            ret_val = 0;
+        }
+        else
+        {
+            ret_val = x-y;
+        }
+        return ret_val;
+    }
+
+It's clear that `local_var` is file-scope and should be counted as such in the
+metrics.  It's also clear that the body of the `subber` function belongs to that
+function (as opposed to being file scope) and should be counted as such.  What's
+less clear is how the declaration of `adder` and the prototype for `subber` should
+be counted.  Do these count as being function scope or file scope?
+
+By default CCSM will:
+* Count declarations within file-scope metrics
+* Cound the prototype associated with a definition within the function-scope
+metrics.
+
+The second behaviour may be modified via command line parameter:
+* `--prototypes-are-filescope` will prevent the prototype of functions from
+counting towards function metrics; it will, instead, be included in the
+file-level metrics
+
 Comparison To Other Tools
 =========================
 
