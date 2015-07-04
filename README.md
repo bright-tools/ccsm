@@ -322,10 +322,10 @@ Metric Details
 | TOK_HIS_STMT | Statement count | Number of 'statements' |
 | HIS_CALLING | Number of functions which call this function |  |
 
-Token & Statement Based Metrics
-===============================
+Raw & Parsed Metrics
+====================
 
-Many of the metrics reported have 2 variants - one counting the number of statements in the code after preprocessor expansion and the other counting the number of tokens in the unexpanded code.
+Some of the metrics reported have 2 variants - one based on examination of the parsed code after preprocessor expansion and the other examining the unexpanded code.
 
 Take for example:
 
@@ -336,29 +336,29 @@ Take for example:
 
 The fragment of some_function in the above code does not contain any 'if' tokens until the `CHECK_FOR_ERROR` macro is expanded.
 
-Due to the fact that some people like to treat macros as a form of encapsulation and don't want the contents of macros counting towards function metrics while other people do, CCSM provides metrics for both, allowing the user to pick and choose.
+Due to the fact that some people like to treat macros as a form of encapsulation and don't want the contents of macros counting towards function metrics while other people do, CCSM provides metrics for both where practical, allowing the user to pick and choose.
 
 
 HIS Metrics Support
 -------------------
 
-| Metric      | Status                                       | Description     |
-|-------------|----------------------------------------------|-----------------|
-| COMF        | Implemented - `TOK_HIS_COMF`                 | Comment density.  Ratio of comments to 'statements' |
-| PATH        | Implemented - `FUNC_PATHS`                   | Number of non-cyclic execution paths in the function |
-| GOTO        | Implemented - `STMT_GOTO_CNT` and `TOK_GOTO` | Number of GOTO statements |
-| v(G)        | Implemented - `TOK_MCCABE` and `STMT_MCCABE` | Cyclomatic complexity     |
-| CALLING     | Implemented - `HIS_CALLING`                  | Number of different functions calling this function.  Note that functions called via function pointer are not counted.|
-| CALLS       | Implemented - `OP_FN_CALL_CNT`               | Number of different functions called.  Note that functions called via function pointer are not counted |
-| PARAM       | Implemented - `STMT_HIS_PARAM`               | Number of function parameters.  Note that only one variant of this metric exists as parameters hidden within macros are still parameters. |
-| STMT        | Implemented - `TOK_HIS_STMT`                 | Number of instructions per function. |
-| LEVEL       | Implemented - `FUNC_DEPTH`                   | Nesting depth within a function.  Note that HIS says that this is defined as "Maximum nesting levels within a function + 1", however the allowable range is 0-4, which doesn't seem consistent.  `FUNC_DEPTH` in this implementation is zero for an empty function |
-| RETURN      | Implemented - `RETURN_POINT_CNT`             | Number of return points in a function.  Note that only one variant of this metric exists as return points hidden within macros are still return points.  Note Issue #54 with respect to this metric. |
-| S           | Not planned                                  | |
-| VOCF        | Not yet implemented                          | |
-| NOMV        | Not planned                                  | |
-| NOMVPR      | Not planned                                  | |
-| ap_cg_cycle | Not planned                                  | |
+| Metric      | Status                                            | Description     |
+|-------------|---------------------------------------------------|-----------------|
+| COMF        | Implemented - `TOK_HIS_COMF`                      | Comment density.  Ratio of comments to 'statements' |
+| PATH        | Implemented - `FUNC_PATHS`                        | Number of non-cyclic execution paths in the function |
+| GOTO        | Implemented - `KW_GOTO_CNT` and `RAW_KW_GOTO_CNT` | Number of GOTO statements |
+| v(G)        | Implemented - `MCCABE` and `RAW_MCCABE`           | Cyclomatic complexity     |
+| CALLING     | Implemented - `HIS_CALLING`                       | Number of different functions calling this function.  Note that functions called via function pointer are not counted.|
+| CALLS       | Implemented - `OP_FN_CALL_CNT`                    | Number of different functions called.  Note that functions called via function pointer are not counted |
+| PARAM       | Implemented - `STMT_HIS_PARAM`                    | Number of function parameters.  Note that only one variant of this metric exists as parameters hidden within macros are still parameters. |
+| STMT        | Implemented - `TOK_HIS_STMT`                      | Number of instructions per function. |
+| LEVEL       | Implemented - `FUNC_DEPTH`                        | Nesting depth within a function.  Note that HIS says that this is defined as "Maximum nesting levels within a function + 1", however the allowable range is 0-4, which doesn't seem consistent.  `FUNC_DEPTH` in this implementation is zero for an empty function |
+| RETURN      | Implemented - `RETURN_POINT_CNT`                  | Number of return points in a function.  Note that only one variant of this metric exists as return points hidden within macros are still return points.  Note Issue #54 with respect to this metric. |
+| S           | Not planned                                       | |
+| VOCF        | Not yet implemented                               | |
+| NOMV        | Not planned                                       | |
+| NOMVPR      | Not planned                                       | |
+| ap_cg_cycle | Not planned                                       | |
 
 Building The Project
 ====================
@@ -377,10 +377,12 @@ MetricUtils.cpp       | Support functions for doing any significant AST processi
 MetricMatcher.cpp     | AST visitor which deals with processing the AST call-backs and recording the appropriate metrics via MetricUnit objects
 MetricPPConsumer.cpp  | Class to receive call-backs from the pre-processor in order to collect metrics relating to comments (not present in the AST tree)
 
+TODO: Needs to be updated
+
 McCabe Complexity
 =================
 
-The `TOK_MCCABE` and `STMT_MCCAKE` metrics are based on the McCabe method of calculating 
+The `MCCABE` and `RAW_MCCABE` metrics are based on the McCabe method of calculating 
 [cyclomatic complexity](http://www.mccabe.com/pdf/mccabe-nist235r.pdf).
 
 > Cyclomatic complexity is defined for each module to be e - n + 2, where e and n are the number
@@ -388,7 +390,46 @@ The `TOK_MCCABE` and `STMT_MCCAKE` metrics are based on the McCabe method of cal
 > Cyclomatic complexity is also known as v(G), where v refers to the cyclomatic number in
 > graph theory and G indicates that the complexity is a function of the graph.
 
+Modified McCabe, where switch statements are counted as opposed to each individual case statement
+are also supported via `MCCABE_MOD` and `RAW_MCCABE_MOD`.
+
+Statement Counting
+==================
+
+Statement counting is based on the definition provided in the C language specification, namely
+
+"A statement specifies an action to be performed"
+
+The following are not counted as statements, as they do not result in any operation being performed:
+* Compound statements, as by themselves they serve only as a method of creating a block.
+* Null statements (consisting of just a semi-colon)
+* Declarations
+* Labels
+
+Statement counting is frequently used as an indication of how complex the task being implemented by the
+code is, hence counting the above items may skew this in some situations (e.g. source code containing
+a significant number of null statements could skew the metric while not actually resulting in any actions)
+
+CCSM provides the `STMT_CNT` metric to report the number of statements found in the parsed C code and `RAW_STMT_CNT` to report the number of statements found in the raw source.  Note that as the raw source code has not been pre-processed, there are times when parsing of the code will be ambiguous, for example:
+
+    #define A unsigned
+    ...
+    A var;
+
+Once expanded, the above is clearly a declaration, as compared to:
+
+    #define A x =
+    ...
+    A var;
+
+which, once expanded, is not a declaration.
+
+Comparison To Other Tools
+=========================
+
+Other tools are available which analyse C code for metrics.  It's possible that the results for some of the metrics will vary slightly between the tools.
+
 Useful Links
 ============
 
-[C99 + TCs](http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1256.pdf)
+[1]: http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1256.pdf  "C99 Draft"
