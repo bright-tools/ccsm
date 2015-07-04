@@ -74,7 +74,7 @@ protected:
 	PathResults getSwitchPathCount(const clang::SwitchStmt* const p_stmt, uint16_t depth = 0);
 	void CountStatements(const clang::Stmt* const p_stmt);
 	void CountStatements(const clang::Stmt::const_child_range& p_children);
-
+	void CountTypeInfo(MetricUnit* owner,const clang::QualType& qualType);
 
 public:
 	
@@ -87,6 +87,7 @@ public:
 	virtual bool VisitLabelStmt(clang::LabelStmt *p_LabelSt);
 	virtual bool VisitDoStmt(clang::DoStmt *p_doSt);
 	virtual bool VisitWhileStmt(clang::WhileStmt *p_whileSt);
+	virtual bool VisitTypedefNameDecl(const clang::TypedefNameDecl *T);
 	virtual bool VisitReturnStmt(clang::ReturnStmt *p_returnSt);
 	virtual bool VisitSwitchStmt(clang::SwitchStmt *p_switchSt);
 	virtual bool VisitConditionalOperator(clang::ConditionalOperator *p_condOp);
@@ -103,7 +104,6 @@ public:
 	virtual bool VisitArraySubscriptExpr (clang::ArraySubscriptExpr *p_subs);
 	virtual bool VisitMemberExpr( clang::MemberExpr* p_memberExpr );
 	virtual bool VisitUnaryExprOrTypeTraitExpr( clang::UnaryExprOrTypeTraitExpr* p_unaryExpr );
-	virtual bool VisitTypedefDecl( clang::TypedefDecl* p_typeDef );
 	virtual bool TraverseDecl(clang::Decl *p_decl);
 	virtual bool TraverseStmt(clang::Stmt *p_stmt);
 

@@ -481,24 +481,52 @@ bool MetricVisitor::VisitRecordDecl(clang::RecordDecl* p_recordDecl)
 	return true;
 }
 
-
-bool MetricVisitor::VisitTypedefDecl( clang::TypedefDecl* p_typeDef )
+bool MetricVisitor::VisitTypedefNameDecl(const clang::TypedefNameDecl *p_typeDef)
 {
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-	std::cout << "VisitTypedefDecl - CONTEXT " << m_currentFileName << "::" << m_currentFunctionName << std::endl;
+	std::cout << "VisitTypedefNameDecl - CONTEXT " << m_currentFileName << "::" << m_currentFunctionName << std::endl;
 #endif
 
 	/* Deal with common actions which may be applicable to a decl valid at translation-unit level */
-	DeclCommon( p_typeDef->getLexicalDeclContext(), p_typeDef );
+	DeclCommon(p_typeDef->getLexicalDeclContext(), p_typeDef);
 
-	if( m_currentUnit )
+	if (m_currentUnit)
 	{
-		/* TODO: Need to hunt the typedef for qualifiers, such as const */
-
+		/* Count up any use of keywords in qualifiers */
+		CountTypeInfo(m_currentUnit, p_typeDef->getTypeSourceInfo()->getType());
 		IncrementMetric(m_currentUnit, METRIC_TYPE_TYPEDEF);
 	}
 
 	return true;
+}
+
+void MetricVisitor::CountTypeInfo(MetricUnit* p_owner, const clang::QualType& qualType)
+{
+	/* Only interested in local qualifiers, not those which have been added by typedef, etc. */
+	const bool isLocalVolatile = qualType.isLocalVolatileQualified();
+	const bool isLocalConst = qualType.isLocalConstQualified();
+
+	if (isLocalVolatile)
+	{
+		IncrementMetric(p_owner, METRIC_TYPE_VOLATILE);
+	}
+	if (isLocalConst)
+	{
+		IncrementMetric(p_owner, METRIC_TYPE_CONST);
+	}
+
+	/* Check if it's a constant pointer type */
+	const clang::Type* typePtr = qualType.getTypePtr();
+	if (typePtr->getTypeClass() == clang::Type::Pointer)
+	{
+		const clang::PointerType *array_type = llvm::dyn_cast<clang::PointerType>(typePtr);
+		if (array_type->getPointeeType().isConstQualified())
+		{
+			IncrementMetric(p_owner, METRIC_TYPE_CONST);
+		}
+	}
+
+
 }
 
 void MetricVisitor::CloseOutFnOrMtd( void )
@@ -560,9 +588,6 @@ bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 	{
 		MetricUnit* owner = m_currentUnit;
 
-		/* Only interested in local qualifiers, not those which have been added by typedef, etc. */
-		const bool isLocalVolatile = p_varDec->getType().isLocalVolatileQualified();
-		const bool isLocalConst = p_varDec->getType().isLocalConstQualified();
 		/* Interested in the absolute qualifiers associated with the variable */
 		const bool isVolatile = p_varDec->getType().isVolatileQualified();
 		const bool isConst = p_varDec->getType().isConstQualified();
@@ -573,25 +598,7 @@ bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 			owner = m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE);
 		}
 
-		if (isLocalVolatile)
-		{
-			IncrementMetric(owner, METRIC_TYPE_VOLATILE);
-		}
-		if (isLocalConst)
-		{
-			IncrementMetric(owner, METRIC_TYPE_CONST);
-		}
-		{
-			const clang::Type* zz = p_varDec->getType().getTypePtr();
-			if (zz->getTypeClass() == clang::Type::Pointer)
-			{
-				const clang::PointerType *array_type = llvm::dyn_cast<clang::PointerType>(zz);
-				if (array_type->getPointeeType().isConstQualified())
-				{
-					IncrementMetric(owner, METRIC_TYPE_CONST);
-				}
-			}
-		}
+		CountTypeInfo(owner, p_varDec->getType());
 
 		/* Check it's not a function parameter */
 		if (p_varDec->getKind() == clang::Decl::Var)
