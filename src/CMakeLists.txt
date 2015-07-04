@@ -9,6 +9,8 @@ set(SOURCES
   MetricUnit.cpp
   MetricUtils.hpp
   MetricUtils.cpp
+  MetricDumper.hpp
+  MetricDumper.cpp
   MetricOptions.hpp
   MetricOptions.cpp
   MetricPPIncludeHandler.hpp

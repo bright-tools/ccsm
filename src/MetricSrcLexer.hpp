@@ -70,6 +70,8 @@ class MetricSrcLexer
 		std::string             m_currentFunctionName;
 		uint32_t				m_semiContainerDepth[ SCC_MAX ];
 		bool				    m_semiContainerOpen[ SCC_MAX ];
+		bool                    m_semiHasContent;
+		bool					m_dumpNewline;
 
 		static const std::map<clang::tok::TokenKind,MetricType_e> m_tokenKindToTypeMap;
 

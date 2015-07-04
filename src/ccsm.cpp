@@ -20,6 +20,7 @@
 #include "MetricFrontendActors.hpp"
 #include "FunctionLocator.hpp"
 #include "MetricLinkageResolver.hpp"
+#include "MetricDumper.hpp"
 
 #include "clang/Tooling/Tooling.h"
 #include "clang/Basic/SourceManager.h"
@@ -71,10 +72,23 @@ static cl::list<std::string, std::vector<std::string>> IncludeInParentFiles(
 	cl::location(IncludeInParentFileList),
 	cl::cat(CCSMToolCategory));
 
+static cl::opt<bool> UseShortNames(
+	"output-short-names",
+	cl::desc("Use short metric names in the output"),
+	cl::init(false),
+	cl::cat(CCSMToolCategory)
+	);
+
 static cl::opt<bool> DumpTokens(
   "dump-tokens",
   cl::desc("Dump tokens as they are lexed"),
   cl::cat(CCSMToolCategory)
+);
+
+static cl::opt<bool> DumpAST(
+	"dump-ast",
+	cl::desc("Dump AST when it is processed"),
+	cl::cat(CCSMToolCategory)
 );
 
 static cl::opt<bool> DumpFnMap(
@@ -140,6 +154,8 @@ int main(int argc, const char **argv) {
 	CommonOptionsParser OptionsParser(argc, argv, CCSMToolCategory);
 
 	options.setDumpTokens( DumpTokens );
+	options.setDumpAST(DumpAST);
+	options.setUseShortNames(UseShortNames);
 
 	ClangTool Tool(OptionsParser.getCompilations(), OptionsParser.getSourcePathList());
 
@@ -183,7 +199,7 @@ int main(int argc, const char **argv) {
 				srcMap.dump( std::cout );
 			}
 
-			topUnit.dump( std::cout, output, OutputFormat, &options );
+			MetricDumper::dump(std::cout, &topUnit, output, OutputFormat, &options);
 		}
 		else
 		{

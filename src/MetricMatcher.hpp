@@ -44,6 +44,12 @@ protected:
 		bool                  path_has_return;
 	} PathResults;
 
+	/** Table of pairs which match binary operators against metrics, used to initialise binaryOperatorToMetricMap */
+	const static std::pair<clang::BinaryOperator::Opcode, MetricType_e> binaryOperatorToMetricPairs[];
+
+	/** Map used to look up the metric associated with a particular binary operator */
+	const static std::map<clang::BinaryOperator::Opcode, MetricType_e> binaryOperatorToMetricMap;
+
 	clang::CompilerInstance&        m_compilerInstance;
 	clang::ASTContext*		        m_astContext;
 	MetricUnit*		                m_topUnit;
@@ -54,7 +60,7 @@ protected:
 	std::set<std::string>	        m_fnsCalled;          
 	TranslationUnitFunctionLocator* m_fnLocator;
 
-	void HandleLoc( clang::SourceLocation& p_loc );
+	void HandleLoc( const clang::SourceLocation& p_loc );
 	void DeclCommon( const clang::DeclContext* p_declCtxt, const clang::Decl* p_decl );
 	void CloseOutFnOrMtd( void );
 	bool ShouldIncludeFile( const std::string& p_file );
@@ -66,6 +72,9 @@ protected:
 	PathResults getOtherPathCount(const clang::Stmt* const p_stmt, uint16_t depth = 0);
 	PathResults getIfPathCount(const clang::IfStmt* const p_stmt, uint16_t depth = 0);
 	PathResults getSwitchPathCount(const clang::SwitchStmt* const p_stmt, uint16_t depth = 0);
+	void CountStatements(const clang::Stmt* const p_stmt);
+	void CountStatements(const clang::Stmt::const_child_range& p_children);
+
 
 public:
 	
@@ -83,10 +92,12 @@ public:
 	virtual bool VisitConditionalOperator(clang::ConditionalOperator *p_condOp);
 	virtual bool VisitDefaultStmt(clang::DefaultStmt *p_defaultSt);
 	virtual bool VisitCaseStmt(clang::CaseStmt *p_caseSt);
+	virtual bool VisitCompoundStmt(clang::CompoundStmt *p_compoundSt);
 	virtual bool VisitBinaryOperator(clang::BinaryOperator *p_binOp);
 	virtual bool VisitUnaryOperator(clang::UnaryOperator *p_uOp);
 	virtual bool VisitStmt(clang::Stmt *p_statement);
 	virtual bool VisitIfStmt(clang::IfStmt *p_ifSt);
+	virtual bool VisitRecordDecl(clang::RecordDecl* p_recordDecl);
 	virtual bool VisitExplicitCastExpr(clang::ExplicitCastExpr *p_castExpr);
 	virtual bool VisitCallExpr(clang::CallExpr *p_callExpr);
 	virtual bool VisitArraySubscriptExpr (clang::ArraySubscriptExpr *p_subs);

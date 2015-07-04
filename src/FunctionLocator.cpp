@@ -117,8 +117,8 @@ std::string TranslationUnitFunctionLocator::FindFunction( const clang::SourceMan
 			/* Does the location we're considering match the function start or end or is it within those bounds? */
 			if(( p_loc == (*func_it).first ) || 
 				( p_loc == (*func_it).second.first ) ||
-				( (*func_it).first < p_loc ) &&
-				( p_loc < (*func_it).second.first ))
+				(( (*func_it).first < p_loc ) &&
+				 ( p_loc < (*func_it).second.first )))
 			{
 				ret_val = (*func_it).second.second;
 				if( p_end != NULL )
