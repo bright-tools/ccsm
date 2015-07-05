@@ -919,6 +919,15 @@ bool MetricVisitor::VisitConditionalOperator(clang::ConditionalOperator *p_condO
     return true;
 }
 
+bool MetricVisitor::VisitContinueStmt(clang::ContinueStmt *p_continueSt)
+{
+	if (m_currentUnit)
+	{
+		IncrementMetric(m_currentUnit, METRIC_TYPE_CONTINUE);
+	}
+	return true;
+}
+
 bool MetricVisitor::VisitDefaultStmt(clang::DefaultStmt *p_defaultSt) 
 {
 	if( m_currentUnit )

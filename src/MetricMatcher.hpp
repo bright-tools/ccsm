@@ -92,6 +92,7 @@ public:
 	virtual bool VisitSwitchStmt(clang::SwitchStmt *p_switchSt);
 	virtual bool VisitConditionalOperator(clang::ConditionalOperator *p_condOp);
 	virtual bool VisitDefaultStmt(clang::DefaultStmt *p_defaultSt);
+	virtual bool VisitContinueStmt(clang::ContinueStmt *p_continueSt);
 	virtual bool VisitCaseStmt(clang::CaseStmt *p_caseSt);
 	virtual bool VisitCompoundStmt(clang::CompoundStmt *p_compoundSt);
 	virtual bool VisitBinaryOperator(clang::BinaryOperator *p_binOp);

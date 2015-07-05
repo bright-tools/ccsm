@@ -47,15 +47,22 @@ METRIC( METRIC_TYPE_VOLATILE,                                 "KW_VOLATILE_CNT",
 METRIC( METRIC_TYPE_TOKEN_VOLATILE,                           "RAW_KW_VOLATILE_CNT",            "'volatile' keyword count (raw source)",			true,  true,  true,  true,  true,       false,     true,         1,        "" )
 METRIC( METRIC_TYPE_CONST,                                    "KW_CONST_CNT",                   "'const' keyword count",						    true,  true,  true,  true,  true,       false,     true,         1,        "" )
 METRIC( METRIC_TYPE_TOKEN_CONST,                              "RAW_KW_CONST_CNT",               "'const' keyword count (raw source)",				true,  true,  true,  true,  true,       false,     true,         1,        "" )
-METRIC( METRIC_TYPE_LABEL,                                    "STMT_LABEL_CNT",                 "'label' keyword count",                            true,  true,  true,  true,  true,       false,     false,        1,        "" )
+METRIC( METRIC_TYPE_TYPEDEF,                                  "KW_TYPEDEF_CNT",                 "'typedef' keyword count",                          true,  true,  true,  true,  true,       false,     true,         1,        "" )
+METRIC( METRIC_TYPE_TOKEN_TYPEDEF,                            "RAW_KW_TYPEDEF_CNT",             "'typedef' keyword count (raw source)",             true,  true,  true,  true,  true,       false,     true,         1,        "" )
+METRIC( METRIC_TYPE_CONTINUE,                                 "KW_CONTINUE_CNT",                "Number of 'continue' tokens",						true,  true,  true,  true,  true,       false,     false,        1,        "" )
+METRIC( METRIC_TYPE_TOKEN_CONTINUE,                           "RAW_KW_CONTINUE_CNT",            "Number of 'continue' tokens (raw source)",   		true,  true,  true,  true,  true,       false,     false,        1,        "" )
+
+METRIC( METRIC_TYPE_LABEL,                                    "KW_LABEL_CNT",                   "'label' keyword count",                            true,  true,  true,  true,  true,       false,     false,        1,        "" )
+// TODO: Label tokens?
+
+/* TODO: Explicitly count anonymous typedefs? */
+METRIC( METRIC_TYPE_TOKEN_UNION,                              "TOK_UNION",                      "'union' keyword count (raw source)",		        true,  true,  true,  true,  true,       false,     true,        1,        "" )
+// keywords: char, double, enum, extern, float, inline, int, long, register, restrict, short, signed, sizeof, static, struct, union, unsiged, void
 
 METRIC( METRIC_TYPE_KEYWORD_CNT,                              "KW_CNT",                         "Number of keywords used",             				true,  true,  true,  true,  true,       false,     true,         1,        "Total number of C keywords used" )
 METRIC( METRIC_TYPE_KEYWORD_TYPES,                            "KW_TYPES_CNT",                   "Number of types of keyword used",             		true,  true,  true,  true,  true,       false,     true,         1,        "" )
 
 
-/* TODO: Explicitly count anonymous typedefs? */
-METRIC( METRIC_TYPE_TYPEDEF,                                  "KW_TYPEDEF_CNT",                 "'typedef' keyword count",                          true,  true,  true,  true,  true,       false,     true,         1,        "" )
-METRIC( METRIC_TYPE_TOKEN_TYPEDEF,                            "RAW_KW_TYPEDEF_CNT",             "'typedef' keyword count (raw source)",             true,  true,  true,  true,  true,       false,     true,         1,        "" )
 
 METRIC( METRIC_TYPE_VARIABLE_FILE_LOCAL,                      "VAR_FILE_LOC_CNT",               "File-scope total local variable declarations",     true,  true,  false, false, true,       false,     false,        1,        "Includes auto and static but not extern" )
 METRIC( METRIC_TYPE_VARIABLE_FILE_STATIC,                     "VAR_FILE_LOC_STATIC_CNT",        "File-scope static variable declarations",          true,  true,  false, false, true,       false,     false,        1,        "" )
@@ -74,7 +81,7 @@ METRIC( METRIC_TYPE_RETURNPOINTS,                             "RETURN_POINT_CNT"
 
 METRIC( METRIC_TYPE_STATEMENTS,                               "STMT_CNT",                       "Statement count",								    true,  true,  true,  true,  true,       false,     true,         1,        "Number of statements" )
 // TODO: Not implemented!
-// METRIC( METRIC_TYPE_TOKEN_STATEMENTS,                         "RAW_STMT_CNT",                   "Statement count (raw source)",						true,  true,  true,  true,  true,       false,     false,        1,        "Number of statements in the code before pre-processing" )
+// METRIC( METRIC_TYPE_TOKEN_STATEMENTS,                      "RAW_STMT_CNT",                   "Statement count (raw source)",						true,  true,  true,  true,  true,       false,     false,        1,        "Number of statements in the code before pre-processing" )
 
 METRIC( METRIC_TYPE_HIS_COMMENT_DENSITY,                      "COMMENT_HIS_COMF",               "Comment density",									true,  true,  false, false, true,       false,     false,     1000,        "Relationship of the number of comments to the number of statements, with range 0-1.  HIS metric." )
 METRIC( METRIC_TYPE_COMMENT_BYTE_COUNT,                       "COMMENT_BYTE_CNT",               "Comments in bytes",								true,  true,  false, false, true,       false,     false,        1,        "Counts the total number of bytes which are used in comments.  Note that --exclude-function does not have any effect on this metric." )
@@ -177,7 +184,6 @@ METRIC( METRIC_TYPE_TOKEN_MUTABLE,                            "TOK_MUTABLE",    
 METRIC( METRIC_TYPE_TOKEN_FRIEND,                             "TOK_FRIEND",                     "Number of 'friend' tokens",						true,  true,  true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_TOKEN_ASM,                                "TOK_ASM",                        "Number of 'asm' tokens",							true,  true,  true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_TOKEN_CLASS,                              "TOK_CLASS",                      "Number of 'class' tokens",							true,  true,  true,  true,  true,       false,     false,        1,        "" )
-METRIC( METRIC_TYPE_TOKEN_CONTINUE,                           "TOK_CONTINUE",                   "Number of 'continue' tokens",						true,  true,  true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_TOKEN_DELETE,                             "TOK_DELETE",                     "Number of 'delete' tokens",						true,  true,  true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_TOKEN_ENUM,                               "TOK_ENUM",                       "Number of 'enum' tokens",						    true,  true,  true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_TOKEN_NEW,                                "TOK_NEW",                        "Number of 'new' tokens",						    true,  true,  true,  true,  true,       false,     false,        1,        "" )
@@ -188,7 +194,6 @@ METRIC( METRIC_TYPE_TOKEN_PUBLIC,                             "TOK_PUBLIC",     
 METRIC( METRIC_TYPE_TOKEN_SIZEOF,                             "TOK_SIZEOF",                     "Number of 'sizeof' tokens",						true,  true,  true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_TOKEN_STRUCT,                             "TOK_STRUCT",                     "Number of 'struct' tokens",						true,  true,  true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_TOKEN_THIS,                               "TOK_THIS",                       "Number of 'this' tokens",						    true,  true,  true,  true,  true,       false,     false,        1,        "" )
-METRIC( METRIC_TYPE_TOKEN_UNION,                              "TOK_UNION",                      "Number of 'union' tokens",						    true,  true,  true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_TOKEN_NAMESPACE,                          "TOK_NAMESPACE",                  "Number of 'namespace' tokens",						true,  true,  true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_TOKEN_USING,                              "TOK_USING",                      "Number of 'using' tokens",						    true,  true,  true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_TOKEN_TRY,                                "TOK_TRY",                        "Number of 'try' tokens",						    true,  true,  true,  true,  true,       false,     false,        1,        "" )
