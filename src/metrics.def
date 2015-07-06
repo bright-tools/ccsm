@@ -19,6 +19,7 @@ METRIC( METRIC_TYPE_FILES,                                    "FILE_CNT",       
 METRIC( METRIC_TYPE_BYTE_COUNT,                               "FILE_SIZE",                      "Size in bytes",									true,  true,  false, false, true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_FUNCTIONS,                                "FUNC_CNT",                       "Functions",                      				    true,  true,  false, false, true,       false,     false,        1,        "" )
 
+/* Keyword related metrics */
 METRIC( METRIC_TYPE_IF,                                       "KW_IF_CNT",                      "'if' keyword count ",                				true,  true,  true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_TOKEN_IF,                                 "RAW_KW_IF_CNT",                  "'if' keyword count (raw source)",				    true,  true,  true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_ELSE,                                     "KW_ELSE_CNT",                    "'else' keyword count ",              				true,  true,  true,  true,  true,       false,     false,        1,        "" )
@@ -49,14 +50,17 @@ METRIC( METRIC_TYPE_CONST,                                    "KW_CONST_CNT",   
 METRIC( METRIC_TYPE_TOKEN_CONST,                              "RAW_KW_CONST_CNT",               "'const' keyword count (raw source)",				true,  true,  true,  true,  true,       false,     true,         1,        "" )
 METRIC( METRIC_TYPE_TYPEDEF,                                  "KW_TYPEDEF_CNT",                 "'typedef' keyword count",                          true,  true,  true,  true,  true,       false,     true,         1,        "" )
 METRIC( METRIC_TYPE_TOKEN_TYPEDEF,                            "RAW_KW_TYPEDEF_CNT",             "'typedef' keyword count (raw source)",             true,  true,  true,  true,  true,       false,     true,         1,        "" )
-METRIC( METRIC_TYPE_CONTINUE,                                 "KW_CONTINUE_CNT",                "Number of 'continue' tokens",						true,  true,  true,  true,  true,       false,     false,        1,        "" )
-METRIC( METRIC_TYPE_TOKEN_CONTINUE,                           "RAW_KW_CONTINUE_CNT",            "Number of 'continue' tokens (raw source)",   		true,  true,  true,  true,  true,       false,     false,        1,        "" )
+METRIC( METRIC_TYPE_CONTINUE,                                 "KW_CONTINUE_CNT",                "'continue' keyword count",					    	true,  true,  true,  true,  true,       false,     false,        1,        "" )
+METRIC( METRIC_TYPE_TOKEN_CONTINUE,                           "RAW_KW_CONTINUE_CNT",            "'continue' keyword count (raw source)",   	    	true,  true,  true,  true,  true,       false,     false,        1,        "" )
 
 METRIC( METRIC_TYPE_LABEL,                                    "KW_LABEL_CNT",                   "'label' keyword count",                            true,  true,  true,  true,  true,       false,     false,        1,        "" )
 // TODO: Label tokens?
 
 /* TODO: Explicitly count anonymous typedefs? */
-METRIC( METRIC_TYPE_TOKEN_UNION,                              "TOK_UNION",                      "'union' keyword count (raw source)",		        true,  true,  true,  true,  true,       false,     true,        1,        "" )
+METRIC( METRIC_TYPE_UNION,                                    "KW_UNION_CNT",                   "'union' keyword count",    						true,  true,  true,  true,  true,       false,     true,         1,        "" )
+METRIC( METRIC_TYPE_TOKEN_UNION,                              "RAW_KW_UNION_CNT",               "'union' keyword count (raw source)",		        true,  true,  true,  true,  true,       false,     true,         1,        "" )
+METRIC( METRIC_TYPE_STRUCT,                                   "KW_STRUCT_CNT",                  "'struct' keyword count",				            true,  true,  true,  true,  true,       false,     true,         1,        "" )
+METRIC( METRIC_TYPE_TOKEN_STRUCT,                             "RAW_KW_STRUCT_CNT",              "'struct' keyword count (raw source)",				true,  true,  true,  true,  true,       false,     true,         1,        "" )
 // keywords: char, double, enum, extern, float, inline, int, long, register, restrict, short, signed, sizeof, static, struct, union, unsiged, void
 
 METRIC( METRIC_TYPE_KEYWORD_CNT,                              "KW_CNT",                         "Number of keywords used",             				true,  true,  true,  true,  true,       false,     true,         1,        "Total number of C keywords used" )
@@ -192,7 +196,6 @@ METRIC( METRIC_TYPE_TOKEN_PRIVATE,                            "TOK_PRIVATE",    
 METRIC( METRIC_TYPE_TOKEN_PROTECTED,                          "TOK_PROTECTED",                  "Number of 'protected' tokens",						true,  true,  true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_TOKEN_PUBLIC,                             "TOK_PUBLIC",                     "Number of 'public' tokens",						true,  true,  true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_TOKEN_SIZEOF,                             "TOK_SIZEOF",                     "Number of 'sizeof' tokens",						true,  true,  true,  true,  true,       false,     false,        1,        "" )
-METRIC( METRIC_TYPE_TOKEN_STRUCT,                             "TOK_STRUCT",                     "Number of 'struct' tokens",						true,  true,  true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_TOKEN_THIS,                               "TOK_THIS",                       "Number of 'this' tokens",						    true,  true,  true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_TOKEN_NAMESPACE,                          "TOK_NAMESPACE",                  "Number of 'namespace' tokens",						true,  true,  true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_TOKEN_USING,                              "TOK_USING",                      "Number of 'using' tokens",						    true,  true,  true,  true,  true,       false,     false,        1,        "" )

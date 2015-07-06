@@ -464,20 +464,53 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 
 bool MetricVisitor::VisitRecordDecl(clang::RecordDecl* p_recordDecl)
 {
-	for (clang::RecordDecl::field_iterator it = p_recordDecl->field_begin();
-		it != p_recordDecl->field_end();
-		it++)
+	/* Deal with common actions which may be applicable to a decl valid at translation-unit level */
+	DeclCommon(p_recordDecl->getLexicalDeclContext(), p_recordDecl);
+
+	if (m_currentUnit)
 	{
-		if ((*it)->getType().isVolatileQualified())
+		/* If it's a free-standing record, count it here.  Otherwise will get counted
+		   when vardecl is processed */
+		if (p_recordDecl->isRecord() && p_recordDecl->isFreeStanding())
 		{
-			IncrementMetric(m_currentUnit, METRIC_TYPE_VOLATILE);
+			if (p_recordDecl->isUnion())
+			{
+				IncrementMetric(m_currentUnit, METRIC_TYPE_UNION);
+			}
+			else if (p_recordDecl->isStruct())
+			{
+				IncrementMetric(m_currentUnit, METRIC_TYPE_STRUCT);
+			}
 		}
-		if ((*it)->getType().isConstQualified())
+
+		for (clang::RecordDecl::field_iterator it = p_recordDecl->field_begin();
+			it != p_recordDecl->field_end();
+			it++)
 		{
-			IncrementMetric(m_currentUnit, METRIC_TYPE_CONST);
+			/* Only consider elaborated types here - record types will be counted via a separate 
+			   call to VisitRecordDecl() */
+			if ((*it)->getType().getTypePtr()->isElaboratedTypeSpecifier() ) 
+			{
+				if ((*it)->getType().getTypePtr()->isUnionType())
+				{
+					IncrementMetric(m_currentUnit, METRIC_TYPE_UNION);
+				}
+				else if ((*it)->getType().getTypePtr()->isStructureType())
+				{
+					IncrementMetric(m_currentUnit, METRIC_TYPE_STRUCT);
+				}
+
+			}
+			if ((*it)->getType().isVolatileQualified())
+			{
+				IncrementMetric(m_currentUnit, METRIC_TYPE_VOLATILE);
+			}
+			if ((*it)->getType().isConstQualified())
+			{
+				IncrementMetric(m_currentUnit, METRIC_TYPE_CONST);
+			}
 		}
 	}
-
 	return true;
 }
 
@@ -525,7 +558,18 @@ void MetricVisitor::CountTypeInfo(MetricUnit* p_owner, const clang::QualType& qu
 			IncrementMetric(p_owner, METRIC_TYPE_CONST);
 		}
 	}
-
+	else if (typePtr->getTypeClass() == clang::Type::Elaborated)
+	{
+		const clang::ElaboratedType *array_type = llvm::dyn_cast<clang::ElaboratedType>(typePtr);
+		if (array_type->isUnionType())
+		{
+			IncrementMetric(p_owner, METRIC_TYPE_UNION);
+		}
+		else if (array_type->isStructureType())
+		{
+			IncrementMetric(p_owner, METRIC_TYPE_STRUCT);
+		}
+	}
 
 }
 
@@ -592,6 +636,7 @@ bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 		const bool isVolatile = p_varDec->getType().isVolatileQualified();
 		const bool isConst = p_varDec->getType().isConstQualified();
 
+		/* Is this a function parameter which should be attributed to file scope? */
 		if (m_options->getPrototypesAreFileScope() &&
 			(p_varDec->getKind() == clang::Decl::ParmVar))
 		{
@@ -1323,9 +1368,15 @@ void MetricVisitor::IncrementMetric( MetricUnit* const p_unit, const MetricType_
 		else
 		{
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-			std::cout << "Not incrementing metric " << MetricUnit::getMetricName( p_metricType ) << std::endl;
+			std::cout << "File has been processed - not incrementing metric " << MetricUnit::getMetricName( p_metricType ) << std::endl;
 #endif
 		}
+	}
+	else
+	{
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+		std::cout << "File not specified - not incrementing metric " << MetricUnit::getMetricName(p_metricType) << std::endl;
+#endif
 	}
 }
 
