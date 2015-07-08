@@ -462,6 +462,24 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 
 #undef DEBUG_FN_TRACE_OUTOUT
 
+bool MetricVisitor::VisitEnumDecl(clang::EnumDecl* p_enumDecl)
+{
+	/* Deal with common actions which may be applicable to a decl valid at translation-unit level */
+	DeclCommon(p_enumDecl->getLexicalDeclContext(), p_enumDecl);
+
+	if (m_currentUnit)
+	{
+		/* If it's a free-standing record, count it here.  Otherwise will get counted
+		when vardecl is processed */
+		if (p_enumDecl->isFreeStanding())
+		{
+			IncrementMetric(m_currentUnit, METRIC_TYPE_ENUM);
+		}
+	}
+
+	return true;
+}
+
 bool MetricVisitor::VisitRecordDecl(clang::RecordDecl* p_recordDecl)
 {
 	/* Deal with common actions which may be applicable to a decl valid at translation-unit level */
@@ -499,7 +517,10 @@ bool MetricVisitor::VisitRecordDecl(clang::RecordDecl* p_recordDecl)
 				{
 					IncrementMetric(m_currentUnit, METRIC_TYPE_STRUCT);
 				}
-
+				else if ((*it)->getType().getTypePtr()->isEnumeralType())
+				{
+					IncrementMetric(m_currentUnit, METRIC_TYPE_ENUM);
+				}
 			}
 			if ((*it)->getType().isVolatileQualified())
 			{
@@ -568,6 +589,10 @@ void MetricVisitor::CountTypeInfo(MetricUnit* p_owner, const clang::QualType& qu
 		else if (array_type->isStructureType())
 		{
 			IncrementMetric(p_owner, METRIC_TYPE_STRUCT);
+		}
+		else if (array_type->isEnumeralType())
+		{
+			IncrementMetric(p_owner, METRIC_TYPE_ENUM);
 		}
 	}
 
