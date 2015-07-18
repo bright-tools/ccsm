@@ -108,6 +108,8 @@ public:
 	virtual bool TraverseDecl(clang::Decl *p_decl);
 	virtual bool TraverseStmt(clang::Stmt *p_stmt);
 	virtual bool VisitEnumDecl(clang::EnumDecl* p_enumDecl);
+	virtual bool VisitCastExpr(clang::CastExpr *p_castExp);
+
 
 #if 0
 	void dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE );

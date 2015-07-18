@@ -63,6 +63,8 @@ METRIC( METRIC_TYPE_STRUCT,                                   "KW_STRUCT_CNT",  
 METRIC( METRIC_TYPE_TOKEN_STRUCT,                             "RAW_KW_STRUCT_CNT",              "'struct' keyword count (raw source)",				true,  true,  true,  true,  true,       false,     true,         1,        "" )
 METRIC( METRIC_TYPE_ENUM,                                     "KW_ENUM_CNT",                    "'enum' keyword count",				                true,  true,  true,  true,  true,       false,     true,         1,        "" )
 METRIC( METRIC_TYPE_TOKEN_ENUM,                               "RAW_KW_ENUM_CNT",                "'enum' keyword count (raw source)",				true,  true,  true,  true,  true,       false,     true,         1,        "" )
+METRIC( METRIC_TYPE_CHAR,                                     "KW_CHAR_CNT",                    "'char' keyword count",					   	        true,  true,  true,  true,  true,       false,     true,         1,        "" )
+METRIC( METRIC_TYPE_TOKEN_CHAR,                               "RAW_KW_CHAR_CNT",                "'char' keyword count (raw source)",	   	        true,  true,  true,  true,  true,       false,     true,         1,        "" )
 
 // keywords: char, double, enum, extern, float, inline, int, long, register, restrict, short, signed, sizeof, static, struct, union, unsiged, void
 
@@ -173,7 +175,6 @@ METRIC( METRIC_TYPE_OPERATOR_HALSTEAD_TYPES,                  "OP_HALSTEAD_TYPES
 METRIC( METRIC_TYPE_OPERATOR_HALSTEAD_COUNT,                  "OP_HALSTEAD_CNT",                "Number of halstead operators",                     false, false, true,  true,  true,       false,     false,        1,        "Total number of operators (as classified for the purpose of Halstead metrics; this is not the same classification as the 'C' standard) used" )
 
 METRIC( METRIC_TYPE_TOKEN_BOOL,                               "TOK_BOOL",                       "Number of 'bool' tokens",							true,  true,  true,  true,  true,       false,     false,        1,        "" )
-METRIC( METRIC_TYPE_TOKEN_CHAR,                               "TOK_CHAR",                       "Number of 'char' tokens",					   	    true,  true,  true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_TOKEN_DOUBLE,                             "TOK_DOUBLE",                     "Number of 'double' tokens",						true,  true,  true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_TOKEN_FLOAT,                              "TOK_FLOAT",                      "Number of 'float' tokens",						    true,  true,  true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_TOKEN_INT,                                "TOK_INT",                        "Number of 'int' tokens",							true,  true,  true,  true,  true,       false,     false,        1,        "" )

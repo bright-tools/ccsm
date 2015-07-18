@@ -14,6 +14,10 @@
    limitations under the License.
 */
 
+#include "MetricSrcLexer.hpp"
+#include "MetricSrcUnexpandedLexer.hpp"
+#include "MetricSrcExpandedLexer.hpp"
+
 #include "MetricASTConsumer.hpp"
 #include "clang/Basic/SourceManager.h"
 
@@ -66,10 +70,11 @@ void MetricASTConsumer::HandleTranslationUnit(clang::ASTContext &Context)
 	delete( visitor );
 }
 
-MetricPPConsumer::MetricPPConsumer(MetricUnit* p_topUnit, MetricOptions* p_options, GlobalFunctionLocator*  p_fnLocator ) 
+MetricPPConsumer::MetricPPConsumer(MetricUnit* p_topUnit, MetricOptions* p_options, GlobalFunctionLocator*  p_fnLocator, const bool p_expanded)
 	: m_options( p_options ),
       m_topUnit( p_topUnit ),
       m_fnLocator( p_fnLocator ),
+	  m_expanded( p_expanded ),
 	  clang::PreprocessorFrontendAction()
 { 
 }
@@ -80,9 +85,19 @@ MetricPPConsumer::~MetricPPConsumer(void)
 
 void MetricPPConsumer::ExecuteAction()
 {
-	MetricSrcLexer srcLexer( getCompilerInstance(), m_topUnit, m_options );
+	MetricSrcLexer* srcLexer;
+	if ( m_expanded )
+	{
+		srcLexer = new MetricSrcExpandedLexer(getCompilerInstance(), m_topUnit, m_options);
+	}
+	else
+	{
+		srcLexer = new MetricSrcUnexpandedLexer(getCompilerInstance(), m_topUnit, m_options);
+	}
 	clang::SourceManager& sm = getCompilerInstance().getSourceManager();
 	std::string mainFileName = sm.getFileEntryForID( sm.getMainFileID() )->getName();
 	
-	srcLexer.LexSources( getCompilerInstance(), m_fnLocator->getLocatorFor( mainFileName ) );
+	srcLexer->LexSources( getCompilerInstance(), m_fnLocator->getLocatorFor( mainFileName ) );
+
+	delete(srcLexer);
 }

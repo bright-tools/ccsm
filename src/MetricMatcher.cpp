@@ -522,14 +522,6 @@ bool MetricVisitor::VisitRecordDecl(clang::RecordDecl* p_recordDecl)
 					IncrementMetric(m_currentUnit, METRIC_TYPE_ENUM);
 				}
 			}
-			if ((*it)->getType().isVolatileQualified())
-			{
-				IncrementMetric(m_currentUnit, METRIC_TYPE_VOLATILE);
-			}
-			if ((*it)->getType().isConstQualified())
-			{
-				IncrementMetric(m_currentUnit, METRIC_TYPE_CONST);
-			}
 		}
 	}
 	return true;
@@ -548,7 +540,6 @@ bool MetricVisitor::VisitTypedefNameDecl(const clang::TypedefNameDecl *p_typeDef
 	{
 		/* Count up any use of keywords in qualifiers */
 		CountTypeInfo(m_currentUnit, p_typeDef->getTypeSourceInfo()->getType());
-		IncrementMetric(m_currentUnit, METRIC_TYPE_TYPEDEF);
 	}
 
 	return true;
@@ -560,26 +551,9 @@ void MetricVisitor::CountTypeInfo(MetricUnit* p_owner, const clang::QualType& qu
 	const bool isLocalVolatile = qualType.isLocalVolatileQualified();
 	const bool isLocalConst = qualType.isLocalConstQualified();
 
-	if (isLocalVolatile)
-	{
-		IncrementMetric(p_owner, METRIC_TYPE_VOLATILE);
-	}
-	if (isLocalConst)
-	{
-		IncrementMetric(p_owner, METRIC_TYPE_CONST);
-	}
-
 	/* Check if it's a constant pointer type */
 	const clang::Type* typePtr = qualType.getTypePtr();
-	if (typePtr->getTypeClass() == clang::Type::Pointer)
-	{
-		const clang::PointerType *array_type = llvm::dyn_cast<clang::PointerType>(typePtr);
-		if (array_type->getPointeeType().isConstQualified())
-		{
-			IncrementMetric(p_owner, METRIC_TYPE_CONST);
-		}
-	}
-	else if (typePtr->getTypeClass() == clang::Type::Elaborated)
+    if (typePtr->getTypeClass() == clang::Type::Elaborated)
 	{
 		const clang::ElaboratedType *array_type = llvm::dyn_cast<clang::ElaboratedType>(typePtr);
 		if (array_type->isUnionType())
@@ -595,7 +569,6 @@ void MetricVisitor::CountTypeInfo(MetricUnit* p_owner, const clang::QualType& qu
 			IncrementMetric(p_owner, METRIC_TYPE_ENUM);
 		}
 	}
-
 }
 
 void MetricVisitor::CloseOutFnOrMtd( void )
@@ -642,6 +615,10 @@ void MetricVisitor::HandleLoc( const clang::SourceLocation& p_loc)
 	}
 }
 
+bool MetricVisitor::VisitCastExpr(clang::CastExpr *p_castExp)
+{
+	return true;
+}
 
 bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 
@@ -735,7 +712,6 @@ bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 						break;
 					case clang::SC_Auto:
 						IncrementMetric(m_currentUnit, METRIC_TYPE_VARIABLE_FN_AUTO);
-						IncrementMetric(m_currentUnit, METRIC_TYPE_AUTO);
 						break;
 					default:
 						/* Not currently of interest */
@@ -783,7 +759,6 @@ bool MetricVisitor::VisitForStmt(clang::ForStmt *p_forSt)
 	{
 		m_currentUnit->setMax( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_forSt, m_astContext ));
 		IncrementMetric(m_currentUnit, METRIC_TYPE_LOOPS);
-		IncrementMetric( m_currentUnit, METRIC_TYPE_FORLOOP );
 
 		CountStatements(p_forSt->getBody());
 	}
@@ -794,7 +769,6 @@ bool MetricVisitor::VisitGotoStmt(clang::GotoStmt *p_gotoSt)
 {
 	if( m_currentUnit )
 	{
-		IncrementMetric( m_currentUnit, METRIC_TYPE_GOTO );
 	}
 
     return true;
@@ -818,7 +792,6 @@ bool MetricVisitor::VisitWhileStmt(clang::WhileStmt *p_whileSt)
 	{
 		m_currentUnit->setMax( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_whileSt, m_astContext ));
 		IncrementMetric( m_currentUnit, METRIC_TYPE_LOOPS );
-		IncrementMetric(m_currentUnit, METRIC_TYPE_WHILE);
 
 		CountStatements(p_whileSt->getBody());
 	}
@@ -834,7 +807,6 @@ bool MetricVisitor::VisitDoStmt(clang::DoStmt *p_doSt)
 	{
 		m_currentUnit->setMax(METRIC_TYPE_NESTING_LEVEL, getControlDepth(p_doSt, m_astContext));
 		IncrementMetric(m_currentUnit, METRIC_TYPE_LOOPS);
-		IncrementMetric(m_currentUnit, METRIC_TYPE_DO);
 
 		CountStatements(p_doSt->getBody());
 	}
@@ -845,7 +817,6 @@ bool MetricVisitor::VisitReturnStmt(clang::ReturnStmt *p_returnSt)
 {
 	if( m_currentUnit )
 	{
-		IncrementMetric( m_currentUnit, METRIC_TYPE_RETURN );
 		IncrementMetric( m_currentUnit, METRIC_TYPE_RETURNPOINTS );
 	}
     return true;
@@ -969,7 +940,6 @@ bool MetricVisitor::VisitSwitchStmt(clang::SwitchStmt *p_switchSt)
 	if( m_currentUnit )
 	{
 		m_currentUnit->setMax( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_switchSt, m_astContext ));
-		IncrementMetric(m_currentUnit, METRIC_TYPE_SWITCH);
 		IncrementMetric( m_currentUnit, METRIC_TYPE_DECISIONS );
 
 		CountStatements(p_switchSt->getBody());
@@ -993,7 +963,6 @@ bool MetricVisitor::VisitContinueStmt(clang::ContinueStmt *p_continueSt)
 {
 	if (m_currentUnit)
 	{
-		IncrementMetric(m_currentUnit, METRIC_TYPE_CONTINUE);
 	}
 	return true;
 }
@@ -1002,8 +971,6 @@ bool MetricVisitor::VisitDefaultStmt(clang::DefaultStmt *p_defaultSt)
 {
 	if( m_currentUnit )
 	{
-		IncrementMetric( m_currentUnit, METRIC_TYPE_DEFAULT );
-
 		CountStatements(p_defaultSt->getSubStmt());
 	}
     return true;
@@ -1013,8 +980,6 @@ bool MetricVisitor::VisitCaseStmt(clang::CaseStmt *p_caseSt)
 {
 	if( m_currentUnit )
 	{
-		IncrementMetric( m_currentUnit, METRIC_TYPE_CASE );
-
 		CountStatements(p_caseSt->getSubStmt());
 	}
     return true;
@@ -1201,16 +1166,12 @@ bool MetricVisitor::VisitIfStmt(clang::IfStmt *p_ifSt)
 	std::cout << "VisitIfStmt - Recorded" << std::endl;
 #endif
 		m_currentUnit->setMax( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_ifSt, m_astContext ));
-		IncrementMetric(m_currentUnit, METRIC_TYPE_IF);
 		IncrementMetric( m_currentUnit, METRIC_TYPE_DECISIONS );
 
 		CountStatements(p_ifSt->getThen());
 
 		if( p_ifSt->getElse() )
 		{
-			// TODO: This means that "else if" statements get counted as both an IF and an ELSE, which may not be what everyone wants
-			IncrementMetric( m_currentUnit, METRIC_TYPE_ELSE );
-
 			CountStatements(p_ifSt->getElse());
 		}
 	} else {

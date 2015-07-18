@@ -21,6 +21,10 @@ set(SOURCES
   MetricASTConsumer.cpp
   MetricSrcLexer.cpp
   MetricSrcLexer.hpp
+  MetricSrcExpandedLexer.cpp
+  MetricSrcExpandedLexer.hpp
+  MetricSrcUnexpandedLexer.cpp
+  MetricSrcUnexpandedLexer.hpp
   MetricFrontendActors.hpp
   MetricFrontendActors.cpp
   FunctionLocator.hpp

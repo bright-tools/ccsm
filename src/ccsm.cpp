@@ -188,7 +188,12 @@ int main(int argc, const char **argv) {
 		// Second tool run to gather metrics from the pre-processor.  This is performed after the AST
 		//  generation as the details of the function locations gathered from the AST are used
 		//  for determining whether or not a function should be included
-		Result = Tool.run(newPPMetricFrontendActionFactory(&options, &topUnit, &srcMap));
+		Result = Tool.run(newPPMetricFrontendActionFactory(&options, &topUnit, &srcMap, true));
+
+		if (Result == 0)
+		{
+			Result = Tool.run(newPPMetricFrontendActionFactory(&options, &topUnit, &srcMap, false));
+		}
 
 		// Success?
 		if( Result == 0 )
