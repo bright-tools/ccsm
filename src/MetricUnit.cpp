@@ -430,21 +430,35 @@ MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType, c
 	return ret_val;
 }
 
+#include "llvm/Support/FileSystem.h"
+#include "llvm/Support/MemoryBuffer.h"
+#include "llvm/Support/Path.h"
+
 MetricUnit* MetricUnit::getSubUnit( const std::string& p_name, const MetricUnitType_e p_type, const bool p_create )
 {
 	MetricUnit* ret_val = NULL;
-	SubUnitMap_t::iterator name_it = m_subUnits.find( p_name );
+	std::string name = p_name;
+
+	if (p_type == METRIC_UNIT_FILE)
+	{
+		llvm::SmallString<256> NativeNameBuf(p_name);
+		llvm::sys::fs::make_absolute(NativeNameBuf);
+		llvm::sys::path::native(NativeNameBuf);
+		name = NativeNameBuf.c_str();
+	}
+
+	SubUnitMap_t::iterator name_it = m_subUnits.find( name );
 	if( name_it == m_subUnits.end() )
 	{
 		if( p_create )
 		{
-			ret_val = new MetricUnit( this, p_name, p_type );
+			ret_val = new MetricUnit( this, name, p_type );
 
 			if( p_type == METRIC_UNIT_FILE )
 			{
 				this->increment( METRIC_TYPE_FILES );
 			}
-			m_subUnits[ p_name ] = ret_val;
+			m_subUnits[ name ] = ret_val;
 		}
 	} else {
 		ret_val = (*name_it).second;

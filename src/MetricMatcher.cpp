@@ -1368,6 +1368,7 @@ void MetricVisitor::IncrementMetric( MetricUnit* const p_unit, const MetricType_
 
 bool MetricVisitor::ShouldIncludeFile( const std::string& p_file )
 {
+	// TODO: Ensure this function is sane with regard to different directory separator styles - \ vs /
 	bool ret_val = false;
 	if( SHOULD_INCLUDE_FILE( m_options, p_file ) )
 	{
