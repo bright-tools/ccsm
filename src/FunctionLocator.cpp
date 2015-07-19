@@ -76,6 +76,7 @@ TranslationUnitFunctionLocator::TranslationUnitFunctionLocator(MetricOptions& p_
 
 void TranslationUnitFunctionLocator::addFunctionLocation(const clang::ASTContext* const p_context, const std::string& p_name, const clang::FunctionDecl * const p_func)
 {
+	// TODO: need to check if getLocEnd() is a macro location?
 	clang::SourceLocation endLoc = p_func->getBody()->getLocEnd();
 	clang::SourceLocation startLoc;
 
@@ -87,7 +88,11 @@ void TranslationUnitFunctionLocator::addFunctionLocation(const clang::ASTContext
 	{
 		startLoc = p_func->getLocStart();
 	}
-	clang::FileID fId = p_context->getSourceManager().getFileID(p_func->getLocStart());
+	if (startLoc.isMacroID())
+	{
+		startLoc = p_context->getSourceManager().getFileLoc(startLoc);
+	}
+	clang::FileID fId = p_context->getSourceManager().getFileID(startLoc);
 	unsigned int hashVal = fId.getHashValue();
 
 //	std::cout << "addFunctionLocation : Adding to function map: " << p_name << " " << hashVal << " ( " << startLoc.getRawEncoding() << " to " << endLoc.getRawEncoding() << ")" << std::endl;
