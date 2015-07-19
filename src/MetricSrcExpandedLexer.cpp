@@ -69,7 +69,7 @@ const static std::pair<clang::tok::TokenKind,MetricType_e> tokenKindToTypeMapDat
 	std::make_pair(clang::tok::kw_const,     METRIC_TYPE_CONST),
 //	std::make_pair(clang::tok::kw_friend,    METRIC_TYPE_TOKEN_FRIEND),
 	std::make_pair(clang::tok::kw_volatile,  METRIC_TYPE_VOLATILE),
-//	std::make_pair(clang::tok::kw_static,    METRIC_TYPE_TOKEN_STATIC),
+	std::make_pair(clang::tok::kw_static,    METRIC_TYPE_STATIC),
 	std::make_pair(clang::tok::kw_typedef,   METRIC_TYPE_TYPEDEF),
 //	std::make_pair(clang::tok::kw_virtual,   METRIC_TYPE_TOKEN_VIRTUAL),
 //	std::make_pair(clang::tok::kw_mutable,   METRIC_TYPE_TOKEN_MUTABLE),
@@ -214,6 +214,8 @@ void MetricSrcExpandedLexer::ProcessToken(clang::Token& p_token)
 
 	if( m_options->getDumpTokens() )
 	{
+		std::cout << "," << p_token.getLocation().getRawEncoding();
+		std::cout << "," << m_compilerInstance.getSourceManager().getFileLoc(p_token.getLocation()).getRawEncoding();
 		if (tok_data.length())
 		{
 			std::cout << "," << tok_data;
