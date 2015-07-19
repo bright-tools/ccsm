@@ -16,6 +16,10 @@
 
 #include "MetricUnit.hpp"
 
+#include "llvm/Support/FileSystem.h"
+#include "llvm/Support/MemoryBuffer.h"
+#include "llvm/Support/Path.h"
+
 #include <iostream>
 
 const std::string MetricUnit::m_metricShortNames[ METRIC_TYPE_MAX ] = {
@@ -429,10 +433,6 @@ MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType, c
 
 	return ret_val;
 }
-
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/Path.h"
 
 MetricUnit* MetricUnit::getSubUnit( const std::string& p_name, const MetricUnitType_e p_type, const bool p_create )
 {

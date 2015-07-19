@@ -58,13 +58,13 @@ const static std::pair<clang::tok::TokenKind,MetricType_e> tokenKindToTypeMapDat
 	std::make_pair(clang::tok::kw_else,      METRIC_TYPE_ELSE),
 //	std::make_pair(clang::tok::kw_bool,      METRIC_TYPE_TOKEN_BOOL),
 	std::make_pair(clang::tok::kw_char,      METRIC_TYPE_CHAR),
-//	std::make_pair(clang::tok::kw_double,    METRIC_TYPE_TOKEN_DOUBLE),
-//	std::make_pair(clang::tok::kw_float,     METRIC_TYPE_TOKEN_FLOAT),
-//	std::make_pair(clang::tok::kw_int,       METRIC_TYPE_TOKEN_INT),
-//	std::make_pair(clang::tok::kw_long,      METRIC_TYPE_TOKEN_LONG),
-//	std::make_pair(clang::tok::kw_short,     METRIC_TYPE_TOKEN_SHORT),
-//	std::make_pair(clang::tok::kw_signed,    METRIC_TYPE_TOKEN_SIGNED),
-//	std::make_pair(clang::tok::kw_unsigned,  METRIC_TYPE_TOKEN_UNSIGNED),
+	std::make_pair(clang::tok::kw_double,    METRIC_TYPE_DOUBLE),
+	std::make_pair(clang::tok::kw_float,     METRIC_TYPE_FLOAT),
+	std::make_pair(clang::tok::kw_int,       METRIC_TYPE_INT),
+	std::make_pair(clang::tok::kw_long,      METRIC_TYPE_LONG),
+	std::make_pair(clang::tok::kw_short,     METRIC_TYPE_SHORT),
+	std::make_pair(clang::tok::kw_signed,    METRIC_TYPE_SIGNED),
+	std::make_pair(clang::tok::kw_unsigned,  METRIC_TYPE_UNSIGNED),
 //	std::make_pair(clang::tok::kw_void,      METRIC_TYPE_TOKEN_VOID),
 	std::make_pair(clang::tok::kw_const,     METRIC_TYPE_CONST),
 //	std::make_pair(clang::tok::kw_friend,    METRIC_TYPE_TOKEN_FRIEND),
@@ -82,7 +82,7 @@ const static std::pair<clang::tok::TokenKind,MetricType_e> tokenKindToTypeMapDat
 	std::make_pair(clang::tok::kw_default,   METRIC_TYPE_DEFAULT),
 //	std::make_pair(clang::tok::kw_delete,    METRIC_TYPE_TOKEN_DELETE),
 	std::make_pair(clang::tok::kw_do,        METRIC_TYPE_DO),
-//	std::make_pair(clang::tok::kw_enum,      METRIC_TYPE_TOKEN_ENUM),
+	std::make_pair(clang::tok::kw_enum,      METRIC_TYPE_ENUM),
 	std::make_pair(clang::tok::kw_goto,      METRIC_TYPE_GOTO),
 //	std::make_pair(clang::tok::kw_new,       METRIC_TYPE_TOKEN_NEW),
 //	std::make_pair(clang::tok::kw_operator,  METRIC_TYPE_TOKEN_OPERATOR),
@@ -91,10 +91,10 @@ const static std::pair<clang::tok::TokenKind,MetricType_e> tokenKindToTypeMapDat
 //	std::make_pair(clang::tok::kw_public,    METRIC_TYPE_TOKEN_PUBLIC),
 	std::make_pair(clang::tok::kw_return,    METRIC_TYPE_RETURN),
 //	std::make_pair(clang::tok::kw_sizeof,    METRIC_TYPE_TOKEN_SIZEOF),
-//	std::make_pair(clang::tok::kw_struct,    METRIC_TYPE_TOKEN_STRUCT),
+	std::make_pair(clang::tok::kw_struct,    METRIC_TYPE_STRUCT),
 	std::make_pair(clang::tok::kw_switch,    METRIC_TYPE_SWITCH),
 //	std::make_pair(clang::tok::kw_this,      METRIC_TYPE_TOKEN_THIS),
-//	std::make_pair(clang::tok::kw_union,     METRIC_TYPE_TOKEN_UNION),
+	std::make_pair(clang::tok::kw_union,     METRIC_TYPE_UNION),
 	std::make_pair(clang::tok::kw_while,            METRIC_TYPE_WHILE),
 //	std::make_pair(clang::tok::kw_namespace,        METRIC_TYPE_TOKEN_NAMESPACE),
 //	std::make_pair(clang::tok::kw_using,            METRIC_TYPE_TOKEN_USING),
@@ -214,7 +214,7 @@ void MetricSrcExpandedLexer::ProcessToken(clang::Token& p_token)
 
 	if( m_options->getDumpTokens() )
 	{
-		if( tok_data.length() )
+		if (tok_data.length())
 		{
 			std::cout << "," << tok_data;
 		}

@@ -362,7 +362,7 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 #endif
 
 	/* Deal with common actions which may be applicable to a decl valid at translation-unit level */
-	DeclCommon( func->getLexicalParent(), func );
+	DeclCommon(func->getLexicalParent(), func);
 
 	/* Function body attached? */
 	if( func->doesThisDeclarationHaveABody() )
@@ -464,66 +464,11 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 
 bool MetricVisitor::VisitEnumDecl(clang::EnumDecl* p_enumDecl)
 {
-	/* Deal with common actions which may be applicable to a decl valid at translation-unit level */
-	DeclCommon(p_enumDecl->getLexicalDeclContext(), p_enumDecl);
-
-	if (m_currentUnit)
-	{
-		/* If it's a free-standing record, count it here.  Otherwise will get counted
-		when vardecl is processed */
-		if (p_enumDecl->isFreeStanding())
-		{
-			IncrementMetric(m_currentUnit, METRIC_TYPE_ENUM);
-		}
-	}
-
 	return true;
 }
 
 bool MetricVisitor::VisitRecordDecl(clang::RecordDecl* p_recordDecl)
 {
-	/* Deal with common actions which may be applicable to a decl valid at translation-unit level */
-	DeclCommon(p_recordDecl->getLexicalDeclContext(), p_recordDecl);
-
-	if (m_currentUnit)
-	{
-		/* If it's a free-standing record, count it here.  Otherwise will get counted
-		   when vardecl is processed */
-		if (p_recordDecl->isRecord() && p_recordDecl->isFreeStanding())
-		{
-			if (p_recordDecl->isUnion())
-			{
-				IncrementMetric(m_currentUnit, METRIC_TYPE_UNION);
-			}
-			else if (p_recordDecl->isStruct())
-			{
-				IncrementMetric(m_currentUnit, METRIC_TYPE_STRUCT);
-			}
-		}
-
-		for (clang::RecordDecl::field_iterator it = p_recordDecl->field_begin();
-			it != p_recordDecl->field_end();
-			it++)
-		{
-			/* Only consider elaborated types here - record types will be counted via a separate 
-			   call to VisitRecordDecl() */
-			if ((*it)->getType().getTypePtr()->isElaboratedTypeSpecifier() ) 
-			{
-				if ((*it)->getType().getTypePtr()->isUnionType())
-				{
-					IncrementMetric(m_currentUnit, METRIC_TYPE_UNION);
-				}
-				else if ((*it)->getType().getTypePtr()->isStructureType())
-				{
-					IncrementMetric(m_currentUnit, METRIC_TYPE_STRUCT);
-				}
-				else if ((*it)->getType().getTypePtr()->isEnumeralType())
-				{
-					IncrementMetric(m_currentUnit, METRIC_TYPE_ENUM);
-				}
-			}
-		}
-	}
 	return true;
 }
 
@@ -533,42 +478,7 @@ bool MetricVisitor::VisitTypedefNameDecl(const clang::TypedefNameDecl *p_typeDef
 	std::cout << "VisitTypedefNameDecl - CONTEXT " << m_currentFileName << "::" << m_currentFunctionName << std::endl;
 #endif
 
-	/* Deal with common actions which may be applicable to a decl valid at translation-unit level */
-	DeclCommon(p_typeDef->getLexicalDeclContext(), p_typeDef);
-
-	if (m_currentUnit)
-	{
-		/* Count up any use of keywords in qualifiers */
-		CountTypeInfo(m_currentUnit, p_typeDef->getTypeSourceInfo()->getType());
-	}
-
 	return true;
-}
-
-void MetricVisitor::CountTypeInfo(MetricUnit* p_owner, const clang::QualType& qualType)
-{
-	/* Only interested in local qualifiers, not those which have been added by typedef, etc. */
-	const bool isLocalVolatile = qualType.isLocalVolatileQualified();
-	const bool isLocalConst = qualType.isLocalConstQualified();
-
-	/* Check if it's a constant pointer type */
-	const clang::Type* typePtr = qualType.getTypePtr();
-    if (typePtr->getTypeClass() == clang::Type::Elaborated)
-	{
-		const clang::ElaboratedType *array_type = llvm::dyn_cast<clang::ElaboratedType>(typePtr);
-		if (array_type->isUnionType())
-		{
-			IncrementMetric(p_owner, METRIC_TYPE_UNION);
-		}
-		else if (array_type->isStructureType())
-		{
-			IncrementMetric(p_owner, METRIC_TYPE_STRUCT);
-		}
-		else if (array_type->isEnumeralType())
-		{
-			IncrementMetric(p_owner, METRIC_TYPE_ENUM);
-		}
-	}
 }
 
 void MetricVisitor::CloseOutFnOrMtd( void )
@@ -585,18 +495,18 @@ void MetricVisitor::CloseOutFnOrMtd( void )
 	}
 }
 
-void MetricVisitor::DeclCommon( const clang::DeclContext* p_declCtxt, const clang::Decl* p_decl )
+void MetricVisitor::DeclCommon(const clang::DeclContext* p_declCtxt, const clang::Decl* p_decl)
 {
-#if defined( DEBUG_FN_TRACE_OUTOUT )
+#if defined(DEBUG_FN_TRACE_OUTOUT)
 	std::cout << "DeclCommon - CONTEXT " << m_currentFileName << "::" << m_currentFunctionName << std::endl;
 #endif
 
 	// Check to see if the decl is top-level - may need to update m_currentUnit after exiting a function.
-	if( p_declCtxt->getDeclKind() == clang::Decl::TranslationUnit )
+	if (p_declCtxt->getDeclKind() == clang::Decl::TranslationUnit)
 	{
 		CloseOutFnOrMtd();
 
-		HandleLoc( p_decl->getLocation() );
+		HandleLoc(p_decl->getLocation());
 	}
 }
 
@@ -628,7 +538,7 @@ bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 #endif
 
 	/* Deal with common actions which may be applicable to a decl valid at translation-unit level */
-	DeclCommon( p_varDec->getLexicalDeclContext(), p_varDec );
+	DeclCommon(p_varDec->getLexicalDeclContext(), p_varDec);
 
 	if( m_currentUnit )
 	{
@@ -644,8 +554,6 @@ bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 		{
 			owner = m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE);
 		}
-
-		CountTypeInfo(owner, p_varDec->getType());
 
 		/* Check it's not a function parameter */
 		if (p_varDec->getKind() == clang::Decl::Var)

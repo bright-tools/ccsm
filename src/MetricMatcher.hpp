@@ -61,7 +61,7 @@ protected:
 	TranslationUnitFunctionLocator* m_fnLocator;
 
 	void HandleLoc( const clang::SourceLocation& p_loc );
-	void DeclCommon( const clang::DeclContext* p_declCtxt, const clang::Decl* p_decl );
+	void DeclCommon(const clang::DeclContext* p_declCtxt, const clang::Decl* p_decl);
 	void CloseOutFnOrMtd( void );
 	bool ShouldIncludeFile( const std::string& p_file );
 	void IncrementMetric( MetricUnit* const p_unit, const MetricType_e p_metricType );
@@ -74,7 +74,6 @@ protected:
 	PathResults getSwitchPathCount(const clang::SwitchStmt* const p_stmt, uint16_t depth = 0);
 	void CountStatements(const clang::Stmt* const p_stmt);
 	void CountStatements(const clang::Stmt::const_child_range& p_children);
-	void CountTypeInfo(MetricUnit* owner,const clang::QualType& qualType);
 
 public:
 	
