@@ -75,11 +75,15 @@ METRIC( METRIC_TYPE_LONG,                                     "KW_LONG_CNT",    
 METRIC( METRIC_TYPE_TOKEN_LONG,                               "RAW_KW_LONG_CNT",                "'long' keyword count (raw source)",				true,  true,  true,  true,  true,       false,     true,         1,        "" )
 METRIC( METRIC_TYPE_SHORT,                                    "KW_SHORT_CNT",                   "'short' keyword count",	               			true,  true,  true,  true,  true,       false,     true,         1,        "" )
 METRIC( METRIC_TYPE_TOKEN_SHORT,                              "RAW_KW_SHORT_CNT",               "'short' keyword count (raw source)",				true,  true,  true,  true,  true,       false,     true,         1,        "" )
+METRIC( METRIC_TYPE_STATIC,                                   "KW_STATIC_CNT",                  "'static' keyword count",			            	true,  true,  true,  true,  true,       false,     true,         1,        "" )
+METRIC( METRIC_TYPE_TOKEN_STATIC,                             "RAW_KW_STATIC_CNT",              "'static' keyword count (raw source)",				true,  true,  true,  true,  true,       false,     true,         1,        "" )
 
-METRIC( METRIC_TYPE_STATIC,                                   "KW_STATIC_CNT",                  "'static' keyword count",			            	true,  true,  true,  true,  true,       false,     true,        1,        "" )
-METRIC( METRIC_TYPE_TOKEN_STATIC,                             "RAW_KW_STATIC_CNT",              "'static' keyword count (raw source)",				true,  true,  true,  true,  true,       false,     true,        1,        "" )
+METRIC( METRIC_TYPE_EXTERN,                                   "KW_EXTERN_CNT",                  "'extern' keyword count",				            true,  true,  true,  true,  true,       false,     true,         1,        "" )
+METRIC( METRIC_TYPE_TOKEN_EXTERN,                             "RAW_KW_EXTERN_CNT",              "'extern' keyword count (raw source)",				true,  true,  true,  true,  true,       false,     true,         1,        "" )
+METRIC( METRIC_TYPE_REGISTER,                                 "KW_REGISTER_CNT",                "'register' keyword count",			   			    true,  true,  true,  true,  true,       false,     true,         1,        "" )
+METRIC( METRIC_TYPE_TOKEN_REGISTER,                           "RAW_KW_REGISTER_CNT",            "'register' keyword count (raw source)",			true,  true,  true,  true,  true,       false,     true,         1,        "" )
 
-// keywords: extern, inline, register, restrict, sizeof, static, void
+// keywords: extern, inline, register, restrict, sizeof, void
 
 METRIC( METRIC_TYPE_KEYWORD_CNT,                              "KW_CNT",                         "Number of keywords used",             				true,  true,  true,  true,  true,       false,     true,         1,        "Total number of C keywords used" )
 METRIC( METRIC_TYPE_KEYWORD_TYPES,                            "KW_TYPES_CNT",                   "Number of types of keyword used",             		true,  true,  true,  true,  true,       false,     true,         1,        "" )
@@ -192,9 +196,7 @@ METRIC( METRIC_TYPE_OPERATOR_HALSTEAD_COUNT,                  "OP_HALSTEAD_CNT",
 
 METRIC( METRIC_TYPE_TOKEN_BOOL,                               "TOK_BOOL",                       "Number of 'bool' tokens",							true,  true,  true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_TOKEN_VOID,                               "TOK_VOID",                       "Number of 'void' tokens",						    true,  true,  true,  true,  true,       false,     false,        1,        "" )
-METRIC( METRIC_TYPE_TOKEN_EXTERN,                             "TOK_EXTERN",                     "Number of 'extern' tokens",						true,  true,  true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_TOKEN_INLINE,                             "TOK_INLINE",                     "Number of 'inline' tokens",						true,  true,  true,  true,  true,       false,     false,        1,        "" )
-METRIC( METRIC_TYPE_TOKEN_REGISTER,                           "TOK_REGISTER",                   "Number of 'register' tokens",						true,  true,  true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_TOKEN_VIRTUAL,                            "TOK_VIRTUAL",                    "Number of 'virtual' tokens",						true,  true,  true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_TOKEN_MUTABLE,                            "TOK_MUTABLE",                    "Number of 'mutable' tokens",						true,  true,  true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_TOKEN_FRIEND,                             "TOK_FRIEND",                     "Number of 'friend' tokens",						true,  true,  true,  true,  true,       false,     false,        1,        "" )
