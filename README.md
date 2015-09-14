@@ -109,33 +109,92 @@ Metric Details
 | Name | Description | Notes |
 |------|-------------|-------|
 | FILE_CNT | Files |  |
+| FILE_SIZE | Size in bytes |  |
 | FUNC_CNT | Functions |  |
-| STMT_IF_CNT | IF statements |  |
-| STMT_ELSE_CNT | ELSE statements |  |
-| STMT_FOR_CNT | FOR loops |  |
-| STMT_RETURN_CNT | RETURN statements |  |
-| STMT_WHILE_CNT | WHILE loops |  |
-| STMT_SWITCH_CNT | SWITCH statements |  |
-| STMT_CASE_CNT | CASE statements |  |
-| STMT_DEFAULT_CNT | DEFAULT statements |  |
-| STMT_GOTO_CNT | GOTO statements |  |
-| STMT_LABEL_CNT | LABEL statements |  |
-| TYPEDEF_FILE_CNT | File-scope typedefs |  |
-| TYPEDEF_FN_CNT | Function-scope typedefs |  |
+| KW_IF_CNT | 'if' keyword count  |  |
+| RAW_KW_IF_CNT | 'if' keyword count (raw source) |  |
+| KW_ELSE_CNT | 'else' keyword count  |  |
+| RAW_KW_ELSE_CNT | 'else' keyword count (raw source) |  |
+| KW_FOR_CNT | 'for' keyword count |  |
+| RAW_KW_FOR_CNT | 'for' keyword count (raw source) |  |
+| KW_RETURN_CNT | 'return' keyword count |  |
+| RAW_KW_RETURN_CNT | 'return' keyword count (raw source) |  |
+| KW_DO_CNT | 'do' keyword count |  |
+| RAW_KW_DO_CNT | 'do' keyword count (raw source) |  |
+| KW_WHILE_CNT | 'while' keyword count |  |
+| RAW_KW_WHILE_CNT | 'while' keyword count (raw source) |  |
+| KW_SWITCH_CNT | 'switch' keyword count |  |
+| RAW_KW_SWITCH_CNT | 'switch' keyword count (raw source) |  |
+| KW_CASE_CNT | 'case' keyword count |  |
+| RAW_KW_CASE_CNT | 'case' keyword count (raw source) |  |
+| KW_BREAK_CNT | 'break' keyword count |  |
+| RAW_KW_BREAK_CNT | 'break' keyword count (raw source) |  |
+| KW_DEFAULT_CNT | 'default' keyword count |  |
+| RAW_KW_DEFAULT_CNT | 'default' keyword count (raw source) |  |
+| KW_GOTO_CNT | 'goto' keyword count |  |
+| RAW_KW_GOTO_CNT | 'goto' keyword count (raw source) |  |
+| KW_AUTO_CNT | 'auto' keyword count |  |
+| RAW_KW_AUTO_CNT | 'auto' keyword count (raw source) |  |
+| KW_VOLATILE_CNT | 'volatile' keyword count |  |
+| RAW_KW_VOLATILE_CNT | 'volatile' keyword count (raw source) |  |
+| KW_CONST_CNT | 'const' keyword count |  |
+| RAW_KW_CONST_CNT | 'const' keyword count (raw source) |  |
+| KW_TYPEDEF_CNT | 'typedef' keyword count |  |
+| RAW_KW_TYPEDEF_CNT | 'typedef' keyword count (raw source) |  |
+| KW_CONTINUE_CNT | 'continue' keyword count |  |
+| RAW_KW_CONTINUE_CNT | 'continue' keyword count (raw source) |  |
+| KW_UNION_CNT | 'union' keyword count |  |
+| RAW_KW_UNION_CNT | 'union' keyword count (raw source) |  |
+| KW_STRUCT_CNT | 'struct' keyword count |  |
+| RAW_KW_STRUCT_CNT | 'struct' keyword count (raw source) |  |
+| KW_ENUM_CNT | 'enum' keyword count |  |
+| RAW_KW_ENUM_CNT | 'enum' keyword count (raw source) |  |
+| KW_CHAR_CNT | 'char' keyword count |  |
+| RAW_KW_CHAR_CNT | 'char' keyword count (raw source) |  |
+| KW_UNSIGNED_CNT | 'unsigned' keyword count |  |
+| RAW_KW_UNSIGNED_CNT | 'unsigned' keyword count (raw source) |  |
+| KW_SIGNED_CNT | 'signed' keyword count |  |
+| RAW_KW_SIGNED_CNT | 'signed' keyword count (raw source) |  |
+| KW_DOUBLE_CNT | 'double' keyword count |  |
+| RAW_KW_DOUBLE_CNT | 'double' keyword count (raw source) |  |
+| KW_FLOAT_CNT | 'float' keyword count |  |
+| RAW_KW_FLOAT_CNT | 'float' keyword count (raw source) |  |
+| KW_INT_CNT | 'int' keyword count |  |
+| RAW_KW_INT_CNT | 'int' keyword count (raw source) |  |
+| KW_LONG_CNT | 'long' keyword count |  |
+| RAW_KW_LONG_CNT | 'long' keyword count (raw source) |  |
+| KW_SHORT_CNT | 'short' keyword count |  |
+| RAW_KW_SHORT_CNT | 'short' keyword count (raw source) |  |
+| KW_STATIC_CNT | 'static' keyword count |  |
+| RAW_KW_STATIC_CNT | 'static' keyword count (raw source) |  |
+| KW_EXTERN_CNT | 'extern' keyword count |  |
+| RAW_KW_EXTERN_CNT | 'extern' keyword count (raw source) |  |
+| KW_REGISTER_CNT | 'register' keyword count |  |
+| RAW_KW_REGISTER_CNT | 'register' keyword count (raw source) |  |
+| KW_CNT | Number of keywords used | Total number of C keywords used |
+| KW_TYPES_CNT | Number of types of keyword used |  |
+| KW_LABEL_CNT | 'label' keyword count |  |
 | VAR_FILE_LOC_CNT | File-scope total local variable declarations | Includes auto and static but not extern |
 | VAR_FILE_LOC_STATIC_CNT | File-scope static variable declarations |  |
 | VAR_FILE_EXT_CNT | File-scope external variable declarations |  |
+| VAR_FILE_VOLATILE_CNT | File-scope volatile variable declarations |  |
+| VAR_FILE_CONST_CNT | File-scope constant variable declarations |  |
 | VAR_FN_LOC_CNT | Function-scope total local variable declarations | Includes auto and static but not extern |
 | VAR_FN_LOC_STATIC_CNT | Function-scope static variable declarations |  |
+| VAR_FN_LOC_CONST_CNT | Function-scope constant variable declarations |  |
+| VAR_FN_LOC_VOLATILE_CNT | Function-scope volatile variable declarations |  |
 | VAR_FN_LOC_REG_CNT | Function-scope register variable declarations |  |
 | VAR_FN_LOC_AUTO_CNT | Function-scope auto variable declarations |  |
 | VAR_FN_EXT_CNT | Function-scope external variable declarations |  |
 | RETURN_POINT_CNT | Return points |  |
-| STMT_CNT | Statements |  |
-| STMT_MCCABE | Statement based McCabe |  |
-| STMT_MOD_MCCABE | Statement based Modified McCabe |  |
-| TOK_MCCABE | Token based McCabe |  |
-| TOK_MOD_MCCABE | Token based Modified McCabe |  |
+| STMT_CNT | Statement count | Number of statements |
+| COMMENT_HIS_COMF | Comment density | Relationship of the number of comments to the number of statements, with range 0-1.  HIS metric. |
+| COMMENT_BYTE_CNT | Comments in bytes | Counts the total number of bytes which are used in comments.  Note that --exclude-function does not have any effect on this metric. |
+| COMMENT_CNT | Comment count | Counts the total number of comments.  Note that --exclude-function does not have any effect on this metric. |
+| MCCABE | McCabe complexity |  |
+| MCCABE_MOD | Modified McCabe complexity |  |
+| RAW_MCCABE | McCabe complexity (raw source) |  |
+| RAW_MCCABE_MOD | Modified McCabe complexity (raw source) |  |
 | FUNC_LOCAL_CNT | Local Functions |  |
 | FUNC_EXTERN_EXPL_CNT | External (explicit) functions declarations |  |
 | FUNC_EXTERN_IMPL_CNT | External (implicit) functions declarations |  |
@@ -146,10 +205,7 @@ Metric Details
 | FUNC_PATHS | Number of paths through the function |  |
 | OP_FN_CALL_UNIQUE_CNT | No. different functions called | Of the total number of functions called (see OP_FN_CALL_CNT), this represents the number of uniquely addressed functions.  Does not include functions called via function pointers |
 | LOCAL_FN_CALL_CNT | Local Function Calls | Does not include functions called via function pointers |
-| FILE_SIZE | Size in bytes |  |
 | FILE_LINE_CNT | Size in lines | Counts number of newlines in the file |
-| COMMENT_BYTE_CNT | Comments in bytes | Counts the total number of bytes which are used in comments.  Note that --exclude-function does not have any effect on this metric. |
-| COMMENT_CNT | Comment Count | Counts the total number of comments.  Note that --exclude-function does not have any effect on this metric. |
 | FUNC_LINE_CNT | Function (body) size in lines | Counts number of newlines in the function body |
 | STMT_HIS_PARAM | Function Parameters |  |
 | TODO | Decisions |  |
@@ -205,54 +261,26 @@ Metric Details
 | OP_SIZEOF_CNT | Sizeof operators |  |
 | OP_ALIGNOF_CNT | Alignof operators |  |
 | OP_CAST_CNT | Cast operators |  |
-| OP_TYPES_CNT | Number of different types of C operator |  |
-| OP_TYPES_HALSTEAD_CNT | Number of different types of operator (Halstead) |  |
+| OP_TYPES_CNT | Number of different types of C operator | Number of distinct different types of operators. |
+| OP_CNT | Number of operators | Total number of operators used |
+| OP_HALSTEAD_TYPES_CNT | Number of different types of halstead operators | Number of distinct different types of operators (as classified for the purpose of Halstead metrics; this is not the same classification as the 'C' standard) |
+| OP_HALSTEAD_CNT | Number of halstead operators | Total number of operators (as classified for the purpose of Halstead metrics; this is not the same classification as the 'C' standard) used |
 | TOK_BOOL | Number of 'bool' tokens |  |
-| TOK_CHAR | Number of 'char' tokens |  |
-| TOK_DOUBLE | Number of 'double' tokens |  |
-| TOK_FLOAT | Number of 'float' tokens |  |
-| TOK_INT | Number of 'int' tokens |  |
-| TOK_LONG | Number of 'long' tokens |  |
-| TOK_SHORT | Number of 'short' tokens |  |
-| TOK_SIGNED | Number of 'signed' tokens |  |
-| TOK_UNSIGNED | Number of 'unsigned' tokens |  |
 | TOK_VOID | Number of 'void' tokens |  |
-| TOK_CONST | Number of 'const' tokens |  |
-| TOK_EXTERN | Number of 'extern' tokens |  |
 | TOK_INLINE | Number of 'inline' tokens |  |
-| TOK_REGISTER | Number of 'register' tokens |  |
-| TOK_STATIC | Number of 'static' tokens |  |
-| TOK_TYPEDEF | Number of 'typedef' tokens |  |
 | TOK_VIRTUAL | Number of 'virtual' tokens |  |
 | TOK_MUTABLE | Number of 'mutable' tokens |  |
 | TOK_FRIEND | Number of 'friend' tokens |  |
-| TOK_VOLATILE | Number of 'volatile' tokens |  |
-| TOK_AUTO | Number of 'auto' tokens |  |
 | TOK_ASM | Number of 'asm' tokens |  |
-| TOK_BREAK | Number of 'break' tokens |  |
-| TOK_CASE | Number of 'case' tokens |  |
 | TOK_CLASS | Number of 'class' tokens |  |
-| TOK_CONTINUE | Number of 'continue' tokens |  |
-| TOK_DEFAULT | Number of 'default' tokens |  |
 | TOK_DELETE | Number of 'delete' tokens |  |
-| TOK_DO | Number of 'do' tokens |  |
-| TOK_ELSE | Number of 'else' tokens |  |
-| TOK_ENUM | Number of 'enum' tokens |  |
-| TOK_FOR | Number of 'for' tokens |  |
-| TOK_GOTO | Number of 'goto' tokens |  |
-| TOK_IF | Number of 'if' tokens |  |
 | TOK_NEW | Number of 'new' tokens |  |
 | TOK_OPERATOR | Number of 'operator' tokens |  |
 | TOK_PRIVATE | Number of 'private' tokens |  |
 | TOK_PROTECTED | Number of 'protected' tokens |  |
 | TOK_PUBLIC | Number of 'public' tokens |  |
-| TOK_RETURN | Number of 'return' tokens |  |
 | TOK_SIZEOF | Number of 'sizeof' tokens |  |
-| TOK_STRUCT | Number of 'struct' tokens |  |
-| TOK_SWITCH | Number of 'switch' tokens |  |
 | TOK_THIS | Number of 'this' tokens |  |
-| TOK_UNION | Number of 'union' tokens |  |
-| TOK_WHILE | Number of 'while' tokens |  |
 | TOK_NAMESPACE | Number of 'namespace' tokens |  |
 | TOK_USING | Number of 'using' tokens |  |
 | TOK_TRY | Number of 'try' tokens |  |
@@ -318,8 +346,6 @@ Metric Details
 | TOK_UNRESERVED_IDENTIFIERS_UNIQ | Number of unique (unreserved) identifier tokens |  |
 | TOK_CHAR_CONSTS | Number of character constants |  |
 | TOK_CHAR_CONSTS_UNIQ | Number of unique character constants |  |
-| TOK_HIS_COMF | Comment density | Relationship of the number of comments to the number of statements.  HIS metric. |
-| TOK_HIS_STMT | Statement count | Number of 'statements' |
 | HIS_CALLING | Number of functions which call this function |  |
 
 Raw & Parsed Metrics
