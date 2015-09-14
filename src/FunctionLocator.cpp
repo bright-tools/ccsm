@@ -22,11 +22,13 @@
 
 #include <iostream>
 
+GlobalFunctionLocator::GlobalFunctionLocator(MetricOptions& p_options) : m_options(p_options)
+{
+}
+
 TranslationUnitFunctionLocator* GlobalFunctionLocator::getLocatorFor( const std::string p_fileName )
 {
 	TranslationUnitFunctionLocator* ret_val = NULL;
-	return &(m_map[ p_fileName ]);
-#if 0
 	MainSrcToFnLocMap_t::iterator it = m_map.find( p_fileName );
 
 	if( it != m_map.end() )
@@ -35,12 +37,11 @@ TranslationUnitFunctionLocator* GlobalFunctionLocator::getLocatorFor( const std:
 	}
 	else
 	{
-		ret_val = new TranslationUnitFunctionLocator();
-		m_map[ p_fileName ] = ret_val;
+		ret_val = new TranslationUnitFunctionLocator(m_options);
+		m_map.insert(std::pair<std::string, TranslationUnitFunctionLocator* >(p_fileName, ret_val));
 	}
 
 	return ret_val;
-#endif
 }
 
 void GlobalFunctionLocator::dump( std::ostream& p_out ) const
@@ -52,7 +53,7 @@ void GlobalFunctionLocator::dump( std::ostream& p_out ) const
 		 it++ )
 	{
 		p_out << "Translation Unit: " << it->first << std::endl;
-		it->second.dump( p_out );
+		it->second->dump( p_out );
 	}
 }
 
@@ -69,11 +70,29 @@ GlobalFunctionLocator::~GlobalFunctionLocator()
 #endif
 }
 
-void TranslationUnitFunctionLocator::addFunctionLocation( const clang::ASTContext* const p_context, const std::string& p_name, const clang::FunctionDecl * const p_func  )
+TranslationUnitFunctionLocator::TranslationUnitFunctionLocator(MetricOptions& p_options) : m_options(p_options)
 {
+}
+
+void TranslationUnitFunctionLocator::addFunctionLocation(const clang::ASTContext* const p_context, const std::string& p_name, const clang::FunctionDecl * const p_func)
+{
+	// TODO: need to check if getLocEnd() is a macro location?
 	clang::SourceLocation endLoc = p_func->getBody()->getLocEnd();
-	clang::SourceLocation startLoc = p_func->getLocStart();
-	clang::FileID fId = p_context->getSourceManager().getFileID( p_func->getLocStart() );
+	clang::SourceLocation startLoc;
+
+	if (m_options.getPrototypesAreFileScope())
+	{
+		startLoc = p_func->getBody()->getLocStart();
+	}
+	else
+	{
+		startLoc = p_func->getLocStart();
+	}
+	if (startLoc.isMacroID())
+	{
+		startLoc = p_context->getSourceManager().getFileLoc(startLoc);
+	}
+	clang::FileID fId = p_context->getSourceManager().getFileID(startLoc);
 	unsigned int hashVal = fId.getHashValue();
 
 //	std::cout << "addFunctionLocation : Adding to function map: " << p_name << " " << hashVal << " ( " << startLoc.getRawEncoding() << " to " << endLoc.getRawEncoding() << ")" << std::endl;
@@ -97,7 +116,7 @@ void TranslationUnitFunctionLocator::dump( std::ostream& p_out ) const
 			 pit != it->second.end();
 			 pit++ )
 		{
-			p_out << "  Function: " << pit->second.second << " (" << pit->first.getRawEncoding() << "-" << pit->second.first.getRawEncoding() << ")" << std::endl;
+			p_out << "  Function Definition: " << pit->second.second << " (" << pit->first.getRawEncoding() << "-" << pit->second.first.getRawEncoding() << ")" << std::endl;
 		}
 	}
 }
@@ -117,8 +136,8 @@ std::string TranslationUnitFunctionLocator::FindFunction( const clang::SourceMan
 			/* Does the location we're considering match the function start or end or is it within those bounds? */
 			if(( p_loc == (*func_it).first ) || 
 				( p_loc == (*func_it).second.first ) ||
-				( (*func_it).first < p_loc ) &&
-				( p_loc < (*func_it).second.first ))
+				(( (*func_it).first < p_loc ) &&
+				 ( p_loc < (*func_it).second.first )))
 			{
 				ret_val = (*func_it).second.second;
 				if( p_end != NULL )

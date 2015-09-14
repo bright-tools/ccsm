@@ -31,13 +31,15 @@
 class MetricPPIncludeHandler : public clang::PPCallbacks
 {
 	private:
-		std::string& m_currentFile;
-		MetricOptions* m_options;
+		MetricOptions*        m_options;
+		clang::SourceManager& m_SM;
+		std::string&          m_currentFile;
     public:
-		MetricPPIncludeHandler( MetricOptions* p_options, std::string& p_currentFile );
+		MetricPPIncludeHandler(MetricOptions* p_options, clang::SourceManager& p_SM, std::string& p_currentFile);
 		virtual ~MetricPPIncludeHandler( void );
-		virtual void InclusionDirective (clang::SourceLocation HashLoc, const clang::Token &IncludeTok, clang::StringRef FileName, bool IsAngled, clang::CharSourceRange FilenameRange, const clang::FileEntry *File, clang::StringRef SearchPath, clang::StringRef RelativePath, const clang::Module *Imported);
-
+		virtual void FileChanged(clang::SourceLocation Loc, FileChangeReason Reason,
+							     clang::SrcMgr::CharacteristicKind FileType,
+								 clang::FileID PrevFID = clang::FileID());
 };
 
 #endif

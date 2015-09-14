@@ -33,6 +33,10 @@ protected:
 	std::vector<std::string>* OutputMetrics;
 	std::vector<std::string>* DefFiles;
 	bool m_dumpTokens;
+	bool m_dumpAST;
+	bool m_useShortNames;
+	bool m_declarationsAreNotFileScope;
+	bool m_prototypesAreFileScope;
 
 	bool isFileInList( const std::vector<std::string>* const p_list, const std::string& p_name ) const;
 public:
@@ -47,6 +51,12 @@ public:
 	bool isDefFile( const std::string& p_name ) const;
 	void setDumpTokens( const bool p_dump );
 	bool getDumpTokens( void ) const;
+	void setDumpAST(const bool p_dump);
+	bool getDumpAST(void) const;
+	void setUseShortNames(const bool p_shortNames);
+	bool getUseShortNames(void) const;
+	void setPrototypesAreFileScope(const bool p_proto);
+	bool getPrototypesAreFileScope(void) const;
 };
 
 #define SHOULD_INCLUDE_FILE( _m, _f ) (((_m)==NULL) || ((_m)->ShouldIncludeFile( _f )))

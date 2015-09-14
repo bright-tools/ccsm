@@ -22,8 +22,48 @@
 #include <sstream>
 #include <iostream>
 
-using namespace clang;
-using namespace std;
+const std::pair<clang::Stmt::StmtClass, MetricType_e> keywordToMetricPairs[] = {
+	std::make_pair(clang::Stmt::BreakStmtClass, METRIC_TYPE_BREAK),
+};
+
+const std::pair<clang::BinaryOperator::Opcode, MetricType_e> MetricVisitor::binaryOperatorToMetricPairs[] = {
+	std::make_pair(clang::BO_PtrMemD, METRIC_TYPE_OPERATOR_PTR_TO_MEMBER_DIRECT),
+	std::make_pair(clang::BO_PtrMemI, METRIC_TYPE_OPERATOR_PTR_TO_MEMBER_INDIRECT),
+	std::make_pair(clang::BO_Mul, METRIC_TYPE_OPERATOR_ARITHMETIC_MULTIPLICATION),
+	std::make_pair(clang::BO_Div, METRIC_TYPE_OPERATOR_ARITHMETIC_DIVISION),
+	std::make_pair(clang::BO_Rem, METRIC_TYPE_OPERATOR_ARITHMETIC_MODULO),
+	std::make_pair(clang::BO_Add, METRIC_TYPE_OPERATOR_ARITHMETIC_ADDITION),
+	std::make_pair(clang::BO_Sub, METRIC_TYPE_OPERATOR_ARITHMETIC_SUBTRACTION),
+	std::make_pair(clang::BO_Shl, METRIC_TYPE_OPERATOR_SHIFT_LEFT),
+	std::make_pair(clang::BO_Shr, METRIC_TYPE_OPERATOR_SHIFT_RIGHT),
+	std::make_pair(clang::BO_LT, METRIC_TYPE_OPERATOR_COMP_LESS_THAN),
+	std::make_pair(clang::BO_GT, METRIC_TYPE_OPERATOR_COMP_GREATER_THAN),
+	std::make_pair(clang::BO_LE, METRIC_TYPE_OPERATOR_COMP_LESS_THAN_EQUAL),
+	std::make_pair(clang::BO_GE, METRIC_TYPE_OPERATOR_COMP_GREATER_THAN_EQUAL),
+	std::make_pair(clang::BO_EQ, METRIC_TYPE_OPERATOR_COMP_EQUAL),
+	std::make_pair(clang::BO_NE, METRIC_TYPE_OPERATOR_COMP_NOT_EQUAL),
+	std::make_pair(clang::BO_And, METRIC_TYPE_OPERATOR_BITWISE_AND),
+	std::make_pair(clang::BO_Xor, METRIC_TYPE_OPERATOR_BITWISE_XOR),
+	std::make_pair(clang::BO_Or, METRIC_TYPE_OPERATOR_BITWISE_OR),
+	std::make_pair(clang::BO_LAnd, METRIC_TYPE_OPERATOR_LOGICAL_AND),
+	std::make_pair(clang::BO_LOr, METRIC_TYPE_OPERATOR_LOGICAL_OR),
+	std::make_pair(clang::BO_Assign, METRIC_TYPE_OPERATOR_ARITHMETIC_ASSIGN),
+	std::make_pair(clang::BO_MulAssign, METRIC_TYPE_OPERATOR_ARITHMETIC_MULTIPLICATION_ASSIGN),
+	std::make_pair(clang::BO_DivAssign, METRIC_TYPE_OPERATOR_ARITHMETIC_DIVISION_ASSIGN),
+	std::make_pair(clang::BO_RemAssign, METRIC_TYPE_OPERATOR_ARITHMETIC_MODULO_ASSIGN),
+	std::make_pair(clang::BO_AddAssign, METRIC_TYPE_OPERATOR_ARITHMETIC_ADDITION_ASSIGN),
+	std::make_pair(clang::BO_SubAssign, METRIC_TYPE_OPERATOR_ARITHMETIC_SUBTRACTION_ASSIGN),
+	std::make_pair(clang::BO_ShlAssign, METRIC_TYPE_OPERATOR_SHIFT_LEFT_ASSIGN),
+	std::make_pair(clang::BO_ShrAssign, METRIC_TYPE_OPERATOR_SHIFT_RIGHT_ASSIGN),
+	std::make_pair(clang::BO_AndAssign, METRIC_TYPE_OPERATOR_BITWISE_AND_ASSIGN),
+	std::make_pair(clang::BO_XorAssign, METRIC_TYPE_OPERATOR_BITWISE_XOR_ASSIGN),
+	std::make_pair(clang::BO_OrAssign, METRIC_TYPE_OPERATOR_BITWISE_OR_ASSIGN),
+	std::make_pair(clang::BO_Comma, METRIC_TYPE_OPERATOR_COMMA),
+};
+
+const std::map<clang::BinaryOperator::Opcode, MetricType_e> MetricVisitor::binaryOperatorToMetricMap(binaryOperatorToMetricPairs,
+	binaryOperatorToMetricPairs + sizeof binaryOperatorToMetricPairs / sizeof binaryOperatorToMetricPairs[0]);
+
 
 MetricVisitor::MetricVisitor(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, MetricOptions* p_options, TranslationUnitFunctionLocator* p_fnLocator) : 
 	                                                                                                           m_compilerInstance(p_CI), 
@@ -42,7 +82,7 @@ MetricVisitor::~MetricVisitor(void)
 std::string MetricVisitor::getDefResolvedFileName( const clang::SourceLocation &loc )
 {
 	clang::SourceManager& sm =  m_astContext->getSourceManager();
-	SourceLocation sLoc = loc;
+	clang::SourceLocation sLoc = loc;
 
 	if( sLoc.isMacroID() )
 	{
@@ -87,47 +127,50 @@ MetricVisitor::PathResults MetricVisitor::getSwitchPathCount(const clang::Switch
 	std::string blanks(depth, ' ');
 #endif
 
-	do
+	if (switchCase)
 	{
-		const clang::Stmt* subStmt = switchCase->getSubStmt();
+		do
+		{
+			const clang::Stmt* subStmt = switchCase->getSubStmt();
 
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-		std::cout << blanks << "getSwitchPathCount - Case is " << subStmt->getStmtClassName() << std::endl;
+			std::cout << blanks << "getSwitchPathCount - Case is " << subStmt->getStmtClassName() << std::endl;
 #endif
 
-		/* Check that it's not a fall-through */
-		if ((subStmt->getStmtClass() != Stmt::CaseStmtClass) &&
-			(subStmt->getStmtClass() != Stmt::DefaultStmtClass))
-		{
-			/* Check there actually is a substatement */
-			if (subStmt != nullptr)
+			/* Check that it's not a fall-through */
+			if ((subStmt->getStmtClass() != clang::Stmt::CaseStmtClass) &&
+				(subStmt->getStmtClass() != clang::Stmt::DefaultStmtClass))
 			{
-				PathResults sub_count = getPathCount(subStmt, depth);
-				pathSum.path_count += sub_count.path_count;
-				pathSum.path_has_return = pathSum.path_has_return && sub_count.path_has_return;
+				/* Check there actually is a substatement */
+				if (subStmt != nullptr)
+				{
+					PathResults sub_count = getPathCount(subStmt, depth);
+					pathSum.path_count += sub_count.path_count;
+					pathSum.path_has_return = pathSum.path_has_return && sub_count.path_has_return;
+				}
 			}
-		}
-		else
-		{
+			else
+			{
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-			std::cout << blanks << "getSwitchPathCount - Fallthrough" << std::endl;
+				std::cout << blanks << "getSwitchPathCount - Fallthrough" << std::endl;
 #endif
-		}
+			}
 
-		/* This case a 'default' statement? */
-		if (switchCase->getStmtClass() == clang::Stmt::DefaultStmtClass)
-		{
-			hasDefault = true;
-		}
+			/* This case a 'default' statement? */
+			if (switchCase->getStmtClass() == clang::Stmt::DefaultStmtClass)
+			{
+				hasDefault = true;
+			}
 
-		switchCase = switchCase->getNextSwitchCase();
+			switchCase = switchCase->getNextSwitchCase();
 
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-		std::cout << blanks << "getSwitchPathCount - Updated: count - " << pathSum.path_count << " return - " << pathSum.path_has_return << std::endl;
+			std::cout << blanks << "getSwitchPathCount - Updated: count - " << pathSum.path_count << " return - " << pathSum.path_has_return << std::endl;
 #endif
 
-	} while (switchCase != nullptr);
-	
+		} while (switchCase != nullptr);
+	}
+
 	/* If there wasn't an explicit default in the set of cases, add an implicit one */
 	if (!hasDefault)
 	{
@@ -141,7 +184,7 @@ MetricVisitor::PathResults MetricVisitor::getSwitchPathCount(const clang::Switch
 #if defined( DEBUG_FN_TRACE_OUTOUT )
 	std::cout << blanks << "getSwitchPathCount - Done: count - " << pathSum.path_count << " return - " << pathSum.path_has_return << std::endl;
 #endif
-
+	
 	return pathSum;
 }
 
@@ -177,7 +220,7 @@ MetricVisitor::PathResults MetricVisitor::getIfPathCount(const clang::IfStmt* co
 			if (ifStmt->getElse()->getStmtClass() == clang::Stmt::IfStmtClass)
 			{
 				/* Process the contents of the 'else if' next time round the while */
-				ifStmt = static_cast<const IfStmt*>(ifStmt->getElse());
+				ifStmt = static_cast<const clang::IfStmt*>(ifStmt->getElse());
 				/* No need to count an implicit else */
 				elseCount.path_count = 0;
 			}
@@ -224,21 +267,21 @@ MetricVisitor::PathResults MetricVisitor::getPathCount(const clang::Stmt* const 
 		switch (p_stmt->getStmtClass())
 		{
 			case clang::Stmt::StmtClass::IfStmtClass:
-				ret_val = getIfPathCount(static_cast<const IfStmt*>(p_stmt), thisDepth);
+				ret_val = getIfPathCount(static_cast<const clang::IfStmt*>(p_stmt), thisDepth);
 				break;
 			case clang::Stmt::StmtClass::SwitchStmtClass:
-				ret_val = getSwitchPathCount(static_cast<const SwitchStmt*>(p_stmt), thisDepth);
+				ret_val = getSwitchPathCount(static_cast<const clang::SwitchStmt*>(p_stmt), thisDepth);
 				break;
 			case clang::Stmt::StmtClass::WhileStmtClass:
-				ret_val = getPathCount((static_cast<const WhileStmt*>(p_stmt)->getBody()), thisDepth);
+				ret_val = getPathCount((static_cast<const clang::WhileStmt*>(p_stmt)->getBody()), thisDepth);
 				ret_val.path_count += 1;
 				break;
 			case clang::Stmt::StmtClass::ForStmtClass:
-				ret_val = getPathCount((static_cast<const ForStmt*>(p_stmt)->getBody()), thisDepth);
+				ret_val = getPathCount((static_cast<const clang::ForStmt*>(p_stmt)->getBody()), thisDepth);
 				ret_val.path_count += 1;
 				break;
 			case clang::Stmt::StmtClass::DoStmtClass:
-				ret_val = getPathCount((static_cast<const DoStmt*>(p_stmt)->getBody()), thisDepth);
+				ret_val = getPathCount((static_cast<const clang::DoStmt*>(p_stmt)->getBody()), thisDepth);
 				ret_val.path_count += 1;
 				break;
 			default:
@@ -319,12 +362,12 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 #endif
 
 	/* Deal with common actions which may be applicable to a decl valid at translation-unit level */
-	DeclCommon( func->getLexicalParent(), func );
+	DeclCommon(func->getLexicalParent(), func);
 
 	/* Function body attached? */
 	if( func->doesThisDeclarationHaveABody() )
 	{		
-		SourceLocation funcLoc = func->getLocation();
+		clang::SourceLocation funcLoc = func->getLocation();
 
 		UpdateCurrentFileName( funcLoc );
 		
@@ -357,7 +400,7 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 			/* Obtain the buffer for the function body, then count the lines */ 
 			const char * start = m_astContext->getSourceManager().getCharacterData( func->getBody()->getLocStart() );
 			const char * end = m_astContext->getSourceManager().getCharacterData( func->getBody()->getLocEnd() );
-			StringRef buffer( start, end-start );
+			clang::StringRef buffer(start, end - start);
 			m_currentUnit->set( METRIC_TYPE_FUNCTION_LINE_COUNT, countNewlines( buffer ) );
 
 			if( func->isInlineSpecified() )
@@ -397,8 +440,6 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 	}
 	else
 	{
-		/* No body to this function */
-
 		if( m_currentUnit )
 		{
 			switch( func->getStorageClass() )
@@ -421,29 +462,21 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 
 #undef DEBUG_FN_TRACE_OUTOUT
 
+bool MetricVisitor::VisitEnumDecl(clang::EnumDecl* p_enumDecl)
+{
+	return true;
+}
 
+bool MetricVisitor::VisitRecordDecl(clang::RecordDecl* p_recordDecl)
+{
+	return true;
+}
 
-bool MetricVisitor::VisitTypedefDecl( clang::TypedefDecl* p_typeDef )
+bool MetricVisitor::VisitTypedefNameDecl(const clang::TypedefNameDecl *p_typeDef)
 {
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-	std::cout << "VisitTypedefDecl - CONTEXT " << m_currentFileName << "::" << m_currentFunctionName << std::endl;
+	std::cout << "VisitTypedefNameDecl - CONTEXT " << m_currentFileName << "::" << m_currentFunctionName << std::endl;
 #endif
-
-	/* Deal with common actions which may be applicable to a decl valid at translation-unit level */
-	DeclCommon( p_typeDef->getLexicalDeclContext(), p_typeDef );
-
-	if( m_currentUnit )
-	{
-		/* Is it a "top level" decl? */
-		if( p_typeDef->isDefinedOutsideFunctionOrMethod() )
-		{
-			IncrementMetric( m_currentUnit, METRIC_TYPE_TYPEDEF_FILE );
-		}
-		else
-		{
-			IncrementMetric( m_currentUnit, METRIC_TYPE_TYPEDEF_FN );
-		}
-	}
 
 	return true;
 }
@@ -462,22 +495,22 @@ void MetricVisitor::CloseOutFnOrMtd( void )
 	}
 }
 
-void MetricVisitor::DeclCommon( const clang::DeclContext* p_declCtxt, const clang::Decl* p_decl )
+void MetricVisitor::DeclCommon(const clang::DeclContext* p_declCtxt, const clang::Decl* p_decl)
 {
-#if defined( DEBUG_FN_TRACE_OUTOUT )
+#if defined(DEBUG_FN_TRACE_OUTOUT)
 	std::cout << "DeclCommon - CONTEXT " << m_currentFileName << "::" << m_currentFunctionName << std::endl;
 #endif
 
 	// Check to see if the decl is top-level - may need to update m_currentUnit after exiting a function.
-	if( p_declCtxt->getDeclKind() == clang::Decl::TranslationUnit )
+	if (p_declCtxt->getDeclKind() == clang::Decl::TranslationUnit)
 	{
 		CloseOutFnOrMtd();
 
-		HandleLoc( p_decl->getLocation() );
+		HandleLoc(p_decl->getLocation());
 	}
 }
 
-void MetricVisitor::HandleLoc( SourceLocation& p_loc )
+void MetricVisitor::HandleLoc( const clang::SourceLocation& p_loc)
 {
 	m_currentFunctionName = "";
 	UpdateCurrentFileName( p_loc );
@@ -492,6 +525,10 @@ void MetricVisitor::HandleLoc( SourceLocation& p_loc )
 	}
 }
 
+bool MetricVisitor::VisitCastExpr(clang::CastExpr *p_castExp)
+{
+	return true;
+}
 
 bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 
@@ -501,67 +538,103 @@ bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 #endif
 
 	/* Deal with common actions which may be applicable to a decl valid at translation-unit level */
-	DeclCommon( p_varDec->getLexicalDeclContext(), p_varDec );
+	DeclCommon(p_varDec->getLexicalDeclContext(), p_varDec);
 
 	if( m_currentUnit )
 	{
-		/* Check it's not something like a function parameter */
-		if( p_varDec->getKind() == clang::Decl::Var )
+		MetricUnit* owner = m_currentUnit;
+
+		/* Interested in the absolute qualifiers associated with the variable */
+		const bool isVolatile = p_varDec->getType().isVolatileQualified();
+		const bool isConst = p_varDec->getType().isConstQualified();
+
+		/* Is this a function parameter which should be attributed to file scope? */
+		if (m_options->getPrototypesAreFileScope() &&
+			(p_varDec->getKind() == clang::Decl::ParmVar))
 		{
+			owner = m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE);
+		}
+
+		/* Check it's not a function parameter */
+		if (p_varDec->getKind() == clang::Decl::Var)
+		{
+			// TODO: This is the declared storage class rather than the computed storage class.  There may be a difference - which version should the metrics reflect?
 			clang::StorageClass sc = p_varDec->getStorageClass();
 
 			/* Check to see if this variable is file scope */
-			if( p_varDec->isFileVarDecl() )
+			if (p_varDec->isFileVarDecl())
 			{
 #if defined( DEBUG_FN_TRACE_OUTOUT )
 				std::cout << "VisitVarDecl : Processing file-scope var " << p_varDec->getNameAsString() << std::endl;
 #endif
-				if ( sc == clang::SC_Extern )
+				if (sc == clang::SC_Extern)
 				{
-					IncrementMetric( m_currentUnit, METRIC_TYPE_VARIABLE_FILE_EXTERN );
+					IncrementMetric(m_currentUnit, METRIC_TYPE_VARIABLE_FILE_EXTERN);
 				}
 				else
 				{
-					IncrementMetric( m_currentUnit, METRIC_TYPE_VARIABLE_FILE_LOCAL );
-					switch( sc )
+					IncrementMetric(m_currentUnit, METRIC_TYPE_VARIABLE_FILE_LOCAL);
+					if (isVolatile)
 					{
-						case clang::SC_Static:
-							IncrementMetric( m_currentUnit, METRIC_TYPE_VARIABLE_FILE_STATIC );
-							break;
-						default:
-							/* Not currently interested */
-							break;
+						IncrementMetric(m_currentUnit, METRIC_TYPE_VARIABLE_FILE_VOLATILE);
+					}
+					if (isConst)
+					{
+						IncrementMetric(m_currentUnit, METRIC_TYPE_VARIABLE_FILE_CONST);
+					}
+					switch (sc)
+					{
+					case clang::SC_Static:
+						IncrementMetric(m_currentUnit, METRIC_TYPE_VARIABLE_FILE_STATIC);
+						break;
+					default:
+						/* Not currently interested */
+						break;
 					}
 				}
 			}
 			else
 			{
-				if ( sc == clang::SC_Extern )
+				if (sc == clang::SC_Extern)
 				{
-					IncrementMetric( m_currentUnit, METRIC_TYPE_VARIABLE_FN_EXTERN );
+					IncrementMetric(m_currentUnit, METRIC_TYPE_VARIABLE_FN_EXTERN);
 				}
 				else
 				{
-					IncrementMetric( m_currentUnit, METRIC_TYPE_VARIABLE_FN_LOCAL );
-					switch( sc )
+					IncrementMetric(m_currentUnit, METRIC_TYPE_VARIABLE_FN_LOCAL);
+					if (isVolatile)
 					{
-						case clang::SC_Static:
-							IncrementMetric( m_currentUnit, METRIC_TYPE_VARIABLE_FN_STATIC );
-							break;
-						case clang::SC_Register:
-							IncrementMetric( m_currentUnit, METRIC_TYPE_VARIABLE_FN_REGISTER );
-							break;
-						case clang::SC_Auto:
-							IncrementMetric( m_currentUnit, METRIC_TYPE_VARIABLE_FN_AUTO );
-							break;
-						default:
-							/* Not currently of interest */
-							break;
+						IncrementMetric(m_currentUnit, METRIC_TYPE_VARIABLE_FN_VOLATILE);
+					}
+					if (isConst)
+					{
+						IncrementMetric(m_currentUnit, METRIC_TYPE_VARIABLE_FN_CONST);
+					}
+					switch (sc)
+					{
+					case clang::SC_Static:
+						IncrementMetric(m_currentUnit, METRIC_TYPE_VARIABLE_FN_STATIC);
+						break;
+					case clang::SC_Register:
+						IncrementMetric(m_currentUnit, METRIC_TYPE_VARIABLE_FN_REGISTER);
+						break;
+					case clang::SC_Auto:
+						IncrementMetric(m_currentUnit, METRIC_TYPE_VARIABLE_FN_AUTO);
+						break;
+					default:
+						/* Not currently of interest */
+						break;
 					}
 				}
 			}
-		} 
-		else if( p_varDec->getKind() == clang::Decl::ParmVar )
+
+			/* If the decl has an initialiser then it's a statement */
+			if (p_varDec->getAnyInitializer() != NULL)
+			{
+				IncrementMetric(m_currentUnit, METRIC_TYPE_STATEMENTS);
+			}
+
+		} else if (p_varDec->getKind() == clang::Decl::ParmVar)
 		{
 			IncrementMetric( m_currentUnit, METRIC_TYPE_FUNCTION_PARAMETERS );
 		}
@@ -571,6 +644,16 @@ bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 	}
 
 	return true;	
+}
+
+bool MetricVisitor::VisitCompoundStmt(clang::CompoundStmt *p_compoundSt)
+{
+	if (m_currentUnit)
+	{
+		CountStatements(p_compoundSt->children());
+	}
+
+	return true;
 }
 
 // TODO: Lots of repetition here - template it?
@@ -584,7 +667,8 @@ bool MetricVisitor::VisitForStmt(clang::ForStmt *p_forSt)
 	{
 		m_currentUnit->setMax( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_forSt, m_astContext ));
 		IncrementMetric(m_currentUnit, METRIC_TYPE_LOOPS);
-		IncrementMetric( m_currentUnit, METRIC_TYPE_FORLOOP );
+
+		CountStatements(p_forSt->getBody());
 	}
     return true;
 }
@@ -593,7 +677,6 @@ bool MetricVisitor::VisitGotoStmt(clang::GotoStmt *p_gotoSt)
 {
 	if( m_currentUnit )
 	{
-		IncrementMetric( m_currentUnit, METRIC_TYPE_GOTO );
 	}
 
     return true;
@@ -617,7 +700,8 @@ bool MetricVisitor::VisitWhileStmt(clang::WhileStmt *p_whileSt)
 	{
 		m_currentUnit->setMax( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_whileSt, m_astContext ));
 		IncrementMetric( m_currentUnit, METRIC_TYPE_LOOPS );
-		IncrementMetric( m_currentUnit, METRIC_TYPE_WHILELOOP );
+
+		CountStatements(p_whileSt->getBody());
 	}
     return true;
 }
@@ -631,7 +715,8 @@ bool MetricVisitor::VisitDoStmt(clang::DoStmt *p_doSt)
 	{
 		m_currentUnit->setMax(METRIC_TYPE_NESTING_LEVEL, getControlDepth(p_doSt, m_astContext));
 		IncrementMetric(m_currentUnit, METRIC_TYPE_LOOPS);
-// TODO		IncrementMetric(m_currentUnit, METRIC_TYPE_WHILELOOP);
+
+		CountStatements(p_doSt->getBody());
 	}
 	return true;
 }
@@ -640,7 +725,6 @@ bool MetricVisitor::VisitReturnStmt(clang::ReturnStmt *p_returnSt)
 {
 	if( m_currentUnit )
 	{
-		IncrementMetric( m_currentUnit, METRIC_TYPE_RETURN );
 		IncrementMetric( m_currentUnit, METRIC_TYPE_RETURNPOINTS );
 	}
     return true;
@@ -680,13 +764,13 @@ bool MetricVisitor::VisitCallExpr(clang::CallExpr *p_callExpr)
 #endif
 
 					/* This look-up will only find functions where the body is visible from to the current TU */
-					Stmt* calleeBody = p_callExpr->getDirectCallee()->getBody();
+					clang::Stmt* calleeBody = p_callExpr->getDirectCallee()->getBody();
 
 					if (calleeBody)
 					{
 						/* Called function is visible from the current position */
 
-						SourceLocation calleeBodyLocation = calleeBody->getLocStart();
+						clang::SourceLocation calleeBodyLocation = calleeBody->getLocStart();
 						std::string name = getDefResolvedFileName(calleeBodyLocation);
 
 #if defined( DEBUG_FN_TRACE_OUTOUT )
@@ -764,8 +848,9 @@ bool MetricVisitor::VisitSwitchStmt(clang::SwitchStmt *p_switchSt)
 	if( m_currentUnit )
 	{
 		m_currentUnit->setMax( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_switchSt, m_astContext ));
-		IncrementMetric(m_currentUnit, METRIC_TYPE_SWITCH);
 		IncrementMetric( m_currentUnit, METRIC_TYPE_DECISIONS );
+
+		CountStatements(p_switchSt->getBody());
 	}
     return true;
 }
@@ -782,11 +867,19 @@ bool MetricVisitor::VisitConditionalOperator(clang::ConditionalOperator *p_condO
     return true;
 }
 
+bool MetricVisitor::VisitContinueStmt(clang::ContinueStmt *p_continueSt)
+{
+	if (m_currentUnit)
+	{
+	}
+	return true;
+}
+
 bool MetricVisitor::VisitDefaultStmt(clang::DefaultStmt *p_defaultSt) 
 {
 	if( m_currentUnit )
 	{
-		IncrementMetric( m_currentUnit, METRIC_TYPE_DEFAULT );
+		CountStatements(p_defaultSt->getSubStmt());
 	}
     return true;
 }
@@ -795,7 +888,7 @@ bool MetricVisitor::VisitCaseStmt(clang::CaseStmt *p_caseSt)
 {
 	if( m_currentUnit )
 	{
-		IncrementMetric( m_currentUnit, METRIC_TYPE_CASE );
+		CountStatements(p_caseSt->getSubStmt());
 	}
     return true;
 }
@@ -919,109 +1012,16 @@ bool MetricVisitor::VisitBinaryOperator(clang::BinaryOperator *p_binOp)
 {
 	if( m_currentUnit )
 	{
-		switch( p_binOp->getOpcode() )
+		std::map<clang::BinaryOperator::Opcode, MetricType_e>::const_iterator it = binaryOperatorToMetricMap.find(p_binOp->getOpcode());
+		if (it != binaryOperatorToMetricMap.end())
 		{
-			case clang::BO_PtrMemD:
-				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_PTR_TO_MEMBER_DIRECT );
-				break;
-			case clang::BO_PtrMemI:	
-				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_PTR_TO_MEMBER_INDIRECT );
-				break;
-			case clang::BO_Mul:
-				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ARITHMETIC_MULTIPLICATION );
-				break;
-			case clang::BO_Div:	
-				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ARITHMETIC_DIVISION );
-				break;
-			case clang::BO_Rem: 	
-				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ARITHMETIC_MODULO );
-				break;
-			case clang::BO_Add: 	
-				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ARITHMETIC_ADDITION );
-				break;
-			case clang::BO_Sub: 	
-				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ARITHMETIC_SUBTRACTION );
-				break;
-			case clang::BO_Shl:	
-				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_SHIFT_LEFT );
-				break;
-			case clang::BO_Shr: 	
-				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_SHIFT_RIGHT );
-				break;
-			case clang::BO_LT: 	
-				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_COMP_LESS_THAN );
-				break;
-			case clang::BO_GT: 	
-				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_COMP_GREATER_THAN );
-				break;
-			case clang::BO_LE: 	
-				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_COMP_LESS_THAN_EQUAL );
-				break;
-			case clang::BO_GE: 	
-				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_COMP_GREATER_THAN_EQUAL );
-				break;
-			case clang::BO_EQ: 	
-				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_COMP_EQUAL );
-				break;
-			case clang::BO_NE: 	
-				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_COMP_NOT_EQUAL );
-				break;
-			case clang::BO_And: 	
-				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_BITWISE_AND );
-				break;
-			case clang::BO_Xor: 	
-				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_BITWISE_XOR );
-				break;
-			case clang::BO_Or: 	
-				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_BITWISE_OR );
-				break;
-			case clang::BO_LAnd:
-				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_LOGICAL_AND );
-				break;
-			case clang::BO_LOr:
-				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_LOGICAL_OR );
-				break;
-			case clang::BO_Assign:
-				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ARITHMETIC_ASSIGN );
-				break;
-			case clang::BO_MulAssign:
-				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ARITHMETIC_MULTIPLICATION_ASSIGN );
-				break;
-			case clang::BO_DivAssign:	
-				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ARITHMETIC_DIVISION_ASSIGN );
-				break;
-			case clang::BO_RemAssign: 	
-				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ARITHMETIC_MODULO_ASSIGN );
-				break;
-			case clang::BO_AddAssign: 	
-				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ARITHMETIC_ADDITION_ASSIGN );
-				break;
-			case clang::BO_SubAssign: 	
-				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ARITHMETIC_SUBTRACTION_ASSIGN );
-				break;
-			case clang::BO_ShlAssign: 	
-				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_SHIFT_LEFT_ASSIGN );
-				break;
-			case clang::BO_ShrAssign: 	
-				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_SHIFT_RIGHT_ASSIGN );
-				break;
-			case clang::BO_AndAssign:	
-				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_BITWISE_AND_ASSIGN );
-				break;
-			case clang::BO_XorAssign: 	
-				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_BITWISE_XOR_ASSIGN );
-				break;
-			case clang::BO_OrAssign: 	
-				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_BITWISE_OR_ASSIGN );
-				break;
-			case clang::BO_Comma:
-				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_COMMA );
-				break;
-			default:
+			IncrementMetric(m_currentUnit, it->second);
+		}
+		else
+		{
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-				std::cout << "VisitBinaryOperator - Unhandled operator" << std::endl;
+			std::cout << "VisitBinaryOperator - Unhandled operator" << std::endl;
 #endif
-				break;
 		}
 	}
     return true;
@@ -1030,13 +1030,37 @@ bool MetricVisitor::VisitBinaryOperator(clang::BinaryOperator *p_binOp)
 
 bool MetricVisitor::VisitStmt(clang::Stmt *p_statement) 
 {
-	if( m_currentUnit )
+	if (m_currentUnit)
 	{
-		IncrementMetric( m_currentUnit, METRIC_TYPE_STATEMENTS );
+		switch (p_statement->getStmtClass())
+		{
+		case clang::Stmt::WhileStmtClass:
+			default:
+				break;
+		}
+
+		/* All of these statement classes count towards the METRIC_TYPE_STATEMENTS metric */
+		switch (p_statement->getStmtClass())
+		{
+			case clang::Stmt::WhileStmtClass:
+			case clang::Stmt::DoStmtClass:
+			case clang::Stmt::ForStmtClass:
+			case clang::Stmt::IfStmtClass:
+			case clang::Stmt::SwitchStmtClass:
+			case clang::Stmt::CaseStmtClass:
+			case clang::Stmt::DefaultStmtClass:
+			case clang::Stmt::GotoStmtClass:
+			case clang::Stmt::ContinueStmtClass:
+			case clang::Stmt::BreakStmtClass:
+			case clang::Stmt::ReturnStmtClass:
+				IncrementMetric(m_currentUnit, METRIC_TYPE_STATEMENTS);
+				break;
+			default:
+				break;
+		}
 	}
 	return true;
 }
-
 
 bool MetricVisitor::VisitIfStmt(clang::IfStmt *p_ifSt) 
 {
@@ -1050,13 +1074,13 @@ bool MetricVisitor::VisitIfStmt(clang::IfStmt *p_ifSt)
 	std::cout << "VisitIfStmt - Recorded" << std::endl;
 #endif
 		m_currentUnit->setMax( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_ifSt, m_astContext ));
-		IncrementMetric(m_currentUnit, METRIC_TYPE_IF);
 		IncrementMetric( m_currentUnit, METRIC_TYPE_DECISIONS );
+
+		CountStatements(p_ifSt->getThen());
 
 		if( p_ifSt->getElse() )
 		{
-			// TODO: This means that "else if" statements get counted as both an IF and an ELSE, which may not be what everyone wants
-			IncrementMetric( m_currentUnit, METRIC_TYPE_ELSE );
+			CountStatements(p_ifSt->getElse());
 		}
 	} else {
 		/* TODO */
@@ -1153,6 +1177,10 @@ bool MetricVisitor::TraverseDecl(clang::Decl *p_decl)
 				fileUnit->set( METRIC_TYPE_BYTE_COUNT, (*x).first->getSize() );
 			}
 		}
+		if (m_options->getDumpAST())
+		{
+			p_decl->dump();
+		}
 	}
 	
 	bool retVal = clang::RecursiveASTVisitor<MetricVisitor>::TraverseDecl( p_decl );
@@ -1163,6 +1191,54 @@ bool MetricVisitor::TraverseDecl(clang::Decl *p_decl)
 	}
 
 	return retVal;
+}
+
+void MetricVisitor::CountStatements(const clang::Stmt* const p_stmt)
+{
+	if (p_stmt != NULL)
+	{
+		switch (p_stmt->getStmtClass())
+		{
+			case clang::Stmt::NullStmtClass:
+			case clang::Stmt::DeclStmtClass:
+				/* These certainly don't count as statements */
+				break;
+			case clang::Stmt::CompoundStmtClass:
+			case clang::Stmt::LabelStmtClass:
+				/* These aren't usefully counted as statements */
+				break;
+			case clang::Stmt::WhileStmtClass:
+			case clang::Stmt::DoStmtClass:
+			case clang::Stmt::ForStmtClass:
+			case clang::Stmt::IfStmtClass:
+			case clang::Stmt::SwitchStmtClass:
+			case clang::Stmt::CaseStmtClass:
+			case clang::Stmt::DefaultStmtClass:
+			case clang::Stmt::GotoStmtClass:
+			case clang::Stmt::ContinueStmtClass:
+			case clang::Stmt::BreakStmtClass:
+			case clang::Stmt::ReturnStmtClass:
+				/* These are handled in VisitStmt() */
+				break;
+
+			default:
+				IncrementMetric(m_currentUnit, METRIC_TYPE_STATEMENTS);
+				break;
+		}
+	}
+}
+
+void MetricVisitor::CountStatements(const clang::Stmt::const_child_range& p_children)
+{
+	for (clang::Stmt::const_child_iterator cit = begin(p_children);
+		cit != end(p_children);
+		cit++)
+	{
+		if (*cit != NULL)
+		{
+			CountStatements(*cit);
+		}
+	}
 }
 
 void MetricVisitor::IncrementMetric( MetricUnit* const p_unit, const MetricType_e p_metricType )
@@ -1186,14 +1262,21 @@ void MetricVisitor::IncrementMetric( MetricUnit* const p_unit, const MetricType_
 		else
 		{
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-			std::cout << "Not incrementing metric " << MetricUnit::getMetricName( p_metricType ) << std::endl;
+			std::cout << "File has been processed - not incrementing metric " << MetricUnit::getMetricName( p_metricType ) << std::endl;
 #endif
 		}
+	}
+	else
+	{
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+		std::cout << "File not specified - not incrementing metric " << MetricUnit::getMetricName(p_metricType) << std::endl;
+#endif
 	}
 }
 
 bool MetricVisitor::ShouldIncludeFile( const std::string& p_file )
 {
+	// TODO: Ensure this function is sane with regard to different directory separator styles - \ vs /
 	bool ret_val = false;
 	if( SHOULD_INCLUDE_FILE( m_options, p_file ) )
 	{

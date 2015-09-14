@@ -1,8 +1,0 @@
-Global
-Sizeof operators: 3
-File: src\oper_sizeof.c
-	Sizeof operators: 3
-	Function: main
-		Sizeof operators: 3
- clang\3.7.0\include\stdint.h
-	Sizeof operators: 0

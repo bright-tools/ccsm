@@ -23,6 +23,8 @@
 #if !defined( FUNCTION_LOCATOR_HPP )
 #define       FUNCTION_LOCATOR_HPP
 
+#include "MetricOptions.hpp"
+
 #include "clang/Basic/SourceLocation.h"
 
 #include "clang/AST/ASTContext.h"
@@ -40,9 +42,11 @@ private:
 	typedef std::map< unsigned, StartEndPair_t>					 SrcStartToFunctionMap_t;
 
 	SrcStartToFunctionMap_t m_map;
+	MetricOptions& m_options;
 public:
+	TranslationUnitFunctionLocator(MetricOptions& p_options);
 	void addFunctionLocation( const clang::ASTContext* const p_context, const std::string& p_name, const clang::FunctionDecl * const p_func );
-	std::string FindFunction( const clang::SourceManager& p_SourceManager, clang::SourceLocation& p_loc, clang::SourceLocation* p_end = NULL ) const;
+	std::string FindFunction(const clang::SourceManager& p_SourceManager, clang::SourceLocation& p_loc, clang::SourceLocation* p_end = NULL) const;
 
 	void dump( std::ostream& p_out ) const;
 };
@@ -50,12 +54,14 @@ public:
 class GlobalFunctionLocator
 {
 	private:
-		typedef std::map< std::string, TranslationUnitFunctionLocator >     MainSrcToFnLocMap_t;
+		typedef std::map< std::string, TranslationUnitFunctionLocator* >     MainSrcToFnLocMap_t;
 
 		MainSrcToFnLocMap_t m_map;
+		MetricOptions& m_options;
 
 	public:
-        TranslationUnitFunctionLocator* getLocatorFor( const std::string p_fileName );
+		GlobalFunctionLocator(MetricOptions& p_options);
+		TranslationUnitFunctionLocator* getLocatorFor(const std::string p_fileName);
 		virtual ~GlobalFunctionLocator();
 		void dump( std::ostream& p_out ) const;
 };

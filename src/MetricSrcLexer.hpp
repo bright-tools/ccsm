@@ -34,55 +34,21 @@
 class MetricSrcLexer
 {
 	protected:
-		typedef enum {
-			SCC_Define,
-			SCC_For,
-			SCC_Struct,
-			SCC_Union,
-			SCC_MAX
-		} SemiConlonContainers_e;
-
-		static const SemiConlonContainers_e m_sccStartLineEnding;
-		static const SemiConlonContainers_e m_sccEndLineEnding;
-
-		static const SemiConlonContainers_e m_sccStartParen;
-		static const SemiConlonContainers_e m_sccEndParen;
-
-		static const SemiConlonContainers_e m_sccStartBrace;
-		static const SemiConlonContainers_e m_sccEndBrace;
-
-		clang::tok::TokenKind   m_lastToken;
 		clang::CompilerInstance &m_compilerInstance;
 		MetricUnit*		        m_topUnit;
 		MetricOptions*          m_options;
 		MetricUnit*             m_currentUnit;
-		std::string             m_currentFileName;
-		std::set<std::string>   m_currentFnNumerics;
-		std::set<std::string>   m_currentFnStrings;
-		std::set<std::string>   m_currentFnCharConsts;
-		std::set<std::string>   m_currentFnIdentifiers;
-
-		std::set<std::string>   m_currentFileNumerics;
-		std::set<std::string>   m_currentFileStrings;
-		std::set<std::string>   m_currentFileCharConsts;
-		std::set<std::string>   m_currentFileIdentifiers;
-
 		std::string             m_currentFunctionName;
-		uint32_t				m_semiContainerDepth[ SCC_MAX ];
-		bool				    m_semiContainerOpen[ SCC_MAX ];
+		std::string             m_currentFileName;
 
-		static const std::map<clang::tok::TokenKind,MetricType_e> m_tokenKindToTypeMap;
-
-		void CountToken( clang::Token& p_token );
-		void CloseOutFnOrMtd( void );
-		void HandleBasicToken( clang::Token& p_token );
-		void HandleSemiToken( clang::Token& p_token );
+		virtual void                       ProcessToken(clang::Token& p_token) = 0;
+		virtual MetricUnitProcessingType_e getLexType( void ) const = 0;
 
 	public:
 		MetricSrcLexer(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, MetricOptions* p_options = NULL);
 	    virtual ~MetricSrcLexer(void);
 
-		void LexSources( clang::CompilerInstance& p_ci, const TranslationUnitFunctionLocator* const p_fnLocator );
+		virtual void LexSources( clang::CompilerInstance& p_ci, const TranslationUnitFunctionLocator* const p_fnLocator );
 };
 
 #endif     // !defined( METRIC_SRC_LEXER_HPP )

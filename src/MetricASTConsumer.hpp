@@ -34,7 +34,6 @@
 #include "FunctionLocator.hpp"
 #include "MetricOptions.hpp"
 #include "MetricMatcher.hpp"
-#include "MetricSrcLexer.hpp"
 
 class MetricASTConsumer : public clang::ASTConsumer
 {
@@ -57,9 +56,10 @@ protected:
 	MetricOptions            *m_options;
 	MetricUnit               *m_topUnit;
 	GlobalFunctionLocator    *m_fnLocator;
+	bool                      m_expanded;
 
 public:
-	explicit MetricPPConsumer(MetricUnit* p_topUnit, MetricOptions* p_options = NULL, GlobalFunctionLocator*  m_fnLocator = NULL);
+	explicit MetricPPConsumer(MetricUnit* p_topUnit, MetricOptions* p_options = NULL, GlobalFunctionLocator*  m_fnLocator = NULL, const bool p_expanded = true);
 
 	virtual ~MetricPPConsumer(void);
 	virtual void ExecuteAction();

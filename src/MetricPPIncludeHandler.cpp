@@ -16,7 +16,7 @@
 
 #include "MetricPPIncludeHandler.hpp"
 
-MetricPPIncludeHandler::MetricPPIncludeHandler( MetricOptions* p_options, std::string& p_currentFile ) : clang::PPCallbacks(), m_currentFile( p_currentFile ), m_options( p_options )
+MetricPPIncludeHandler::MetricPPIncludeHandler(MetricOptions* p_options, clang::SourceManager& p_SM, std::string& p_currentFile) : clang::PPCallbacks(), m_options(p_options), m_currentFile(p_currentFile), m_SM(p_SM)
 {
 }
 
@@ -24,6 +24,19 @@ MetricPPIncludeHandler::~MetricPPIncludeHandler( void )
 {
 }
 
+void MetricPPIncludeHandler::FileChanged(clang::SourceLocation Loc, FileChangeReason Reason,
+	                            clang::SrcMgr::CharacteristicKind FileType,
+	                            clang::FileID PrevFID) 
+{
+	std::string fileName = m_SM.getFilename(Loc).str();
+
+	if (!m_options->isDefFile(fileName))
+	{
+		m_currentFile = fileName;
+	}
+}
+
+#if 0
 void MetricPPIncludeHandler::InclusionDirective(clang::SourceLocation HashLoc, const clang::Token &IncludeTok, clang::StringRef FileName, bool IsAngled, clang::CharSourceRange FilenameRange, const clang::FileEntry *File, clang::StringRef SearchPath, clang::StringRef RelativePath, const clang::Module *Imported)
 {
 	if( !m_options->isDefFile( FileName ))
@@ -31,3 +44,4 @@ void MetricPPIncludeHandler::InclusionDirective(clang::SourceLocation HashLoc, c
 		m_currentFile = File->getName();
 	}
 }
+#endif

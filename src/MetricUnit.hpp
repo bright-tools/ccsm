@@ -53,7 +53,8 @@ typedef enum
 
 typedef enum {
 	METRIC_UNIT_PROCESS_AST,
-	METRIC_UNIT_PROCESS_LEX,
+	METRIC_UNIT_PROCESS_LEX_UNEXPANDED,
+	METRIC_UNIT_PROCESS_LEX_EXPANDED,
 	METRIC_UNIT_PROCESS_MAX
 } MetricUnitProcessingType_e;
 
@@ -64,9 +65,13 @@ typedef enum {
 
 class MetricUnit
 {
+public:
+	typedef std::map<std::string, MetricUnit*> SubUnitMap_t;
+
+	/* See also counter_t_Max */
+	typedef uint32_t counter_t;
+
 private:
-	static const std::string m_dumpPrefix[ METRIC_UNIT_MAX ];
-	static const std::string m_namePrefix[ METRIC_UNIT_MAX ];
 	static const std::string m_metricNames[ METRIC_TYPE_MAX ];
 	static const std::string m_metricShortNames[ METRIC_TYPE_MAX ];
 	static const bool        m_metricIsCumulative[ METRIC_TYPE_MAX ];
@@ -75,7 +80,6 @@ private:
 	static const bool        m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ];
 	static const bool        m_metricMultipass[ METRIC_TYPE_MAX ];
 protected:
-	typedef std::map<std::string, MetricUnit*> SubUnitMap_t;
 	std::string m_name;
 	MetricUnitType_e m_type;
 	SubUnitMap_t m_subUnits;
@@ -85,16 +89,19 @@ protected:
 	/* for METRIC_UNIT_FUNCTION types, a list of fuction calls where the target function body was not visible when the
 	   function hosting the call was processed */
 	std::set<std::string> m_unresolvedFnCalls;
+	counter_t m_counters[METRIC_TYPE_MAX];
 
 public:
 	typedef std::map<std::string, MetricUnit*> FunctionMap_t;
 
-	/* See also counter_t_Max */
-	typedef uint32_t counter_t;
-
 	static bool isMultiPassAllowed( const MetricType_e p_type );
+	static bool isMetricCumulative(const MetricType_e p_type);
 
 	static std::string getMetricName( const MetricType_e p_type );
+	static std::string getMetricShortName(const MetricType_e p_type);
+	static uint32_t    getMetricScaling(const MetricType_e p_type);
+	static bool        doesMetricApplyForUnit(const MetricType_e p_MetricType, const MetricUnitType_e p_unitType);
+	static bool        isMetricLocalAndCumulative(const MetricType_e p_type);
 
 	static const uint32_t counter_t_Max;
 
@@ -110,12 +117,8 @@ public:
 	bool hasExternalLinkage(void) const;
 	FunctionMap_t getAllFunctionMap(void);
 
-	/* Sets a metric to the maximum of the current value and the specified value */
+	/** Sets a metric to the maximum of the current value and the specified value */
 	void setMax(const MetricType_e p_metricType, const MetricUnit::counter_t p_val);
-
-	void dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE, const MetricOptions* const p_options = NULL ) const;
-	void dumpMetric( std::ostream& out, const MetricType_e p_metric, const MetricDumpFormat_e p_fmt, const std::string& p_sep, const bool p_recurse ) const;
-
 
 	counter_t getCounter( const MetricType_e p_metricType, const bool p_recurse = false ) const;
 
@@ -124,15 +127,15 @@ public:
 	counter_t getSubUnitCount( const MetricUnitType_e p_type ) const;
 
 	MetricUnitType_e GetType( void ) const;
+	std::string getUnitName(void) const;
+
+	const SubUnitMap_t* getSubUnits(void) const;
 
 	bool hasBeenProcessed( const MetricUnitProcessingType_e p_type ) const;
 
 	bool isFnOrMethod( void ) const;
 
 	void setProcessed( const MetricUnitProcessingType_e p_type );
-
-protected:
-	counter_t m_counters[ METRIC_TYPE_MAX ];
 };
 
 #endif

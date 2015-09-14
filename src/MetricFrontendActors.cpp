@@ -94,14 +94,15 @@ class PPFrontendActionFactory : public clang::tooling::FrontendActionFactory {
     MetricOptions*           m_options;
     MetricUnit*              m_topUnit;
     GlobalFunctionLocator*   m_srcMap;
+	bool                     m_expanded;
    public:
-     PPFrontendActionFactory( MetricOptions* p_options, MetricUnit* p_topUnit, GlobalFunctionLocator* p_srcMap )
-	      : m_options( p_options), m_topUnit( p_topUnit ), m_srcMap( p_srcMap ), clang::tooling::FrontendActionFactory()
+	   PPFrontendActionFactory(MetricOptions* p_options, MetricUnit* p_topUnit, GlobalFunctionLocator* p_srcMap, const bool p_expanded)
+	      : m_options( p_options), m_topUnit( p_topUnit ), m_srcMap( p_srcMap ), m_expanded( p_expanded ), clang::tooling::FrontendActionFactory()
 	 {
 	 }
 
 	 clang::FrontendAction *create() override { 
-		 return new MetricPPConsumer( m_topUnit, m_options, m_srcMap ); 
+		 return new MetricPPConsumer( m_topUnit, m_options, m_srcMap, m_expanded ); 
 	 }
 
 	 virtual ~PPFrontendActionFactory()
@@ -109,6 +110,6 @@ class PPFrontendActionFactory : public clang::tooling::FrontendActionFactory {
 	 }
 };
 
-clang::tooling::FrontendActionFactory* newPPMetricFrontendActionFactory( MetricOptions* p_options, MetricUnit* p_topUnit, GlobalFunctionLocator* p_srcMap  ) {
-   return new PPFrontendActionFactory( p_options, p_topUnit, p_srcMap );
+clang::tooling::FrontendActionFactory* newPPMetricFrontendActionFactory( MetricOptions* p_options, MetricUnit* p_topUnit, GlobalFunctionLocator* p_srcMap, const bool p_expanded  ) {
+   return new PPFrontendActionFactory( p_options, p_topUnit, p_srcMap, p_expanded );
 }

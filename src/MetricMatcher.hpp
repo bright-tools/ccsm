@@ -44,6 +44,12 @@ protected:
 		bool                  path_has_return;
 	} PathResults;
 
+	/** Table of pairs which match binary operators against metrics, used to initialise binaryOperatorToMetricMap */
+	const static std::pair<clang::BinaryOperator::Opcode, MetricType_e> binaryOperatorToMetricPairs[];
+
+	/** Map used to look up the metric associated with a particular binary operator */
+	const static std::map<clang::BinaryOperator::Opcode, MetricType_e> binaryOperatorToMetricMap;
+
 	clang::CompilerInstance&        m_compilerInstance;
 	clang::ASTContext*		        m_astContext;
 	MetricUnit*		                m_topUnit;
@@ -54,8 +60,8 @@ protected:
 	std::set<std::string>	        m_fnsCalled;          
 	TranslationUnitFunctionLocator* m_fnLocator;
 
-	void HandleLoc( clang::SourceLocation& p_loc );
-	void DeclCommon( const clang::DeclContext* p_declCtxt, const clang::Decl* p_decl );
+	void HandleLoc( const clang::SourceLocation& p_loc );
+	void DeclCommon(const clang::DeclContext* p_declCtxt, const clang::Decl* p_decl);
 	void CloseOutFnOrMtd( void );
 	bool ShouldIncludeFile( const std::string& p_file );
 	void IncrementMetric( MetricUnit* const p_unit, const MetricType_e p_metricType );
@@ -66,6 +72,8 @@ protected:
 	PathResults getOtherPathCount(const clang::Stmt* const p_stmt, uint16_t depth = 0);
 	PathResults getIfPathCount(const clang::IfStmt* const p_stmt, uint16_t depth = 0);
 	PathResults getSwitchPathCount(const clang::SwitchStmt* const p_stmt, uint16_t depth = 0);
+	void CountStatements(const clang::Stmt* const p_stmt);
+	void CountStatements(const clang::Stmt::const_child_range& p_children);
 
 public:
 	
@@ -78,23 +86,29 @@ public:
 	virtual bool VisitLabelStmt(clang::LabelStmt *p_LabelSt);
 	virtual bool VisitDoStmt(clang::DoStmt *p_doSt);
 	virtual bool VisitWhileStmt(clang::WhileStmt *p_whileSt);
+	virtual bool VisitTypedefNameDecl(const clang::TypedefNameDecl *T);
 	virtual bool VisitReturnStmt(clang::ReturnStmt *p_returnSt);
 	virtual bool VisitSwitchStmt(clang::SwitchStmt *p_switchSt);
 	virtual bool VisitConditionalOperator(clang::ConditionalOperator *p_condOp);
 	virtual bool VisitDefaultStmt(clang::DefaultStmt *p_defaultSt);
+	virtual bool VisitContinueStmt(clang::ContinueStmt *p_continueSt);
 	virtual bool VisitCaseStmt(clang::CaseStmt *p_caseSt);
+	virtual bool VisitCompoundStmt(clang::CompoundStmt *p_compoundSt);
 	virtual bool VisitBinaryOperator(clang::BinaryOperator *p_binOp);
 	virtual bool VisitUnaryOperator(clang::UnaryOperator *p_uOp);
 	virtual bool VisitStmt(clang::Stmt *p_statement);
 	virtual bool VisitIfStmt(clang::IfStmt *p_ifSt);
+	virtual bool VisitRecordDecl(clang::RecordDecl* p_recordDecl);
 	virtual bool VisitExplicitCastExpr(clang::ExplicitCastExpr *p_castExpr);
 	virtual bool VisitCallExpr(clang::CallExpr *p_callExpr);
 	virtual bool VisitArraySubscriptExpr (clang::ArraySubscriptExpr *p_subs);
 	virtual bool VisitMemberExpr( clang::MemberExpr* p_memberExpr );
 	virtual bool VisitUnaryExprOrTypeTraitExpr( clang::UnaryExprOrTypeTraitExpr* p_unaryExpr );
-	virtual bool VisitTypedefDecl( clang::TypedefDecl* p_typeDef );
 	virtual bool TraverseDecl(clang::Decl *p_decl);
 	virtual bool TraverseStmt(clang::Stmt *p_stmt);
+	virtual bool VisitEnumDecl(clang::EnumDecl* p_enumDecl);
+	virtual bool VisitCastExpr(clang::CastExpr *p_castExp);
+
 
 #if 0
 	void dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE );

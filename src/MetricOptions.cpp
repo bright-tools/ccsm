@@ -22,7 +22,9 @@ MetricOptions::MetricOptions( std::vector<std::string>* const p_excludeFiles,
 							  std::vector<std::string>* const p_defFiles )
 	: ExcludeFiles( p_excludeFiles ), ExcludeFunctions( p_excludeFunctions ), 
 	  OutputMetrics( p_outputMetrics ), DefFiles( p_defFiles ),
-	  m_dumpTokens( false )
+	  m_dumpTokens( false ),
+	  m_dumpAST( false ),
+	  m_useShortNames( false )
 {
 }
 
@@ -110,7 +112,37 @@ void MetricOptions::setDumpTokens( const bool p_dump )
 	m_dumpTokens = p_dump;
 }
 
+void MetricOptions::setDumpAST(const bool p_dump)
+{
+	m_dumpAST = p_dump;
+}
+
 bool MetricOptions::getDumpTokens( void ) const
 {
 	return m_dumpTokens;
+}
+
+bool MetricOptions::getDumpAST(void) const
+{
+	return m_dumpAST;
+}
+
+void MetricOptions::setUseShortNames(const bool p_shortNames)
+{
+	m_useShortNames = p_shortNames;
+}
+
+bool MetricOptions::getUseShortNames(void) const
+{
+	return m_useShortNames;
+}
+
+void MetricOptions::setPrototypesAreFileScope(const bool p_proto)
+{
+	m_prototypesAreFileScope = p_proto;
+}
+
+bool MetricOptions::getPrototypesAreFileScope(void) const
+{
+	return m_prototypesAreFileScope;
 }

@@ -9,6 +9,8 @@ set(SOURCES
   MetricUnit.cpp
   MetricUtils.hpp
   MetricUtils.cpp
+  MetricDumper.hpp
+  MetricDumper.cpp
   MetricOptions.hpp
   MetricOptions.cpp
   MetricPPIncludeHandler.hpp
@@ -19,6 +21,10 @@ set(SOURCES
   MetricASTConsumer.cpp
   MetricSrcLexer.cpp
   MetricSrcLexer.hpp
+  MetricSrcExpandedLexer.cpp
+  MetricSrcExpandedLexer.hpp
+  MetricSrcUnexpandedLexer.cpp
+  MetricSrcUnexpandedLexer.hpp
   MetricFrontendActors.hpp
   MetricFrontendActors.cpp
   FunctionLocator.hpp

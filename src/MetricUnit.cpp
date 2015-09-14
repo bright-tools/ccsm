@@ -16,23 +16,11 @@
 
 #include "MetricUnit.hpp"
 
+#include "llvm/Support/FileSystem.h"
+#include "llvm/Support/MemoryBuffer.h"
+#include "llvm/Support/Path.h"
+
 #include <iostream>
-#include <iomanip>
-
-#define IS_OUTPUT_TREE_FORM( _fmt ) (((_fmt) == METRIC_DUMP_FORMAT_TREE ) || ((_fmt) == METRIC_DUMP_FORMAT_SPARSE_TREE ))
-
-const std::string MetricUnit::m_namePrefix[ METRIC_UNIT_MAX ] = {
-	"",
-	"File: ",
-	"\tFunction: ",
-	"\tMethod: "
-};
-const std::string MetricUnit::m_dumpPrefix[ METRIC_UNIT_MAX ] = {
-	"",
-	"\t",
-	"\t\t",
-	"\t\t"
-};
 
 const std::string MetricUnit::m_metricShortNames[ METRIC_TYPE_MAX ] = {
 #define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _multipass, _report_local, _scaling, _description  ) _short_name ,
@@ -217,6 +205,107 @@ MetricUnit::counter_t MetricUnit::getSubUnitCount( const MetricUnitType_e p_type
 	return ret_val;
 }
 
+/* TODO: This doesn't deal with C++ only operators */
+const std::set<MetricType_e> m_operatorMetrics = {
+	METRIC_TYPE_OPERATOR_ARITHMETIC_ASSIGN,
+	METRIC_TYPE_OPERATOR_ARITHMETIC_ADDITION,
+	METRIC_TYPE_OPERATOR_ARITHMETIC_SUBTRACTION,
+	METRIC_TYPE_OPERATOR_ARITHMETIC_UNARY_PLUS,
+	METRIC_TYPE_OPERATOR_ARITHMETIC_UNARY_MINUS,
+	METRIC_TYPE_OPERATOR_ARITHMETIC_MULTIPLICATION,
+	METRIC_TYPE_OPERATOR_ARITHMETIC_DIVISION,
+	METRIC_TYPE_OPERATOR_ARITHMETIC_MODULO,
+	METRIC_TYPE_OPERATOR_ARITHMETIC_INCREMENT_PRE,
+	METRIC_TYPE_OPERATOR_ARITHMETIC_INCREMENT_POST,
+	METRIC_TYPE_OPERATOR_ARITHMETIC_DECREMENT_PRE,
+	METRIC_TYPE_OPERATOR_ARITHMETIC_DECREMENT_POST,
+
+	METRIC_TYPE_OPERATOR_COMP_EQUAL,
+	METRIC_TYPE_OPERATOR_COMP_NOT_EQUAL,
+	METRIC_TYPE_OPERATOR_COMP_GREATER_THAN,
+	METRIC_TYPE_OPERATOR_COMP_LESS_THAN,
+	METRIC_TYPE_OPERATOR_COMP_GREATER_THAN_EQUAL,
+	METRIC_TYPE_OPERATOR_COMP_LESS_THAN_EQUAL,
+
+	METRIC_TYPE_OPERATOR_LOGICAL_NOT,
+	METRIC_TYPE_OPERATOR_LOGICAL_AND,
+	METRIC_TYPE_OPERATOR_LOGICAL_OR,
+
+	METRIC_TYPE_OPERATOR_BITWISE_NOT,
+	METRIC_TYPE_OPERATOR_BITWISE_AND,
+	METRIC_TYPE_OPERATOR_BITWISE_OR,
+	METRIC_TYPE_OPERATOR_BITWISE_XOR,
+	METRIC_TYPE_OPERATOR_SHIFT_LEFT,
+	METRIC_TYPE_OPERATOR_SHIFT_RIGHT,
+
+	METRIC_TYPE_OPERATOR_ARITHMETIC_ADDITION_ASSIGN,
+	METRIC_TYPE_OPERATOR_ARITHMETIC_SUBTRACTION_ASSIGN,
+	METRIC_TYPE_OPERATOR_ARITHMETIC_MULTIPLICATION_ASSIGN,
+	METRIC_TYPE_OPERATOR_ARITHMETIC_DIVISION_ASSIGN,
+	METRIC_TYPE_OPERATOR_ARITHMETIC_MODULO_ASSIGN,
+	METRIC_TYPE_OPERATOR_BITWISE_AND_ASSIGN,
+	METRIC_TYPE_OPERATOR_BITWISE_OR_ASSIGN,
+	METRIC_TYPE_OPERATOR_BITWISE_XOR_ASSIGN,
+	METRIC_TYPE_OPERATOR_SHIFT_LEFT_ASSIGN,
+	METRIC_TYPE_OPERATOR_SHIFT_RIGHT_ASSIGN,
+
+	METRIC_TYPE_OPERATOR_ARRAY_SUBSCRIPT,
+	METRIC_TYPE_OPERATOR_DEREFERENCE,
+	METRIC_TYPE_OPERATOR_ADDRESS_OF,
+	METRIC_TYPE_OPERATOR_MEMBER_ACCESS_POINTER,
+	METRIC_TYPE_OPERATOR_MEMBER_ACCESS_DIRECT,
+	METRIC_TYPE_OPERATOR_PTR_TO_MEMBER_INDIRECT,
+	METRIC_TYPE_OPERATOR_PTR_TO_MEMBER_DIRECT,
+
+	// TODO: This is an operator?
+	METRIC_TYPE_FUNCTION_CALLS,
+	METRIC_TYPE_OPERATOR_COMMA,
+	METRIC_TYPE_OPERATOR_TERNARY,
+	METRIC_TYPE_OPERATOR_SIZE_OF,
+	METRIC_TYPE_OPERATOR_ALIGN_OF,
+	METRIC_TYPE_OPERATOR_CAST
+};
+
+/* TODO: This doesn't deal with C++ only keywoards */
+const std::set<MetricType_e> m_keywordMetrics = {
+	METRIC_TYPE_VARIABLE_FN_AUTO,
+	METRIC_TYPE_BREAK,
+	METRIC_TYPE_CASE,
+	METRIC_TYPE_CHAR,
+	METRIC_TYPE_CONST,
+	METRIC_TYPE_CONTINUE,
+	METRIC_TYPE_DEFAULT,
+	METRIC_TYPE_DO,
+//	METRIC_TYPE_DOUBLE,
+	METRIC_TYPE_ELSE,
+	METRIC_TYPE_ENUM,
+	METRIC_TYPE_VARIABLE_FN_EXTERN,
+	METRIC_TYPE_VARIABLE_FILE_EXTERN,
+//	METRIC_TYPE_FLOAT,
+	METRIC_TYPE_FORLOOP,
+	METRIC_TYPE_GOTO,
+	METRIC_TYPE_IF,
+//	METRIC_TYPE_INLINE,
+//	METRIC_TYPE_INT,
+//	METRIC_TYPE_LONG,
+	METRIC_TYPE_VARIABLE_FN_REGISTER,
+//	METRIC_TYPE_RESTRICT,
+	METRIC_TYPE_RETURN,
+//	METRIC_TYPE_SHORT,
+//	METRIC_TYPE_SIGNED,
+	METRIC_TYPE_OPERATOR_SIZE_OF,
+//	METRIC_TYPE_STATIC,
+	METRIC_TYPE_STRUCT,
+	METRIC_TYPE_SWITCH,
+	METRIC_TYPE_TYPEDEF,
+	METRIC_TYPE_UNION,
+//	METRIC_TYPE_UNSIGNED
+//	METRIC_TYPE_VOID,
+	METRIC_TYPE_VOLATILE,
+	METRIC_TYPE_WHILE
+	// TODO - no _Bool, _Complex or _Imaginary
+};
+
 MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType, const bool p_recurse ) const
 {
 	counter_t ret_val = 0;
@@ -227,68 +316,40 @@ MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType, c
 			ret_val = getCounter(METRIC_TYPE_CALLED_BY_LOCAL, p_recurse) +
 				      getCounter(METRIC_TYPE_CALLED_BY_EXTERN, p_recurse);
 			break;
+		case METRIC_TYPE_OPERATOR_COUNT:
+			for (std::set<MetricType_e>::const_iterator it = m_operatorMetrics.begin();
+				it != m_operatorMetrics.end();
+				it++)
+			{
+				ret_val += getCounter(*it, p_recurse);
+			}
+			break;
+		case METRIC_TYPE_KEYWORD_CNT:
+			for (std::set<MetricType_e>::const_iterator it = m_keywordMetrics.begin();
+				it != m_keywordMetrics.end();
+				it++)
+			{
+				ret_val += getCounter(*it, p_recurse);
+			}
+			break;
+		case METRIC_TYPE_KEYWORD_TYPES:
+			/* TODO */
+			break;
+		case METRIC_TYPE_OPERATOR_HALSTEAD_TYPES:
+			ret_val = getCounter(METRIC_TYPE_OPERATOR_TYPES, p_recurse) +
+				      getCounter(METRIC_TYPE_KEYWORD_TYPES);
+			break;
 	    case METRIC_TYPE_OPERATOR_TYPES:
-			/* TODO: This doesn't deal with C++ only operators */
-			ret_val = (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_ASSIGN, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_ADDITION, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_SUBTRACTION, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_UNARY_PLUS, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_UNARY_MINUS, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_MULTIPLICATION, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_DIVISION, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_MODULO, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_INCREMENT_PRE, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_INCREMENT_POST, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_DECREMENT_PRE, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_DECREMENT_POST, p_recurse ) > 0) +
-
-				      (getCounter(METRIC_TYPE_OPERATOR_COMP_EQUAL, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_COMP_NOT_EQUAL, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_COMP_GREATER_THAN, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_COMP_LESS_THAN, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_COMP_GREATER_THAN_EQUAL, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_COMP_LESS_THAN_EQUAL, p_recurse ) > 0) +
-
-					  (getCounter(METRIC_TYPE_OPERATOR_LOGICAL_NOT, p_recurse ) > 0) +
-					  (getCounter(METRIC_TYPE_OPERATOR_LOGICAL_AND, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_LOGICAL_OR, p_recurse ) > 0) +
-
-					  (getCounter(METRIC_TYPE_OPERATOR_BITWISE_NOT, p_recurse ) > 0) +
-					  (getCounter(METRIC_TYPE_OPERATOR_BITWISE_AND, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_BITWISE_OR, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_BITWISE_XOR, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_SHIFT_LEFT, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_SHIFT_RIGHT, p_recurse ) > 0) +
-
-					  (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_ADDITION_ASSIGN, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_SUBTRACTION_ASSIGN, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_MULTIPLICATION_ASSIGN, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_DIVISION_ASSIGN, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_ARITHMETIC_MODULO_ASSIGN, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_BITWISE_AND_ASSIGN, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_BITWISE_OR_ASSIGN, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_BITWISE_XOR_ASSIGN, p_recurse ) > 0) +
-					  (getCounter(METRIC_TYPE_OPERATOR_SHIFT_LEFT_ASSIGN, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_SHIFT_RIGHT_ASSIGN, p_recurse ) > 0) +
-
-				      (getCounter(METRIC_TYPE_OPERATOR_ARRAY_SUBSCRIPT, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_DEREFERENCE, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_ADDRESS_OF, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_MEMBER_ACCESS_POINTER, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_MEMBER_ACCESS_DIRECT, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_PTR_TO_MEMBER_INDIRECT, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_PTR_TO_MEMBER_DIRECT, p_recurse ) > 0) +
-
-					  (getCounter(METRIC_TYPE_FUNCTION_CALLS, p_recurse ) > 0) +
-					  (getCounter(METRIC_TYPE_OPERATOR_COMMA, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_TERNARY, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_SIZE_OF, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_ALIGN_OF, p_recurse ) > 0) +
-				      (getCounter(METRIC_TYPE_OPERATOR_CAST, p_recurse ) > 0);
+			for (std::set<MetricType_e>::const_iterator it = m_operatorMetrics.begin();
+				it != m_operatorMetrics.end();
+				it++)
+			{
+				ret_val += (getCounter(*it, p_recurse) > 0);
+			}
 			break;
 		case METRIC_TYPE_HIS_COMMENT_DENSITY:
 			{
-				counter_t stmtCount = getCounter( METRIC_TYPE_HIS_STATEMENT, p_recurse );
+				counter_t stmtCount = getCounter( METRIC_TYPE_STATEMENTS, p_recurse );
 				/* Div-by-zero protection */
 				if( stmtCount > 0 )
 				{
@@ -322,7 +383,7 @@ MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType, c
 			{
 				ret_val = getCounter( METRIC_TYPE_FORLOOP, p_recurse ) +
 						  getCounter( METRIC_TYPE_IF, p_recurse ) +
-						  getCounter( METRIC_TYPE_WHILELOOP, p_recurse ) +
+						  getCounter( METRIC_TYPE_WHILE, p_recurse ) +
 						  getCounter( METRIC_TYPE_SWITCH, p_recurse ) +
 						  getCounter( METRIC_TYPE_OPERATOR_LOGICAL_AND, p_recurse ) +
 						  getCounter( METRIC_TYPE_OPERATOR_LOGICAL_OR, p_recurse ) +
@@ -347,7 +408,7 @@ MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType, c
 				// TODO: What about the 'DEFAULT'?
 				ret_val = getCounter( METRIC_TYPE_FORLOOP, p_recurse ) +
 						  getCounter( METRIC_TYPE_IF, p_recurse ) +
-						  getCounter( METRIC_TYPE_WHILELOOP, p_recurse ) +
+						  getCounter( METRIC_TYPE_WHILE, p_recurse ) +
 						  getCounter( METRIC_TYPE_CASE, p_recurse ) +
 						  getCounter( METRIC_TYPE_OPERATOR_LOGICAL_AND, p_recurse ) +
 						  getCounter( METRIC_TYPE_OPERATOR_LOGICAL_OR, p_recurse ) +
@@ -373,139 +434,31 @@ MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType, c
 	return ret_val;
 }
 
-void MetricUnit::dumpMetric( std::ostream& out, const MetricType_e p_metric, const MetricDumpFormat_e p_fmt, const std::string& p_sep, const bool p_recurse ) const
-{
-	counter_t val = getCounter( p_metric, p_recurse );
-
-	if(( p_fmt != METRIC_DUMP_FORMAT_SPARSE_TREE ) ||
-		( val != 0 )) 
-	{
-		if( IS_OUTPUT_TREE_FORM( p_fmt )) {
-			out << m_dumpPrefix[ m_type ] << m_metricNames[ p_metric ] << ": ";
-		} 
-		if( m_metricScaling[ p_metric ] == 1 )
-		{
-			out << val << p_sep;
-		}
-		else
-		{
-			out << std::setprecision(6) << ((float)(val)) / m_metricScaling[ p_metric ] << p_sep;
-		}
-	}
-}
-
-void MetricUnit::dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt, const MetricOptions* const p_options ) const
-{
-	std::string sep;
-
-	if( p_output[ m_type ] ) 
-	{
-		switch( p_fmt ) {
-		case METRIC_DUMP_FORMAT_TREE:
-		case METRIC_DUMP_FORMAT_SPARSE_TREE:
-			// TODO: Should be endl
-			sep = "\r\n";
-			break;
-		case METRIC_DUMP_FORMAT_TSV:
-			sep = "\t";
-			break;
-		case METRIC_DUMP_FORMAT_CSV:
-			sep = ",";
-			break;
-		}
-
-		if(( p_fmt == METRIC_DUMP_FORMAT_TSV ) ||
-		   ( p_fmt == METRIC_DUMP_FORMAT_CSV )) {
-
-			if( m_type == METRIC_UNIT_GLOBAL )
-			{
-				out << "Name" << sep;
-				unsigned loop;
-				for( loop = 0;
-					 loop < METRIC_TYPE_MAX;
-
-					 loop++ )
-				{
-					const bool localAndCumulativeOutputs = m_metricIsCumulative[ loop ] && m_metricReportLocal[ loop ];
-
-					if( SHOULD_INCLUDE_METRIC( p_options, m_metricShortNames[ loop ] ) )
-					{
-						out << m_metricNames[loop];
-
-						if( localAndCumulativeOutputs )
-						{
-							out << "(local)" << sep << m_metricNames[loop] << "(cumulative)";
-						
-						}
-						out << sep;
-					}
-				}
-				out << std::endl;
-			}
-		}
-
-		if( IS_OUTPUT_TREE_FORM ( p_fmt )) {
-			out << m_namePrefix[m_type];
-		} 
-
-		out << m_name << sep;
-
-		unsigned loop;
-		for( loop = 0;
-			 loop < METRIC_TYPE_MAX;
-			 loop++ )
-		{
-			/* TODO: duped above */
-			const bool localAndCumulativeOutputs = m_metricIsCumulative[ loop ] && m_metricReportLocal[ loop ];
-
-			/* Filter out metrics which only apply at file/method level */
-			if( SHOULD_INCLUDE_METRIC( p_options, m_metricShortNames[ loop ] ) && m_metricApplies[ m_type ][ loop ])
-			{
-				if( localAndCumulativeOutputs )
-				{
-					dumpMetric( out, (MetricType_e) loop, p_fmt, sep, false );
-				}
-				dumpMetric( out, (MetricType_e) loop, p_fmt, sep, m_metricIsCumulative[ loop ] );
-			} 
-			else if( !IS_OUTPUT_TREE_FORM( p_fmt ))
-			{
-				out << sep;
-				if( localAndCumulativeOutputs )
-				{
-					out << sep;
-				}
-			}
-		}
-
-		if(( p_fmt == METRIC_DUMP_FORMAT_TSV ) ||
-		   ( p_fmt == METRIC_DUMP_FORMAT_CSV )) {
-			out << std::endl;
-		}
-	}
-
-	for( SubUnitMap_t::const_iterator unitIt = m_subUnits.begin();
-		 unitIt != m_subUnits.end();
-		 ++unitIt )
-	{
-		(*unitIt).second->dump( out, p_output, p_fmt, p_options );
-	}
-}
-
 MetricUnit* MetricUnit::getSubUnit( const std::string& p_name, const MetricUnitType_e p_type, const bool p_create )
 {
 	MetricUnit* ret_val = NULL;
-	SubUnitMap_t::iterator name_it = m_subUnits.find( p_name );
+	std::string name = p_name;
+
+	if (p_type == METRIC_UNIT_FILE)
+	{
+		llvm::SmallString<256> NativeNameBuf(p_name);
+		llvm::sys::fs::make_absolute(NativeNameBuf);
+		llvm::sys::path::native(NativeNameBuf);
+		name = NativeNameBuf.c_str();
+	}
+
+	SubUnitMap_t::iterator name_it = m_subUnits.find( name );
 	if( name_it == m_subUnits.end() )
 	{
 		if( p_create )
 		{
-			ret_val = new MetricUnit( this, p_name, p_type );
+			ret_val = new MetricUnit( this, name, p_type );
 
 			if( p_type == METRIC_UNIT_FILE )
 			{
 				this->increment( METRIC_TYPE_FILES );
 			}
-			m_subUnits[ p_name ] = ret_val;
+			m_subUnits[ name ] = ret_val;
 		}
 	} else {
 		ret_val = (*name_it).second;
@@ -537,4 +490,39 @@ bool MetricUnit::isMultiPassAllowed( const MetricType_e p_type )
 std::string MetricUnit::getMetricName( const MetricType_e p_type )
 {
 	return m_metricNames[ p_type ];
+}
+
+std::string MetricUnit::getMetricShortName(const MetricType_e p_type)
+{
+	return m_metricShortNames[p_type];
+}
+
+uint32_t MetricUnit::getMetricScaling(const MetricType_e p_type)
+{
+	return m_metricScaling[p_type];
+}
+
+bool MetricUnit::isMetricCumulative(const MetricType_e p_type)
+{
+	return m_metricIsCumulative[p_type];
+}
+
+std::string MetricUnit::getUnitName(void) const
+{
+	return m_name;
+}
+
+bool MetricUnit::doesMetricApplyForUnit(const MetricType_e p_MetricType, const MetricUnitType_e p_unitType)
+{
+	return m_metricApplies[p_unitType][p_MetricType];
+}
+
+bool MetricUnit::isMetricLocalAndCumulative(const MetricType_e p_type)
+{
+	return m_metricReportLocal[p_type];
+}
+
+const MetricUnit::SubUnitMap_t* MetricUnit::getSubUnits(void) const
+{
+	return &m_subUnits;
 }
