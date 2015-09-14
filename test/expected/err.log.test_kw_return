@@ -1,7 +1,0 @@
-F:\WORK\GIT\ccsm\test\src\kw_return.c:49:1: warning: control may reach end of non-void function [-Wreturn-type]
-}
-^
-F:\WORK\GIT\ccsm\test\src\kw_return.c:80:1: warning: control may reach end of non-void function [-Wreturn-type]
-}
-^
-2 warnings generated.
