@@ -47,7 +47,7 @@ public:
 	virtual ~MetricOptions();
 	bool ShouldIncludeFile( const std::string& p_fn ) const;
 	bool ShouldIncludeFunction( const std::string& p_fn ) const;
-	bool ShouldIncludeMetric( const std::string& p_name ) const;
+	bool ShouldIncludeMetric(const std::string& p_name, bool p_checkAliases = true) const;
 	bool isDefFile( const std::string& p_name ) const;
 	void setDumpTokens( const bool p_dump );
 	bool getDumpTokens( void ) const;

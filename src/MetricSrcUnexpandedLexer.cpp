@@ -212,7 +212,7 @@ const static std::pair<clang::tok::TokenKind,MetricType_e> tokenKindToTypeMapDat
 	std::make_pair(clang::tok::kw_protected, METRIC_TYPE_TOKEN_PROTECTED),
 	std::make_pair(clang::tok::kw_public,    METRIC_TYPE_TOKEN_PUBLIC),
 	std::make_pair(clang::tok::kw_return,    METRIC_TYPE_TOKEN_RETURN),
-	std::make_pair(clang::tok::kw_sizeof,    METRIC_TYPE_TOKEN_SIZEOF),
+	std::make_pair(clang::tok::kw_sizeof,    METRIC_TYPE_TOKEN_OPERATOR_SIZE_OF),
 	std::make_pair(clang::tok::kw_struct,    METRIC_TYPE_TOKEN_STRUCT),
 	std::make_pair(clang::tok::kw_switch,    METRIC_TYPE_TOKEN_SWITCH),
 	std::make_pair(clang::tok::kw_this,      METRIC_TYPE_TOKEN_THIS),

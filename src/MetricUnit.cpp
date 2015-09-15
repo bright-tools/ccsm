@@ -23,63 +23,81 @@
 #include <iostream>
 
 const std::string MetricUnit::m_metricShortNames[ METRIC_TYPE_MAX ] = {
+#define METRIC_ALIAS( _name, _alias )
 #define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _multipass, _report_local, _scaling, _description  ) _short_name ,
 #include "metrics.def"
 #undef  METRIC
+#undef  METRIC_ALIAS
 };
 
 const std::string MetricUnit::m_metricNames[ METRIC_TYPE_MAX ] = {
+#define METRIC_ALIAS( _name, _alias )
 #define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _multipass, _report_local, _scaling, _description  ) _long_name ,
 #include "metrics.def"
 #undef  METRIC
+#undef  METRIC_ALIAS
 };
 
 const bool MetricUnit::m_metricMultipass[ METRIC_TYPE_MAX ] = {
+#define METRIC_ALIAS( _name, _alias )
 #define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _multipass, _report_local, _scaling, _description  ) _multipass ,
 #include "metrics.def"
 #undef  METRIC
+#undef  METRIC_ALIAS
 };
 
-
 const bool MetricUnit::m_metricIsCumulative[ METRIC_TYPE_MAX ] = {
+#define METRIC_ALIAS( _name, _alias )
 #define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _multipass, _report_local, _scaling, _description  ) _cumulative ,
 #include "metrics.def"
 #undef  METRIC
+#undef  METRIC_ALIAS
 };
 
 const bool MetricUnit::m_metricReportLocal[ METRIC_TYPE_MAX ] = {
+#define METRIC_ALIAS( _name, _alias )
 #define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _multipass, _report_local, _scaling, _description  ) _report_local ,
 #include "metrics.def"
 #undef  METRIC
+#undef  METRIC_ALIAS
 };
 
 const uint32_t MetricUnit::m_metricScaling[ METRIC_TYPE_MAX ] = {
+#define METRIC_ALIAS( _name, _alias )
 #define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _multipass, _report_local, _scaling, _description  ) _scaling ,
 #include "metrics.def"
 #undef  METRIC
+#undef  METRIC_ALIAS
 };
-
 
 const bool MetricUnit::m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ] = {
 	{
+#define METRIC_ALIAS( _name, _alias )
 #define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _multipass, _report_local, _scaling, _description  ) _applies_global ,
 #include "metrics.def"
 #undef  METRIC
+#undef  METRIC_ALIAS
 	},
 	{
+#define METRIC_ALIAS( _name, _alias )
 #define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _multipass, _report_local, _scaling, _description  ) _applies_file ,
 #include "metrics.def"
 #undef  METRIC
+#undef  METRIC_ALIAS
 	},
 	{
+#define METRIC_ALIAS( _name, _alias )
 #define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _multipass, _report_local, _scaling, _description  ) _applies_function ,
 #include "metrics.def"
 #undef  METRIC
+#undef  METRIC_ALIAS
 	},
 	{
+#define METRIC_ALIAS( _name, _alias )
 #define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _multipass, _report_local, _scaling, _description  ) _applies_method ,
 #include "metrics.def"
 #undef  METRIC
+#undef  METRIC_ALIAS
 	}
 };
 
@@ -276,31 +294,31 @@ const std::set<MetricType_e> m_keywordMetrics = {
 	METRIC_TYPE_CONTINUE,
 	METRIC_TYPE_DEFAULT,
 	METRIC_TYPE_DO,
-//	METRIC_TYPE_DOUBLE,
+	METRIC_TYPE_DOUBLE,
 	METRIC_TYPE_ELSE,
 	METRIC_TYPE_ENUM,
 	METRIC_TYPE_VARIABLE_FN_EXTERN,
 	METRIC_TYPE_VARIABLE_FILE_EXTERN,
-//	METRIC_TYPE_FLOAT,
+	METRIC_TYPE_FLOAT,
 	METRIC_TYPE_FORLOOP,
 	METRIC_TYPE_GOTO,
 	METRIC_TYPE_IF,
 //	METRIC_TYPE_INLINE,
-//	METRIC_TYPE_INT,
-//	METRIC_TYPE_LONG,
+	METRIC_TYPE_INT,
+	METRIC_TYPE_LONG,
 	METRIC_TYPE_VARIABLE_FN_REGISTER,
 //	METRIC_TYPE_RESTRICT,
 	METRIC_TYPE_RETURN,
-//	METRIC_TYPE_SHORT,
-//	METRIC_TYPE_SIGNED,
+	METRIC_TYPE_SHORT,
+	METRIC_TYPE_SIGNED,
 	METRIC_TYPE_OPERATOR_SIZE_OF,
-//	METRIC_TYPE_STATIC,
+	METRIC_TYPE_STATIC,
 	METRIC_TYPE_STRUCT,
 	METRIC_TYPE_SWITCH,
 	METRIC_TYPE_TYPEDEF,
 	METRIC_TYPE_UNION,
-//	METRIC_TYPE_UNSIGNED
-//	METRIC_TYPE_VOID,
+	METRIC_TYPE_UNSIGNED,
+	METRIC_TYPE_VOID,
 	METRIC_TYPE_VOLATILE,
 	METRIC_TYPE_WHILE
 	// TODO - no _Bool, _Complex or _Imaginary

@@ -14,7 +14,19 @@
    limitations under the License.
 */
 
+#include "MetricUnit.hpp"
 #include "MetricOptions.hpp"
+
+static const std::pair<std::string, std::string> metricAliasListData[] =
+{
+#define METRIC_ALIAS( _name, _alias ) std::make_pair( _name, _alias ),
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _multipass, _report_local, _scaling, _description  )
+#include "metrics.def"
+#undef  METRIC
+#undef  METRIC_ALIAS
+};
+static const std::set<std::pair<std::string, std::string>> metricAliasList(metricAliasListData,
+	metricAliasListData + sizeof metricAliasListData / sizeof metricAliasListData[0]);
 
 MetricOptions::MetricOptions( std::vector<std::string>* const p_excludeFiles, 
 							  std::vector<std::string>* const p_excludeFunctions, 
@@ -67,7 +79,7 @@ bool MetricOptions::ShouldIncludeFunction( const std::string& p_fn ) const
 			( std::find( ExcludeFunctions->begin(), ExcludeFunctions->end(), p_fn ) == ExcludeFunctions->end() ));
 }
 
-bool MetricOptions::ShouldIncludeMetric( const std::string& p_name ) const
+bool MetricOptions::ShouldIncludeMetric( const std::string& p_name, bool p_checkAliases ) const
 {
 	bool ret_val = false;
 
@@ -78,8 +90,10 @@ bool MetricOptions::ShouldIncludeMetric( const std::string& p_name ) const
 	}
 	else
 	{
+		bool metricOutput[METRIC_TYPE_MAX] = { 0 };
+
 		for( std::vector<std::string>::const_iterator it = OutputMetrics->begin();
-		     it != OutputMetrics->end();
+		     (it != OutputMetrics->end()) && !ret_val;
 			 it++ )
 		{
 			size_t len = (*it).length();
@@ -97,10 +111,19 @@ bool MetricOptions::ShouldIncludeMetric( const std::string& p_name ) const
 			{
 				ret_val = true;
 			}
+		}
 
-			if( ret_val )
+		/* Check against the list of aliases for the metric, if necessary */
+		if (!ret_val && p_checkAliases)
+		{
+			for (std::set<std::pair<std::string, std::string>>::const_iterator it = metricAliasList.begin();
+				(it != metricAliasList.end()) && !ret_val;
+				it++)
 			{
-				break;
+				if (it->first == p_name)
+				{
+					ret_val = ShouldIncludeMetric(it->second,false); 
+				}
 			}
 		}
 	}

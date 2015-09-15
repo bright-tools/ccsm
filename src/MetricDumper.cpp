@@ -106,6 +106,7 @@ void MetricDumper::dump(std::ostream& out, const MetricUnit* const p_topLevel, c
 					const MetricType_e metric = static_cast<MetricType_e>(loop);
 					const bool localAndCumulativeOutputs = MetricUnit::isMetricCumulative(metric) && MetricUnit::isMetricLocalAndCumulative(metric);
 
+					/* TODO: Output a warning in the case that anything in p_options.OutputMetrics isn't understood */
 					if (SHOULD_INCLUDE_METRIC(p_options, MetricUnit::getMetricShortName(metric)))
 					{
 						std::string metricName;
