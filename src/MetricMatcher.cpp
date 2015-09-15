@@ -899,9 +899,6 @@ bool MetricVisitor::VisitUnaryExprOrTypeTraitExpr( clang::UnaryExprOrTypeTraitEx
 	{
 		switch( p_unaryExpr->getKind() )
 		{
-			case clang::UETT_SizeOf:
-				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_SIZE_OF );
-				break;
 			case clang::UETT_AlignOf:
 				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ALIGN_OF );
 				break;

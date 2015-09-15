@@ -36,8 +36,10 @@ typedef enum
 
 typedef enum
 {
+#define METRIC_ALIAS( _name, _alias )
 #define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _multipass, _report_local, _scaling, _description  ) _enum ,
 #include "metrics.def"
+#undef  METRIC_ALIAS
 #undef  METRIC
 	METRIC_TYPE_MAX
 } MetricType_e;
