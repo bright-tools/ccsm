@@ -28,6 +28,7 @@
 
 #include "clang/AST/RecursiveASTVisitor.h"
 #include "clang/Frontend/CompilerInstance.h"
+#include "clang/Lex/Token.h"
 
 #include <cstdint>
 
@@ -40,6 +41,7 @@ class MetricSrcLexer
 		MetricUnit*             m_currentUnit;
 		std::string             m_currentFunctionName;
 		std::string             m_currentFileName;
+		clang::Token            m_lastToken;
 
 		virtual void                       ProcessToken(clang::Token& p_token) = 0;
 		virtual MetricUnitProcessingType_e getLexType( void ) const = 0;

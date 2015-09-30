@@ -632,6 +632,10 @@ bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 			if (p_varDec->getAnyInitializer() != NULL)
 			{
 				IncrementMetric(m_currentUnit, METRIC_TYPE_STATEMENTS);
+				if (!p_varDec->getLocStart().isMacroID())
+				{
+					m_currentUnit->increment(METRIC_TYPE_TOKEN_STATEMENTS);
+				}
 			}
 
 		} else if (p_varDec->getKind() == clang::Decl::ParmVar)
@@ -686,7 +690,7 @@ bool MetricVisitor::VisitLabelStmt(clang::LabelStmt *p_LabelSt)
 {
 	if( m_currentUnit )
 	{
-		IncrementMetric( m_currentUnit, METRIC_TYPE_LABEL );
+		IncrementMetric(m_currentUnit, METRIC_TYPE_LABEL_NAME );
 	}
     return true;
 }
@@ -1051,6 +1055,10 @@ bool MetricVisitor::VisitStmt(clang::Stmt *p_statement)
 			case clang::Stmt::BreakStmtClass:
 			case clang::Stmt::ReturnStmtClass:
 				IncrementMetric(m_currentUnit, METRIC_TYPE_STATEMENTS);
+				if (! p_statement->getLocStart().isMacroID())
+				{
+					m_currentUnit->increment(METRIC_TYPE_TOKEN_STATEMENTS);
+				}
 				break;
 			default:
 				break;
@@ -1220,6 +1228,10 @@ void MetricVisitor::CountStatements(const clang::Stmt* const p_stmt)
 
 			default:
 				IncrementMetric(m_currentUnit, METRIC_TYPE_STATEMENTS);
+				if (!p_stmt->getLocStart().isMacroID())
+				{
+					m_currentUnit->increment(METRIC_TYPE_TOKEN_STATEMENTS);
+				}
 				break;
 		}
 	}

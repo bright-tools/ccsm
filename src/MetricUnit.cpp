@@ -284,7 +284,7 @@ const std::set<MetricType_e> m_operatorMetrics = {
 	METRIC_TYPE_OPERATOR_CAST
 };
 
-/* TODO: This doesn't deal with C++ only keywoards */
+/* TODO: This doesn't deal with C99/C++ only keywoards */
 const std::set<MetricType_e> m_keywordMetrics = {
 	METRIC_TYPE_VARIABLE_FN_AUTO,
 	METRIC_TYPE_BREAK,
@@ -303,11 +303,11 @@ const std::set<MetricType_e> m_keywordMetrics = {
 	METRIC_TYPE_FORLOOP,
 	METRIC_TYPE_GOTO,
 	METRIC_TYPE_IF,
-//	METRIC_TYPE_INLINE,
+//	METRIC_TYPE_INLINE, // TODO C99
 	METRIC_TYPE_INT,
 	METRIC_TYPE_LONG,
 	METRIC_TYPE_VARIABLE_FN_REGISTER,
-//	METRIC_TYPE_RESTRICT,
+//	METRIC_TYPE_RESTRICT, // TODO C99
 	METRIC_TYPE_RETURN,
 	METRIC_TYPE_SHORT,
 	METRIC_TYPE_SIGNED,

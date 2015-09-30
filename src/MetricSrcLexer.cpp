@@ -46,6 +46,7 @@ void MetricSrcLexer::LexSources( clang::CompilerInstance& p_ci, const Translatio
 
 	// Start preprocessing the specified input file.
 	clang::Token result;
+	m_lastToken.setKind( clang::tok::eof );
 	PP.EnterMainSourceFile();
 	PP.SetCommentRetentionState(true,true);
 	PP.addPPCallbacks( llvm::make_unique<MetricPPIncludeHandler>( m_options, SM, m_currentFileName ) );
@@ -127,6 +128,7 @@ void MetricSrcLexer::LexSources( clang::CompilerInstance& p_ci, const Translatio
 			if( shouldLexToken )
 			{
 				ProcessToken( result );
+				m_lastToken = result;
 			}
 		}
 	} while (result.isNot(clang::tok::eof));

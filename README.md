@@ -424,7 +424,17 @@ Statement Counting
 
 Statement counting is based on the definition provided in the C language specification, namely
 
-"A statement specifies an action to be performed"
+> "A statement specifies an action to be performed"
+
+Syntactically it is defined as:
+
+> statement:
+>    labeled-statement
+>    compound-statement
+>    expression-statement
+>    selection-statement
+>    iteration-statement
+>    jump-statement
 
 The following are not counted as statements, as they do not result in any operation being performed:
 * Compound statements, as by themselves they serve only as a method of creating a block.
@@ -449,6 +459,12 @@ Once expanded, the above is clearly a declaration, as compared to:
     A var;
 
 which, once expanded, is not a declaration.
+
+Currently each macro usage is counted as a single statement statement.  In
+some cases this will distort the statement counting unnecessarily, however not
+counting macro usages at all would most likely under-represent the complexity of
+the code in most cases, hence this seems to be the lesser of the two evils.  An
+option to inhibit this functionality could be added in future.
 
 Function and File Scoping
 =========================

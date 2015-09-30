@@ -17,6 +17,8 @@
 #include "MetricUnit.hpp"
 #include "MetricOptions.hpp"
 
+#include <algorithm>
+
 static const std::pair<std::string, std::string> metricAliasListData[] =
 {
 #define METRIC_ALIAS( _name, _alias ) std::make_pair( _name, _alias ),
