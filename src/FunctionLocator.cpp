@@ -60,14 +60,12 @@ void GlobalFunctionLocator::dump( std::ostream& p_out ) const
 
 GlobalFunctionLocator::~GlobalFunctionLocator()
 {
-#if 0
 	for( MainSrcToFnLocMap_t::iterator it = m_map.begin();
 		 it != m_map.end();
 		 it++ )
 	{
 		delete( it->second );
 	}
-#endif
 }
 
 TranslationUnitFunctionLocator::TranslationUnitFunctionLocator(MetricOptions& p_options) : m_options(p_options)
@@ -95,7 +93,9 @@ void TranslationUnitFunctionLocator::addFunctionLocation(const clang::ASTContext
 	clang::FileID fId = p_context->getSourceManager().getFileID(startLoc);
 	unsigned int hashVal = fId.getHashValue();
 
-//	std::cout << "addFunctionLocation : Adding to function map: " << p_name << " " << hashVal << " ( " << startLoc.getRawEncoding() << " to " << endLoc.getRawEncoding() << ")" << std::endl;
+#if 0
+	std::cout << "addFunctionLocation : Adding to function map: " << p_name << " " << hashVal << " ( " << startLoc.getRawEncoding() << " to " << endLoc.getRawEncoding() << ")" << std::endl;
+#endif
 
 	LocationNamePair_t endNamePair( endLoc, p_name );
 	m_map[ hashVal ][ startLoc ] = endNamePair;
