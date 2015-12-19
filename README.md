@@ -377,7 +377,7 @@ HIS Metrics Support
 | CALLING     | Implemented - `HIS_CALLING`                       | Number of different functions calling this function.  Note that functions called via function pointer are not counted.|
 | CALLS       | Implemented - `OP_FN_CALL_CNT`                    | Number of different functions called.  Note that functions called via function pointer are not counted |
 | PARAM       | Implemented - `STMT_HIS_PARAM`                    | Number of function parameters.  Note that only one variant of this metric exists as parameters hidden within macros are still parameters. |
-| STMT        | Implemented - `TOK_HIS_STMT`                      | Number of instructions per function. |
+| STMT        | Implemented - `STMT_CNT` and `RAW_STMT_CNT`       | Number of instructions per function. |
 | LEVEL       | Implemented - `FUNC_DEPTH`                        | Nesting depth within a function.  Note that HIS says that this is defined as "Maximum nesting levels within a function + 1", however the allowable range is 0-4, which doesn't seem consistent.  `FUNC_DEPTH` in this implementation is zero for an empty function |
 | RETURN      | Implemented - `RETURN_POINT_CNT`                  | Number of return points in a function.  Note that only one variant of this metric exists as return points hidden within macros are still return points.  Note Issue #54 with respect to this metric. |
 | S           | Not planned                                       | |
