@@ -137,7 +137,7 @@ void MetricDumper::dump(std::ostream& out, const MetricUnit* const p_topLevel, c
 			out << m_namePrefix[metricUnitType];
 		}
 
-		out << p_topLevel->getUnitName() << sep;
+		out << p_topLevel->getUnitName(*p_options) << sep;
 
 		unsigned loop;
 		for (loop = 0;

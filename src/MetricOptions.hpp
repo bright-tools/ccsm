@@ -37,6 +37,7 @@ protected:
 	bool m_useShortNames;
 	bool m_declarationsAreNotFileScope;
 	bool m_prototypesAreFileScope;
+	bool m_useAbsoluteFileNames;
 
 	bool isFileInList( const std::vector<std::string>* const p_list, const std::string& p_name ) const;
 public:
@@ -57,6 +58,8 @@ public:
 	bool getUseShortNames(void) const;
 	void setPrototypesAreFileScope(const bool p_proto);
 	bool getPrototypesAreFileScope(void) const;
+	void setUseAbsoluteFileNames(const bool p_absoluteFn);
+	bool getUseAbsoluteFileNames(void) const;
 };
 
 #define SHOULD_INCLUDE_FILE( _m, _f ) (((_m)==NULL) || ((_m)->ShouldIncludeFile( _f )))

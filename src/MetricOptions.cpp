@@ -38,7 +38,8 @@ MetricOptions::MetricOptions( std::vector<std::string>* const p_excludeFiles,
 	  OutputMetrics( p_outputMetrics ), DefFiles( p_defFiles ),
 	  m_dumpTokens( false ),
 	  m_dumpAST( false ),
-	  m_useShortNames( false )
+	  m_useShortNames( false ),
+	  m_useAbsoluteFileNames( false )
 {
 }
 
@@ -92,8 +93,6 @@ bool MetricOptions::ShouldIncludeMetric( const std::string& p_name, bool p_check
 	}
 	else
 	{
-		bool metricOutput[METRIC_TYPE_MAX] = { 0 };
-
 		for( std::vector<std::string>::const_iterator it = OutputMetrics->begin();
 		     (it != OutputMetrics->end()) && !ret_val;
 			 it++ )
@@ -171,3 +170,14 @@ bool MetricOptions::getPrototypesAreFileScope(void) const
 {
 	return m_prototypesAreFileScope;
 }
+
+void MetricOptions::setUseAbsoluteFileNames(const bool p_absoluteFn)
+{
+	m_useAbsoluteFileNames = p_absoluteFn;
+}
+
+bool MetricOptions::getUseAbsoluteFileNames(void) const
+{
+	return m_useAbsoluteFileNames;
+}
+

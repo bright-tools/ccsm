@@ -457,12 +457,15 @@ MetricUnit* MetricUnit::getSubUnit( const std::string& p_name, const MetricUnitT
 	MetricUnit* ret_val = NULL;
 	std::string name = p_name;
 
+	/* For files, get the absolute path so that we can disambiguate between files which have the same filename */
 	if (p_type == METRIC_UNIT_FILE)
 	{
-		llvm::SmallString<256> NativeNameBuf(p_name);
-		llvm::sys::fs::make_absolute(NativeNameBuf);
-		llvm::sys::path::native(NativeNameBuf);
-		name = NativeNameBuf.c_str();
+		/* Filename limit on Windows is 32767 characters - see 
+		    https://msdn.microsoft.com/en-gb/library/windows/desktop/aa365247(v=vs.85).aspx */
+		llvm::SmallString<INT16_MAX> NativeAbsNameBuf(p_name);
+		llvm::sys::fs::make_absolute(NativeAbsNameBuf);
+		llvm::sys::path::native(NativeAbsNameBuf);
+		name = NativeAbsNameBuf.c_str();
 	}
 
 	SubUnitMap_t::iterator name_it = m_subUnits.find( name );
@@ -475,6 +478,12 @@ MetricUnit* MetricUnit::getSubUnit( const std::string& p_name, const MetricUnitT
 			if( p_type == METRIC_UNIT_FILE )
 			{
 				this->increment( METRIC_TYPE_FILES );
+
+				/* Make the filename native.  This avoids situations where there are mixed separators, e.g.
+				    "a\directory\here/header.h" */
+				llvm::SmallString<INT16_MAX> NativeNameBuf(p_name);
+				llvm::sys::path::native(NativeNameBuf);
+				ret_val->m_alias = NativeNameBuf.c_str();
 			}
 			m_subUnits[ name ] = ret_val;
 		}
@@ -525,9 +534,21 @@ bool MetricUnit::isMetricCumulative(const MetricType_e p_type)
 	return m_metricIsCumulative[p_type];
 }
 
-std::string MetricUnit::getUnitName(void) const
+std::string MetricUnit::getUnitName(const MetricOptions& p_options) const
 {
-	return m_name;
+	std::string ret_val;
+
+	if ((this->m_type == METRIC_UNIT_FILE) &&
+		(!p_options.getUseAbsoluteFileNames()))
+	{
+		ret_val = m_alias;
+	}
+	else
+	{
+		ret_val = m_name;
+	}
+
+	return ret_val;
 }
 
 bool MetricUnit::doesMetricApplyForUnit(const MetricType_e p_MetricType, const MetricUnitType_e p_unitType)

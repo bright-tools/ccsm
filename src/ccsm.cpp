@@ -79,6 +79,13 @@ static cl::opt<bool> UseShortNames(
 	cl::cat(CCSMToolCategory)
 	);
 
+static cl::opt<bool> UseAbsoluteFileNames(
+	"output-absolute-fn",
+	cl::desc("Use absolute filenames in the output"),
+	cl::init(false),
+	cl::cat(CCSMToolCategory)
+	);
+
 static cl::opt<bool> DumpTokens(
   "dump-tokens",
   cl::desc("Dump tokens as they are lexed"),
@@ -170,6 +177,7 @@ int main(int argc, const char **argv) {
 	options.setDumpTokens( DumpTokens );
 	options.setDumpAST(DumpAST);
 	options.setUseShortNames(UseShortNames);
+	options.setUseAbsoluteFileNames(UseAbsoluteFileNames);
 	options.setPrototypesAreFileScope(PrototypesAreFileScope);
 
 	ClangTool Tool(OptionsParser.getCompilations(), OptionsParser.getSourcePathList());
