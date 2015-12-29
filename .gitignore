@@ -20,6 +20,7 @@
 
 # Generated file
 src/ccsm_ver.h
+GIT-VS-VERSION-FILE
 
 # Transient files used during testing
 test/err.log
