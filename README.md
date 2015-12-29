@@ -389,7 +389,29 @@ HIS Metrics Support
 Building The Project
 ====================
 
-TODO
+Before starting, please ensure that you have a command-line version of git
+installed.  If you are using Windows, you must ensure that git is available 
+to Windows Command Prompt.
+
+To build the project you will need to be able to compile Clang.  See the
+[instructions](http://clang.llvm.org/get_started.html).  Currently I use Visual
+Studio 2013 for builds.
+
+Follow the instructions up to the point where you have checked out Clang, 
+then open the file `llvm\tools\clang\tools\CMakeLists.txt` and add the following 
+lines:
+
+    set(CCSM_DIR F:\\WORK\\GIT\\CCSM\\)
+    add_subdirectory(${CCSM_DIR}\\SRC ${CMAKE_CURRENT_BINARY_DIR}/ccsm)
+
+You will need to modify the path to point to wherever your clone of the CCSM
+project is, but note that
+1.  The path in the first line should point to the 'src' subdirectory of the clone
+2.  Path separators either need to be escaped (using double backslashes instead of
+    single backslashes) 
+
+After that, follow the remainder of the instructions for building Clang.  CCSM
+should be build as part of the complete Clang build.
 
 Code Structure
 ==============
