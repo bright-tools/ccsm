@@ -18,6 +18,9 @@
 *.tmp
 *~
 
+# Generated file
+src/ccsm_ver.h
+
 # Transient files used during testing
 test/err.log
 test/out.log

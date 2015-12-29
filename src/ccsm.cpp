@@ -21,6 +21,7 @@
 #include "FunctionLocator.hpp"
 #include "MetricLinkageResolver.hpp"
 #include "MetricDumper.hpp"
+#include "ccsm_ver.h"
 
 #include "clang/Tooling/Tooling.h"
 #include "clang/Basic/SourceManager.h"
@@ -164,6 +165,8 @@ static cl::list<std::string, std::vector<std::string>> OutputOnlyMetrics(
 	cl::ZeroOrMore,
 	cl::location(OutputMetricList),
 	cl::cat(CCSMToolCategory));
+
+static cl::extrahelp MoreHelp("\nVersion: " GEN_VER_VERSION_STRING); 
 
 int main(int argc, const char **argv) {
 	MetricUnit topUnit( NULL, "Global", METRIC_UNIT_GLOBAL);
