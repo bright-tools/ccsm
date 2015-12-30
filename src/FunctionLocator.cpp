@@ -22,7 +22,7 @@
 
 #include <iostream>
 
-GlobalFunctionLocator::GlobalFunctionLocator(MetricOptions& p_options) : m_options(p_options)
+GlobalFunctionLocator::GlobalFunctionLocator(const MetricOptions& p_options) : m_options(p_options)
 {
 }
 
@@ -68,7 +68,7 @@ GlobalFunctionLocator::~GlobalFunctionLocator()
 	}
 }
 
-TranslationUnitFunctionLocator::TranslationUnitFunctionLocator(MetricOptions& p_options) : m_options(p_options)
+TranslationUnitFunctionLocator::TranslationUnitFunctionLocator(const MetricOptions& p_options) : m_options(p_options)
 {
 }
 

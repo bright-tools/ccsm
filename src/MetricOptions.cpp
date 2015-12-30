@@ -181,3 +181,32 @@ bool MetricOptions::getUseAbsoluteFileNames(void) const
 	return m_useAbsoluteFileNames;
 }
 
+void MetricOptions::setOutputFormat(const MetricDumpFormat_e p_outputFormat)
+{
+	m_outputFormat = p_outputFormat;
+}
+
+MetricDumpFormat_e MetricOptions::getOutputFormat(void) const
+{
+	return m_outputFormat;
+}
+
+void MetricOptions::setOutputMetric(const MetricUnitType_e p_metric, const bool p_output)
+{
+	m_outputMetric[p_metric] = p_output;
+}
+
+bool MetricOptions::getOutputMetric(const MetricUnitType_e p_metric) const
+{
+	return m_outputMetric[p_metric];
+}
+
+void MetricOptions::setDumpFnMap(const bool p_dump)
+{
+	m_dumpFnMap = p_dump;
+}
+
+bool MetricOptions::getDumpFnMap(void) const
+{
+	return m_dumpFnMap;
+}

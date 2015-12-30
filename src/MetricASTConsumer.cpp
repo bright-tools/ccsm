@@ -21,7 +21,7 @@
 #include "MetricASTConsumer.hpp"
 #include "clang/Basic/SourceManager.h"
 
-MetricASTConsumer::MetricASTConsumer(clang::CompilerInstance &CI, MetricUnit* p_topUnit, MetricOptions* p_options, GlobalFunctionLocator*  p_fnLocator ) :
+MetricASTConsumer::MetricASTConsumer(clang::CompilerInstance &CI, MetricUnit* p_topUnit, const MetricOptions& p_options, GlobalFunctionLocator*  p_fnLocator ) :
 																													  m_compilerInstance( CI ),
 																													  m_options( p_options ),
 																													  m_topUnit( p_topUnit ),
@@ -59,8 +59,8 @@ void MetricASTConsumer::HandleTranslationUnit(clang::ASTContext &Context)
 	{
 		std::string fileName = it->first->getName();
 
-		if( SHOULD_INCLUDE_FILE( m_options, fileName ) &&
-			!(m_options->isDefFile( fileName )))
+		if( m_options.ShouldIncludeFile( fileName ) &&
+			!(m_options.isDefFile( fileName )))
 		{
 			MetricUnit* fileUnit = m_topUnit->getSubUnit(fileName, METRIC_UNIT_FILE);
 			fileUnit->setProcessed( METRIC_UNIT_PROCESS_AST);
@@ -70,7 +70,7 @@ void MetricASTConsumer::HandleTranslationUnit(clang::ASTContext &Context)
 	delete( visitor );
 }
 
-MetricPPConsumer::MetricPPConsumer(MetricUnit* p_topUnit, MetricOptions* p_options, GlobalFunctionLocator*  p_fnLocator, const bool p_expanded)
+MetricPPConsumer::MetricPPConsumer(MetricUnit* p_topUnit, const MetricOptions& p_options, GlobalFunctionLocator*  p_fnLocator, const bool p_expanded)
 	: m_options( p_options ),
       m_topUnit( p_topUnit ),
       m_fnLocator( p_fnLocator ),

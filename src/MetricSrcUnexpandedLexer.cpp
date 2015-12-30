@@ -135,7 +135,7 @@ const std::map<clang::tok::TokenKind, MetricType_e> MetricSrcUnexpandedLexer::m_
     tokenKindToTypeMapData + sizeof tokenKindToTypeMapData / sizeof tokenKindToTypeMapData[0]);
 
 
-MetricSrcUnexpandedLexer::MetricSrcUnexpandedLexer(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, MetricOptions* p_options) : MetricSrcLexer( p_CI, p_topUnit, p_options )
+MetricSrcUnexpandedLexer::MetricSrcUnexpandedLexer(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, const MetricOptions& p_options) : MetricSrcLexer( p_CI, p_topUnit, p_options )
 {
 }
 
@@ -163,7 +163,7 @@ void MetricSrcUnexpandedLexer::HandleBasicToken(clang::Token& p_token)
 		if( p_token.isAnyIdentifier() )
 		{
 			std::string tok_data = p_token.getIdentifierInfo()->getName();
-			if( m_options->getDumpTokens() )
+			if( m_options.getDumpTokens() )
 			{
 				std::cout << ",unreserved:"<<tok_data;
 			}
@@ -180,7 +180,7 @@ void MetricSrcUnexpandedLexer::HandleBasicToken(clang::Token& p_token)
 			/* We treat each macro invokation as a statement */
 			if (m_compilerInstance.getPreprocessor().isMacroDefined(tok_data))
 			{
-				if (m_options->getDumpTokens())
+				if (m_options.getDumpTokens())
 				{
 					std::cout << ",macro";
 				}
@@ -208,7 +208,7 @@ void MetricSrcUnexpandedLexer::ProcessToken(clang::Token& p_token)
 	std::string tok_data;
 	unsigned int tok_len = p_token.getLength();
 
-	if( m_options->getDumpTokens() )
+	if( m_options.getDumpTokens() )
 	{
 		std::cout << "(" << p_token.getName();
 	}
@@ -266,7 +266,7 @@ void MetricSrcUnexpandedLexer::ProcessToken(clang::Token& p_token)
 			break;
 	}
 
-	if( m_options->getDumpTokens() )
+	if( m_options.getDumpTokens() )
 	{
 		if( tok_data.length() )
 		{

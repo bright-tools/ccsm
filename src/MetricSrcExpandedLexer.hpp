@@ -51,7 +51,7 @@ class MetricSrcExpandedLexer : public MetricSrcLexer
 		virtual MetricUnitProcessingType_e getLexType(void) const;
 
 	public:
-		MetricSrcExpandedLexer(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, MetricOptions* p_options = NULL);
+		MetricSrcExpandedLexer(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, const MetricOptions& p_options);
 	    virtual ~MetricSrcExpandedLexer(void);
 };
 

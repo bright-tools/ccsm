@@ -24,6 +24,7 @@ limitations under the License.
 #define       METRIC_DUMPER_HPP
 
 #include "MetricUnit.hpp"
+#include "MetricOptions.hpp"
 
 #include <iostream>
 
@@ -35,7 +36,7 @@ protected:
 
 	static void dumpMetric(std::ostream& out, const MetricUnit* const p_unit, const MetricType_e p_metric, const MetricDumpFormat_e p_fmt, const std::string& p_sep, const bool p_recurse, const std::string& p_suffix, const bool p_useShortNames);
 public:
-	static void dump(std::ostream& out, const MetricUnit* const p_topLevel, const bool p_output[METRIC_UNIT_MAX], const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE, const MetricOptions* const p_options = NULL);
+	static void dump(std::ostream& out, const MetricUnit* const p_topLevel, const MetricOptions& p_options );
 };
 
 #endif

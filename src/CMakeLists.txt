@@ -4,6 +4,8 @@ set(LLVM_USED_LIBS clangTooling clangBasic clangAST)
 set(SOURCES 
   ccsm.cpp
   ccsm_ver.h
+  CcsmOptionsHandler.hpp
+  CcsmOptionsHandler.cpp
   MetricMatcher.hpp
   MetricMatcher.cpp
   MetricUnit.hpp

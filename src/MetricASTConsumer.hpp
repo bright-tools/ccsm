@@ -39,12 +39,12 @@ class MetricASTConsumer : public clang::ASTConsumer
 {
 protected:
 	clang::CompilerInstance& m_compilerInstance;
-	MetricOptions            *m_options;
+	const MetricOptions&      m_options;
 	MetricUnit               *m_topUnit;
 	GlobalFunctionLocator    *m_fnLocator;
 
 public:
-	explicit MetricASTConsumer(clang::CompilerInstance &CI, MetricUnit* p_topUnit, MetricOptions* p_options = NULL, GlobalFunctionLocator*  m_fnLocator = NULL);
+	explicit MetricASTConsumer(clang::CompilerInstance &CI, MetricUnit* p_topUnit, const MetricOptions& p_options, GlobalFunctionLocator*  m_fnLocator = NULL);
 
 	virtual ~MetricASTConsumer(void);
 	virtual void HandleTranslationUnit(clang::ASTContext &Context);
@@ -53,13 +53,13 @@ public:
 class MetricPPConsumer : public clang::PreprocessorFrontendAction
 {
 protected:
-	MetricOptions            *m_options;
+	const MetricOptions&      m_options;
 	MetricUnit               *m_topUnit;
 	GlobalFunctionLocator    *m_fnLocator;
 	bool                      m_expanded;
 
 public:
-	explicit MetricPPConsumer(MetricUnit* p_topUnit, MetricOptions* p_options = NULL, GlobalFunctionLocator*  m_fnLocator = NULL, const bool p_expanded = true);
+	explicit MetricPPConsumer(MetricUnit* p_topUnit, const MetricOptions& p_options, GlobalFunctionLocator*  m_fnLocator = NULL, const bool p_expanded = true);
 
 	virtual ~MetricPPConsumer(void);
 	virtual void ExecuteAction();

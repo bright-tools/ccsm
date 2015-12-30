@@ -31,11 +31,11 @@
 class MetricPPIncludeHandler : public clang::PPCallbacks
 {
 	private:
-		MetricOptions*        m_options;
+		const MetricOptions&  m_options;
 		clang::SourceManager& m_SM;
 		std::string&          m_currentFile;
     public:
-		MetricPPIncludeHandler(MetricOptions* p_options, clang::SourceManager& p_SM, std::string& p_currentFile);
+		MetricPPIncludeHandler(const MetricOptions& p_options, clang::SourceManager& p_SM, std::string& p_currentFile);
 		virtual ~MetricPPIncludeHandler( void );
 		virtual void FileChanged(clang::SourceLocation Loc, FileChangeReason Reason,
 							     clang::SrcMgr::CharacteristicKind FileType,

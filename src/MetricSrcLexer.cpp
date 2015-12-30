@@ -23,7 +23,7 @@
 
 #include <iostream>
 
-MetricSrcLexer::MetricSrcLexer(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, MetricOptions* p_options) : m_compilerInstance(p_CI), 
+MetricSrcLexer::MetricSrcLexer(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, const MetricOptions& p_options) : m_compilerInstance(p_CI), 
 	                                                                                                             m_topUnit( p_topUnit ), 
 	                                                                                                             m_options( p_options ),
 																												 m_currentUnit( NULL )
@@ -39,7 +39,7 @@ void MetricSrcLexer::LexSources( clang::CompilerInstance& p_ci, const Translatio
 	clang::Preprocessor &PP = p_ci.getPreprocessor();
 	clang::SourceManager &SM = p_ci.getSourceManager();
 
-	if( m_options->getDumpTokens() )
+	if( m_options.getDumpTokens() )
 	{
 		std::cout << std::endl << "Start lexing translation unit: " << SM.getFileEntryForID( SM.getMainFileID() )->getName() << std::endl;
 	}
@@ -74,9 +74,9 @@ void MetricSrcLexer::LexSources( clang::CompilerInstance& p_ci, const Translatio
 
 		// TODO: Need to differentiate between "non-function" and "whole-file" level counts - e.g. 
 		//  unique numerical constants that aren't in functions and unique numerical constants across the whole file
-		if( SHOULD_INCLUDE_FILE( m_options, fileName ))
+		if( m_options.ShouldIncludeFile( fileName ))
 		{
-			if( !m_options->isDefFile( fileName ))
+			if( !m_options.isDefFile( fileName ))
 			{
 				m_currentFileName = fileName;
 			}
@@ -91,7 +91,7 @@ void MetricSrcLexer::LexSources( clang::CompilerInstance& p_ci, const Translatio
 					std::string funcName = p_fnLocator->FindFunction( SM, tokenLoc, &fnEnd );
 					fnStart = tokenLoc;
 
-					if(( funcName.length() > 0 ) && m_options->getDumpTokens() )
+					if(( funcName.length() > 0 ) && m_options.getDumpTokens() )
 					{
 						std::cout << std::endl << "[fn:" << funcName << "@" << tokenLoc.getRawEncoding() << "-" << fnEnd.getRawEncoding() << "]" << std::endl << "  ";
 					}
@@ -100,7 +100,7 @@ void MetricSrcLexer::LexSources( clang::CompilerInstance& p_ci, const Translatio
 
 					if( m_currentFunctionName != "" ) 
 					{
-						if( SHOULD_INCLUDE_FUNCTION( m_options, m_currentFunctionName ))
+						if( m_options.ShouldIncludeFunction( m_currentFunctionName ))
 						{
 							m_currentUnit = fileUnit->getSubUnit(m_currentFunctionName, METRIC_UNIT_FUNCTION);
 						}
@@ -142,7 +142,7 @@ void MetricSrcLexer::LexSources( clang::CompilerInstance& p_ci, const Translatio
 		clang::StringRef Buffer = SM.getBufferData(fid, &Invalid);
 		std::string fileName = it->first->getName();
 
-		if (SHOULD_INCLUDE_FILE(m_options, fileName))
+		if (m_options.ShouldIncludeFile( fileName))
 		{
 			MetricUnit* fileUnit = m_topUnit->getSubUnit(fileName, METRIC_UNIT_FILE);
 			fileUnit->set(METRIC_TYPE_LINE_COUNT, countNewlines(Buffer));

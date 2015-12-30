@@ -134,7 +134,7 @@ const std::map<clang::tok::TokenKind, MetricType_e> MetricSrcExpandedLexer::m_to
     tokenKindToTypeMapData + sizeof tokenKindToTypeMapData / sizeof tokenKindToTypeMapData[0]);
 
 
-MetricSrcExpandedLexer::MetricSrcExpandedLexer(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, MetricOptions* p_options) : MetricSrcLexer( p_CI, p_topUnit, p_options ),
+MetricSrcExpandedLexer::MetricSrcExpandedLexer(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, const MetricOptions& p_options) : MetricSrcLexer( p_CI, p_topUnit, p_options ),
 																												 m_dumpNewline( false )
 {
 }
@@ -153,7 +153,7 @@ void MetricSrcExpandedLexer::ProcessToken(clang::Token& p_token)
 	std::string tok_data;
 	unsigned int tok_len = p_token.getLength();
 
-	if( m_options->getDumpTokens() )
+	if( m_options.getDumpTokens() )
 	{
 		std::cout << "(" << p_token.getName();
 	}
@@ -212,7 +212,7 @@ void MetricSrcExpandedLexer::ProcessToken(clang::Token& p_token)
 			break;
 	}
 
-	if( m_options->getDumpTokens() )
+	if( m_options.getDumpTokens() )
 	{
 		std::cout << "," << p_token.getLocation().getRawEncoding();
 		std::cout << "," << m_compilerInstance.getSourceManager().getFileLoc(p_token.getLocation()).getRawEncoding();

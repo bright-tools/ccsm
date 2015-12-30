@@ -54,10 +54,10 @@ private:
 	/** Map of file IDs and associated function position/name data */
 	SrcStartToFunctionMap_t m_map;
 	/** Reference to the options selected by the user */
-	MetricOptions&          m_options;
+	const MetricOptions&          m_options;
 
 public:
-	TranslationUnitFunctionLocator(MetricOptions& p_options);
+	TranslationUnitFunctionLocator(const MetricOptions& p_options);
 
 
 	void addFunctionLocation( const clang::ASTContext* const p_context, const std::string& p_name, const clang::FunctionDecl * const p_func );
@@ -79,10 +79,10 @@ class GlobalFunctionLocator
 		MainSrcToFnLocMap_t m_map;
 
 		/** Reference to the options selected by the user */
-		MetricOptions& m_options;
+		const MetricOptions& m_options;
 
 	public:
-		GlobalFunctionLocator(MetricOptions& p_options);
+		GlobalFunctionLocator(const MetricOptions& p_options);
 		TranslationUnitFunctionLocator* getLocatorFor(const std::string p_fileName);
 		virtual ~GlobalFunctionLocator();
 		void dump( std::ostream& p_out ) const;

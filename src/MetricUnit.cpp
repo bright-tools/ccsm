@@ -15,6 +15,7 @@
 */
 
 #include "MetricUnit.hpp"
+#include "MetricOptions.hpp"
 
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/MemoryBuffer.h"

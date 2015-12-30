@@ -35,13 +35,13 @@
 class MetricPPCustomer : public clang::PPCallbacks, public clang::CommentHandler
 {
 protected:
-	MetricUnit*		       m_topUnit;
-	MetricOptions*                    m_options;
+	MetricUnit*		                  m_topUnit;
+	const MetricOptions&              m_options;
 	std::string                       m_commentFile;
     std::set<std::string>*            m_commentFileList;
 
 public:
-	MetricPPCustomer( MetricUnit* p_topUnit, std::set<std::string>* p_commentFileList, MetricOptions* p_options = NULL );
+	MetricPPCustomer( MetricUnit* p_topUnit, std::set<std::string>* p_commentFileList, const MetricOptions& p_options );
 	virtual ~MetricPPCustomer();
 	virtual void InclusionDirective (clang::SourceLocation HashLoc, const clang::Token &IncludeTok, clang::StringRef FileName, bool IsAngled, clang::CharSourceRange FilenameRange, const clang::FileEntry *File, clang::StringRef SearchPath, clang::StringRef RelativePath, const clang::Module *Imported);
 	virtual bool HandleComment(clang::Preprocessor &PP, clang::SourceRange Loc);

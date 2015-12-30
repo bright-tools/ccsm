@@ -24,16 +24,6 @@
 #if !defined( METRIC_UNIT_HPP )
 #define       METRIC_UNIT_HPP
 
-#include "MetricOptions.hpp"
-
-typedef enum
-{
-	METRIC_DUMP_FORMAT_TREE,
-	METRIC_DUMP_FORMAT_SPARSE_TREE,
-	METRIC_DUMP_FORMAT_TSV,
-	METRIC_DUMP_FORMAT_CSV
-} MetricDumpFormat_e;
-
 typedef enum
 {
 #define METRIC_ALIAS( _name, _alias )
@@ -64,6 +54,8 @@ typedef enum {
 #include <map>
 #include <set>
 #include <stdint.h>
+
+class MetricOptions;
 
 class MetricUnit
 {
