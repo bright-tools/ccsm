@@ -32,6 +32,8 @@ private:
 	clang::tooling::CommonOptionsParser* m_optionsParser;
 	MetricOptions* m_metricOptions;
 
+	void checkCompilerArgs(const char* const exeName);
+
 public:
 
 	CcsmOptionsHandler();

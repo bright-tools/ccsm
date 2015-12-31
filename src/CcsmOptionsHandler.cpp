@@ -159,8 +159,10 @@ CcsmOptionsHandler::~CcsmOptionsHandler()
 	delete(m_metricOptions);
 }
 
+#include <iostream>
+
 void CcsmOptionsHandler::ParseOptions(int argc,
-                                                  const char ** const argv )
+                                      const char ** const argv )
 {
 	m_metricOptions = new MetricOptions(&ExcludeFileList, &ExcludeFunctionList, &OutputMetricList, &IncludeInParentFileList);
 	m_optionsParser = new clang::tooling::CommonOptionsParser(argc, argv, CCSMToolCategory);
@@ -178,6 +180,8 @@ void CcsmOptionsHandler::ParseOptions(int argc,
 	m_metricOptions->setOutputMetric(METRIC_UNIT_GLOBAL, !NoGlobal);
 
 	m_metricOptions->setDumpFnMap(DumpFnMap);
+
+	checkCompilerArgs(argv[0]);
 }
 
 const MetricOptions* CcsmOptionsHandler::getMetricOptions() const
@@ -205,15 +209,19 @@ clang::tooling::CommonOptionsParser* CcsmOptionsHandler::getOptionsParser() cons
 using namespace clang;
 using namespace clang::tooling;
 
-void processArgs(clang::tooling::CompilationDatabase& db, llvm::ArrayRef<std::string> SourcePaths, int argc, const char **argv)
+void ccsm_marker(void)
+{
+}
+
+void CcsmOptionsHandler::checkCompilerArgs(const char* const exeName)
 {
 	bool cppWarningDone = false;
-	std::string Path = llvm::sys::fs::getMainExecutable(argv[0], (void*)(intptr_t)processArgs);
+	std::string Path = llvm::sys::fs::getMainExecutable(exeName, (void*)(intptr_t)ccsm_marker);
 	std::string TripleStr = llvm::sys::getProcessTriple();
 	llvm::Triple T(TripleStr);
-	for (const auto &SourcePath : SourcePaths) {
+	for (const auto &SourcePath : m_optionsParser->getSourcePathList() ) {
 		std::string File(getAbsolutePath(SourcePath));
-		std::vector<CompileCommand> CompileCommandsForFile = db.getCompileCommands(File);
+		std::vector<CompileCommand> CompileCommandsForFile = m_optionsParser->getCompilations().getCompileCommands(File);
 		for (CompileCommand &CompileCommand : CompileCommandsForFile) {
 			std::vector<std::string> CommandLine = CompileCommand.CommandLine;
 			std::vector<const char*> Args;
