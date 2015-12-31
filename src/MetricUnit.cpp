@@ -484,7 +484,10 @@ MetricUnit* MetricUnit::getSubUnit( const std::string& p_name, const MetricUnitT
 				    "a\directory\here/header.h" */
 				llvm::SmallString<INT16_MAX> NativeNameBuf(p_name);
 				llvm::sys::path::native(NativeNameBuf);
-				ret_val->m_alias = NativeNameBuf.c_str();
+				/* TODO: This stores only the filename.  Ideally it would store the relative path of the file,
+				         however clang doesn't seem to retain this anywhere - all paths get coverted to
+						 absolute paths */
+				ret_val->m_alias = llvm::sys::path::filename(NativeNameBuf);
 			}
 			m_subUnits[ name ] = ret_val;
 		}
