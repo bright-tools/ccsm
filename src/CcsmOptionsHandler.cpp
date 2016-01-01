@@ -20,6 +20,9 @@
 #include "MetricUnit.hpp"
 
 #include "llvm/Support/CommandLine.h"
+#include "clang/Basic/Version.h"
+
+#include <iostream>
 
 // Set up the command line options
 static llvm::cl::OptionCategory CCSMToolCategory("ccsm options");
@@ -149,8 +152,16 @@ static llvm::cl::list<std::string, std::vector<std::string>> OutputOnlyMetrics(
 
 static llvm::cl::extrahelp MoreHelp("\nVersion: " GEN_VER_VERSION_STRING);
 
+static void PrintVersion() {
+	std::cout << "CCSM (https://github.com/bright-tools/ccsm):" << '\n'
+	          << "  CCSM version " << GEN_VER_VERSION_STRING << '\n'
+			  << "  Built " << __DATE__ << " (" << __TIME__ << ").\n"
+	          << "Using " << clang::getClangFullVersion() << '\n';
+}
+
 CcsmOptionsHandler::CcsmOptionsHandler() : m_optionsParser(NULL), m_metricOptions( NULL )
 {
+	llvm::cl::SetVersionPrinter(PrintVersion);
 }
 
 CcsmOptionsHandler::~CcsmOptionsHandler()
@@ -158,8 +169,6 @@ CcsmOptionsHandler::~CcsmOptionsHandler()
 	delete(m_optionsParser);
 	delete(m_metricOptions);
 }
-
-#include <iostream>
 
 void CcsmOptionsHandler::ParseOptions(int argc,
                                       const char ** const argv )
