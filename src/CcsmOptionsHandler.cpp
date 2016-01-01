@@ -43,7 +43,7 @@ static llvm::cl::list<std::string, std::vector<std::string>> ExcludeFiles(
 	llvm::cl::location(ExcludeFileList),
 	llvm::cl::cat(CCSMToolCategory));
 
-std::vector<std::string> IncludeInParentFileList;
+static std::vector<std::string> IncludeInParentFileList;
 
 static llvm::cl::list<std::string, std::vector<std::string>> IncludeInParentFiles(
 	"def-file",
