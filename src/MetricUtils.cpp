@@ -56,3 +56,124 @@ extern size_t countNewlines( clang::StringRef& p_buffer )
 	}
 	return cnt;
 }
+
+#include <direct.h>
+#include "llvm/support/path.h"
+
+#ifdef LLVM_ON_WIN32
+#define HANDLE_CHAR_CASE( _x ) tolower(_x)
+#else
+#define HANDLE_CHAR_CASE( _x ) (_x)
+#endif
+
+#if 0
+void test()
+{
+	std::cout << makeRelative("C:\\foo.h", "C:\\" ) << std::endl;
+	std::cout << makeRelative("C:\\foo.h", "C:\\Windows") << std::endl;
+	std::cout << makeRelative("C:\\foo.h", "C:\\Windows\\") << std::endl;
+	std::cout << makeRelative("F:\\foo.h", "C:\\Windows\\") << std::endl;
+	std::cout << makeRelative("C:\\Temp\\foo.h", "C:\\Windows\\") << std::endl;
+	std::cout << makeRelative("c:\\WINDOWS\\foo.h", "C:\\Windows\\") << std::endl;
+	std::cout << makeRelative("c:\\WINDOWS\\jimbo\\zooma\\foo.h", "C:\\Windows\\") << std::endl;
+	std::cout << makeRelative("c:\\WINDOWS\\jimbo\\zooma\\foo.h", "C:\\Windows") << std::endl;
+	std::cout << makeRelative("c:\\WINDOWS", "C:\\Windows") << std::endl;
+	std::cout << makeRelative("c:\\WINDOW", "C:\\Windows") << std::endl;
+	std::cout << makeRelative("c:\\WINDOWS", "C:\\Window") << std::endl;
+	std::cout << makeRelative("c:\\WINDOW\\", "C:\\Windows") << std::endl;
+	std::cout << makeRelative("c:\\WINDOWS\\", "C:\\Window") << std::endl;
+	std::cout << makeRelative("c:\\WINDOW", "C:\\Windows\\") << std::endl;
+	std::cout << makeRelative("c:\\WINDOWS", "C:\\Window\\") << std::endl;
+}
+#endif
+
+std::string makeRelative(const std::string& p_path, const std::string& p_cwd)
+{
+	std::string ret_val;
+	const std::string sep = llvm::sys::path::get_separator();
+
+	size_t path_pos = p_path.find(sep);
+	size_t cwd_pos = p_cwd.find(sep);
+
+	/* If the first character is a separator, then we're using UNIX-style paths.  Otherwise
+	   case-insensitively compare the roots (e.g. 'C:') - if these are different then we can't
+	   construct a relative path */
+	if (llvm::sys::path::is_separator(p_cwd[0]) ||
+		(stricmp(p_path.substr(0, path_pos).c_str(), p_cwd.substr(0, cwd_pos).c_str()) == 0))
+	{
+		const size_t shortest = (p_cwd.length() < p_path.length()) ? p_cwd.length() : p_path.length();
+		size_t pos;
+		size_t last_sep = 0;
+		ret_val = "";
+
+		/* Determine the extent to which the paths match */
+		for (pos = 0;
+			 pos < shortest;
+			 pos++)
+		{
+			/* Paths no longer match, so break out */
+			if (HANDLE_CHAR_CASE(p_cwd[pos]) != HANDLE_CHAR_CASE(p_path[pos]))
+			{
+				break;
+			}
+			if (llvm::sys::path::is_separator(p_cwd[pos]))
+			{
+				last_sep = pos;
+			}
+		}
+
+		/* Was there a mis-match part way through a string (e.g. 'window' vs 'windows')?  If so, we need to treat them as different and
+		   back-track to the last separator */
+		if ((pos < p_path.length() && !(llvm::sys::path::is_separator(p_path[pos]) || llvm::sys::path::is_separator(p_path[pos-1]))) ||
+		    (pos < p_cwd.length() && !(llvm::sys::path::is_separator(p_cwd[pos]) || llvm::sys::path::is_separator(p_cwd[pos - 1]))))
+		{
+			pos = last_sep+1;
+		}
+
+		/* Is the last matching point higher in the directory tree than the CWD?*/
+		if (pos < p_cwd.length())
+		{
+			/* Add ".." backtracks for each separator */
+			for (size_t back = pos;
+				back < p_cwd.length();
+				back++)
+			{
+				if (llvm::sys::path::is_separator(p_cwd[back]))
+				{
+					ret_val += ".." + sep;
+				}
+			}
+			/* If the cwd didn't end in a separator then we need to add an additional backtrack */
+			if (! llvm::sys::path::is_separator(p_cwd[p_cwd.length() - 1]))
+			{
+				ret_val += ".." + sep;
+			}
+		}
+
+#if 1
+		/* Append the remaining non-matching part of p_path.  If it starts with a separator, ignore it */
+		if (llvm::sys::path::is_separator(p_path[pos]))
+		{
+			pos++;
+		}
+#endif
+		ret_val += p_path.substr(pos);
+
+		if (ret_val.length() == 0)
+		{
+			ret_val = ".";
+		}
+	}
+	else
+	{
+		ret_val = p_path;
+	}
+
+	return ret_val;
+}
+
+std::string makeRelative(const std::string& p_path)
+{
+	const std::string cwd = _getcwd(NULL, 0);
+	return makeRelative(p_path, cwd);
+}

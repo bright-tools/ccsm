@@ -16,6 +16,7 @@
 
 #include "MetricUnit.hpp"
 #include "MetricOptions.hpp"
+#include "MetricUtils.hpp"
 
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/MemoryBuffer.h"
@@ -480,14 +481,7 @@ MetricUnit* MetricUnit::getSubUnit( const std::string& p_name, const MetricUnitT
 			{
 				this->increment( METRIC_TYPE_FILES );
 
-				/* Make the filename native.  This avoids situations where there are mixed separators, e.g.
-				    "a\directory\here/header.h" */
-				llvm::SmallString<INT16_MAX> NativeNameBuf(p_name);
-				llvm::sys::path::native(NativeNameBuf);
-				/* TODO: This stores only the filename.  Ideally it would store the relative path of the file,
-				         however clang doesn't seem to retain this anywhere - all paths get coverted to
-						 absolute paths */
-				ret_val->m_alias = llvm::sys::path::filename(NativeNameBuf);
+				ret_val->m_alias = makeRelative(name);
 			}
 			m_subUnits[ name ] = ret_val;
 		}
