@@ -15,12 +15,14 @@
 */
 
 #include "FunctionLocator.hpp"
+#include "MetricUtils.hpp"
 
 #include "clang/AST/Stmt.h"
 #include "clang/Basic/SourceLocation.h"
 #include "clang/AST/ASTContext.h"
 
 #include <iostream>
+#include <string.h>
 
 GlobalFunctionLocator::GlobalFunctionLocator(const MetricOptions& p_options) : m_options(p_options)
 {
@@ -52,7 +54,12 @@ void GlobalFunctionLocator::dump( std::ostream& p_out ) const
 		 it != m_map.end();
 		 it++ )
 	{
-		p_out << "Translation Unit: " << it->first << std::endl;
+		std::string fileName = it->first;
+		if (!m_options.getUseAbsoluteFileNames())
+		{
+			fileName = makeRelative(fileName);
+		}
+		p_out << "Translation Unit: " << fileName << std::endl;
 		it->second->dump( p_out );
 	}
 }
