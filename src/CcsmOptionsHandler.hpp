@@ -32,7 +32,12 @@ private:
 	clang::tooling::CommonOptionsParser* m_optionsParser;
 	MetricOptions* m_metricOptions;
 
+	void analyseCompilerArgs(const char* const exeName);
 	void checkCompilerArgs(const char* const exeName);
+
+	bool m_usesC11;
+	bool m_usesC99;
+	bool m_usesCpp;
 
 public:
 

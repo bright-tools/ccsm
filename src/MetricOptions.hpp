@@ -49,6 +49,7 @@ protected:
 	bool m_prototypesAreFileScope;
 	bool m_useAbsoluteFileNames;
 	bool m_dumpFnMap;
+	bool m_excludeStdHeaders;
 	MetricDumpFormat_e m_outputFormat;
 	bool m_outputMetric[METRIC_UNIT_MAX];
 
@@ -79,6 +80,8 @@ public:
 	bool getOutputMetric(const MetricUnitType_e p_metric) const;
 	void setDumpFnMap(const bool p_dump);
 	bool getDumpFnMap(void) const;
+	void setExcludeStdHeaders(const bool p_exclude);
+	bool getExcludeStdHeaders(void) const;
 };
 
 #endif

@@ -210,3 +210,13 @@ bool MetricOptions::getDumpFnMap(void) const
 {
 	return m_dumpFnMap;
 }
+
+void MetricOptions::setExcludeStdHeaders(const bool p_exclude)
+{
+	m_excludeStdHeaders = p_exclude;
+}
+
+bool MetricOptions::getExcludeStdHeaders(void) const
+{
+	return m_excludeStdHeaders;
+}

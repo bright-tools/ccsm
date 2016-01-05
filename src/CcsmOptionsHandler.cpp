@@ -51,7 +51,7 @@ static std::vector<std::string> IncludeInParentFileList;
 static llvm::cl::list<std::string, std::vector<std::string>> IncludeInParentFiles(
 	"def-file",
 	llvm::cl::desc("Specifies files whose contents should not be individually counted and should be included in the including file.  Intended to help support the def file idiom"),
-	llvm::cl::CommaSeparated,
+	llvm::cl::CommaSeparated, 
 	llvm::cl::ZeroOrMore,
 	llvm::cl::location(IncludeInParentFileList),
 	llvm::cl::cat(CCSMToolCategory));
@@ -66,6 +66,13 @@ static llvm::cl::opt<bool> UseShortNames(
 static llvm::cl::opt<bool> UseAbsoluteFileNames(
 	"output-absolute-fn",
 	llvm::cl::desc("Use absolute filenames in the output"),
+	llvm::cl::init(false),
+	llvm::cl::cat(CCSMToolCategory)
+	);
+
+static llvm::cl::opt<bool> ExcludeStandardHeaders(
+	"exclude-std-headers",
+	llvm::cl::desc("Exclude standard library headers"),
 	llvm::cl::init(false),
 	llvm::cl::cat(CCSMToolCategory)
 	);
@@ -182,6 +189,7 @@ void CcsmOptionsHandler::ParseOptions(int argc,
 	m_metricOptions->setUseAbsoluteFileNames(UseAbsoluteFileNames);
 	m_metricOptions->setPrototypesAreFileScope(PrototypesAreFileScope);
 	m_metricOptions->setOutputFormat(OutputFormat);
+	m_metricOptions->setExcludeStdHeaders(ExcludeStandardHeaders);
 
 	m_metricOptions->setOutputMetric(METRIC_UNIT_METHOD, !NoMethod);
 	m_metricOptions->setOutputMetric(METRIC_UNIT_FUNCTION, !NoFunction);
@@ -203,6 +211,74 @@ clang::tooling::CommonOptionsParser* CcsmOptionsHandler::getOptionsParser() cons
 	return m_optionsParser;
 }
 
+const std::set<std::string> c99_std_headers = { "assert.h",  "inttypes.h", "signal.h",  "stdlib.h",
+                                                "complex.h", "iso646.h",   "stdarg.h",  "string.h",
+                                                "ctype.h",   "limits.h",   "stdbool.h", "tgmath.h",
+                                                "errno.h",   "locale.h",   "stddef.h",  "time.h",
+                                                "fenv.h",    "math.h",     "stdint.h",  "wchar.h",
+                                                "float.h",   "setjmp.h",   "stdio.h",   "wctype.h"};
+
+const std::set<std::string> c11_std_headers = { "assert.h",   "math.h",      "stdlib.h",
+										        "complex.h",  "setjmp.h",    "stdnoreturn.h",
+                                                "ctype.h",    "signal.h",    "string.h",
+												"errno.h",    "stdalign.h",  "tgmath.h",
+											    "fenv.h",     "stdarg.h",    "threads.h",
+												"float.h",    "stdatomic.h", "time.h",
+											    "inttypes.h", "stdbool.h",   "uchar.h",
+                                                "iso646.h",   "stddef.h",    "wchar.h",
+												"limits.h",   "stdint.h",    "wctype.h",
+												"locale.h",   "stdio.h" };
+
+const std::set<std::string> cpp_std_headers = { "algorithm",          "fstream",          "list",      "regex",            "tuple",
+                                                "array",              "functional",       "locale",    "scoped_allocator", "type_traits",
+                                                "atomic",             "future",           "map",       "set",              "typeindex", 
+                                                "bitset",             "initializer_list", "memory",    "sstream",          "typeinfo",
+                                                "chrono",             "iomanip",          "mutex",     "stack",            "unordered_map",
+                                                "codecvt",            "ios",              "new",       "stdexcept",        "unordered_set",
+                                                "complex",            "iosfwd",           "numeric",   "streambuf",        "utility",
+                                                "condition_variable", "iostream",         "ostream",   "string",           "valarray",
+                                                "deque",              "istream",          "queue",     "strstream",        "vector",
+                                                "exception",          "iterator",         "random",    "system_error",
+                                                "forward_list",       "limits",           "ratio",     "thread",
+												/* C++ headers for C library functions */
+                                                "cassert",            "cinttypes",        "csignal",   "cstdio",           "cwchar",
+                                                "ccomplex",           "ciso646",          "cstdalign", "cstdlib",          "cwctype",
+                                                "cctype",             "climits",          "cstdarg",   "cstring",
+                                                "cerrno",             "clocale",          "cstdbool",  "ctgmath",
+                                                "cfenv",              "cmath",            "cstddef",   "ctime",
+                                                "cfloat",             "csetjmp",          "cstdint",   "cuchar"
+};
+
+
+void CcsmOptionsHandler::checkCompilerArgs(const char* const exeName)
+{
+	analyseCompilerArgs(exeName);
+
+	if (m_usesCpp)
+	{
+		std::cerr << "WARNING: Proper support for C++ language constructs is not currently implemented";
+
+	}
+
+	if (m_metricOptions->getExcludeStdHeaders())
+	{
+		if (m_usesCpp)
+		{
+			ExcludeFileList.insert(ExcludeFileList.end(), cpp_std_headers.begin(), cpp_std_headers.end());
+		}
+
+		if (m_usesC99)
+		{
+			ExcludeFileList.insert(ExcludeFileList.end(), c99_std_headers.begin(), c99_std_headers.end());
+		}
+
+		if (m_usesC11)
+		{
+			ExcludeFileList.insert(ExcludeFileList.end(), c11_std_headers.begin(), c11_std_headers.end());
+		}
+	}
+}
+
 #include "clang/Frontend/TextDiagnosticPrinter.h"
 #include "clang/Driver/Driver.h"
 #include "clang/Driver/Compilation.h"
@@ -222,12 +298,16 @@ void ccsm_marker(void)
 {
 }
 
-void CcsmOptionsHandler::checkCompilerArgs(const char* const exeName)
+void CcsmOptionsHandler::analyseCompilerArgs(const char* const exeName)
 {
-	bool cppWarningDone = false;
 	std::string Path = llvm::sys::fs::getMainExecutable(exeName, (void*)(intptr_t)ccsm_marker);
 	std::string TripleStr = llvm::sys::getProcessTriple();
 	llvm::Triple T(TripleStr);
+
+	m_usesCpp = false;
+	m_usesC11 = false;
+	m_usesC99 = false;
+
 	for (const auto &SourcePath : m_optionsParser->getSourcePathList() ) {
 		std::string File(getAbsolutePath(SourcePath));
 		std::vector<CompileCommand> CompileCommandsForFile = m_optionsParser->getCompilations().getCompileCommands(File);
@@ -256,10 +336,17 @@ void CcsmOptionsHandler::checkCompilerArgs(const char* const exeName)
 				CCArgs.size(),
 				Diags);
 
-			if ((*CI).getLangOpts()->CPlusPlus && !cppWarningDone)
+			if ((*CI).getLangOpts()->CPlusPlus)
 			{
-				std::cerr << "WARNING: Proper support for C++ language constructs is not currently implemented";
-				cppWarningDone = true;
+				m_usesCpp = true;
+			}
+			else if ((*CI).getLangOpts()->C99)
+			{
+				m_usesC99 = true;
+			}
+			else if ((*CI).getLangOpts()->C11)
+			{
+				m_usesC11 = true;
 			}
 		}
 	}
