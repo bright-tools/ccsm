@@ -34,7 +34,8 @@ static llvm::cl::list<std::string, std::vector<std::string>> ExcludeFunctions(
 	llvm::cl::desc("Exclude specified function from the metrics"),
 	llvm::cl::CommaSeparated,
 	llvm::cl::ZeroOrMore,
-	llvm::cl::location(ExcludeFunctionList));
+	llvm::cl::location(ExcludeFunctionList),
+	llvm::cl::cat(CCSMToolCategory));
 
 static std::vector<std::string> ExcludeFileList;
 
@@ -157,6 +158,12 @@ static llvm::cl::list<std::string, std::vector<std::string>> OutputOnlyMetrics(
 	llvm::cl::location(OutputMetricList),
 	llvm::cl::cat(CCSMToolCategory));
 
+static llvm::cl::opt<std::string> OutputToFile(
+	"output-to-file",
+	llvm::cl::desc("Specify a file to sent the output to"),
+	llvm::cl::Optional,
+	llvm::cl::cat(CCSMToolCategory));
+
 static llvm::cl::extrahelp MoreHelp("\nVersion: " GEN_VER_VERSION_STRING);
 
 static void PrintVersion() {
@@ -190,6 +197,7 @@ void CcsmOptionsHandler::ParseOptions(int argc,
 	m_metricOptions->setPrototypesAreFileScope(PrototypesAreFileScope);
 	m_metricOptions->setOutputFormat(OutputFormat);
 	m_metricOptions->setExcludeStdHeaders(ExcludeStandardHeaders);
+	m_metricOptions->setOutputFile(OutputToFile);
 
 	m_metricOptions->setOutputMetric(METRIC_UNIT_METHOD, !NoMethod);
 	m_metricOptions->setOutputMetric(METRIC_UNIT_FUNCTION, !NoFunction);

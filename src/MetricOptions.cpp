@@ -220,3 +220,13 @@ bool MetricOptions::getExcludeStdHeaders(void) const
 {
 	return m_excludeStdHeaders;
 }
+
+void MetricOptions::setOutputFile(const std::string p_fileName)
+{
+	m_outputFileName = p_fileName;
+}
+
+std::string MetricOptions::getOutputFile(void) const
+{
+	return m_outputFileName;
+}

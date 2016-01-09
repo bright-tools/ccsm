@@ -25,6 +25,7 @@
 #include "llvm/Support/Signals.h" 
 
 #include <iostream>
+#include <fstream>
 
 int main(int argc, const char **argv) {
 	MetricUnit topUnit( NULL, "Global", METRIC_UNIT_GLOBAL);
@@ -65,22 +66,42 @@ int main(int argc, const char **argv) {
 		// Success?
 		if( Result == 0 )
 		{
+			std::ostream* outputStream = &(std::cout);
+			const std::string outputFileName = metricOptions.getOutputFile();
+			std::ofstream outputFile;
+
+			/* If the user specified a file to sent the output to, try and open it and set the output
+			   stream point to that handle */
+			if (outputFileName.length())
+			{
+				outputFile.open(outputFileName);
+				if (outputFile.is_open())
+				{
+					outputStream = &(outputFile);
+				}
+				else
+				{
+					std::cerr << "Could not open specified output file '" << outputFileName << "'" << std::endl;
+					Result = EXIT_FAILURE;
+				}
+			}
+
 			// Time to dump the results
 			if (metricOptions.getDumpFnMap())
 			{
-				srcMap.dump( std::cout );
+				srcMap.dump(*outputStream);
 			}
 
-			MetricDumper::dump(std::cout, &topUnit, metricOptions);
+			MetricDumper::dump(*outputStream, &topUnit, metricOptions);
 		}
 		else
 		{
-			std::cout << "Tool.run returned " << Result << std::endl;
+			std::cerr << "Tool.run returned " << Result << std::endl;
 		}
 	}
 	else
 	{
-		std::cout << "Tool.run returned " << Result << std::endl;
+		std::cerr << "Tool.run returned " << Result << std::endl;
 	}
 
 	return Result;

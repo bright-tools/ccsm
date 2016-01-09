@@ -52,6 +52,7 @@ protected:
 	bool m_excludeStdHeaders;
 	MetricDumpFormat_e m_outputFormat;
 	bool m_outputMetric[METRIC_UNIT_MAX];
+	std::string m_outputFileName;
 
 	bool isFileInList( const std::vector<std::string>* const p_list, const std::string& p_name ) const;
 public:
@@ -82,6 +83,8 @@ public:
 	bool getDumpFnMap(void) const;
 	void setExcludeStdHeaders(const bool p_exclude);
 	bool getExcludeStdHeaders(void) const;
+	void setOutputFile(const std::string p_fileName);
+	std::string getOutputFile(void) const;
 };
 
 #endif
