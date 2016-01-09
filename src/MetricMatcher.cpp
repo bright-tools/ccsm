@@ -65,7 +65,7 @@ const std::map<clang::BinaryOperator::Opcode, MetricType_e> MetricVisitor::binar
 	binaryOperatorToMetricPairs + sizeof binaryOperatorToMetricPairs / sizeof binaryOperatorToMetricPairs[0]);
 
 
-MetricVisitor::MetricVisitor(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, MetricOptions* p_options, TranslationUnitFunctionLocator* p_fnLocator) : 
+MetricVisitor::MetricVisitor(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, const MetricOptions& p_options, TranslationUnitFunctionLocator* p_fnLocator) : 
 	                                                                                                           m_compilerInstance(p_CI), 
 																											   m_astContext(&(p_CI.getASTContext())),
 	                                                                                                           m_topUnit( p_topUnit ), 
@@ -95,7 +95,7 @@ std::string MetricVisitor::getDefResolvedFileName( const clang::SourceLocation &
 	std::cout << "getDefResolvedFileName - CONTEXT " << m_currentFileName << "::" << m_currentFunctionName << std::endl;
 #endif
 
-	while( m_options->isDefFile( declFn ) && sLoc.isValid() )
+	while( m_options.isDefFile( declFn ) && sLoc.isValid() )
 	{
 		clang::FullSourceLoc sl = m_astContext->getFullLoc( sLoc );
 		sLoc = sm.getIncludeLoc( sl.getFileID() );
@@ -383,7 +383,7 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 		}
 
 		if( ShouldIncludeFile( m_currentFileName ) && 
-			SHOULD_INCLUDE_FUNCTION( m_options, m_currentFunctionName ))
+			m_options.ShouldIncludeFunction( m_currentFunctionName ))
 		{
 			/* Ensure that there is a file-level sub-unit */
 			MetricUnit* fileUnit = m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE);
@@ -549,7 +549,7 @@ bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 		const bool isConst = p_varDec->getType().isConstQualified();
 
 		/* Is this a function parameter which should be attributed to file scope? */
-		if (m_options->getPrototypesAreFileScope() &&
+		if (m_options.getPrototypesAreFileScope() &&
 			(p_varDec->getKind() == clang::Decl::ParmVar))
 		{
 			owner = m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE);
@@ -632,6 +632,10 @@ bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 			if (p_varDec->getAnyInitializer() != NULL)
 			{
 				IncrementMetric(m_currentUnit, METRIC_TYPE_STATEMENTS);
+				if (!p_varDec->getLocStart().isMacroID())
+				{
+					m_currentUnit->increment(METRIC_TYPE_TOKEN_STATEMENTS);
+				}
 			}
 
 		} else if (p_varDec->getKind() == clang::Decl::ParmVar)
@@ -686,7 +690,7 @@ bool MetricVisitor::VisitLabelStmt(clang::LabelStmt *p_LabelSt)
 {
 	if( m_currentUnit )
 	{
-		IncrementMetric( m_currentUnit, METRIC_TYPE_LABEL );
+		IncrementMetric(m_currentUnit, METRIC_TYPE_LABEL_NAME );
 	}
     return true;
 }
@@ -779,7 +783,7 @@ bool MetricVisitor::VisitCallExpr(clang::CallExpr *p_callExpr)
 
 						if (ShouldIncludeFile(name))
 						{
-							if (SHOULD_INCLUDE_FUNCTION(m_options, calleeName))
+							if (m_options.ShouldIncludeFunction( calleeName))
 							{
 								MetricUnit* fileUnit = m_topUnit->getSubUnit(name, METRIC_UNIT_FILE);
 								MetricUnit* targFn = fileUnit->getSubUnit(calleeName, METRIC_UNIT_FUNCTION);
@@ -1051,6 +1055,10 @@ bool MetricVisitor::VisitStmt(clang::Stmt *p_statement)
 			case clang::Stmt::BreakStmtClass:
 			case clang::Stmt::ReturnStmtClass:
 				IncrementMetric(m_currentUnit, METRIC_TYPE_STATEMENTS);
+				if (! p_statement->getLocStart().isMacroID())
+				{
+					m_currentUnit->increment(METRIC_TYPE_TOKEN_STATEMENTS);
+				}
 				break;
 			default:
 				break;
@@ -1174,7 +1182,7 @@ bool MetricVisitor::TraverseDecl(clang::Decl *p_decl)
 				fileUnit->set( METRIC_TYPE_BYTE_COUNT, (*x).first->getSize() );
 			}
 		}
-		if (m_options->getDumpAST())
+		if (m_options.getDumpAST())
 		{
 			p_decl->dump();
 		}
@@ -1220,6 +1228,10 @@ void MetricVisitor::CountStatements(const clang::Stmt* const p_stmt)
 
 			default:
 				IncrementMetric(m_currentUnit, METRIC_TYPE_STATEMENTS);
+				if (!p_stmt->getLocStart().isMacroID())
+				{
+					m_currentUnit->increment(METRIC_TYPE_TOKEN_STATEMENTS);
+				}
 				break;
 		}
 	}
@@ -1275,7 +1287,7 @@ bool MetricVisitor::ShouldIncludeFile( const std::string& p_file )
 {
 	// TODO: Ensure this function is sane with regard to different directory separator styles - \ vs /
 	bool ret_val = false;
-	if( SHOULD_INCLUDE_FILE( m_options, p_file ) )
+	if( m_options.ShouldIncludeFile( p_file ) )
 	{
 		ret_val = true;
 	}

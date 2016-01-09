@@ -3,6 +3,9 @@ set(LLVM_USED_LIBS clangTooling clangBasic clangAST)
 
 set(SOURCES 
   ccsm.cpp
+  ccsm_ver.h
+  CcsmOptionsHandler.hpp
+  CcsmOptionsHandler.cpp
   MetricMatcher.hpp
   MetricMatcher.cpp
   MetricUnit.hpp
@@ -41,3 +44,8 @@ target_link_libraries(ccsm
   clangASTMatchers
   )
 
+add_custom_command( TARGET ccsm
+    PRE_BUILD
+    COMMAND ${CCSM_DIR}\\externals\\git-vs-versioninfo-gen\\GIT-VS-VERSION-GEN.bat "${CCSM_DIR}" "${CCSM_DIR}\\src\\ccsm_ver.h" 
+    WORKING_DIRECTORY ${CCSM_DIR}
+)

@@ -377,7 +377,7 @@ HIS Metrics Support
 | CALLING     | Implemented - `HIS_CALLING`                       | Number of different functions calling this function.  Note that functions called via function pointer are not counted.|
 | CALLS       | Implemented - `OP_FN_CALL_CNT`                    | Number of different functions called.  Note that functions called via function pointer are not counted |
 | PARAM       | Implemented - `STMT_HIS_PARAM`                    | Number of function parameters.  Note that only one variant of this metric exists as parameters hidden within macros are still parameters. |
-| STMT        | Implemented - `TOK_HIS_STMT`                      | Number of instructions per function. |
+| STMT        | Implemented - `STMT_CNT` and `RAW_STMT_CNT`       | Number of instructions per function. |
 | LEVEL       | Implemented - `FUNC_DEPTH`                        | Nesting depth within a function.  Note that HIS says that this is defined as "Maximum nesting levels within a function + 1", however the allowable range is 0-4, which doesn't seem consistent.  `FUNC_DEPTH` in this implementation is zero for an empty function |
 | RETURN      | Implemented - `RETURN_POINT_CNT`                  | Number of return points in a function.  Note that only one variant of this metric exists as return points hidden within macros are still return points.  Note Issue #54 with respect to this metric. |
 | S           | Not planned                                       | |
@@ -389,7 +389,29 @@ HIS Metrics Support
 Building The Project
 ====================
 
-TODO
+Before starting, please ensure that you have a command-line version of git
+installed.  If you are using Windows, you must ensure that git is available 
+to Windows Command Prompt.
+
+To build the project you will need to be able to compile Clang.  See the
+[instructions](http://clang.llvm.org/get_started.html).  Currently I use Visual
+Studio 2013 for builds.
+
+Follow the instructions up to the point where you have checked out Clang, 
+then open the file `llvm\tools\clang\tools\CMakeLists.txt` and add the following 
+lines:
+
+    set(CCSM_DIR F:\\WORK\\GIT\\CCSM\\)
+    add_subdirectory(${CCSM_DIR}\\SRC ${CMAKE_CURRENT_BINARY_DIR}/ccsm)
+
+You will need to modify the path to point to wherever your clone of the CCSM
+project is, but note that
+1.  The path in the first line should point to the 'src' subdirectory of the clone
+2.  Path separators either need to be escaped (using double backslashes instead of
+    single backslashes) 
+
+After that, follow the remainder of the instructions for building Clang.  CCSM
+should be build as part of the complete Clang build.
 
 Code Structure
 ==============
@@ -424,7 +446,17 @@ Statement Counting
 
 Statement counting is based on the definition provided in the C language specification, namely
 
-"A statement specifies an action to be performed"
+> "A statement specifies an action to be performed"
+
+Syntactically it is defined as:
+
+> statement:
+>    labeled-statement
+>    compound-statement
+>    expression-statement
+>    selection-statement
+>    iteration-statement
+>    jump-statement
 
 The following are not counted as statements, as they do not result in any operation being performed:
 * Compound statements, as by themselves they serve only as a method of creating a block.
@@ -449,6 +481,12 @@ Once expanded, the above is clearly a declaration, as compared to:
     A var;
 
 which, once expanded, is not a declaration.
+
+Currently each macro usage is counted as a single statement statement.  In
+some cases this will distort the statement counting unnecessarily, however not
+counting macro usages at all would most likely under-represent the complexity of
+the code in most cases, hence this seems to be the lesser of the two evils.  An
+option to inhibit this functionality could be added in future.
 
 Function and File Scoping
 =========================

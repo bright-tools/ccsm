@@ -17,6 +17,8 @@
 #include "MetricUnit.hpp"
 #include "MetricOptions.hpp"
 
+#include <algorithm>
+
 static const std::pair<std::string, std::string> metricAliasListData[] =
 {
 #define METRIC_ALIAS( _name, _alias ) std::make_pair( _name, _alias ),
@@ -36,7 +38,8 @@ MetricOptions::MetricOptions( std::vector<std::string>* const p_excludeFiles,
 	  OutputMetrics( p_outputMetrics ), DefFiles( p_defFiles ),
 	  m_dumpTokens( false ),
 	  m_dumpAST( false ),
-	  m_useShortNames( false )
+	  m_useShortNames( false ),
+	  m_useAbsoluteFileNames( false )
 {
 }
 
@@ -90,8 +93,6 @@ bool MetricOptions::ShouldIncludeMetric( const std::string& p_name, bool p_check
 	}
 	else
 	{
-		bool metricOutput[METRIC_TYPE_MAX] = { 0 };
-
 		for( std::vector<std::string>::const_iterator it = OutputMetrics->begin();
 		     (it != OutputMetrics->end()) && !ret_val;
 			 it++ )
@@ -168,4 +169,54 @@ void MetricOptions::setPrototypesAreFileScope(const bool p_proto)
 bool MetricOptions::getPrototypesAreFileScope(void) const
 {
 	return m_prototypesAreFileScope;
+}
+
+void MetricOptions::setUseAbsoluteFileNames(const bool p_absoluteFn)
+{
+	m_useAbsoluteFileNames = p_absoluteFn;
+}
+
+bool MetricOptions::getUseAbsoluteFileNames(void) const
+{
+	return m_useAbsoluteFileNames;
+}
+
+void MetricOptions::setOutputFormat(const MetricDumpFormat_e p_outputFormat)
+{
+	m_outputFormat = p_outputFormat;
+}
+
+MetricDumpFormat_e MetricOptions::getOutputFormat(void) const
+{
+	return m_outputFormat;
+}
+
+void MetricOptions::setOutputMetric(const MetricUnitType_e p_metric, const bool p_output)
+{
+	m_outputMetric[p_metric] = p_output;
+}
+
+bool MetricOptions::getOutputMetric(const MetricUnitType_e p_metric) const
+{
+	return m_outputMetric[p_metric];
+}
+
+void MetricOptions::setDumpFnMap(const bool p_dump)
+{
+	m_dumpFnMap = p_dump;
+}
+
+bool MetricOptions::getDumpFnMap(void) const
+{
+	return m_dumpFnMap;
+}
+
+void MetricOptions::setExcludeStdHeaders(const bool p_exclude)
+{
+	m_excludeStdHeaders = p_exclude;
+}
+
+bool MetricOptions::getExcludeStdHeaders(void) const
+{
+	return m_excludeStdHeaders;
 }

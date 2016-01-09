@@ -88,13 +88,13 @@ METRIC_ALIAS( "OP_SIZEOF_CNT", "KW_SIZEOF_CNT" )
 METRIC( METRIC_TYPE_TOKEN_OPERATOR_SIZE_OF,                   "RAW_OP_SIZEOF_CNT",              "'sizeof' keyword/operator count (raw source)",		true,  true,  true,  true,  true,       false,     true,         1,        "" )
 METRIC_ALIAS( "RAW_OP_SIZEOF_CNT", "RAW_KW_SIZEOF_CNT" )
 
-// keywords: inline, restrict, sizeof
+// keywords: inline, restrict
 
 METRIC( METRIC_TYPE_KEYWORD_CNT,                              "KW_CNT",                         "Number of keywords used",             				true,  true,  true,  true,  true,       false,     true,         1,        "Total number of C keywords used" )
 METRIC( METRIC_TYPE_KEYWORD_TYPES,                            "KW_TYPES_CNT",                   "Number of types of keyword used",             		true,  true,  true,  true,  true,       false,     true,         1,        "" )
 
-METRIC( METRIC_TYPE_LABEL,                                    "KW_LABEL_CNT",                   "'label' keyword count",                            true,  true,  true,  true,  true,       false,     false,        1,        "" )
-// TODO: Label tokens?
+METRIC( METRIC_TYPE_LABEL_NAME,                               "IDENT_LABEL_CNT",                "label name count",                                 true,  true,  true,  true,  true,       false,     false,        1,        "" )
+METRIC( METRIC_TYPE_TOKEN_LABEL_NAME,                         "RAW_IDENT_LABEL_CNT",            "label name count (raw source)",                    true,  true,  true,  true,  true,       false,     false,        1,        "" )
 
 
 
@@ -114,8 +114,7 @@ METRIC( METRIC_TYPE_VARIABLE_FN_EXTERN,                       "VAR_FN_EXT_CNT", 
 METRIC( METRIC_TYPE_RETURNPOINTS,                             "RETURN_POINT_CNT",               "Return points",                                    false, false, true,  true,  true,       false,     false,        1,        "" )
 
 METRIC( METRIC_TYPE_STATEMENTS,                               "STMT_CNT",                       "Statement count",								    true,  true,  true,  true,  true,       false,     true,         1,        "Number of statements" )
-// TODO: Not implemented!
-// METRIC( METRIC_TYPE_TOKEN_STATEMENTS,                      "RAW_STMT_CNT",                   "Statement count (raw source)",						true,  true,  true,  true,  true,       false,     false,        1,        "Number of statements in the code before pre-processing" )
+METRIC( METRIC_TYPE_TOKEN_STATEMENTS,                         "RAW_STMT_CNT",                   "Statement count (raw source)",						true,  true,  true,  true,  true,       false,     true,         1,        "Number of statements in the code before pre-processing" )
 
 METRIC( METRIC_TYPE_HIS_COMMENT_DENSITY,                      "COMMENT_HIS_COMF",               "Comment density",									true,  true,  false, false, true,       false,     false,     1000,        "Relationship of the number of comments to the number of statements, with range 0-1.  HIS metric." )
 METRIC( METRIC_TYPE_COMMENT_BYTE_COUNT,                       "COMMENT_BYTE_CNT",               "Comments in bytes",								true,  true,  false, false, true,       false,     false,        1,        "Counts the total number of bytes which are used in comments.  Note that --exclude-function does not have any effect on this metric." )

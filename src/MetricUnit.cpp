@@ -15,6 +15,8 @@
 */
 
 #include "MetricUnit.hpp"
+#include "MetricOptions.hpp"
+#include "MetricUtils.hpp"
 
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/MemoryBuffer.h"
@@ -284,7 +286,7 @@ const std::set<MetricType_e> m_operatorMetrics = {
 	METRIC_TYPE_OPERATOR_CAST
 };
 
-/* TODO: This doesn't deal with C++ only keywoards */
+/* TODO: This doesn't deal with C99/C++ only keywoards */
 const std::set<MetricType_e> m_keywordMetrics = {
 	METRIC_TYPE_VARIABLE_FN_AUTO,
 	METRIC_TYPE_BREAK,
@@ -303,11 +305,11 @@ const std::set<MetricType_e> m_keywordMetrics = {
 	METRIC_TYPE_FORLOOP,
 	METRIC_TYPE_GOTO,
 	METRIC_TYPE_IF,
-//	METRIC_TYPE_INLINE,
+//	METRIC_TYPE_INLINE, // TODO C99
 	METRIC_TYPE_INT,
 	METRIC_TYPE_LONG,
 	METRIC_TYPE_VARIABLE_FN_REGISTER,
-//	METRIC_TYPE_RESTRICT,
+//	METRIC_TYPE_RESTRICT, // TODO C99
 	METRIC_TYPE_RETURN,
 	METRIC_TYPE_SHORT,
 	METRIC_TYPE_SIGNED,
@@ -457,12 +459,15 @@ MetricUnit* MetricUnit::getSubUnit( const std::string& p_name, const MetricUnitT
 	MetricUnit* ret_val = NULL;
 	std::string name = p_name;
 
+	/* For files, get the absolute path so that we can disambiguate between files which have the same filename */
 	if (p_type == METRIC_UNIT_FILE)
 	{
-		llvm::SmallString<256> NativeNameBuf(p_name);
-		llvm::sys::fs::make_absolute(NativeNameBuf);
-		llvm::sys::path::native(NativeNameBuf);
-		name = NativeNameBuf.c_str();
+		/* Filename limit on Windows is 32767 characters - see 
+		    https://msdn.microsoft.com/en-gb/library/windows/desktop/aa365247(v=vs.85).aspx */
+		llvm::SmallString<INT16_MAX> NativeAbsNameBuf(p_name);
+		llvm::sys::fs::make_absolute(NativeAbsNameBuf);
+		llvm::sys::path::native(NativeAbsNameBuf);
+		name = NativeAbsNameBuf.c_str();
 	}
 
 	SubUnitMap_t::iterator name_it = m_subUnits.find( name );
@@ -475,6 +480,8 @@ MetricUnit* MetricUnit::getSubUnit( const std::string& p_name, const MetricUnitT
 			if( p_type == METRIC_UNIT_FILE )
 			{
 				this->increment( METRIC_TYPE_FILES );
+
+				ret_val->m_alias = makeRelative(name);
 			}
 			m_subUnits[ name ] = ret_val;
 		}
@@ -525,9 +532,21 @@ bool MetricUnit::isMetricCumulative(const MetricType_e p_type)
 	return m_metricIsCumulative[p_type];
 }
 
-std::string MetricUnit::getUnitName(void) const
+std::string MetricUnit::getUnitName(const MetricOptions& p_options) const
 {
-	return m_name;
+	std::string ret_val;
+
+	if ((this->m_type == METRIC_UNIT_FILE) &&
+		(!p_options.getUseAbsoluteFileNames()))
+	{
+		ret_val = m_alias;
+	}
+	else
+	{
+		ret_val = m_name;
+	}
+
+	return ret_val;
 }
 
 bool MetricUnit::doesMetricApplyForUnit(const MetricType_e p_MetricType, const MetricUnitType_e p_unitType)

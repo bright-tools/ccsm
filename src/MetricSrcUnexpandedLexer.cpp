@@ -22,127 +22,6 @@
 
 #include <iostream>
 
-const MetricSrcUnexpandedLexer::SemiConlonContainers_e MetricSrcUnexpandedLexer::m_sccStartLineEnding = SCC_Define;
-const MetricSrcUnexpandedLexer::SemiConlonContainers_e MetricSrcUnexpandedLexer::m_sccEndLineEnding = SCC_Define;
-
-const MetricSrcUnexpandedLexer::SemiConlonContainers_e MetricSrcUnexpandedLexer::m_sccStartParen = SCC_For;
-const MetricSrcUnexpandedLexer::SemiConlonContainers_e MetricSrcUnexpandedLexer::m_sccEndParen = SCC_For;
-
-const MetricSrcUnexpandedLexer::SemiConlonContainers_e MetricSrcUnexpandedLexer::m_sccStartBrace = SCC_Struct;
-const MetricSrcUnexpandedLexer::SemiConlonContainers_e MetricSrcUnexpandedLexer::m_sccEndBrace = SCC_Union;
-
-const static std::set<clang::tok::TokenKind> statementImplyingTokens[2] = {
-	{
-		clang::tok::kw_for
-	},
-	{
-		//clang::tok::identifier,
-		clang::tok::exclaim,
-		clang::tok::exclaimequal,
-		clang::tok::percent,
-		clang::tok::percentequal,
-		clang::tok::amp,
-		clang::tok::ampamp,
-		clang::tok::pipepipe,
-		clang::tok::ampequal,
-		//clang::tok::l_paren, 
-		//clang::tok::r_paren, 
-		clang::tok::star,
-		clang::tok::starequal,
-		clang::tok::plus,
-		clang::tok::plusplus,
-		clang::tok::plusequal,
-		//clang::tok::comma, 
-		clang::tok::minus,
-		clang::tok::minusminus,
-		clang::tok::minusequal,
-		clang::tok::arrow,
-		clang::tok::period,
-		clang::tok::ellipsis,
-		clang::tok::slash,
-		clang::tok::slashequal,
-		//clang::tok::colon, 
-		//clang::tok::kw_inline, 
-		//clang::tok::kw_typedef, 
-		//clang::tok::kw_auto, 
-		//clang::tok::kw_extern, 
-		//clang::tok::kw_register, 
-		clang::tok::kw_if,
-		clang::tok::kw_else,
-		//clang::tok::kw_bool, 
-		//clang::tok::kw_char, 
-		//clang::tok::kw_double, 
-		//clang::tok::kw_float, 
-		//clang::tok::kw_int, 
-		//clang::tok::kw_long, 
-		//clang::tok::kw_short, 
-		//clang::tok::kw_signed, 
-		//clang::tok::kw_unsigned, 
-		//clang::tok::kw_void, 
-		//clang::tok::kw_const, 
-		//clang::tok::kw_friend, 
-		//clang::tok::kw_volatile, 
-		//clang::tok::kw_static, 
-		//clang::tok::kw_typedef, 
-		//clang::tok::kw_virtual, 
-		//clang::tok::kw_mutable, 
-		//clang::tok::kw_auto, 
-		//clang::tok::kw_asm, 
-		clang::tok::kw_break,
-		//clang::tok::kw_case, 
-		//clang::tok::kw_class, 
-		clang::tok::kw_continue,
-		clang::tok::kw_default,
-		//clang::tok::kw_delete, 
-		clang::tok::kw_do,
-		//clang::tok::kw_enum, 
-		clang::tok::kw_goto,
-		//clang::tok::kw_new, 
-		//clang::tok::kw_operator, 
-		//clang::tok::kw_private, 
-		//clang::tok::kw_protected, 
-		//clang::tok::kw_public, 
-		clang::tok::kw_return,
-		//clang::tok::kw_sizeof, 
-		//clang::tok::kw_struct, 
-		clang::tok::kw_switch,
-		//clang::tok::kw_this, 
-		//clang::tok::kw_union, 
-		clang::tok::kw_while,
-		//clang::tok::kw_namespace, 
-		//clang::tok::kw_using, 
-		//clang::tok::kw_try, 
-		//clang::tok::kw_catch, 
-		//clang::tok::kw_throw, 
-		//clang::tok::kw_typeid, 
-		//clang::tok::kw_template, 
-		//clang::tok::kw_explicit, 
-		//clang::tok::kw_true, 
-		//clang::tok::kw_false, 
-		//clang::tok::kw_typename, 
-		//clang::tok::coloncolon, 
-		clang::tok::less,
-		clang::tok::lessless,
-		clang::tok::lesslessequal,
-		clang::tok::lessequal,
-		clang::tok::equal,
-		clang::tok::equalequal,
-		clang::tok::greater,
-		clang::tok::greaterequal,
-		clang::tok::greatergreater,
-		clang::tok::greatergreaterequal,
-		clang::tok::question,
-		clang::tok::l_square,
-		clang::tok::r_square,
-		clang::tok::caret,
-		clang::tok::caretequal,
-		//clang::tok::l_brace, 
-		//clang::tok::r_brace, 
-		clang::tok::pipe,
-		clang::tok::pipeequal,
-		clang::tok::tilde
-	}
-};
 
 const static std::pair<clang::tok::TokenKind,MetricType_e> tokenKindToTypeMapData[] = {
 	std::make_pair(clang::tok::exclaim,      METRIC_TYPE_TOKEN_NOT),
@@ -256,39 +135,12 @@ const std::map<clang::tok::TokenKind, MetricType_e> MetricSrcUnexpandedLexer::m_
     tokenKindToTypeMapData + sizeof tokenKindToTypeMapData / sizeof tokenKindToTypeMapData[0]);
 
 
-MetricSrcUnexpandedLexer::MetricSrcUnexpandedLexer(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, MetricOptions* p_options) : MetricSrcLexer( p_CI, p_topUnit, p_options ),
-																												 m_dumpNewline( false )
+MetricSrcUnexpandedLexer::MetricSrcUnexpandedLexer(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, const MetricOptions& p_options) : MetricSrcLexer( p_CI, p_topUnit, p_options )
 {
 }
 
 MetricSrcUnexpandedLexer::~MetricSrcUnexpandedLexer(void)
 {
-}
-
-void MetricSrcUnexpandedLexer::HandleSemiToken(clang::Token& p_token)
-{
-	bool inScc = false;
-	for( unsigned checkLoop = 0 ; checkLoop < SCC_MAX ; checkLoop++ )
-	{
-		if( m_semiContainerDepth[ checkLoop ] )
-		{
-			inScc = true;
-			break;
-		}
-	}
-	if( !inScc )
-	{
-		if (m_currentFunctionName.length() && m_semiHasContent)
-		{
-// TODO			m_currentUnit->increment(METRIC_TYPE_HIS_STATEMENT);
-			m_semiHasContent = false;
-			m_dumpNewline = true;
-		}
-		if( m_options->getDumpTokens() )
-		{
-			std::cout << ",statement-delimiter";
-		}
-	}
 }
 
 MetricUnitProcessingType_e MetricSrcUnexpandedLexer::getLexType(void) const
@@ -299,55 +151,19 @@ MetricUnitProcessingType_e MetricSrcUnexpandedLexer::getLexType(void) const
 void MetricSrcUnexpandedLexer::HandleBasicToken(clang::Token& p_token)
 {
 	const clang::tok::TokenKind tokenKind = p_token.getKind();
-	MetricSrcUnexpandedLexer::SemiConlonContainers_e start;
-	MetricSrcUnexpandedLexer::SemiConlonContainers_e end;
-	bool checkSccStart = false;
-	bool checkSccEnd = false;
-
-	if (statementImplyingTokens[0].find(tokenKind) != statementImplyingTokens[0].end())
-	{
-// TODO		m_currentUnit->increment(METRIC_TYPE_HIS_STATEMENT);
-		m_dumpNewline = true;
-	}
-	else if (statementImplyingTokens[1].find(tokenKind) != statementImplyingTokens[1].end())
-	{
-		m_semiHasContent = true;
-	}
 
 	std::map<clang::tok::TokenKind, MetricType_e>::const_iterator typeLookup = m_tokenKindToTypeMap.find(tokenKind);
 
 	if( typeLookup != m_tokenKindToTypeMap.end() )
 	{
 		m_currentUnit->increment( (*typeLookup).second );
-		switch( tokenKind )
-		{
-			case clang::tok::kw_for:
-				m_semiContainerOpen[ SCC_For ] = true;
-				break;
-			case clang::tok::kw_struct:
-				m_semiContainerOpen[ SCC_Struct ] = true;
-				break;
-			case clang::tok::kw_union:
-				m_semiContainerOpen[ SCC_Union ] = true;
-				break;
-			default:
-				break;
-#if 0
-					else if(( tok_data == "define" ) && 
-						    ( m_lastToken == clang::tok::hash ))
-					{
-						m_semiContainerOpen[ SCC_Define ] = true;
-					}
-#endif
-		}
-
 	}
 	else
 	{
 		if( p_token.isAnyIdentifier() )
 		{
 			std::string tok_data = p_token.getIdentifierInfo()->getName();
-			if( m_options->getDumpTokens() )
+			if( m_options.getDumpTokens() )
 			{
 				std::cout << ",unreserved:"<<tok_data;
 			}
@@ -360,6 +176,16 @@ void MetricSrcUnexpandedLexer::HandleBasicToken(clang::Token& p_token)
 				m_currentFileIdentifiers.insert( tok_data );
 			}
 			m_currentUnit->increment( METRIC_TYPE_TOKEN_UNRESERVED_IDENTIFIERS );
+
+			/* We treat each macro invokation as a statement */
+			if (m_compilerInstance.getPreprocessor().isMacroDefined(tok_data))
+			{
+				if (m_options.getDumpTokens())
+				{
+					std::cout << ",macro";
+				}
+				m_currentUnit->increment(METRIC_TYPE_TOKEN_STATEMENTS);
+			}
 		}
 		else
 		{
@@ -368,55 +194,13 @@ void MetricSrcUnexpandedLexer::HandleBasicToken(clang::Token& p_token)
 		/* TODO */
 	}
 
-	switch( tokenKind )
+	if (tokenKind == clang::tok::colon)
 	{
-		case clang::tok::l_brace:
-			checkSccStart = true;
-			start = m_sccStartBrace;
-			end = m_sccEndBrace;
-			break;
-		case clang::tok::l_paren:
-			checkSccStart = true;
-			start = m_sccStartParen;
-			end = m_sccEndParen;
-			break;
-		case clang::tok::r_brace:
-			checkSccEnd = true;
-			start = m_sccStartBrace;
-			end = m_sccEndBrace;
-			break;
-		case clang::tok::r_paren:
-			checkSccEnd = true;
-			start = m_sccStartParen;
-			end = m_sccEndParen;
-			break;
-		default:
-			break;
-	}
-
-	if( checkSccStart )
-	{
-		for( signed checkLoop = start ; checkLoop <= end; checkLoop++ )
+		if (m_lastToken.isAnyIdentifier())
 		{
-			if( m_semiContainerOpen[ checkLoop ] ||
-				m_semiContainerDepth[ checkLoop ] )
-			{
-				m_semiContainerDepth[ checkLoop ]++;
-				m_semiContainerOpen[ checkLoop ] = false;
-			}
+			m_currentUnit->increment(METRIC_TYPE_TOKEN_LABEL_NAME);
 		}
 	}
-	else if( checkSccEnd )
-	{
-		for( signed checkLoop = start ; checkLoop <= end ; checkLoop++ )
-		{
-			if( m_semiContainerDepth[ checkLoop ] )
-			{
-				m_semiContainerDepth[ checkLoop ]--;
-			}
-		}
-	}
-
 }
 
 void MetricSrcUnexpandedLexer::ProcessToken(clang::Token& p_token)
@@ -424,66 +208,13 @@ void MetricSrcUnexpandedLexer::ProcessToken(clang::Token& p_token)
 	std::string tok_data;
 	unsigned int tok_len = p_token.getLength();
 
-	if( m_options->getDumpTokens() )
+	if( m_options.getDumpTokens() )
 	{
 		std::cout << "(" << p_token.getName();
 	}
 
 	switch( p_token.getKind() )
 	{
-#if 0
-		case clang::tok::raw_identifier:
-			{
-					if( m_options->getDumpTokens() )
-					{
-						std::cout << "raw_t,";
-					}
-					tok_data = p_token.getRawIdentifier();
-				std::map<std::string,MetricType_e>::const_iterator typeLookup = m_tokenToTypeMap.find( tok_data );
-				if( typeLookup != m_tokenToTypeMap.end() )
-				{
-					if( m_options->getDumpTokens() )
-					{
-						std::cout << ",reserved";
-					}
-					m_currentUnit->increment( (*typeLookup).second );
-					if( tok_data == "for" )
-					{
-						m_semiContainerOpen[ SCC_For ] = true;
-					}
-					else if( tok_data == "struct" )
-					{
-						m_semiContainerOpen[ SCC_Struct ] = true;
-					}
-					else if( tok_data == "union" )
-					{
-						m_semiContainerOpen[ SCC_Union ] = true;
-					}
-					else if(( tok_data == "define" ) && 
-						    ( m_lastToken == clang::tok::hash ))
-					{
-						m_semiContainerOpen[ SCC_Define ] = true;
-					}
-				}
-				else
-				{
-					if( m_options->getDumpTokens() )
-					{
-						std::cout << ",unreserved";
-					}
-					if( m_currentUnit->isFnOrMethod() )
-					{
-						m_currentFnIdentifiers.insert( tok_data );
-					}
-					else
-					{
-						m_currentFileIdentifiers.insert( tok_data );
-					}
-					m_currentUnit->increment( METRIC_TYPE_TOKEN_UNRESERVED_IDENTIFIERS );
-				}
-			}
-			break;
-#endif
 		case clang::tok::numeric_constant:
 			tok_data = clang::StringRef(p_token.getLiteralData(), tok_len).str();
 			if( m_currentUnit->isFnOrMethod() )
@@ -521,7 +252,6 @@ void MetricSrcUnexpandedLexer::ProcessToken(clang::Token& p_token)
 			m_currentUnit->increment( METRIC_TYPE_TOKEN_STRING_LITERALS );
 			break;
 		case clang::tok::semi:
-			HandleSemiToken( p_token );
 			break;
 		case clang::tok::comment:
 			/* TODO */
@@ -536,23 +266,16 @@ void MetricSrcUnexpandedLexer::ProcessToken(clang::Token& p_token)
 			break;
 	}
 
-	if( m_options->getDumpTokens() )
+	if( m_options.getDumpTokens() )
 	{
 		if( tok_data.length() )
 		{
 			std::cout << "," << tok_data;
 		}
-			std::cout << "," << (long)(p_token.getKind());
-			std::cout << "," << (long)(p_token.getFlags());
+		std::cout << "," << (long)(p_token.getKind());
+		std::cout << "," << (long)(p_token.getFlags());
 		std::cout << ")";
-		if (m_dumpNewline)
-		{
-			std::cout << std::endl << "  ";
-			m_dumpNewline = false;
-		}
 	}
-
-	m_lastToken = p_token.getKind();
 }
 
 void MetricSrcUnexpandedLexer::CloseOutFnOrMtd(void)
@@ -564,7 +287,6 @@ void MetricSrcUnexpandedLexer::CloseOutFnOrMtd(void)
 		if( m_currentUnit->isFnOrMethod() )
 		{
 			/* Close off accumulated metrics */
-
 			m_currentUnit->set( METRIC_TYPE_TOKEN_NUMERIC_CONSTANTS_UNIQ, m_currentFnNumerics.size() );
 			m_currentUnit->set( METRIC_TYPE_TOKEN_STRING_LITERALS_UNIQ, m_currentFnStrings.size() );
 			m_currentUnit->set( METRIC_TYPE_TOKEN_UNRESERVED_IDENTIFIERS_UNIQ, m_currentFnIdentifiers.size() );
@@ -579,14 +301,6 @@ void MetricSrcUnexpandedLexer::CloseOutFnOrMtd(void)
 
 void MetricSrcUnexpandedLexer::LexSources(clang::CompilerInstance& p_ci, const TranslationUnitFunctionLocator* const p_fnLocator)
 {
-	for( unsigned initLoop = 0 ; initLoop < SCC_MAX ; initLoop++ )
-	{
-		m_semiContainerDepth[ initLoop ] = 0;
-		m_semiContainerOpen[ initLoop ] = false;
-	}
-
-	m_semiHasContent = false;
-
 	clang::Preprocessor &PP = p_ci.getPreprocessor();
 	PP.SetMacroExpansionOnlyInDirectives();
 

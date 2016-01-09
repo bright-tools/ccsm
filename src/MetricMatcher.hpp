@@ -56,7 +56,7 @@ protected:
 	std::string				        m_currentFileName;
 	std::string				        m_currentFunctionName;
 	MetricUnit*				        m_currentUnit;
-	MetricOptions*			        m_options;
+	const MetricOptions&	        m_options;
 	std::set<std::string>	        m_fnsCalled;          
 	TranslationUnitFunctionLocator* m_fnLocator;
 
@@ -77,7 +77,7 @@ protected:
 
 public:
 	
-	explicit MetricVisitor(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit,MetricOptions* p_options = NULL,TranslationUnitFunctionLocator* p_fnLocator = NULL);
+	explicit MetricVisitor(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit,const MetricOptions& p_options,TranslationUnitFunctionLocator* p_fnLocator = NULL);
 	virtual ~MetricVisitor(void);
 	virtual bool VisitFunctionDecl(clang::FunctionDecl *func);
 	virtual bool VisitVarDecl(clang::VarDecl *p_varDec);

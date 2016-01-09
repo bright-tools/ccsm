@@ -70,13 +70,14 @@ void MetricDumper::dumpMetric(std::ostream& out, const MetricUnit* const p_unit,
 	}
 }
 
-void MetricDumper::dump(std::ostream& out, const MetricUnit* const p_topLevel, const bool p_output[METRIC_UNIT_MAX], const MetricDumpFormat_e p_fmt, const MetricOptions* const p_options)
+void MetricDumper::dump(std::ostream& out, const MetricUnit* const p_topLevel, const MetricOptions& p_options)
 {
 	std::string sep;
 	const MetricUnitType_e metricUnitType = p_topLevel->GetType();
-	const bool useShortNames = (p_options != NULL) && p_options->getUseShortNames();
+	const bool useShortNames = p_options.getUseShortNames();
+	const MetricDumpFormat_e p_fmt = p_options.getOutputFormat();
 
-	if (p_output[metricUnitType])
+	if (p_options.getOutputMetric(metricUnitType))
 	{
 		switch (p_fmt) {
 		case METRIC_DUMP_FORMAT_TREE:
@@ -107,7 +108,7 @@ void MetricDumper::dump(std::ostream& out, const MetricUnit* const p_topLevel, c
 					const bool localAndCumulativeOutputs = MetricUnit::isMetricCumulative(metric) && MetricUnit::isMetricLocalAndCumulative(metric);
 
 					/* TODO: Output a warning in the case that anything in p_options.OutputMetrics isn't understood */
-					if (SHOULD_INCLUDE_METRIC(p_options, MetricUnit::getMetricShortName(metric)))
+					if (p_options.ShouldIncludeMetric( MetricUnit::getMetricShortName(metric)))
 					{
 						std::string metricName;
 						
@@ -137,7 +138,7 @@ void MetricDumper::dump(std::ostream& out, const MetricUnit* const p_topLevel, c
 			out << m_namePrefix[metricUnitType];
 		}
 
-		out << p_topLevel->getUnitName() << sep;
+		out << p_topLevel->getUnitName(p_options) << sep;
 
 		unsigned loop;
 		for (loop = 0;
@@ -150,7 +151,7 @@ void MetricDumper::dump(std::ostream& out, const MetricUnit* const p_topLevel, c
 			const bool localAndCumulativeOutputs = metricIsCumulative && MetricUnit::isMetricLocalAndCumulative(metric);
 
 			/* Filter out metrics which only apply at file/method level */
-			if (SHOULD_INCLUDE_METRIC(p_options, MetricUnit::getMetricShortName(metric)) && MetricUnit::doesMetricApplyForUnit(metric, metricUnitType))
+			if (p_options.ShouldIncludeMetric( MetricUnit::getMetricShortName(metric)) && MetricUnit::doesMetricApplyForUnit(metric, metricUnitType))
 			{
 				std::string sfx = "";
 				bool output_sep = false;
@@ -186,7 +187,7 @@ void MetricDumper::dump(std::ostream& out, const MetricUnit* const p_topLevel, c
 		 unitIt != subUnits->end();
 		 ++unitIt)
 	{
-		dump(out, (*unitIt).second, p_output, p_fmt, p_options);
+		dump(out, (*unitIt).second, p_options);
 	}
 }
 

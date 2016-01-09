@@ -24,16 +24,6 @@
 #if !defined( METRIC_UNIT_HPP )
 #define       METRIC_UNIT_HPP
 
-#include "MetricOptions.hpp"
-
-typedef enum
-{
-	METRIC_DUMP_FORMAT_TREE,
-	METRIC_DUMP_FORMAT_SPARSE_TREE,
-	METRIC_DUMP_FORMAT_TSV,
-	METRIC_DUMP_FORMAT_CSV
-} MetricDumpFormat_e;
-
 typedef enum
 {
 #define METRIC_ALIAS( _name, _alias )
@@ -65,6 +55,8 @@ typedef enum {
 #include <set>
 #include <stdint.h>
 
+class MetricOptions;
+
 class MetricUnit
 {
 public:
@@ -83,6 +75,7 @@ private:
 	static const bool        m_metricMultipass[ METRIC_TYPE_MAX ];
 protected:
 	std::string m_name;
+	std::string m_alias;
 	MetricUnitType_e m_type;
 	SubUnitMap_t m_subUnits;
 	MetricUnit* m_parent;
@@ -129,7 +122,7 @@ public:
 	counter_t getSubUnitCount( const MetricUnitType_e p_type ) const;
 
 	MetricUnitType_e GetType( void ) const;
-	std::string getUnitName(void) const;
+	std::string getUnitName(const MetricOptions& p_options) const;
 
 	const SubUnitMap_t* getSubUnits(void) const;
 

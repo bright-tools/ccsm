@@ -16,7 +16,7 @@
 
 #include "MetricPPCustomer.hpp"
 
-MetricPPCustomer::MetricPPCustomer( MetricUnit* p_topUnit, std::set<std::string>* p_commentFileList, MetricOptions* p_options ) 
+MetricPPCustomer::MetricPPCustomer( MetricUnit* p_topUnit, std::set<std::string>* p_commentFileList, const MetricOptions& p_options ) 
 	: m_topUnit( p_topUnit ), m_commentFileList( p_commentFileList ), m_options( p_options), clang::PPCallbacks(), CommentHandler()
 {
 }
@@ -43,7 +43,7 @@ bool MetricPPCustomer::HandleComment(clang::Preprocessor &PP, clang::SourceRange
 		std::string C(SM.getCharacterData(Start),
 					  SM.getCharacterData(Loc.getEnd()));
 
-		if( SHOULD_INCLUDE_FILE( m_options, fileName ))
+		if( m_options.ShouldIncludeFile( fileName ))
 		{
 			MetricUnit* unit = m_topUnit->getSubUnit(fileName, METRIC_UNIT_FILE);
 			unit->increment( METRIC_TYPE_COMMENT_BYTE_COUNT, C.length() );

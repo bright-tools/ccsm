@@ -22,8 +22,18 @@
 #if !defined( METRIC_OPTIONS_HPP )
 #define       METRIC_OPTIONS_HPP
 
+#include "MetricUnit.hpp"
+
 #include <vector>
 #include <string>
+
+typedef enum
+{
+	METRIC_DUMP_FORMAT_TREE,
+	METRIC_DUMP_FORMAT_SPARSE_TREE,
+	METRIC_DUMP_FORMAT_TSV,
+	METRIC_DUMP_FORMAT_CSV
+} MetricDumpFormat_e;
 
 class MetricOptions
 {
@@ -37,6 +47,11 @@ protected:
 	bool m_useShortNames;
 	bool m_declarationsAreNotFileScope;
 	bool m_prototypesAreFileScope;
+	bool m_useAbsoluteFileNames;
+	bool m_dumpFnMap;
+	bool m_excludeStdHeaders;
+	MetricDumpFormat_e m_outputFormat;
+	bool m_outputMetric[METRIC_UNIT_MAX];
 
 	bool isFileInList( const std::vector<std::string>* const p_list, const std::string& p_name ) const;
 public:
@@ -57,10 +72,16 @@ public:
 	bool getUseShortNames(void) const;
 	void setPrototypesAreFileScope(const bool p_proto);
 	bool getPrototypesAreFileScope(void) const;
+	void setUseAbsoluteFileNames(const bool p_absoluteFn);
+	bool getUseAbsoluteFileNames(void) const;
+	void setOutputFormat(const MetricDumpFormat_e p_outputFormat);
+	MetricDumpFormat_e getOutputFormat(void) const;
+	void setOutputMetric(const MetricUnitType_e p_metric, const bool p_output);
+	bool getOutputMetric(const MetricUnitType_e p_metric) const;
+	void setDumpFnMap(const bool p_dump);
+	bool getDumpFnMap(void) const;
+	void setExcludeStdHeaders(const bool p_exclude);
+	bool getExcludeStdHeaders(void) const;
 };
-
-#define SHOULD_INCLUDE_FILE( _m, _f ) (((_m)==NULL) || ((_m)->ShouldIncludeFile( _f )))
-#define SHOULD_INCLUDE_FUNCTION( _m, _f ) (((_m)==NULL) || ((_m)->ShouldIncludeFunction( _f )))
-#define SHOULD_INCLUDE_METRIC( _m, _t ) (((_m)==NULL) || ((_m)->ShouldIncludeMetric( _t )))
 
 #endif
