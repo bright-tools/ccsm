@@ -57,14 +57,16 @@ extern size_t countNewlines( clang::StringRef& p_buffer )
 	return cnt;
 }
 
-#include <direct.h>
-#include "llvm/support/path.h"
-
 #ifdef LLVM_ON_WIN32
 #define HANDLE_CHAR_CASE( _x ) tolower(_x)
+#include <direct.h>
+#define getcwd _getcwd // stupid MSFT "deprecation" warning
 #else
 #define HANDLE_CHAR_CASE( _x ) (_x)
+#include <unistd.h>
 #endif
+
+#include "llvm/Support/Path.h"
 
 #if 0
 void test()
@@ -174,6 +176,6 @@ std::string makeRelative(const std::string& p_path, const std::string& p_cwd)
 
 std::string makeRelative(const std::string& p_path)
 {
-	const std::string cwd = _getcwd(NULL, 0);
+	const std::string cwd = getcwd(NULL, 0);
 	return makeRelative(p_path, cwd);
 }
