@@ -64,6 +64,8 @@ extern size_t countNewlines( clang::StringRef& p_buffer )
 #else
 #define HANDLE_CHAR_CASE( _x ) (_x)
 #include <unistd.h>
+#include <strings.h>
+#define stricmp strcasecmp
 #endif
 
 #include "llvm/Support/Path.h"
