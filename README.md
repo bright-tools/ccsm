@@ -375,7 +375,7 @@ HIS Metrics Support
 | GOTO        | Implemented - `KW_GOTO_CNT` and `RAW_KW_GOTO_CNT` | Number of GOTO statements |
 | v(G)        | Implemented - `MCCABE` and `RAW_MCCABE`           | Cyclomatic complexity     |
 | CALLING     | Implemented - `HIS_CALLING`                       | Number of different functions calling this function.  Note that functions called via function pointer are not counted.|
-| CALLS       | Implemented - `OP_FN_CALL_CNT`                    | Number of different functions called.  Note that functions called via function pointer are not counted |
+| CALLS       | Implemented - `OP_FN_CALL_UNIQUE_CNT`             | Number of different functions called.  Note that functions called via function pointer are not counted |
 | PARAM       | Implemented - `STMT_HIS_PARAM`                    | Number of function parameters.  Note that only one variant of this metric exists as parameters hidden within macros are still parameters. |
 | STMT        | Implemented - `STMT_CNT` and `RAW_STMT_CNT`       | Number of instructions per function. |
 | LEVEL       | Implemented - `FUNC_DEPTH`                        | Nesting depth within a function.  Note that HIS says that this is defined as "Maximum nesting levels within a function + 1", however the allowable range is 0-4, which doesn't seem consistent.  `FUNC_DEPTH` in this implementation is zero for an empty function |
