@@ -25,62 +25,70 @@
 #include "llvm/Support/Signals.h" 
 
 #include <iostream>
+#include <fstream>
 
 int main(int argc, const char **argv) {
-	MetricUnit topUnit( NULL, "Global", METRIC_UNIT_GLOBAL);
+	int Result;
+	MetricUnit topUnit(NULL, "Global", METRIC_UNIT_GLOBAL);
 	std::set<std::string> commentFileList;
 	CcsmOptionsHandler OptionsHandler;
 
 	OptionsHandler.ParseOptions(argc, argv);
 	const MetricOptions& metricOptions = *(OptionsHandler.getMetricOptions());
-
-	GlobalFunctionLocator srcMap(*(OptionsHandler.getMetricOptions()));
-
-	llvm::sys::PrintStackTraceOnErrorSignal();
-		
-	clang::tooling::ClangTool Tool(OptionsHandler.getOptionsParser()->getCompilations(), 
-		                           OptionsHandler.getOptionsParser()->getSourcePathList());
-
-	// First tool-run to gather metrics from the AST.  This is done separately from the second tool-rum
-	// as different pre-processor options are used
-	int Result = Tool.run(newASTMetricFrontendActionFactory(metricOptions, &topUnit, &srcMap, &commentFileList));
-
-	// Success?
-	if( Result == 0 )
+	if (metricOptions.optionsOk())
 	{
-		// Now that all TUs have been processed, try to resolve function references which couldn't be 
-		//  resolved during the processing of individual translation units
-		resolveLinkages( &topUnit );
 
-		// Second tool run to gather metrics from the pre-processor.  This is performed after the AST
-		//  generation as the details of the function locations gathered from the AST are used
-		//  for determining whether or not a function should be included
-		Result = Tool.run(newPPMetricFrontendActionFactory(metricOptions, &topUnit, &srcMap, true));
+		GlobalFunctionLocator srcMap(*(OptionsHandler.getMetricOptions()));
 
-		if (Result == 0)
-		{
-			Result = Tool.run(newPPMetricFrontendActionFactory(metricOptions, &topUnit, &srcMap, false));
-		}
+		llvm::sys::PrintStackTraceOnErrorSignal();
+
+		clang::tooling::ClangTool Tool(OptionsHandler.getOptionsParser()->getCompilations(),
+			OptionsHandler.getOptionsParser()->getSourcePathList());
+
+		// First tool-run to gather metrics from the AST.  This is done separately from the second tool-rum
+		// as different pre-processor options are used
+		Result = Tool.run(newASTMetricFrontendActionFactory(metricOptions, &topUnit, &srcMap, &commentFileList));
 
 		// Success?
-		if( Result == 0 )
+		if (Result == 0)
 		{
-			// Time to dump the results
-			if (metricOptions.getDumpFnMap())
+			// Now that all TUs have been processed, try to resolve function references which couldn't be 
+			//  resolved during the processing of individual translation units
+			resolveLinkages(&topUnit);
+
+			// Second tool run to gather metrics from the pre-processor.  This is performed after the AST
+			//  generation as the details of the function locations gathered from the AST are used
+			//  for determining whether or not a function should be included
+			Result = Tool.run(newPPMetricFrontendActionFactory(metricOptions, &topUnit, &srcMap, true));
+
+			if (Result == 0)
 			{
-				srcMap.dump( std::cout );
+				Result = Tool.run(newPPMetricFrontendActionFactory(metricOptions, &topUnit, &srcMap, false));
 			}
 
-			MetricDumper::dump(std::cout, &topUnit, metricOptions);
+			// Success?
+			if (Result == 0)
+			{
+				if (metricOptions.getDumpFnMap())
+				{
+					srcMap.dump();
+				}
+
+				MetricDumper::dump(&topUnit, metricOptions);
+			}
+			else
+			{
+				std::cerr << "Tool.run returned " << Result << std::endl;
+			}
 		}
 		else
 		{
-			std::cout << "Tool.run returned " << Result << std::endl;
+			std::cerr << "Tool.run returned " << Result << std::endl;
 		}
 	}
 	else
 	{
-		std::cout << "Tool.run returned " << Result << std::endl;
+		Result = EXIT_FAILURE;
 	}
 
 	return Result;

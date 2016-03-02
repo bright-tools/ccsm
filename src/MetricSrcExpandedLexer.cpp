@@ -155,7 +155,7 @@ void MetricSrcExpandedLexer::ProcessToken(clang::Token& p_token)
 
 	if( m_options.getDumpTokens() )
 	{
-		std::cout << "(" << p_token.getName();
+		m_options.getOutput() << "(" << p_token.getName();
 	}
 
 	switch( p_token.getKind() )
@@ -214,18 +214,18 @@ void MetricSrcExpandedLexer::ProcessToken(clang::Token& p_token)
 
 	if( m_options.getDumpTokens() )
 	{
-		std::cout << "," << p_token.getLocation().getRawEncoding();
-		std::cout << "," << m_compilerInstance.getSourceManager().getFileLoc(p_token.getLocation()).getRawEncoding();
+		m_options.getOutput() << "," << p_token.getLocation().getRawEncoding();
+		m_options.getOutput() << "," << m_compilerInstance.getSourceManager().getFileLoc(p_token.getLocation()).getRawEncoding();
 		if (tok_data.length())
 		{
-			std::cout << "," << tok_data;
+			m_options.getOutput() << "," << tok_data;
 		}
-			std::cout << "," << (long)(p_token.getKind());
-			std::cout << "," << (long)(p_token.getFlags());
-		std::cout << ")";
+		m_options.getOutput() << "," << (long)(p_token.getKind());
+		m_options.getOutput() << "," << (long)(p_token.getFlags());
+		m_options.getOutput() << ")";
 		if (m_dumpNewline)
 		{
-			std::cout << std::endl << "  ";
+			m_options.getOutput() << std::endl << "  ";
 			m_dumpNewline = false;
 		}
 	}

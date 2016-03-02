@@ -70,12 +70,13 @@ void MetricDumper::dumpMetric(std::ostream& out, const MetricUnit* const p_unit,
 	}
 }
 
-void MetricDumper::dump(std::ostream& out, const MetricUnit* const p_topLevel, const MetricOptions& p_options)
+void MetricDumper::dump(const MetricUnit* const p_topLevel, const MetricOptions& p_options)
 {
 	std::string sep;
 	const MetricUnitType_e metricUnitType = p_topLevel->GetType();
 	const bool useShortNames = p_options.getUseShortNames();
 	const MetricDumpFormat_e p_fmt = p_options.getOutputFormat();
+	std::ostream& out = p_options.getOutput();
 
 	if (p_options.getOutputMetric(metricUnitType))
 	{
@@ -202,7 +203,7 @@ void MetricDumper::dump(std::ostream& out, const MetricUnit* const p_topLevel, c
 		 unitIt != subUnits->end();
 		 ++unitIt)
 	{
-		dump(out, (*unitIt).second, p_options);
+		dump((*unitIt).second, p_options);
 	}
 }
 
