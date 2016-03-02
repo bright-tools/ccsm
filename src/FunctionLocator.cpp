@@ -46,7 +46,7 @@ TranslationUnitFunctionLocator* GlobalFunctionLocator::getLocatorFor( const std:
 	return ret_val;
 }
 
-void GlobalFunctionLocator::dump( std::ostream& p_out ) const
+void GlobalFunctionLocator::dump() const
 {
 	MainSrcToFnLocMap_t::const_iterator it;
 
@@ -59,8 +59,8 @@ void GlobalFunctionLocator::dump( std::ostream& p_out ) const
 		{
 			fileName = makeRelative(fileName);
 		}
-		p_out << "Translation Unit: " << fileName << std::endl;
-		it->second->dump( p_out );
+		m_options.getOutput() << "Translation Unit: " << fileName << std::endl;
+		it->second->dump();
 	}
 }
 
@@ -108,7 +108,7 @@ void TranslationUnitFunctionLocator::addFunctionLocation(const clang::ASTContext
 	m_map[ hashVal ][ startLoc ] = endNamePair;
 }
 
-void TranslationUnitFunctionLocator::dump( std::ostream& p_out ) const
+void TranslationUnitFunctionLocator::dump() const
 {
 	SrcStartToFunctionMap_t::const_iterator it;
 
@@ -116,14 +116,14 @@ void TranslationUnitFunctionLocator::dump( std::ostream& p_out ) const
 		 it != m_map.end();
 		 it++ )
 	{
-		p_out << " File ID: " << it->first << std::endl;
+		m_options.getOutput() << " File ID: " << it->first << std::endl;
 		StartEndPair_t::const_iterator pit;
 
 		for( pit = it->second.begin();
 			 pit != it->second.end();
 			 pit++ )
 		{
-			p_out << "  Function Definition: " << pit->second.second << " (" << pit->first.getRawEncoding() << "-" << pit->second.first.getRawEncoding() << ")" << std::endl;
+			m_options.getOutput() << "  Function Definition: " << pit->second.second << " (" << pit->first.getRawEncoding() << "-" << pit->second.first.getRawEncoding() << ")" << std::endl;
 		}
 	}
 }

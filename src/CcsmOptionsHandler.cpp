@@ -197,6 +197,7 @@ void CcsmOptionsHandler::ParseOptions(int argc,
 	m_metricOptions->setPrototypesAreFileScope(PrototypesAreFileScope);
 	m_metricOptions->setOutputFormat(OutputFormat);
 	m_metricOptions->setExcludeStdHeaders(ExcludeStandardHeaders);
+	// TODO: Handle failure
 	m_metricOptions->setOutputFile(OutputToFile);
 
 	m_metricOptions->setOutputMetric(METRIC_UNIT_METHOD, !NoMethod);

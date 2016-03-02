@@ -21,6 +21,7 @@
 
 #include <sstream>
 #include <iostream>
+#include <llvm/Support/raw_os_ostream.h>
 
 const std::pair<clang::Stmt::StmtClass, MetricType_e> keywordToMetricPairs[] = {
 	std::make_pair(clang::Stmt::BreakStmtClass, METRIC_TYPE_BREAK),
@@ -1184,7 +1185,8 @@ bool MetricVisitor::TraverseDecl(clang::Decl *p_decl)
 		}
 		if (m_options.getDumpAST())
 		{
-			p_decl->dump();
+			llvm::raw_os_ostream out(m_options.getOutput());
+			p_decl->dump(out);			
 		}
 	}
 	
