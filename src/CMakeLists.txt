@@ -48,6 +48,6 @@ target_link_libraries(ccsm
 set_property(SOURCE ccsm_ver.h APPEND PROPERTY OBJECT_DEPENDS ccsm_ver.h_fake)
 
 add_custom_command( OUTPUT "${CCSM_DIR}/src/ccsm_ver.h_fake"
-    COMMAND ${CCSM_DIR}/utils/gen_ver/gen_ver.py "${CCSM_DIR}" > "${CCSM_DIR}/src/ccsm_ver.h"
+    COMMAND ${CCSM_DIR}/utils/gen_ver/gen_ver.py "${CCSM_DIR}/src/ccsm_ver.h" "${CCSM_DIR}" 
     WORKING_DIRECTORY ${CCSM_DIR}
 )
