@@ -375,7 +375,7 @@ HIS Metrics Support
 | GOTO        | Implemented - `KW_GOTO_CNT` and `RAW_KW_GOTO_CNT` | Number of GOTO statements |
 | v(G)        | Implemented - `MCCABE` and `RAW_MCCABE`           | Cyclomatic complexity     |
 | CALLING     | Implemented - `HIS_CALLING`                       | Number of different functions calling this function.  Note that functions called via function pointer are not counted.|
-| CALLS       | Implemented - `OP_FN_CALL_CNT`                    | Number of different functions called.  Note that functions called via function pointer are not counted |
+| CALLS       | Implemented - `OP_FN_CALL_UNIQUE_CNT`             | Number of different functions called.  Note that functions called via function pointer are not counted |
 | PARAM       | Implemented - `STMT_HIS_PARAM`                    | Number of function parameters.  Note that only one variant of this metric exists as parameters hidden within macros are still parameters. |
 | STMT        | Implemented - `STMT_CNT` and `RAW_STMT_CNT`       | Number of instructions per function. |
 | LEVEL       | Implemented - `FUNC_DEPTH`                        | Nesting depth within a function.  Note that HIS says that this is defined as "Maximum nesting levels within a function + 1", however the allowable range is 0-4, which doesn't seem consistent.  `FUNC_DEPTH` in this implementation is zero for an empty function |
@@ -393,22 +393,23 @@ Before starting, please ensure that you have a command-line version of git
 installed.  If you are using Windows, you must ensure that git is available 
 to Windows Command Prompt.
 
-To build the project you will need to be able to compile Clang.  See the
-[instructions](http://clang.llvm.org/get_started.html).  Currently I use Visual
-Studio 2013 for builds.
+To build the project you will need to be able to compile Clang, including having
+all dependencies installed.  See the 
+[instructions](http://clang.llvm.org/get_started.html).  
+
+Currently I use Visual Studio 2013 on Windows and GCC on 
+[Ubuntu Trusty Tahr](http://releases.ubuntu.com/14.04/) for builds.
 
 Follow the instructions up to the point where you have checked out Clang, 
-then open the file `llvm\tools\clang\tools\CMakeLists.txt` and add the following 
-lines:
+then open the file `llvm\tools\clang\tools\CMakeLists.txt` and add 
+the following lines:
 
-    set(CCSM_DIR F:\\WORK\\GIT\\CCSM\\)
-    add_subdirectory(${CCSM_DIR}\\SRC ${CMAKE_CURRENT_BINARY_DIR}/ccsm)
+    set(CCSM_DIR F:/WORK/GIT/CCSM/)
+    add_subdirectory(${CCSM_DIR}/src ${CMAKE_CURRENT_BINARY_DIR}/ccsm)
 
 You will need to modify the path to point to wherever your clone of the CCSM
-project is, but note that
-1.  The path in the first line should point to the 'src' subdirectory of the clone
-2.  Path separators either need to be escaped (using double backslashes instead of
-    single backslashes) 
+project is, but note that the path in the first line should point to the 'src' 
+subdirectory of the clone.
 
 After that, follow the remainder of the instructions for building Clang.  CCSM
 should be build as part of the complete Clang build.

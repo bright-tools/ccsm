@@ -165,7 +165,7 @@ void MetricSrcUnexpandedLexer::HandleBasicToken(clang::Token& p_token)
 			std::string tok_data = p_token.getIdentifierInfo()->getName();
 			if( m_options.getDumpTokens() )
 			{
-				std::cout << ",unreserved:"<<tok_data;
+				m_options.getOutput() << ",unreserved:" << tok_data;
 			}
 			if( m_currentUnit->isFnOrMethod() )
 			{
@@ -182,7 +182,7 @@ void MetricSrcUnexpandedLexer::HandleBasicToken(clang::Token& p_token)
 			{
 				if (m_options.getDumpTokens())
 				{
-					std::cout << ",macro";
+					m_options.getOutput() << ",macro";
 				}
 				m_currentUnit->increment(METRIC_TYPE_TOKEN_STATEMENTS);
 			}
@@ -210,7 +210,7 @@ void MetricSrcUnexpandedLexer::ProcessToken(clang::Token& p_token)
 
 	if( m_options.getDumpTokens() )
 	{
-		std::cout << "(" << p_token.getName();
+		m_options.getOutput() << "(" << p_token.getName();
 	}
 
 	switch( p_token.getKind() )
@@ -270,11 +270,11 @@ void MetricSrcUnexpandedLexer::ProcessToken(clang::Token& p_token)
 	{
 		if( tok_data.length() )
 		{
-			std::cout << "," << tok_data;
+			m_options.getOutput() << "," << tok_data;
 		}
-		std::cout << "," << (long)(p_token.getKind());
-		std::cout << "," << (long)(p_token.getFlags());
-		std::cout << ")";
+		m_options.getOutput() << "," << (long)(p_token.getKind());
+		m_options.getOutput() << "," << (long)(p_token.getFlags());
+		m_options.getOutput() << ")";
 	}
 }
 

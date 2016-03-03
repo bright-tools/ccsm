@@ -64,7 +64,7 @@ public:
 
 	std::string FindFunction(const clang::SourceManager& p_SourceManager, clang::SourceLocation& p_loc, clang::SourceLocation* p_end = NULL) const;
 
-	void dump( std::ostream& p_out ) const;
+	void dump() const;
 };
 
 /** Supports finding the location of functions across a number of translation units
@@ -85,7 +85,7 @@ class GlobalFunctionLocator
 		GlobalFunctionLocator(const MetricOptions& p_options);
 		TranslationUnitFunctionLocator* getLocatorFor(const std::string p_fileName);
 		virtual ~GlobalFunctionLocator();
-		void dump( std::ostream& p_out ) const;
+		void dump() const;
 };
 
 #endif

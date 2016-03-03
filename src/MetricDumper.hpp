@@ -36,7 +36,7 @@ protected:
 
 	static void dumpMetric(std::ostream& out, const MetricUnit* const p_unit, const MetricType_e p_metric, const MetricDumpFormat_e p_fmt, const std::string& p_sep, const bool p_recurse, const std::string& p_suffix, const bool p_useShortNames);
 public:
-	static void dump(std::ostream& out, const MetricUnit* const p_topLevel, const MetricOptions& p_options );
+	static void dump(const MetricUnit* const p_topLevel, const MetricOptions& p_options );
 };
 
 #endif

@@ -18,6 +18,8 @@
 #include "MetricOptions.hpp"
 
 #include <algorithm>
+#include <iostream>
+#include <fstream>
 
 static const std::pair<std::string, std::string> metricAliasListData[] =
 {
@@ -39,12 +41,17 @@ MetricOptions::MetricOptions( std::vector<std::string>* const p_excludeFiles,
 	  m_dumpTokens( false ),
 	  m_dumpAST( false ),
 	  m_useShortNames( false ),
-	  m_useAbsoluteFileNames( false )
+	  m_useAbsoluteFileNames( false ),
+	  m_outputStream(&std::cout)
 {
 }
 
 MetricOptions::~MetricOptions()
 {
+	if (m_outputStream != &std::cout)
+	{
+		delete(m_outputStream);
+	}
 }
 
 bool MetricOptions::isFileInList( const std::vector<std::string>* const p_list, const std::string& p_name ) const
@@ -151,6 +158,11 @@ bool MetricOptions::getDumpAST(void) const
 	return m_dumpAST;
 }
 
+bool MetricOptions::optionsOk(void) const
+{
+	return m_optionsOk;
+}
+
 void MetricOptions::setUseShortNames(const bool p_shortNames)
 {
 	m_useShortNames = p_shortNames;
@@ -219,4 +231,39 @@ void MetricOptions::setExcludeStdHeaders(const bool p_exclude)
 bool MetricOptions::getExcludeStdHeaders(void) const
 {
 	return m_excludeStdHeaders;
+}
+
+bool MetricOptions::setOutputFile(const std::string p_fileName)
+{
+	bool retVal = false;
+	/* If the user specified a file to sent the output to, try and open it and set the output
+	   stream point to that handle */
+	if (p_fileName.length())
+	{
+		std::ofstream* outputFile = new std::ofstream();
+		outputFile->open(p_fileName);
+		if (outputFile->is_open())
+		{
+			m_outputStream = outputFile;
+			m_outputFileName = p_fileName;
+			retVal = true;
+		}
+		else
+		{
+			std::cerr << "Failed to open output file '" << p_fileName << "'\n";
+			m_optionsOk = false;
+		}
+	}
+
+	return retVal;
+}
+
+std::ostream& MetricOptions::getOutput(void) const
+{
+	return *m_outputStream;
+}
+
+std::string MetricOptions::getOutputFile(void) const
+{
+	return m_outputFileName;
 }

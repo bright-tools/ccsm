@@ -41,7 +41,7 @@ void MetricSrcLexer::LexSources( clang::CompilerInstance& p_ci, const Translatio
 
 	if( m_options.getDumpTokens() )
 	{
-		std::cout << std::endl << "Start lexing translation unit: " << SM.getFileEntryForID( SM.getMainFileID() )->getName() << std::endl;
+		m_options.getOutput() << std::endl << "Start lexing translation unit: " << SM.getFileEntryForID( SM.getMainFileID() )->getName() << std::endl;
 	}
 
 	// Start preprocessing the specified input file.
@@ -93,7 +93,7 @@ void MetricSrcLexer::LexSources( clang::CompilerInstance& p_ci, const Translatio
 
 					if(( funcName.length() > 0 ) && m_options.getDumpTokens() )
 					{
-						std::cout << std::endl << "[fn:" << funcName << "@" << tokenLoc.getRawEncoding() << "-" << fnEnd.getRawEncoding() << "]" << std::endl << "  ";
+						m_options.getOutput() << std::endl << "[fn:" << funcName << "@" << tokenLoc.getRawEncoding() << "-" << fnEnd.getRawEncoding() << "]" << std::endl << "  ";
 					}
 
 					m_currentFunctionName = funcName;
