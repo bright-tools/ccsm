@@ -116,7 +116,7 @@ void MetricVisitor::UpdateCurrentFileName( const clang::SourceLocation &loc )
 
 MetricVisitor::PathResults MetricVisitor::getSwitchPathCount(const clang::SwitchStmt* const p_stmt, uint16_t depth)
 {
-	MetricVisitor::PathResults pathSum = { 0, true };
+	MetricVisitor::PathResults pathSum = { 0, false };
 	// If the switch is based on an enum and all enum values are covered then effectively there should be no need for
 	//  a default
 	// TODO: Not necessarily true - just because an enum is being used it does not stop other values
@@ -130,6 +130,7 @@ MetricVisitor::PathResults MetricVisitor::getSwitchPathCount(const clang::Switch
 
 	if (switchCase)
 	{
+		bool firstSubst = true;
 		do
 		{
 			const clang::Stmt* subStmt = switchCase->getSubStmt();
@@ -147,7 +148,8 @@ MetricVisitor::PathResults MetricVisitor::getSwitchPathCount(const clang::Switch
 				{
 					PathResults sub_count = getPathCount(subStmt, depth);
 					pathSum.path_count += sub_count.path_count;
-					pathSum.path_has_return = pathSum.path_has_return && sub_count.path_has_return;
+					pathSum.path_has_return = (pathSum.path_has_return || firstSubst) && sub_count.path_has_return;
+					firstSubst = false;
 				}
 			}
 			else
@@ -200,53 +202,64 @@ MetricVisitor::PathResults MetricVisitor::getIfPathCount(const clang::IfStmt* co
 	std::string blanks(depth, ' ');
 #endif
 
-	/* Loops across 'if', 'else if' and 'else' constructs */
-	while (ifStmt != nullptr)
+	if (ifStmt != nullptr)
 	{
-		MetricVisitor::PathResults thenCount = { 1, false };
-		/* Default to one gives an count for an implicit else block in the case that there is not one in the code */
-		MetricVisitor::PathResults elseCount = { 1, true };
+		has_return = true;
 
-		/* Get the path count for the 'then' block */
-		thenCount = getPathCount(ifStmt->getThen(), depth);
-
-		/* Is there an else block? */
-		if (ifStmt->getElse() != nullptr)
+		/* Loops across 'if', 'else if' and 'else' constructs */
+		while (ifStmt != nullptr)
 		{
+			MetricVisitor::PathResults thenCount = { 1, false };
+			/* Default to one gives an count for an implicit else block in the case that there is not one in the code */
+			MetricVisitor::PathResults elseCount = { 1, false };
+
+			/* Get the path count for the 'then' block */
+			thenCount = getPathCount(ifStmt->getThen(), depth);
+
+			/* Is there an else block? */
+			if (ifStmt->getElse() != nullptr)
+			{
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-			std::cout << blanks << "getIfPathCount - Else is " << ifStmt->getElse()->getStmtClassName() << std::endl;
+				std::cout << blanks << "getIfPathCount - Else is " << ifStmt->getElse()->getStmtClassName() << std::endl;
 #endif
 
-			/* Is it an 'else if'? */
-			if (ifStmt->getElse()->getStmtClass() == clang::Stmt::IfStmtClass)
-			{
-				/* Process the contents of the 'else if' next time round the while */
-				ifStmt = static_cast<const clang::IfStmt*>(ifStmt->getElse());
-				/* No need to count an implicit else */
-				elseCount.path_count = 0;
+				/* Is it an 'else if'? */
+				if (ifStmt->getElse()->getStmtClass() == clang::Stmt::IfStmtClass)
+				{
+					/* Process the contents of the 'else if' next time round the while */
+					ifStmt = static_cast<const clang::IfStmt*>(ifStmt->getElse());
+					/* No need to count an implicit else */
+					elseCount.path_count = 0;
+				}
+				else
+				{
+					/* Not an 'else if', just an 'else', so count that and no more while loop iteration required */
+					elseCount = getPathCount(ifStmt->getElse(), depth);
+					ifStmt = nullptr;
+				}
 			}
 			else
 			{
-				/* Not an 'else if', just an 'else', so count that and no more while loop iteration required */
-				elseCount = getPathCount(ifStmt->getElse(), depth);
 				ifStmt = nullptr;
 			}
-		}
-		else
-		{
-			ifStmt = nullptr;
-		}
 
-		pathSum += (thenCount.path_count + elseCount.path_count);
-		has_return = thenCount.path_has_return && elseCount.path_has_return;
+			pathSum += (thenCount.path_count + elseCount.path_count);
+			has_return = has_return && (thenCount.path_has_return && ((elseCount.path_count == 0) || elseCount.path_has_return));
+		}
 	}
-
 	ret_val.path_count = pathSum;
 	ret_val.path_has_return = has_return;
+
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+	std::cout << blanks << "getIfPathCount - Updated: count - " << ret_val.path_count << " return - " << ret_val.path_has_return << std::endl;
+#endif
 
 	return ret_val;
 }
 
+/* This function determines the number of unique paths through the specified code.  It also determines whether each and every
+   path leads to a return keyword or not.
+*/
 MetricVisitor::PathResults MetricVisitor::getPathCount(const clang::Stmt* const p_stmt, uint16_t depth)
 {
 	PathResults ret_val;
@@ -292,6 +305,10 @@ MetricVisitor::PathResults MetricVisitor::getPathCount(const clang::Stmt* const 
 
 	}
 
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+	std::cout << blanks << "getPathCount - path_count " << ret_val.path_count << " has_return " << ret_val.path_has_return << std::endl;
+#endif
+
 	return ret_val;
 }
 
@@ -309,46 +326,99 @@ MetricVisitor::PathResults MetricVisitor::getOtherPathCount(const clang::Stmt* c
 	if (p_stmt->getStmtClass() == clang::Stmt::StmtClass::ReturnStmtClass)
 	{
 		ret_val.path_has_return = true;
+		/* No need to process any following statements, as they're inaccessible 
+		   TODO: unless there's a labelled statement that can receive a goto jump */
+		IncrementMetric(m_currentUnit, METRIC_TYPE_RETURNPOINTS);
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+		std::cout << blanks << "getOtherPathCount - Return point found" << std::endl;
+#endif
 	}
-
-	// Iterate all child statements
-	for (clang::Stmt::const_child_iterator it = p_stmt->child_begin();
-		 it != p_stmt->child_end();
-	 	 it++)
+	else
 	{
-		clang::Stmt::StmtClass clss = (*it)->getStmtClass();
-		PathResults sub_results;
-#if defined( DEBUG_FN_TRACE_OUTOUT )
-		std::cout << blanks << "getOtherPathCount - processing " << (*it)->getStmtClassName() << std::endl;
-#endif
-
-		// For statement classes which have an effect on the path
-		switch (clss)
+		bool skipAllSubsequent = false;
+		bool pathMissingReturn = false;
+		// Iterate all child statements
+		for (clang::Stmt::const_child_iterator it = p_stmt->child_begin();
+			it != p_stmt->child_end();
+			it++)
 		{
-			case clang::Stmt::StmtClass::ReturnStmtClass:
-				ret_val.path_has_return = true;
-				break;
-			case clang::Stmt::StmtClass::IfStmtClass:
-			case clang::Stmt::StmtClass::SwitchStmtClass:
-			case clang::Stmt::StmtClass::CompoundStmtClass:
-			case clang::Stmt::StmtClass::WhileStmtClass:
-			case clang::Stmt::StmtClass::DoStmtClass:
-			case clang::Stmt::StmtClass::ForStmtClass:
-				sub_results = getPathCount(*it, depth);
-				if (sub_results.path_has_return)
-				{
-					ret_val.path_has_return = true;
-				}
-				ret_val.path_count *= sub_results.path_count;
-				break;
-			default:
-				break;
-		}
-#if defined( DEBUG_FN_TRACE_OUTOUT )
-		std::cout << blanks << "getOtherPathCount - Updated: count - " << ret_val.path_count << " return - " << ret_val.path_has_return << std::endl;
-#endif
-	}
+			clang::Stmt::StmtClass clss = (*it)->getStmtClass();
+			PathResults sub_results;
 
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+			std::cout << blanks << "getOtherPathCount - processing " << (*it)->getStmtClassName() << std::endl;
+#endif
+			if (skipAllSubsequent)
+			{
+				if (clss == clang::Stmt::LabelStmtClass)
+				{
+					skipAllSubsequent = false;
+				}
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+				std::cout << blanks << "getOtherPathCount - skipping " << std::endl;
+#endif
+			}
+			else 
+			{
+				// For statement classes which have an effect on the path
+				switch (clss)
+				{
+				case clang::Stmt::StmtClass::GotoStmtClass:
+				case clang::Stmt::StmtClass::BreakStmtClass:
+				case clang::Stmt::StmtClass::ContinueStmtClass:
+					/* Subsequent statements are inaccessible unless there's a label 
+					   TODO: what about if the label is within a sub-tree? */
+					skipAllSubsequent = true;
+					break;
+				case clang::Stmt::StmtClass::ReturnStmtClass:
+					ret_val.path_has_return = true;
+					skipAllSubsequent = true;
+					IncrementMetric(m_currentUnit, METRIC_TYPE_RETURNPOINTS);
+					pathMissingReturn = false;
+
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+					std::cout << blanks << "getOtherPathCount - Return point found" << std::endl;
+#endif
+
+					break;
+				case clang::Stmt::StmtClass::IfStmtClass:
+				case clang::Stmt::StmtClass::SwitchStmtClass:
+				case clang::Stmt::StmtClass::CompoundStmtClass:
+				case clang::Stmt::StmtClass::WhileStmtClass:
+				case clang::Stmt::StmtClass::DoStmtClass:
+				case clang::Stmt::StmtClass::ForStmtClass:
+					sub_results = getPathCount(*it, depth);
+					if (sub_results.path_has_return)
+					{
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+						std::cout << blanks << "getOtherPathCount - Path has a return statement" << std::endl;
+#endif
+						ret_val.path_has_return = true;
+						/* All paths had a return statement ... from now on, code should not be reachable */
+						skipAllSubsequent = true;
+					}
+					else
+					{
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+						std::cout << blanks << "getOtherPathCount - Path is missing a return statement" << std::endl;
+#endif
+						pathMissingReturn = true;
+					}
+					ret_val.path_count *= sub_results.path_count;
+					break;
+				default:
+					break;
+				}
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+				std::cout << blanks << "getOtherPathCount - Updated: count - " << ret_val.path_count << " return - " << ret_val.path_has_return << std::endl;
+#endif
+			}
+		}
+		if (pathMissingReturn)
+		{
+			ret_val.path_has_return = false;
+		}
+	}
 #if defined( DEBUG_FN_TRACE_OUTOUT )
 	std::cout << blanks << "getOtherPathCount - Done: count - " << ret_val.path_count << " return - " << ret_val.path_has_return << std::endl;
 #endif
@@ -416,7 +486,7 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 			if (!pathResults.path_has_return)
 			{
 				/* Add an implicit return point */
-				m_currentUnit->set(METRIC_TYPE_RETURNPOINTS, 1);
+				m_currentUnit->increment(METRIC_TYPE_RETURNPOINTS, 1);
 			}
 
 			switch( func->getLinkageAndVisibility().getLinkage() )
@@ -726,11 +796,11 @@ bool MetricVisitor::VisitDoStmt(clang::DoStmt *p_doSt)
 	return true;
 }
 
+/* TODO: Remove this */
 bool MetricVisitor::VisitReturnStmt(clang::ReturnStmt *p_returnSt) 
 {
 	if( m_currentUnit )
 	{
-		IncrementMetric( m_currentUnit, METRIC_TYPE_RETURNPOINTS );
 	}
     return true;
 }
