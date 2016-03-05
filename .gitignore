@@ -25,3 +25,5 @@ src/ccsm_ver.h
 test/err.log
 test/out.log
 utils/vagrant/.vagrant
+
+ccsm_tests
