@@ -16,7 +16,10 @@
 
 #include "MetricPPIncludeHandler.hpp"
 
-MetricPPIncludeHandler::MetricPPIncludeHandler(const MetricOptions& p_options, clang::SourceManager& p_SM, std::string& p_currentFile) : clang::PPCallbacks(), m_options(p_options), m_currentFile(p_currentFile), m_SM(p_SM)
+MetricPPIncludeHandler::MetricPPIncludeHandler(const MetricOptions& p_options, clang::SourceManager& p_SM, std::string& p_currentFile) : clang::PPCallbacks(), 
+																																		 m_options(p_options),
+																																		 m_currentFile(p_currentFile), 
+																																		 m_SM(p_SM)
 {
 }
 

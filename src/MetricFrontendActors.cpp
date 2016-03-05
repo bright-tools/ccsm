@@ -50,7 +50,7 @@ public:
 };
 
 ASTMetricFrontendActionFactory::ASTMetricFrontendActionFactory( const MetricOptions& p_options, MetricUnit* p_topUnit, GlobalFunctionLocator* p_srcMap, std::set<std::string>* p_commentFileList )
-	: m_commentFileList( p_commentFileList), ASTMetricConsumerFactory( p_options, p_topUnit , p_srcMap)
+	: ASTMetricConsumerFactory(p_options, p_topUnit, p_srcMap), m_commentFileList(p_commentFileList)
 {
 }
 
@@ -76,7 +76,7 @@ class ASTFrontendActionFactory : public clang::tooling::FrontendActionFactory {
 	std::set<std::string>*   m_commentFileList;
    public:
      ASTFrontendActionFactory( const MetricOptions& p_options, MetricUnit* p_topUnit, GlobalFunctionLocator* p_srcMap, std::set<std::string>* p_commentFileList )
-	      : m_options( p_options), m_topUnit( p_topUnit ), m_srcMap( p_srcMap ), m_commentFileList( p_commentFileList ), clang::tooling::FrontendActionFactory()
+		 : clang::tooling::FrontendActionFactory(), m_options(p_options), m_topUnit(p_topUnit), m_srcMap(p_srcMap), m_commentFileList(p_commentFileList)
 	 {
 	 }
 	 clang::FrontendAction *create() override { 
@@ -99,7 +99,7 @@ class PPFrontendActionFactory : public clang::tooling::FrontendActionFactory {
 	bool                     m_expanded;
    public:
 	   PPFrontendActionFactory(const MetricOptions& p_options, MetricUnit* p_topUnit, GlobalFunctionLocator* p_srcMap, const bool p_expanded)
-	      : m_options( p_options), m_topUnit( p_topUnit ), m_srcMap( p_srcMap ), m_expanded( p_expanded ), clang::tooling::FrontendActionFactory()
+		   : clang::tooling::FrontendActionFactory(), m_options(p_options), m_topUnit(p_topUnit), m_srcMap(p_srcMap), m_expanded(p_expanded)
 	 {
 	 }
 

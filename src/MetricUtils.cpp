@@ -12,8 +12,6 @@ unsigned getControlDepth(const clang::Stmt* const p_stmt, clang::ASTContext* p_c
 	unsigned ret_val = 0;
 
 	clang::SourceLocation loc,sloc;
-	clang::SourceManager &SM = p_context->getSourceManager();
-	const auto ancestors = p_context->getParents( *p_stmt );
 
 	/* Examine all the parents */
     for (const auto &Parent : p_context->getParents( *p_stmt ) ) {

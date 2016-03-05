@@ -71,11 +71,11 @@ void MetricASTConsumer::HandleTranslationUnit(clang::ASTContext &Context)
 }
 
 MetricPPConsumer::MetricPPConsumer(MetricUnit* p_topUnit, const MetricOptions& p_options, GlobalFunctionLocator*  p_fnLocator, const bool p_expanded)
-	: m_options( p_options ),
+	: clang::PreprocessorFrontendAction(),
+	  m_options(p_options),
       m_topUnit( p_topUnit ),
       m_fnLocator( p_fnLocator ),
-	  m_expanded( p_expanded ),
-	  clang::PreprocessorFrontendAction()
+	  m_expanded( p_expanded )
 { 
 }
 

@@ -613,18 +613,9 @@ bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 
 	if( m_currentUnit )
 	{
-		MetricUnit* owner = m_currentUnit;
-
 		/* Interested in the absolute qualifiers associated with the variable */
 		const bool isVolatile = p_varDec->getType().isVolatileQualified();
 		const bool isConst = p_varDec->getType().isConstQualified();
-
-		/* Is this a function parameter which should be attributed to file scope? */
-		if (m_options.getPrototypesAreFileScope() &&
-			(p_varDec->getKind() == clang::Decl::ParmVar))
-		{
-			owner = m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE);
-		}
 
 		/* Check it's not a function parameter */
 		if (p_varDec->getKind() == clang::Decl::Var)
@@ -711,7 +702,15 @@ bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
 
 		} else if (p_varDec->getKind() == clang::Decl::ParmVar)
 		{
-			IncrementMetric( m_currentUnit, METRIC_TYPE_FUNCTION_PARAMETERS );
+			MetricUnit* owner = m_currentUnit;
+
+			/* Is this a function parameter which should be attributed to file scope? */
+			if (m_options.getPrototypesAreFileScope())
+			{
+				owner = m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE);
+			}
+
+			IncrementMetric(owner, METRIC_TYPE_FUNCTION_PARAMETERS);
 		}
 		else
 		{
