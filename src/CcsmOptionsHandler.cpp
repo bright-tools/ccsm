@@ -220,6 +220,12 @@ clang::tooling::CommonOptionsParser* CcsmOptionsHandler::getOptionsParser() cons
 	return m_optionsParser;
 }
 
+const std::set<std::string> c89_std_headers = { "assert.h", "locale.h",  "stddef.h",
+                                                "ctype.h",  "math.h",    "stdio.h",
+												"errno.h",  "setjmp.h",  "stdlib.h",
+												"float.h",  "signal.h",  "string.h",
+												"limits.h", "stdarg.h",  "time.h" };
+
 const std::set<std::string> c99_std_headers = { "assert.h",  "inttypes.h", "signal.h",  "stdlib.h",
                                                 "complex.h", "iso646.h",   "stdarg.h",  "string.h",
                                                 "ctype.h",   "limits.h",   "stdbool.h", "tgmath.h",
@@ -276,6 +282,11 @@ void CcsmOptionsHandler::checkCompilerArgs(const char* const exeName)
 			ExcludeFileList.insert(ExcludeFileList.end(), cpp_std_headers.begin(), cpp_std_headers.end());
 		}
 
+		if (m_usesC89)
+		{
+			ExcludeFileList.insert(ExcludeFileList.end(), c89_std_headers.begin(), c89_std_headers.end());
+		}
+
 		if (m_usesC99)
 		{
 			ExcludeFileList.insert(ExcludeFileList.end(), c99_std_headers.begin(), c99_std_headers.end());
@@ -316,6 +327,7 @@ void CcsmOptionsHandler::analyseCompilerArgs(const char* const exeName)
 	m_usesCpp = false;
 	m_usesC11 = false;
 	m_usesC99 = false;
+	m_usesC89 = false;
 
 	for (const auto &SourcePath : m_optionsParser->getSourcePathList() ) {
 		std::string File(getAbsolutePath(SourcePath));
@@ -345,7 +357,11 @@ void CcsmOptionsHandler::analyseCompilerArgs(const char* const exeName)
 				CCArgs.size(),
 				Diags);
 
-			if ((*CI).getLangOpts()->CPlusPlus)
+			if ((*CI).getLangOpts()->C11)
+			{
+				m_usesC11 = true;
+			}
+			else if ((*CI).getLangOpts()->CPlusPlus)
 			{
 				m_usesCpp = true;
 			}
@@ -353,10 +369,14 @@ void CcsmOptionsHandler::analyseCompilerArgs(const char* const exeName)
 			{
 				m_usesC99 = true;
 			}
-			else if ((*CI).getLangOpts()->C11)
+			else
 			{
-				m_usesC11 = true;
+				m_usesC89 = true;
 			}
+
+#if 0
+			std::cout << "C++: " << m_usesCpp << " C11:" << m_usesC11 << " C89: " << m_usesC89 << " C99: " << m_usesC99 << "\r\n";
+#endif
 		}
 	}
 }
