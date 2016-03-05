@@ -494,6 +494,7 @@ Function and File Scoping
 
 Considering the following code snippet:
 
+```C
     unsigned local_var;
 
     unsigned adder( unsigned x, unsigned y );
@@ -511,6 +512,7 @@ Considering the following code snippet:
         }
         return ret_val;
     }
+```
 
 It's clear that `local_var` is file-scope and should be counted as such in the
 metrics.  It's also clear that the body of the `subber` function belongs to that
