@@ -135,7 +135,7 @@ const std::map<clang::tok::TokenKind, MetricType_e> MetricSrcUnexpandedLexer::m_
     tokenKindToTypeMapData + sizeof tokenKindToTypeMapData / sizeof tokenKindToTypeMapData[0]);
 
 
-MetricSrcUnexpandedLexer::MetricSrcUnexpandedLexer(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, const MetricOptions& p_options) : MetricSrcLexer( p_CI, p_topUnit, p_options )
+MetricSrcUnexpandedLexer::MetricSrcUnexpandedLexer(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, MetricOptions& p_options) : MetricSrcLexer( p_CI, p_topUnit, p_options )
 {
 }
 

@@ -50,7 +50,7 @@ class MetricSrcUnexpandedLexer : public MetricSrcLexer
 		virtual MetricUnitProcessingType_e getLexType(void) const;
 
 	public:
-		MetricSrcUnexpandedLexer(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, const MetricOptions& p_options );
+		MetricSrcUnexpandedLexer(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, MetricOptions& p_options );
 	    virtual ~MetricSrcUnexpandedLexer(void);
 
 		virtual void LexSources(clang::CompilerInstance& p_ci, const TranslationUnitFunctionLocator* const p_fnLocator);

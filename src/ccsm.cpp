@@ -34,10 +34,9 @@ int main(int argc, const char **argv) {
 	CcsmOptionsHandler OptionsHandler;
 
 	OptionsHandler.ParseOptions(argc, argv);
-	const MetricOptions& metricOptions = *(OptionsHandler.getMetricOptions());
+	MetricOptions& metricOptions = *(OptionsHandler.getMetricOptions());
 	if (metricOptions.optionsOk())
 	{
-
 		GlobalFunctionLocator srcMap(*(OptionsHandler.getMetricOptions()));
 
 		llvm::sys::PrintStackTraceOnErrorSignal();

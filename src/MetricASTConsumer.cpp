@@ -21,7 +21,7 @@
 #include "MetricASTConsumer.hpp"
 #include "clang/Basic/SourceManager.h"
 
-MetricASTConsumer::MetricASTConsumer(clang::CompilerInstance &CI, MetricUnit* p_topUnit, const MetricOptions& p_options, GlobalFunctionLocator*  p_fnLocator ) :
+MetricASTConsumer::MetricASTConsumer(clang::CompilerInstance &CI, MetricUnit* p_topUnit, MetricOptions& p_options, GlobalFunctionLocator*  p_fnLocator ) :
 																													  m_compilerInstance( CI ),
 																													  m_options( p_options ),
 																													  m_topUnit( p_topUnit ),
@@ -70,7 +70,7 @@ void MetricASTConsumer::HandleTranslationUnit(clang::ASTContext &Context)
 	delete( visitor );
 }
 
-MetricPPConsumer::MetricPPConsumer(MetricUnit* p_topUnit, const MetricOptions& p_options, GlobalFunctionLocator*  p_fnLocator, const bool p_expanded)
+MetricPPConsumer::MetricPPConsumer(MetricUnit* p_topUnit, MetricOptions& p_options, GlobalFunctionLocator*  p_fnLocator, const bool p_expanded)
 	: clang::PreprocessorFrontendAction(),
 	  m_options(p_options),
       m_topUnit( p_topUnit ),

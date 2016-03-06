@@ -54,6 +54,9 @@ MetricOptions::~MetricOptions()
 	}
 }
 
+#include <llvm/Support/Regex.h>
+#include <llvm/ADT/StringRef.h>
+
 bool MetricOptions::isFileInList( const std::vector<std::string>* const p_list, const std::string& p_name ) const
 {
 	bool ret_val = false;
@@ -63,7 +66,8 @@ bool MetricOptions::isFileInList( const std::vector<std::string>* const p_list, 
 			 it != p_list->end();
 			 it++ )
 		{
-			if( p_name.find( *it ) !=  std::string::npos )
+			llvm::Regex regex(*it);
+			if( regex.match(p_name))
 			{
 				ret_val = true;
 				break;
@@ -78,9 +82,26 @@ bool MetricOptions::isDefFile( const std::string& p_fn ) const
 	return isFileInList( DefFiles, p_fn );
 }
 
-bool MetricOptions::ShouldIncludeFile( const std::string& p_fn ) const
+bool MetricOptions::ShouldIncludeFile( const std::string& p_fn )
 {
-	return !isFileInList( ExcludeFiles, p_fn );
+	bool ret_val;
+	std::map<std::string, bool>::const_iterator fnd;
+
+	/* See if we already checked this file and if so, use that result.  If not,
+	   check to see if the file is in the exclude list
+	   TODO: This caching mechanism will not take into account changes to ExcludeFiles */
+	fnd = m_shouldIncludeFileCache.find(p_fn);
+
+	if (fnd == m_shouldIncludeFileCache.end())
+	{
+		ret_val = !isFileInList(ExcludeFiles, p_fn);
+		m_shouldIncludeFileCache[p_fn] = ret_val;
+	}
+	else
+	{
+		ret_val = fnd->second;
+	}
+	return ret_val;
 }
 
 bool MetricOptions::ShouldIncludeFunction( const std::string& p_fn ) const
