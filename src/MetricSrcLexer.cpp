@@ -23,7 +23,7 @@
 
 #include <iostream>
 
-MetricSrcLexer::MetricSrcLexer(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, const MetricOptions& p_options) : m_compilerInstance(p_CI), 
+MetricSrcLexer::MetricSrcLexer(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, MetricOptions& p_options) : m_compilerInstance(p_CI), 
 	                                                                                                             m_topUnit( p_topUnit ), 
 	                                                                                                             m_options( p_options ),
 																												 m_currentUnit( NULL )

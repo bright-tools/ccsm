@@ -37,7 +37,7 @@ class MetricSrcLexer
 	protected:
 		clang::CompilerInstance &m_compilerInstance;
 		MetricUnit*		        m_topUnit;
-		const MetricOptions&    m_options;
+		MetricOptions&          m_options;
 		MetricUnit*             m_currentUnit;
 		std::string             m_currentFunctionName;
 		std::string             m_currentFileName;
@@ -47,7 +47,7 @@ class MetricSrcLexer
 		virtual MetricUnitProcessingType_e getLexType( void ) const = 0;
 
 	public:
-		MetricSrcLexer(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, const MetricOptions& p_options );
+		MetricSrcLexer(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, MetricOptions& p_options );
 	    virtual ~MetricSrcLexer(void);
 
 		virtual void LexSources( clang::CompilerInstance& p_ci, const TranslationUnitFunctionLocator* const p_fnLocator );

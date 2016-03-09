@@ -24,7 +24,7 @@
 #include <iostream>
 #include <string.h>
 
-GlobalFunctionLocator::GlobalFunctionLocator(const MetricOptions& p_options) : m_options(p_options)
+GlobalFunctionLocator::GlobalFunctionLocator(MetricOptions& p_options) : m_options(p_options)
 {
 }
 
@@ -75,7 +75,7 @@ GlobalFunctionLocator::~GlobalFunctionLocator()
 	}
 }
 
-TranslationUnitFunctionLocator::TranslationUnitFunctionLocator(const MetricOptions& p_options) : m_options(p_options)
+TranslationUnitFunctionLocator::TranslationUnitFunctionLocator(MetricOptions& p_options) : m_options(p_options)
 {
 }
 

@@ -210,7 +210,7 @@ void CcsmOptionsHandler::ParseOptions(int argc,
 	checkCompilerArgs(argv[0]);
 }
 
-const MetricOptions* CcsmOptionsHandler::getMetricOptions() const
+MetricOptions* CcsmOptionsHandler::getMetricOptions() const
 {
 	return m_metricOptions;
 }
@@ -220,48 +220,60 @@ clang::tooling::CommonOptionsParser* CcsmOptionsHandler::getOptionsParser() cons
 	return m_optionsParser;
 }
 
-const std::set<std::string> c89_std_headers = { "assert.h", "locale.h",  "stddef.h",
-                                                "ctype.h",  "math.h",    "stdio.h",
-												"errno.h",  "setjmp.h",  "stdlib.h",
-												"float.h",  "signal.h",  "string.h",
-												"limits.h", "stdarg.h",  "time.h" };
+#include "llvm/Support/Path.h"
 
-const std::set<std::string> c99_std_headers = { "assert.h",  "inttypes.h", "signal.h",  "stdlib.h",
-                                                "complex.h", "iso646.h",   "stdarg.h",  "string.h",
-                                                "ctype.h",   "limits.h",   "stdbool.h", "tgmath.h",
-                                                "errno.h",   "locale.h",   "stddef.h",  "time.h",
-                                                "fenv.h",    "math.h",     "stdint.h",  "wchar.h",
-                                                "float.h",   "setjmp.h",   "stdio.h",   "wctype.h"};
+const std::string sep = "[\\\\/^]";
+const std::string end = "$";
 
-const std::set<std::string> c11_std_headers = { "assert.h",   "math.h",      "stdlib.h",
-										        "complex.h",  "setjmp.h",    "stdnoreturn.h",
-                                                "ctype.h",    "signal.h",    "string.h",
-												"errno.h",    "stdalign.h",  "tgmath.h",
-											    "fenv.h",     "stdarg.h",    "threads.h",
-												"float.h",    "stdatomic.h", "time.h",
-											    "inttypes.h", "stdbool.h",   "uchar.h",
-                                                "iso646.h",   "stddef.h",    "wchar.h",
-												"limits.h",   "stdint.h",    "wctype.h",
-												"locale.h",   "stdio.h" };
+const std::set<std::string> c89_std_headers = { 
+	sep + "assert.h" + end, sep + "locale.h" + end, sep + "stddef.h" + end,
+	sep + "ctype.h" + end,  sep + "math.h" + end,   sep + "stdio.h" + end,
+	sep + "errno.h" + end,  sep + "setjmp.h" + end, sep + "stdlib.h" + end,
+	sep + "float.h" + end,  sep + "signal.h" + end, sep + "string.h" + end,
+	sep + "limits.h" + end, sep + "stdarg.h" + end, sep + "time.h" + end
+};
 
-const std::set<std::string> cpp_std_headers = { "algorithm",          "fstream",          "list",      "regex",            "tuple",
-                                                "array",              "functional",       "locale",    "scoped_allocator", "type_traits",
-                                                "atomic",             "future",           "map",       "set",              "typeindex", 
-                                                "bitset",             "initializer_list", "memory",    "sstream",          "typeinfo",
-                                                "chrono",             "iomanip",          "mutex",     "stack",            "unordered_map",
-                                                "codecvt",            "ios",              "new",       "stdexcept",        "unordered_set",
-                                                "complex",            "iosfwd",           "numeric",   "streambuf",        "utility",
-                                                "condition_variable", "iostream",         "ostream",   "string",           "valarray",
-                                                "deque",              "istream",          "queue",     "strstream",        "vector",
-                                                "exception",          "iterator",         "random",    "system_error",
-                                                "forward_list",       "limits",           "ratio",     "thread",
-												/* C++ headers for C library functions */
-                                                "cassert",            "cinttypes",        "csignal",   "cstdio",           "cwchar",
-                                                "ccomplex",           "ciso646",          "cstdalign", "cstdlib",          "cwctype",
-                                                "cctype",             "climits",          "cstdarg",   "cstring",
-                                                "cerrno",             "clocale",          "cstdbool",  "ctgmath",
-                                                "cfenv",              "cmath",            "cstddef",   "ctime",
-                                                "cfloat",             "csetjmp",          "cstdint",   "cuchar"
+const std::set<std::string> c99_std_headers = { 
+	sep + "assert.h" + end,  sep + "inttypes.h" + end, sep + "signal.h" + end,  sep + "stdlib.h" + end,
+	sep + "complex.h" + end, sep + "iso646.h" + end,   sep + "stdarg.h" + end,  sep + "string.h" + end,
+	sep + "ctype.h" + end,   sep + "limits.h" + end,   sep + "stdbool.h" + end, sep + "tgmath.h" + end,
+	sep + "errno.h" + end,   sep + "locale.h" + end,   sep + "stddef.h" + end,  sep + "time.h" + end,
+	sep + "fenv.h" + end,    sep + "math.h" + end,     sep + "stdint.h" + end,  sep + "wchar.h" + end,
+	sep + "float.h" + end,   sep + "setjmp.h" + end,   sep + "stdio.h" + end,   sep + "wctype.h" + end
+};
+
+const std::set<std::string> c11_std_headers = { 
+	sep + "assert.h" + end,   sep + "math.h" + end,      sep + "stdlib.h" + end,
+	sep + "complex.h" + end,  sep + "setjmp.h" + end,    sep + "stdnoreturn.h" + end,
+	sep + "ctype.h" + end,    sep + "signal.h" + end,    sep + "string.h" + end,
+	sep + "errno.h" + end,    sep + "stdalign.h" + end,  sep + "tgmath.h" + end,
+	sep + "fenv.h" + end,     sep + "stdarg.h" + end,    sep + "threads.h" + end,
+	sep + "float.h" + end,    sep + "stdatomic.h" + end, sep + "time.h" + end,
+	sep + "inttypes.h" + end, sep + "stdbool.h" + end,   sep + "uchar.h" + end,
+	sep + "iso646.h" + end,   sep + "stddef.h" + end,    sep + "wchar.h" + end,
+	sep + "limits.h" + end,   sep + "stdint.h" + end,    sep + "wctype.h" + end,
+	sep + "locale.h" + end,   sep + "stdio.h" + end
+};
+
+const std::set<std::string> cpp_std_headers = { 
+	sep + "algorithm" + end,          sep + "fstream" + end,          sep + "list" + end,    sep + "regex" + end,            sep + "tuple" + end,
+	sep + "array" + end,              sep + "functional" + end,       sep + "locale" + end,  sep + "scoped_allocator" + end, sep + "type_traits" + end,
+	sep + "atomic" + end,             sep + "future" + end,           sep + "map" + end,     sep + "set" + end,              sep + "typeindex" + end,
+	sep + "bitset" + end,             sep + "initializer_list" + end, sep + "memory" + end,  sep + "sstream" + end,          sep + "typeinfo" + end,
+	sep + "chrono" + end,             sep + "iomanip" + end,          sep + "mutex" + end,   sep + "stack" + end,            sep + "unordered_map" + end,
+	sep + "codecvt" + end,            sep + "ios" + end,              sep + "new" + end,     sep + "stdexcept" + end,        sep + "unordered_set" + end,
+	sep + "complex" + end,            sep + "iosfwd" + end,           sep + "numeric" + end, sep + "streambuf" + end,        sep + "utility" + end,
+	sep + "condition_variable" + end, sep + "iostream" + end,         sep + "ostream" + end, sep + "string" + end,           sep + "valarray" + end,
+	sep + "deque" + end,              sep + "istream" + end,          sep + "queue" + end,   sep + "strstream" + end,        sep + "vector" + end,
+	sep + "exception" + end,          sep + "iterator" + end,         sep + "random" + end,  sep + "system_error" + end,
+	sep + "forward_list" + end,       sep + "limits" + end,           sep + "ratio" + end,   sep + "thread" + end,
+	/* C++ headers for C library functions */
+	sep + "cassert" + end,  sep + "cinttypes" + end, sep + "csignal" + end,   sep + "cstdio" + end,  sep + "cwchar" + end,
+	sep + "ccomplex" + end, sep + "ciso646" + end,   sep + "cstdalign" + end, sep + "cstdlib" + end, sep + "cwctype" + end,
+	sep + "cctype" + end,   sep + "climits" + end,   sep + "cstdarg" + end,   sep + "cstring" + end,
+	sep + "cerrno" + end,   sep + "clocale" + end,   sep + "cstdbool" + end,  sep + "ctgmath" + end,
+	sep + "cfenv" + end,    sep + "cmath" + end,     sep + "cstddef" + end,   sep + "ctime" + end,
+	sep + "cfloat" + end,   sep + "csetjmp" + end,   sep + "cstdint" + end,   sep + "cuchar" + end
 };
 
 

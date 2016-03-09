@@ -20,6 +20,9 @@ output and the metrics for a file will include the functions relating to the
 functions within that file.  A global wrap-up provides a top-level overview of
 all files.
 
+See the [usage](usage.md) page for details on the various command line options
+available.
+
 Example Output
 ==============
 

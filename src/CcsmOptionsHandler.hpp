@@ -46,7 +46,7 @@ public:
 
 	void ParseOptions(int argc, const char ** const argv);
 
-	const MetricOptions* getMetricOptions() const;
+	MetricOptions* getMetricOptions() const;
 	clang::tooling::CommonOptionsParser* getOptionsParser() const;
 
 	virtual ~CcsmOptionsHandler();

@@ -26,6 +26,7 @@
 
 #include <vector>
 #include <string>
+#include <map>
 #include <iostream>
 
 typedef enum
@@ -56,6 +57,7 @@ protected:
 	std::string m_outputFileName;
 	std::ostream* m_outputStream;
 	bool m_optionsOk;
+	std::map<std::string, bool> m_shouldIncludeFileCache;
 
 	bool isFileInList( const std::vector<std::string>* const p_list, const std::string& p_name ) const;
 public:
@@ -64,7 +66,7 @@ public:
 				   std::vector<std::string>* const p_outputMetrics = NULL,
 				   std::vector<std::string>* const p_defFiles = NULL );
 	virtual ~MetricOptions();
-	bool ShouldIncludeFile( const std::string& p_fn ) const;
+	bool ShouldIncludeFile( const std::string& p_fn );
 	bool ShouldIncludeFunction( const std::string& p_fn ) const;
 	bool ShouldIncludeMetric(const std::string& p_name, bool p_checkAliases = true) const;
 	bool isDefFile( const std::string& p_name ) const;
