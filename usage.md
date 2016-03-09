@@ -17,6 +17,23 @@ option:
 
     ccsm --help
 
+Using Response Files
+--------------------
+
+Response files can be used to avoid the need to specify a long list of options
+on the command line.  When using response files, the command line options are
+contained in a text file and that text file is referenced on the command line
+using the notation `@filename`.
+
+For example:
+
+    ccsm @opts.txt --
+
+NOTE: Response files cannot be used after the `--` separator.  If you wish to
+avoid having to specify a long list of compiler options, it's necessary to use a
+[Compilation Database](http://clang.llvm.org/docs/JSONCompilationDatabase.html)
+rather than response files.
+
 Excluding Files From The Results
 --------------------------------
 
