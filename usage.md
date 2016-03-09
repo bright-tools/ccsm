@@ -15,7 +15,7 @@ Getting Command Line Help
 A current list of CCSM options can be displayed by running with the `--help`
 option:
 
-    `ccsm --help`
+    ccsm --help
 
 Excluding Files From The Results
 --------------------------------
