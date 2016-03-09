@@ -12,7 +12,10 @@ If not using a compilation database, use:
 Getting Command Line Help
 -------------------------
 
-`ccsm --help`
+A current list of CCSM options can be displayed by running with the `--help`
+option:
+
+    `ccsm --help`
 
 Excluding Files From The Results
 --------------------------------
