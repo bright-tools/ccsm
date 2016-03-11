@@ -44,6 +44,7 @@ static llvm::cl::list<std::string, std::vector<std::string>> ExcludeFiles(
 	llvm::cl::desc("Exclude specified file from the metrics"),
 	llvm::cl::CommaSeparated,
 	llvm::cl::ZeroOrMore,
+	llvm::cl::value_desc("regex"),
 	llvm::cl::location(ExcludeFileList),
 	llvm::cl::cat(CCSMToolCategory));
 
