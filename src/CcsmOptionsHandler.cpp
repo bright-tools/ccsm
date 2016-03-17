@@ -165,6 +165,14 @@ static llvm::cl::opt<std::string> OutputToFile(
 	llvm::cl::Optional,
 	llvm::cl::cat(CCSMToolCategory));
 
+static llvm::cl::opt<std::string> LimitsFile(
+	"limits",
+	llvm::cl::desc("Specify a file to read limits data from"),
+	llvm::cl::Optional,
+	llvm::cl::value_desc("filename"),
+	llvm::cl::cat(CCSMToolCategory));
+
+
 static llvm::cl::extrahelp MoreHelp("\nVersion: " GEN_VER_VERSION_STRING);
 
 static void PrintVersion() {
@@ -198,6 +206,7 @@ void CcsmOptionsHandler::ParseOptions(int argc,
 	m_metricOptions->setPrototypesAreFileScope(PrototypesAreFileScope);
 	m_metricOptions->setOutputFormat(OutputFormat);
 	m_metricOptions->setExcludeStdHeaders(ExcludeStandardHeaders);
+	m_metricOptions->setLimitsFile(LimitsFile);
 	// TODO: Handle failure
 	m_metricOptions->setOutputFile(OutputToFile);
 

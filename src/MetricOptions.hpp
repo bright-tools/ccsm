@@ -55,6 +55,7 @@ protected:
 	MetricDumpFormat_e m_outputFormat  = METRIC_DUMP_FORMAT_TREE;
 	bool m_outputMetric[METRIC_UNIT_MAX];
 	std::string m_outputFileName;
+	std::string m_limitsFileName;
 	std::ostream* m_outputStream       = NULL;
 	bool m_optionsOk                   = true;
 	std::map<std::string, bool> m_shouldIncludeFileCache;
@@ -91,6 +92,8 @@ public:
 	std::ostream& getOutput(void) const;
 	bool setOutputFile(const std::string p_fileName);
 	std::string getOutputFile(void) const;
+	void setLimitsFile(const std::string p_fileName);
+	std::string getLimitsFile(void) const;
 	bool optionsOk(void) const;
 };
 

@@ -522,6 +522,25 @@ std::string MetricUnit::getMetricShortName(const MetricType_e p_type)
 	return m_metricShortNames[p_type];
 }
 
+MetricType_e MetricUnit::getMetricByShortName(const std::string p_shortName)
+{
+	MetricType_e ret_val = METRIC_TYPE_MAX;
+	uint16_t loop;
+
+	for (loop = 0;
+		loop < METRIC_TYPE_MAX;
+		loop++)
+	{
+		if (m_metricShortNames[loop] == p_shortName)
+		{
+			ret_val = static_cast<MetricType_e>(loop);
+			break;
+		}
+	}
+
+	return ret_val;
+}
+
 uint32_t MetricUnit::getMetricScaling(const MetricType_e p_type)
 {
 	return m_metricScaling[p_type];

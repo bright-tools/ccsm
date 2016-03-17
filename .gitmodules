@@ -1,3 +1,6 @@
 [submodule "externals/c_headers"]
 	path = externals/c_headers
 	url = https://github.com/bright-tools/c_headers.git
+[submodule "externals/minicsv"]
+	path = externals/minicsv
+	url = https://github.com/shaovoon/minicsv.git

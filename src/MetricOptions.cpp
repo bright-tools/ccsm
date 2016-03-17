@@ -288,3 +288,13 @@ std::string MetricOptions::getOutputFile(void) const
 {
 	return m_outputFileName;
 }
+
+void MetricOptions::setLimitsFile(const std::string p_fileName)
+{
+	m_limitsFileName = p_fileName;
+}
+
+std::string MetricOptions::getLimitsFile(void) const
+{
+	return m_limitsFileName;
+}

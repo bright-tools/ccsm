@@ -94,6 +94,7 @@ public:
 
 	static std::string getMetricName( const MetricType_e p_type );
 	static std::string getMetricShortName(const MetricType_e p_type);
+	static MetricType_e getMetricByShortName(const std::string p_shortName);
 	static uint32_t    getMetricScaling(const MetricType_e p_type);
 	static bool        doesMetricApplyForUnit(const MetricType_e p_MetricType, const MetricUnitType_e p_unitType);
 	static bool        isMetricLocalAndCumulative(const MetricType_e p_type);

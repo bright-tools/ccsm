@@ -20,6 +20,7 @@
 #include "FunctionLocator.hpp"
 #include "MetricLinkageResolver.hpp"
 #include "MetricDumper.hpp"
+#include "LimitsChecker.hpp"
 
 #include "clang/Tooling/Tooling.h"
 #include "llvm/Support/Signals.h" 
@@ -74,6 +75,11 @@ int main(int argc, const char **argv) {
 				}
 
 				MetricDumper::dump(&topUnit, metricOptions);
+
+				if (metricOptions.getLimitsFile().length())
+				{
+					LimitsChecker::dump(&topUnit, metricOptions);
+				}
 			}
 			else
 			{

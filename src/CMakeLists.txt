@@ -34,6 +34,10 @@ set(SOURCES
   FunctionLocator.cpp
   MetricLinkageResolver.hpp
   MetricLinkageResolver.cpp
+  LimitsChecker.hpp
+  LimitsChecker.cpp
+  LimitLibrary.hpp
+  LimitLibrary.cpp
 )
 
 add_clang_executable(ccsm ${SOURCES})
@@ -43,6 +47,8 @@ target_link_libraries(ccsm
   clangBasic
   clangASTMatchers
   )
+
+include_directories(${CCSM_DIR}/externals/minicsv/MiniCSV)
 
 # Make ccsm_ver.h depend on a fake dependency so that it's always re-built
 set_property(SOURCE ccsm_ver.h APPEND PROPERTY OBJECT_DEPENDS ccsm_ver.h_fake)
