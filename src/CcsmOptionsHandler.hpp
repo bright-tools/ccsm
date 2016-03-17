@@ -29,16 +29,16 @@
 class CcsmOptionsHandler {
 
 private:
-	clang::tooling::CommonOptionsParser* m_optionsParser;
-	MetricOptions* m_metricOptions;
+	clang::tooling::CommonOptionsParser *m_optionsParser = NULL;
+	MetricOptions                       *m_metricOptions = NULL;
+
+	bool m_usesC89 = false;
+	bool m_usesC11 = false;
+	bool m_usesC99 = false;
+	bool m_usesCpp = false;
 
 	void analyseCompilerArgs(const char* const exeName);
 	void checkCompilerArgs(const char* const exeName);
-
-	bool m_usesC89;
-	bool m_usesC11;
-	bool m_usesC99;
-	bool m_usesCpp;
 
 public:
 

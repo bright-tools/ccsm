@@ -35,10 +35,10 @@
 class MetricPPCustomer : public clang::PPCallbacks, public clang::CommentHandler
 {
 protected:
-	MetricUnit*		                  m_topUnit;
+	MetricUnit*		                  m_topUnit         = NULL;
     MetricOptions&                    m_options;
 	std::string                       m_commentFile;
-    std::set<std::string>*            m_commentFileList;
+    std::set<std::string>*            m_commentFileList = NULL;
 
 public:
 	MetricPPCustomer( MetricUnit* p_topUnit, std::set<std::string>* p_commentFileList, MetricOptions& p_options );

@@ -174,7 +174,7 @@ static void PrintVersion() {
 	          << "Using " << clang::getClangFullVersion() << '\n';
 }
 
-CcsmOptionsHandler::CcsmOptionsHandler() : m_optionsParser(NULL), m_metricOptions( NULL )
+CcsmOptionsHandler::CcsmOptionsHandler()
 {
 	llvm::cl::SetVersionPrinter(PrintVersion);
 }

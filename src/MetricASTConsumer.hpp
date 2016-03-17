@@ -40,8 +40,8 @@ class MetricASTConsumer : public clang::ASTConsumer
 protected:
 	clang::CompilerInstance& m_compilerInstance;
     MetricOptions&           m_options;
-	MetricUnit               *m_topUnit;
-	GlobalFunctionLocator    *m_fnLocator;
+	MetricUnit               *m_topUnit         = NULL;
+	GlobalFunctionLocator    *m_fnLocator       = NULL;
 
 public:
 	explicit MetricASTConsumer(clang::CompilerInstance &CI, MetricUnit* p_topUnit, MetricOptions& p_options, GlobalFunctionLocator*  m_fnLocator = NULL);
@@ -54,8 +54,8 @@ class MetricPPConsumer : public clang::PreprocessorFrontendAction
 {
 protected:
 	MetricOptions&            m_options;
-	MetricUnit               *m_topUnit;
-	GlobalFunctionLocator    *m_fnLocator;
+	MetricUnit               *m_topUnit   = NULL;
+	GlobalFunctionLocator    *m_fnLocator = NULL;
 	bool                      m_expanded;
 
 public:
