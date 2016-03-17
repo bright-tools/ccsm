@@ -36,9 +36,9 @@ class MetricSrcLexer
 {
 	protected:
 		clang::CompilerInstance &m_compilerInstance;
-		MetricUnit*		        m_topUnit;
+		MetricUnit*		        m_topUnit             = NULL;
 		MetricOptions&          m_options;
-		MetricUnit*             m_currentUnit;
+		MetricUnit*             m_currentUnit         = NULL;
 		std::string             m_currentFunctionName;
 		std::string             m_currentFileName;
 		clang::Token            m_lastToken;

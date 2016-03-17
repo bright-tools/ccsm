@@ -51,14 +51,14 @@ protected:
 	const static std::map<clang::BinaryOperator::Opcode, MetricType_e> binaryOperatorToMetricMap;
 
 	clang::CompilerInstance&        m_compilerInstance;
-	clang::ASTContext*		        m_astContext;
-	MetricUnit*		                m_topUnit;
+	clang::ASTContext*		        m_astContext           = NULL;
+	MetricUnit*		                m_topUnit              = NULL;
 	std::string				        m_currentFileName;
 	std::string				        m_currentFunctionName;
-	MetricUnit*				        m_currentUnit;
+	MetricUnit*				        m_currentUnit          = NULL;
     MetricOptions&	                m_options;
 	std::set<std::string>	        m_fnsCalled;          
-	TranslationUnitFunctionLocator* m_fnLocator;
+	TranslationUnitFunctionLocator* m_fnLocator            = NULL;
 
 	void HandleLoc( const clang::SourceLocation& p_loc );
 	void DeclCommon(const clang::DeclContext* p_declCtxt, const clang::Decl* p_decl);

@@ -42,7 +42,7 @@ class MetricSrcExpandedLexer : public MetricSrcLexer
 		std::set<std::string>   m_currentFileCharConsts;
 		std::set<std::string>   m_currentFileIdentifiers;
 
-		bool					m_dumpNewline;
+		bool					m_dumpNewline = false;
 
 		static const std::map<clang::tok::TokenKind,MetricType_e> m_tokenKindToTypeMap;
 

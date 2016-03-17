@@ -70,7 +70,6 @@ MetricVisitor::MetricVisitor(clang::CompilerInstance &p_CI, MetricUnit* p_topUni
 	                                                                                                           m_compilerInstance(p_CI), 
 																											   m_astContext(&(p_CI.getASTContext())),
 	                                                                                                           m_topUnit( p_topUnit ), 
-	                                                                                                           m_currentUnit( NULL ), 
 																											   m_options( p_options ),
 																											   m_fnLocator( p_fnLocator )
 {
