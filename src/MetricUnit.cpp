@@ -582,3 +582,8 @@ const MetricUnit::SubUnitMap_t* MetricUnit::getSubUnits(void) const
 {
 	return &m_subUnits;
 }
+
+const MetricUnit* MetricUnit::getParent() const
+{
+	return m_parent;
+}

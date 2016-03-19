@@ -132,6 +132,8 @@ public:
 	bool isFnOrMethod( void ) const;
 
 	void setProcessed( const MetricUnitProcessingType_e p_type );
+
+	const MetricUnit* getParent() const;
 };
 
 #endif

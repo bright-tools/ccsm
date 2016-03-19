@@ -48,3 +48,15 @@ would exclude files with names ending `comment.h` and those ending `free.h`
     --exclude-file=.h$$
 
 would exclude all files with names ending `.h` (likely most header files)
+
+Limits Checking
+---------------
+
+CCSM includes functionality to check against limits for specific metrics.  In
+order to use this, a limits file must be specified on the command line using the
+`--limits` option, for example
+
+    --limits=limit_file.csv
+
+Please see the [limits file format](limits.md) for details of how to specify the
+file.

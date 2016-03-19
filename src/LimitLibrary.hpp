@@ -31,9 +31,12 @@ class LimitLibrary
 {
     protected:
         typedef struct {
-            std::string           fileName;
+			bool                  global;
+			bool                  file;
+			std::string           fileName;
             std::string           funcName;
 			std::string           operand;
+			std::string           text;
             MetricUnit::counter_t limit;
         } limitPattern_t;
 

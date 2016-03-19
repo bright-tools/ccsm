@@ -130,9 +130,10 @@ static llvm::cl::opt<bool> NoMethod(
 
 static llvm::cl::opt<MetricDumpFormat_e> OutputFormat(
 	"output-format",
-	llvm::cl::desc("Format of output"),
+	llvm::cl::desc("Format of metric output"),
 	llvm::cl::values(
-	    clEnumValN(METRIC_DUMP_FORMAT_TSV, "tsv", "Tab Seperated Values"),
+		clEnumValN(METRIC_DUMP_FORMAT_NONE, "none", "Don't output metric data"),
+		clEnumValN(METRIC_DUMP_FORMAT_TSV, "tsv", "Tab Seperated Values"),
     	clEnumValN(METRIC_DUMP_FORMAT_CSV, "csv", "Comma Separated Values"),
 	    clEnumValN(METRIC_DUMP_FORMAT_SPARSE_TREE, "sparsetree", "Sparse Tree (zero value nodes omitted)"),
 	    clEnumValN(METRIC_DUMP_FORMAT_TREE, "tree", "Tree Structure"),
