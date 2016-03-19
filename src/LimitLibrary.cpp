@@ -15,16 +15,73 @@
 */
 
 #include "LimitLibrary.hpp"
-#include "minicsv.h"
+#include "MetricOptions.hpp"
 
 #include <llvm/Support/Regex.h>
 #include <llvm/ADT/StringRef.h>
+#include <iostream>
+
 
 LimitLibrary::LimitLibrary()
 {
 }
 
-#include <iostream>
+void LimitLibrary::parseCsvLine(csv::ifstream& p_is)
+{
+	std::string  metricName;
+	limitPattern_t pattern;
+	std::string  global;
+	std::string  file;
+
+	p_is >> metricName >> global >> file >> pattern.fileName >> pattern.funcName >> pattern.operand >> pattern.limit >> pattern.text;
+#if 0
+	std::cout << "Read: " << metricName << " / " << pattern.fileName << " / " << pattern.funcName << " / " << pattern.operand << " / " << pattern.limit << std::endl;
+#endif
+
+	if (global.length())
+	{
+		pattern.global = true;
+	}
+	else
+	{
+		pattern.global = false;
+	}
+
+	if (file.length())
+	{
+		pattern.file = true;
+	}
+	else
+	{
+		pattern.file = false;
+	}
+
+	/* TODO: deal with scaling */
+	/* TODO: deal with unknown operands */
+
+	if (metricName[0] != ';')
+	{
+		MetricType_e metric = MetricUnit::getMetricByShortName(metricName);
+
+		if (metric != METRIC_TYPE_MAX)
+		{
+#if 0
+			std::cout << "Metric is " << metric << std::endl;
+#endif
+			m_patternMap[metric].push_back(pattern);
+		}
+		else
+		{
+			std::cerr << "Ignoring limits file line starting " << metricName << "\n";
+			// TODO: error
+		}
+	}
+	else
+	{
+		/* It's a comment line - ignore */
+	}
+
+}
 
 bool LimitLibrary::load( const std::string p_fileName )
 {
@@ -35,66 +92,32 @@ bool LimitLibrary::load( const std::string p_fileName )
 
     if( is.is_open() )
     {
-        std::string  metricName;
-		limitPattern_t pattern;
-		std::string  global;
-		std::string  file;
-
 		while (is.read_line())
 		{
-			is >> metricName >> global >> file >> pattern.fileName >> pattern.funcName >> pattern.operand >> pattern.limit >> pattern.text;
-#if 0
-			std::cout << "Read: " << metricName << " / " << pattern.fileName << " / " << pattern.funcName << " / " << pattern.operand << " / " << pattern.limit << std::endl;
-#endif
-
-			if (global.length())
-			{
-				pattern.global = true;
-			}
-			else
-			{
-				pattern.global = false;
-			}
-
-			if (file.length())
-			{
-				pattern.file = true;
-			}
-			else
-			{
-				pattern.file = false;
-			}
-
-			/* TODO: deal with scaling */
-			/* TODO: deal with unknown operands */
-
-			if (metricName[0] != ';')
-			{
-				MetricType_e metric = MetricUnit::getMetricByShortName(metricName);
-
-				if (metric != METRIC_TYPE_MAX)
-				{
-#if 0
-					std::cout << "Metric is " << metric << std::endl;
-#endif
-					m_patternMap[metric].push_back(pattern);
-				}
-				else
-				{
-					std::cerr << "Ignoring limits file line starting " << metricName << "\n";
-					// TODO: error
-				}
-			}
-			else
-			{
-				/* It's a comment line - ignore */
-			}
+			parseCsvLine(is);
 		}
 
         ret_val = true; 
     }
 
     return ret_val;
+}
+
+const LimitLibrary::limitPattern_t* LimitLibrary::findHighestPresidenceRule(const patternSet_t& p_set, const MetricUnit& p_unit, const MetricOptions& p_options) const
+{
+	const limitPattern_t* pattern = NULL;
+
+	for (patternSet_t::const_iterator pit = p_set.begin();
+		pit != p_set.end();
+		pit++)
+	{
+		if (unitMatchesLimitPattern(p_unit, p_options, &(*pit)))
+		{
+			pattern = &(*pit);
+		}
+	}
+
+	return pattern;
 }
 
 void LimitLibrary::checkLimit(const MetricUnit& p_unit, const MetricOptions& p_options) const
@@ -114,83 +137,83 @@ void LimitLibrary::checkLimit(const MetricUnit& p_unit, const MetricOptions& p_o
 			/* Are there any limits against this metric? */
 			if (it != m_patternMap.end())
 			{
-				for (patternSet_t::const_iterator pit = it->second.begin();
-					pit != it->second.end();
-					pit++)
-				{
-					bool matches = false;
-
-					switch (p_unit.GetType())
-					{
-					case METRIC_UNIT_GLOBAL:
-						if (pit->global)
-						{
-							matches = true;
-						}
-						break;
-					case METRIC_UNIT_FILE:
-						if (pit->file)
-						{
-							llvm::Regex regex(pit->fileName);
-							if (regex.match(p_unit.getUnitName(p_options)))
-							{
-								matches = true;
-							}
-						}
-						break;
-					case METRIC_UNIT_FUNCTION:
-						if (pit->funcName.length())
-						{
-							llvm::Regex regex(pit->funcName);
-							if (regex.match(p_unit.getUnitName(p_options)))
-							{
-								llvm::Regex fileRegex(pit->fileName);
-								if (fileRegex.match(p_unit.getParent()->getUnitName(p_options)))
-								{
-									matches = true;
-								}
-							}
-						}
-						break;
-					default:
-						break;
-					}
-
-					if (matches)
-					{
-						pattern = &(*pit);
-					}
-				}
-
-
-				if (pattern != NULL)
-				{
-					MetricUnit::counter_t val = p_unit.getCounter(metric, MetricUnit::isMetricCumulative(metric));
-
-#if 0
-					std::cout << "Checking " << p_unit.getUnitName(p_options) << " for '" << MetricUnit::getMetricName(it->first) << "'\n";
-#endif
-
-					if (((pattern->operand == "<") && (val < pattern->limit)) ||
-						((pattern->operand == ">") && (val > pattern->limit)) ||
-						((pattern->operand == ">=") && (val >= pattern->limit)) ||
-						((pattern->operand == "<=") && (val <= pattern->limit)))
-					{
-						/* Passed check */
-					}
-					else
-					{
-						// TODO: Qualify the unitName - is it a function?  Is it a file?  Global?
-						// TODO: Taking scaling into account on actual vs limit
-						std::cout << p_unit.getUnitName(p_options) << " failed limits check '" << MetricUnit::getMetricName(it->first) << "' (actual: " << val << " expected: " << pattern->operand << pattern->limit << ")";
-						if (pattern->text.length())
-						{
-							std::cout << ": " << pattern->text;
-						}
-						std::cout << "\n";
-					}
-				}
+				pattern = findHighestPresidenceRule(it->second, p_unit, p_options);
+				checkUnitPassesMetricLimit(p_unit, p_options, metric, pattern);
 			}
 		}
 	}
+}
+
+void LimitLibrary::checkUnitPassesMetricLimit(const MetricUnit& p_unit, const MetricOptions& p_options, const MetricType_e p_metric, const limitPattern_t* const p_pattern)
+{
+	if (p_pattern != NULL)
+	{
+		MetricUnit::counter_t val = p_unit.getCounter(p_metric, MetricUnit::isMetricCumulative(p_metric));
+
+#if 0
+		std::cout << "Checking " << p_unit.getUnitName(p_options) << " for '" << MetricUnit::getMetricName(it->first) << "'\n";
+#endif
+
+		if (((p_pattern->operand == "<") && (val < p_pattern->limit)) ||
+			((p_pattern->operand == ">") && (val > p_pattern->limit)) ||
+			((p_pattern->operand == ">=") && (val >= p_pattern->limit)) ||
+			((p_pattern->operand == "<=") && (val <= p_pattern->limit)))
+		{
+			/* Passed check */
+		}
+		else
+		{
+			std::ostream& out = p_options.getOutput();
+			// TODO: Qualify the unitName - is it a function?  Is it a file?  Global?
+			// TODO: Taking scaling into account on actual vs limit
+			out << p_unit.getUnitName(p_options) << " failed limits check '" << MetricUnit::getMetricName(p_metric) << "' (actual: " << val << " expected: " << p_pattern->operand << p_pattern->limit << ")";
+			if (p_pattern->text.length())
+			{
+				out << ": " << p_pattern->text;
+			}
+			out << "\n";
+
+		}
+	}
+}
+
+bool LimitLibrary::unitMatchesLimitPattern(const MetricUnit& p_unit, const MetricOptions& p_options, const limitPattern_t* const p_pattern)
+{
+	bool matches = false;
+	switch (p_unit.GetType())
+	{
+		case METRIC_UNIT_GLOBAL:
+			if (p_pattern->global)
+			{
+				matches = true;
+			}
+			break;
+		case METRIC_UNIT_FILE:
+			if (p_pattern->file)
+			{
+				llvm::Regex regex(p_pattern->fileName);
+				if (regex.match(p_unit.getUnitName(p_options)))
+				{
+					matches = true;
+				}
+			}
+			break;
+		case METRIC_UNIT_FUNCTION:
+			if (p_pattern->funcName.length())
+			{
+				llvm::Regex regex(p_pattern->funcName);
+				if (regex.match(p_unit.getUnitName(p_options)))
+				{
+					llvm::Regex fileRegex(p_pattern->fileName);
+					if (fileRegex.match(p_unit.getParent()->getUnitName(p_options)))
+					{
+						matches = true;
+					}
+				}
+			}
+			break;
+		default:
+			break;
+	}
+	return matches;
 }

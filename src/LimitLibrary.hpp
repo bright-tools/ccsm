@@ -24,6 +24,9 @@
 #define       LIMITS_LIBRARY_HPP
 
 #include "MetricUnit.hpp"
+
+#include "minicsv.h"
+
 #include <map>
 #include <list>
 
@@ -44,6 +47,11 @@ class LimitLibrary
         typedef std::map<MetricType_e,patternSet_t> patternMap_t;
 
         patternMap_t m_patternMap;
+
+		static void checkUnitPassesMetricLimit(const MetricUnit& p_unit, const MetricOptions& p_options, const MetricType_e p_metric, const limitPattern_t* const p_pattern);
+		static bool unitMatchesLimitPattern(const MetricUnit& p_unit, const MetricOptions& p_options, const limitPattern_t* const p_pattern);
+		void parseCsvLine(csv::ifstream& p_is);
+		const limitPattern_t* findHighestPresidenceRule(const patternSet_t& p_set,const MetricUnit& p_unit, const MetricOptions& p_options) const;
 
     public:
         LimitLibrary();
