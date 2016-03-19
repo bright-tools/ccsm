@@ -8,10 +8,8 @@ The limits file is a CSV file, with the following columns:
 | Field | Description |
 |-------|-------------|
 | Metric Name | Short name for the metric to be checked |
-| Global Flag | Indicate whether or not the check should be applied at the global wrap-up level.  An empty value indicates that it should not, any non-zero
-length string indicates that it should |
-| File Flag | Indicate whether or not the check should be applied at the file level.  An empty value indicates that it should not, any non-zero
-length string indicates that it should |
+| Global Flag | Indicate whether or not the check should be applied at the global wrap-up level.  An empty value indicates that it should not, any non-zero length string indicates that it should |
+| File Flag | Indicate whether or not the check should be applied at the file level.  An empty value indicates that it should not, any non-zero length string indicates that it should |
 | File Regex | Regex for matching file names. |
 | Function Regex | Regex for matching function names.  Leaving this empty indicates that the check should not be applied at the function level |
 | Operator | Operator used in the comparison of the value against the limit.  Currently valid are `>`, `<`, `>=` and `<=` |
