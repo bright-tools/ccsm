@@ -98,6 +98,9 @@ public:
 	static uint32_t    getMetricScaling(const MetricType_e p_type);
 	static bool        doesMetricApplyForUnit(const MetricType_e p_MetricType, const MetricUnitType_e p_unitType);
 	static bool        isMetricLocalAndCumulative(const MetricType_e p_type);
+	static float       getScaledMetric(const MetricType_e p_type, counter_t p_val);
+	static std::string getScaledMetricString(const MetricType_e p_type, counter_t p_val);
+
 
 	static const uint32_t counter_t_Max;
 
@@ -134,6 +137,7 @@ public:
 	void setProcessed( const MetricUnitProcessingType_e p_type );
 
 	const MetricUnit* getParent() const;
+
 };
 
 #endif

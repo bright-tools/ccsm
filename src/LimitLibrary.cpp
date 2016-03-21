@@ -21,6 +21,7 @@
 #include <llvm/ADT/StringRef.h>
 #include <iostream>
 
+static const std::set<std::string> knownOperators = { ">", "<", "<=", ">=" };
 
 LimitLibrary::LimitLibrary()
 {
@@ -32,8 +33,9 @@ void LimitLibrary::parseCsvLine(csv::ifstream& p_is)
 	limitPattern_t pattern;
 	std::string  global;
 	std::string  file;
+	float        limit;
 
-	p_is >> metricName >> global >> file >> pattern.fileName >> pattern.funcName >> pattern.operand >> pattern.limit >> pattern.text;
+	p_is >> metricName >> global >> file >> pattern.fileName >> pattern.funcName >> pattern.operand >> limit >> pattern.text;
 #if 0
 	std::cout << "Read: " << metricName << " / " << pattern.fileName << " / " << pattern.funcName << " / " << pattern.operand << " / " << pattern.limit << std::endl;
 #endif
@@ -57,8 +59,7 @@ void LimitLibrary::parseCsvLine(csv::ifstream& p_is)
 	}
 
 	/* TODO: deal with scaling */
-	/* TODO: deal with unknown operands */
-
+	
 	if (metricName[0] != ';')
 	{
 		MetricType_e metric = MetricUnit::getMetricByShortName(metricName);
@@ -68,12 +69,20 @@ void LimitLibrary::parseCsvLine(csv::ifstream& p_is)
 #if 0
 			std::cout << "Metric is " << metric << std::endl;
 #endif
+			if ( knownOperators.find( pattern.operand ) == knownOperators.end() )
+			{
+				std::cerr << "Unknown operator in limits file '" << pattern.operand << "'\n";
+				exit(EXIT_FAILURE);
+			}
+
+			pattern.limit = limit * MetricUnit::getMetricScaling(metric);
+
 			m_patternMap[metric].push_back(pattern);
 		}
 		else
 		{
 			std::cerr << "Ignoring limits file line starting " << metricName << "\n";
-			// TODO: error
+			exit(EXIT_FAILURE);
 		}
 	}
 	else
@@ -134,10 +143,12 @@ void LimitLibrary::checkLimit(const MetricUnit& p_unit, const MetricOptions& p_o
 			patternMap_t::const_iterator it = m_patternMap.find(metric);
 			const limitPattern_t* pattern = NULL;
 			
-			/* Are there any limits against this metric? */
+			/* Are there any limits against this metric at all? */
 			if (it != m_patternMap.end())
 			{
+				/* Find the highest precident rule where the rule pattern matches this unit (if there is one) */
 				pattern = findHighestPresidenceRule(it->second, p_unit, p_options);
+
 				checkUnitPassesMetricLimit(p_unit, p_options, metric, pattern);
 			}
 		}
@@ -165,8 +176,10 @@ void LimitLibrary::checkUnitPassesMetricLimit(const MetricUnit& p_unit, const Me
 		{
 			std::ostream& out = p_options.getOutput();
 			// TODO: Qualify the unitName - is it a function?  Is it a file?  Global?
-			// TODO: Taking scaling into account on actual vs limit
-			out << p_unit.getUnitName(p_options) << " failed limits check '" << MetricUnit::getMetricName(p_metric) << "' (actual: " << val << " expected: " << p_pattern->operand << p_pattern->limit << ")";
+			out << p_unit.getUnitName(p_options) << " failed limits check '" << MetricUnit::getMetricName(p_metric) << "' (actual: "
+			    << MetricUnit::getScaledMetricString(p_metric,val) << " expected: " << p_pattern->operand
+				<< MetricUnit::getScaledMetricString(p_metric, p_pattern->limit) << ")";
+
 			if (p_pattern->text.length())
 			{
 				out << ": " << p_pattern->text;

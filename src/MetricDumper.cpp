@@ -17,8 +17,6 @@ limitations under the License.
 #include "MetricDumper.hpp"
 #include "MetricOptions.hpp"
 
-#include <iomanip>
-
 #define IS_OUTPUT_TREE_FORM( _fmt ) (((_fmt) == METRIC_DUMP_FORMAT_TREE ) || ((_fmt) == METRIC_DUMP_FORMAT_SPARSE_TREE ))
 
 const std::string MetricDumper::m_namePrefix[METRIC_UNIT_MAX] = {
@@ -57,16 +55,7 @@ void MetricDumper::dumpMetric(std::ostream& out, const MetricUnit* const p_unit,
 			out << m_dumpPrefix[metricType] << metricName << p_suffix << ": ";
 		}
 
-		uint32_t scaling = MetricUnit::getMetricScaling(p_metric);
-
-		if (scaling == 1)
-		{
-			out << val << p_sep;
-		}
-		else
-		{
-			out << std::setprecision(6) << ((float)(val)) / scaling << p_sep;
-		}
+		out << MetricUnit::getScaledMetricString(p_metric, val) << p_sep;
 	}
 }
 
