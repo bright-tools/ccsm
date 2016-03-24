@@ -242,6 +242,10 @@ MetricVisitor::PathResults MetricVisitor::getIfPathCount(const clang::IfStmt* co
 				ifStmt = nullptr;
 			}
 
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+			std::cout << blanks << "getIfPathCount - returns " << has_return << " - " << thenCount.path_has_return << " - " << elseCount.path_has_return << std::endl;
+#endif
+
 			pathSum += (thenCount.path_count + elseCount.path_count);
 			has_return = has_return && (thenCount.path_has_return && ((elseCount.path_count == 0) || elseCount.path_has_return));
 		}
@@ -395,6 +399,7 @@ MetricVisitor::PathResults MetricVisitor::getOtherPathCount(const clang::Stmt* c
 						ret_val.path_has_return = true;
 						/* All paths had a return statement ... from now on, code should not be reachable */
 						skipAllSubsequent = true;
+						pathMissingReturn = false;
 					}
 					else
 					{
@@ -409,7 +414,7 @@ MetricVisitor::PathResults MetricVisitor::getOtherPathCount(const clang::Stmt* c
 					break;
 				}
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-				std::cout << blanks << "getOtherPathCount - Updated: count - " << ret_val.path_count << " return - " << ret_val.path_has_return << std::endl;
+				std::cout << blanks << "getOtherPathCount - Updated: count - " << ret_val.path_count << " return - " << ret_val.path_has_return << " missing_return - " << pathMissingReturn << std::endl;
 #endif
 			}
 		}
@@ -485,7 +490,7 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 			if (!pathResults.path_has_return)
 			{
 				/* Add an implicit return point */
-				m_currentUnit->increment(METRIC_TYPE_RETURNPOINTS, 1);
+				IncrementMetric(m_currentUnit,METRIC_TYPE_RETURNPOINTS);
 			}
 
 			switch( func->getLinkageAndVisibility().getLinkage() )
