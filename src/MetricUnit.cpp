@@ -384,7 +384,7 @@ MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType, c
 				}
 				else
 				{
-					ret_val = 0;
+					ret_val = counter_t_Max;
 				}
 			}
 			break;
@@ -607,7 +607,14 @@ std::string MetricUnit::getScaledMetricString(const MetricType_e p_type, MetricU
 	}
 	else
 	{
-		strStream << std::setprecision(6) << MetricUnit::getScaledMetric(p_type, p_val);
+		if (p_val == counter_t_Max)
+		{
+			strStream << "Inf";
+		}
+		else
+		{
+			strStream << std::setprecision(6) << MetricUnit::getScaledMetric(p_type, p_val);
+		}
 	}
 
 	return strStream.str();
