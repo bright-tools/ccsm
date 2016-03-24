@@ -31,6 +31,7 @@
 
 typedef enum
 {
+	METRIC_DUMP_FORMAT_NONE,
 	METRIC_DUMP_FORMAT_TREE,
 	METRIC_DUMP_FORMAT_SPARSE_TREE,
 	METRIC_DUMP_FORMAT_TSV,
@@ -55,6 +56,7 @@ protected:
 	MetricDumpFormat_e m_outputFormat  = METRIC_DUMP_FORMAT_TREE;
 	bool m_outputMetric[METRIC_UNIT_MAX];
 	std::string m_outputFileName;
+	std::vector<std::string> m_limitsFileNames;
 	std::ostream* m_outputStream       = NULL;
 	bool m_optionsOk                   = true;
 	std::map<std::string, bool> m_shouldIncludeFileCache;
@@ -91,6 +93,8 @@ public:
 	std::ostream& getOutput(void) const;
 	bool setOutputFile(const std::string p_fileName);
 	std::string getOutputFile(void) const;
+	void setLimitsFile(const std::vector<std::string>& p_fileName);
+	const std::vector<std::string>& getLimitsFiles(void) const;
 	bool optionsOk(void) const;
 };
 

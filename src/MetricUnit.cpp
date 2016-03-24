@@ -23,6 +23,8 @@
 #include "llvm/Support/Path.h"
 
 #include <iostream>
+#include <sstream>
+#include <iomanip>
 
 const std::string MetricUnit::m_metricShortNames[ METRIC_TYPE_MAX ] = {
 #define METRIC_ALIAS( _name, _alias )
@@ -522,6 +524,25 @@ std::string MetricUnit::getMetricShortName(const MetricType_e p_type)
 	return m_metricShortNames[p_type];
 }
 
+MetricType_e MetricUnit::getMetricByShortName(const std::string p_shortName)
+{
+	MetricType_e ret_val = METRIC_TYPE_MAX;
+	uint16_t loop;
+
+	for (loop = 0;
+		loop < METRIC_TYPE_MAX;
+		loop++)
+	{
+		if (m_metricShortNames[loop] == p_shortName)
+		{
+			ret_val = static_cast<MetricType_e>(loop);
+			break;
+		}
+	}
+
+	return ret_val;
+}
+
 uint32_t MetricUnit::getMetricScaling(const MetricType_e p_type)
 {
 	return m_metricScaling[p_type];
@@ -562,4 +583,32 @@ bool MetricUnit::isMetricLocalAndCumulative(const MetricType_e p_type)
 const MetricUnit::SubUnitMap_t* MetricUnit::getSubUnits(void) const
 {
 	return &m_subUnits;
+}
+
+const MetricUnit* MetricUnit::getParent() const
+{
+	return m_parent;
+}
+
+float MetricUnit::getScaledMetric(const MetricType_e p_type, MetricUnit::counter_t p_val)
+{
+	return (float(p_val) / float(getMetricScaling(p_type)));
+}
+
+std::string MetricUnit::getScaledMetricString(const MetricType_e p_type, MetricUnit::counter_t p_val)
+{
+	std::ostringstream strStream;
+
+	const uint32_t scaling = getMetricScaling(p_type);
+
+	if (scaling == 1)
+	{
+		strStream << p_val;
+	}
+	else
+	{
+		strStream << std::setprecision(6) << MetricUnit::getScaledMetric(p_type, p_val);
+	}
+
+	return strStream.str();
 }

@@ -94,9 +94,13 @@ public:
 
 	static std::string getMetricName( const MetricType_e p_type );
 	static std::string getMetricShortName(const MetricType_e p_type);
+	static MetricType_e getMetricByShortName(const std::string p_shortName);
 	static uint32_t    getMetricScaling(const MetricType_e p_type);
 	static bool        doesMetricApplyForUnit(const MetricType_e p_MetricType, const MetricUnitType_e p_unitType);
 	static bool        isMetricLocalAndCumulative(const MetricType_e p_type);
+	static float       getScaledMetric(const MetricType_e p_type, counter_t p_val);
+	static std::string getScaledMetricString(const MetricType_e p_type, counter_t p_val);
+
 
 	static const uint32_t counter_t_Max;
 
@@ -131,6 +135,9 @@ public:
 	bool isFnOrMethod( void ) const;
 
 	void setProcessed( const MetricUnitProcessingType_e p_type );
+
+	const MetricUnit* getParent() const;
+
 };
 
 #endif

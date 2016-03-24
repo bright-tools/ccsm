@@ -130,9 +130,10 @@ static llvm::cl::opt<bool> NoMethod(
 
 static llvm::cl::opt<MetricDumpFormat_e> OutputFormat(
 	"output-format",
-	llvm::cl::desc("Format of output"),
+	llvm::cl::desc("Format of metric output"),
 	llvm::cl::values(
-	    clEnumValN(METRIC_DUMP_FORMAT_TSV, "tsv", "Tab Seperated Values"),
+		clEnumValN(METRIC_DUMP_FORMAT_NONE, "none", "Don't output metric data"),
+		clEnumValN(METRIC_DUMP_FORMAT_TSV, "tsv", "Tab Seperated Values"),
     	clEnumValN(METRIC_DUMP_FORMAT_CSV, "csv", "Comma Separated Values"),
 	    clEnumValN(METRIC_DUMP_FORMAT_SPARSE_TREE, "sparsetree", "Sparse Tree (zero value nodes omitted)"),
 	    clEnumValN(METRIC_DUMP_FORMAT_TREE, "tree", "Tree Structure"),
@@ -164,6 +165,15 @@ static llvm::cl::opt<std::string> OutputToFile(
 	llvm::cl::desc("Specify a file to sent the output to"),
 	llvm::cl::Optional,
 	llvm::cl::cat(CCSMToolCategory));
+
+static llvm::cl::list<std::string> LimitsFile(
+	"limits",
+	llvm::cl::desc("Specify a file to read limits data from"),
+	llvm::cl::CommaSeparated,
+	llvm::cl::ZeroOrMore,
+	llvm::cl::value_desc("filename"),
+	llvm::cl::cat(CCSMToolCategory));
+
 
 static llvm::cl::extrahelp MoreHelp("\nVersion: " GEN_VER_VERSION_STRING);
 
@@ -198,6 +208,7 @@ void CcsmOptionsHandler::ParseOptions(int argc,
 	m_metricOptions->setPrototypesAreFileScope(PrototypesAreFileScope);
 	m_metricOptions->setOutputFormat(OutputFormat);
 	m_metricOptions->setExcludeStdHeaders(ExcludeStandardHeaders);
+	m_metricOptions->setLimitsFile(LimitsFile);
 	// TODO: Handle failure
 	m_metricOptions->setOutputFile(OutputToFile);
 

@@ -1,0 +1,16 @@
+; Limits file for CCSM implemeting HIS metrics limits from v1.3.1
+;  of the document
+
+; TODO: This is referred to as TOK_HIS_COMF in the README.md
+COMMENT_HIS_COMF,,FILE,.*,,>,0.2,COMF
+FUNC_PATHS,,,.*,.*,<=,80,PATH
+RAW_KW_GOTO_CNT,,,.*,.*,<,1,GOTO
+RAW_MCCABE,,,.*,.*,<=,10,v(G)
+HIS_CALLING,,,.*,.*,<=,5,CALLING
+OP_FN_CALL_UNIQUE_CNT,,,.*,.*,<=,7,CALLS
+STMT_HIS_PARAM,,,.*,.*,<=,5,PARAM
+RAW_STMT_CNT,,,.*,.*,<=,50,STMT
+; TODO: This is refered to as 'FUNC_DEPTH' in the README.md
+FUNC_NESTING,,,.*,.*,<=,4,LEVEL
+RETURN_POINT_CNT,,,.*,.*,<=,1,RETURN
+HIS_VOCF,,,.*,.*,<=,4,VOCF
