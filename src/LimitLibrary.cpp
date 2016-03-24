@@ -58,8 +58,6 @@ void LimitLibrary::parseCsvLine(csv::ifstream& p_is)
 		pattern.file = false;
 	}
 
-	/* TODO: deal with scaling */
-	
 	if (metricName[0] != ';')
 	{
 		MetricType_e metric = MetricUnit::getMetricByShortName(metricName);
@@ -198,7 +196,7 @@ void LimitLibrary::checkUnitPassesMetricLimit(const MetricUnit& p_unit, const Me
 		else
 		{
 			std::ostream& out = p_options.getOutput();
-			// TODO: Qualify the unitName - is it a function?  Is it a file?  Global?
+
 			out << p_unit.getUnitName(p_options) << " failed limits check '" << MetricUnit::getMetricName(p_metric) << "' (actual: "
 			    << MetricUnit::getScaledMetricString(p_metric,val) << " expected: " << p_pattern->operand
 				<< MetricUnit::getScaledMetricString(p_metric, p_pattern->limit) << ")";
