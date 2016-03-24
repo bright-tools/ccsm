@@ -166,10 +166,11 @@ static llvm::cl::opt<std::string> OutputToFile(
 	llvm::cl::Optional,
 	llvm::cl::cat(CCSMToolCategory));
 
-static llvm::cl::opt<std::string> LimitsFile(
+static llvm::cl::list<std::string> LimitsFile(
 	"limits",
 	llvm::cl::desc("Specify a file to read limits data from"),
-	llvm::cl::Optional,
+	llvm::cl::CommaSeparated,
+	llvm::cl::ZeroOrMore,
 	llvm::cl::value_desc("filename"),
 	llvm::cl::cat(CCSMToolCategory));
 

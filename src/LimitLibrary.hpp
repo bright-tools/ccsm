@@ -29,6 +29,7 @@
 
 #include <map>
 #include <list>
+#include <vector>
 
 class LimitLibrary
 {
@@ -56,6 +57,7 @@ class LimitLibrary
     public:
         LimitLibrary();
         bool load( const std::string p_fileName );
+		bool load( const std::vector<std::string>& p_fileNames);
 
 		void checkLimit(const MetricUnit& p_unit, const MetricOptions& p_options) const;
 };

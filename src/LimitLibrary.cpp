@@ -92,6 +92,24 @@ void LimitLibrary::parseCsvLine(csv::ifstream& p_is)
 
 }
 
+bool LimitLibrary::load(const std::vector<std::string>& p_fileNames)
+{
+	bool ret_val = true;
+
+	for (std::vector<std::string>::const_iterator it = p_fileNames.begin();
+		it != p_fileNames.end();
+		it++)
+	{
+		if (!load(*it))
+		{
+			ret_val = false;
+			break;
+		}
+	}
+
+	return ret_val;
+}
+
 bool LimitLibrary::load( const std::string p_fileName )
 {
     bool ret_val = false;
@@ -108,6 +126,11 @@ bool LimitLibrary::load( const std::string p_fileName )
 
         ret_val = true; 
     }
+	else
+	{
+		std::cerr << "Failed to open limits file '" << p_fileName << "'\n";
+		exit(EXIT_FAILURE);
+	}
 
     return ret_val;
 }

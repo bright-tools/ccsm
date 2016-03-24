@@ -21,7 +21,7 @@ void LimitsChecker::dump(const MetricUnit* const p_topLevel, const MetricOptions
 {
 	LimitLibrary limits;
 
-	if (limits.load(p_options.getLimitsFile()))
+	if (limits.load(p_options.getLimitsFiles()))
 	{
 		dump(p_topLevel, p_options, limits);
 	}

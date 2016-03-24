@@ -76,7 +76,7 @@ int main(int argc, const char **argv) {
 
 				MetricDumper::dump(&topUnit, metricOptions);
 
-				if (metricOptions.getLimitsFile().length())
+				if (metricOptions.getLimitsFiles().size())
 				{
 					LimitsChecker::dump(&topUnit, metricOptions);
 				}
