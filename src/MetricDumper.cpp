@@ -93,7 +93,7 @@ void MetricDumper::dump(const MetricUnit* const p_topLevel, const MetricOptions&
 
 				if (metricUnitType == METRIC_UNIT_GLOBAL)
 				{
-					out << "Name" << sep;
+				out << "File" << sep << "Name" << sep;
 					int loop;
 					for (loop = 0;
 						loop < METRIC_TYPE_MAX;
@@ -139,7 +139,31 @@ void MetricDumper::dump(const MetricUnit* const p_topLevel, const MetricOptions&
 				out << m_namePrefix[metricUnitType];
 			}
 
+		if ((p_fmt == METRIC_DUMP_FORMAT_TSV) ||
+			(p_fmt == METRIC_DUMP_FORMAT_CSV)) 
+		{
+			if (metricUnitType == METRIC_UNIT_FUNCTION)
+			{
+				out << p_topLevel->getParent()->getUnitName(p_options) << sep;
+			}
+		}
+
+		if ((metricUnitType == METRIC_UNIT_FUNCTION) && 
+		    (p_options.getUsePrefix()))
+		{
+			out << p_topLevel->getParent()->getUnitName(p_options) << "::";
+		}
+
 			out << p_topLevel->getUnitName(p_options) << sep;
+
+		if ((p_fmt == METRIC_DUMP_FORMAT_TSV) ||
+			(p_fmt == METRIC_DUMP_FORMAT_CSV))
+		{
+			if (metricUnitType != METRIC_UNIT_FUNCTION)
+			{
+				out << sep;
+			}
+		}
 
 			unsigned loop;
 			for (loop = 0;

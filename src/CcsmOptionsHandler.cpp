@@ -166,6 +166,13 @@ static llvm::cl::opt<std::string> OutputToFile(
 	llvm::cl::Optional,
 	llvm::cl::cat(CCSMToolCategory));
 
+static llvm::cl::opt<bool> PrefixFunctionName(
+	"prefix-function-name",
+	llvm::cl::desc("Prefix function name with filename in output"),
+	llvm::cl::init(false),
+	llvm::cl::cat(CCSMToolCategory)
+	);
+
 static llvm::cl::list<std::string> LimitsFile(
 	"limits",
 	llvm::cl::desc("Specify a file to read limits data from"),
@@ -211,6 +218,7 @@ void CcsmOptionsHandler::ParseOptions(int argc,
 	m_metricOptions->setLimitsFile(LimitsFile);
 	// TODO: Handle failure
 	m_metricOptions->setOutputFile(OutputToFile);
+	m_metricOptions->setUsePrefix(PrefixFunctionName);
 
 	m_metricOptions->setOutputMetric(METRIC_UNIT_METHOD, !NoMethod);
 	m_metricOptions->setOutputMetric(METRIC_UNIT_FUNCTION, !NoFunction);

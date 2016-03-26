@@ -32,9 +32,13 @@ private:
 	clang::tooling::CommonOptionsParser *m_optionsParser = NULL;
 	MetricOptions                       *m_metricOptions = NULL;
 
+	/** Indicates whether or not the C89/90 standard is specified for any of the files to be analysed */
 	bool m_usesC89 = false;
+	/** Indicates whether or not the C11 standard is specified for any of the files to be analysed */
 	bool m_usesC11 = false;
+	/** Indicates whether or not the C99 standard is specified for any of the files to be analysed */
 	bool m_usesC99 = false;
+	/** Indicates whether or not C++ is specified for any of the files to be analysed */
 	bool m_usesCpp = false;
 
 	void analyseCompilerArgs(const char* const exeName);
