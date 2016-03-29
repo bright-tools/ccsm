@@ -60,6 +60,7 @@ protected:
 	std::ostream* m_outputStream       = NULL;
 	bool m_optionsOk                   = true;
 	std::map<std::string, bool> m_shouldIncludeFileCache;
+	bool m_usePrefix;
 
 	bool isFileInList( const std::vector<std::string>* const p_list, const std::string& p_name ) const;
 public:
@@ -96,6 +97,8 @@ public:
 	void setLimitsFile(const std::vector<std::string>& p_fileName);
 	const std::vector<std::string>& getLimitsFiles(void) const;
 	bool optionsOk(void) const;
+	void setUsePrefix(const bool p_prefix);
+	bool getUsePrefix() const;
 };
 
 #endif

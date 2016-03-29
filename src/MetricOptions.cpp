@@ -289,6 +289,16 @@ std::string MetricOptions::getOutputFile(void) const
 	return m_outputFileName;
 }
 
+void MetricOptions::setUsePrefix(const bool p_prefix)
+{
+	m_usePrefix = p_prefix;
+}
+
+bool MetricOptions::getUsePrefix() const
+{
+	return m_usePrefix;
+}
+
 void MetricOptions::setLimitsFile(const std::vector<std::string>& p_fileName)
 {
 	m_limitsFileNames = p_fileName;
