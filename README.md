@@ -15,7 +15,7 @@ complexity](http://en.wikipedia.org/wiki/Cyclomatic_complexity) measure.
 The aim is to also include metrics in order to support the set specified by
 [HIS](http://portal.automotive-his.de/images/pdf/SoftwareTest/his-sc-metriken.1.3.1_e.pdf).
 
-Output is hierachial - for example, the metrics relating to each function are
+Output is hierarchical - for example, the metrics relating to each function are
 output and the metrics for a file will include the functions relating to the
 functions within that file.  A global wrap-up provides a top-level overview of
 all files.
@@ -415,7 +415,7 @@ the following lines:
 
 You will need to modify the path to point to wherever your clone of the CCSM
 project is, but note that the path in the first line should point to the 'src' 
-subdirectory of the clone.
+sub-directory of the clone.
 
 After that, follow the remainder of the instructions for building Clang.  CCSM
 should be build as part of the complete Clang build.
@@ -528,7 +528,7 @@ be counted.  Do these count as being function scope or file scope?
 
 By default CCSM will:
 * Count declarations within file-scope metrics
-* Cound the prototype associated with a definition within the function-scope
+* Count the prototype associated with a definition within the function-scope
 metrics.
 
 The second behaviour may be modified via command line parameter:
