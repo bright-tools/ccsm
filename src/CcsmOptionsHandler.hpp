@@ -31,6 +31,7 @@ class CcsmOptionsHandler {
 private:
 	clang::tooling::CommonOptionsParser *m_optionsParser = NULL;
 	MetricOptions                       *m_metricOptions = NULL;
+	std::set<MetricType_e>               m_outputMetrics;
 
 	/** Indicates whether or not the C89/90 standard is specified for any of the files to be analysed */
 	bool m_usesC89 = false;
@@ -43,6 +44,7 @@ private:
 
 	void analyseCompilerArgs(const char* const exeName);
 	void checkCompilerArgs(const char* const exeName);
+	void processOutputMetricList(void);
 
 public:
 

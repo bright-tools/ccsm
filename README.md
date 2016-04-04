@@ -392,6 +392,8 @@ HIS Metrics Support
 | NOMVPR      | Not planned                                       | |
 | ap_cg_cycle | Not planned                                       | |
 
+All supported HIS metrics can be output using the command-line parameter `--output-metrics=HIS_.*`
+
 Building The Project
 ====================
 

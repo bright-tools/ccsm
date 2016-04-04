@@ -43,7 +43,7 @@ class MetricOptions
 protected:
 	std::vector<std::string>* ExcludeFiles;
 	std::vector<std::string>* ExcludeFunctions;
-	std::vector<std::string>* OutputMetrics;
+	std::set<MetricType_e>    OutputMetrics;
 	std::vector<std::string>* DefFiles;
 	bool m_dumpTokens                  = false;
 	bool m_dumpAST                     = false;
@@ -64,14 +64,14 @@ protected:
 
 	bool isFileInList( const std::vector<std::string>* const p_list, const std::string& p_name ) const;
 public:
-	MetricOptions( std::vector<std::string>* const p_excludeFiles = NULL, 
-		           std::vector<std::string>* const p_excludeFunctions = NULL,
-				   std::vector<std::string>* const p_outputMetrics = NULL,
+	MetricOptions( std::vector<std::string>* const p_excludeFiles, 
+		           std::vector<std::string>* const p_excludeFunctions,
+				   std::set<MetricType_e>          p_outputMetrics,
 				   std::vector<std::string>* const p_defFiles = NULL );
 	virtual ~MetricOptions();
 	bool ShouldIncludeFile( const std::string& p_fn );
 	bool ShouldIncludeFunction( const std::string& p_fn ) const;
-	bool ShouldIncludeMetric(const std::string& p_name, bool p_checkAliases = true) const;
+	bool ShouldIncludeMetric(MetricType_e p_metric) const;
 	bool isDefFile( const std::string& p_name ) const;
 	void setDumpTokens( const bool p_dump );
 	bool getDumpTokens( void ) const;

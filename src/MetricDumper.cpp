@@ -109,7 +109,7 @@ void MetricDumper::dump(const MetricUnit* const p_topLevel, const MetricOptions&
 						}
 
 						/* TODO: Output a warning in the case that anything in p_options.OutputMetrics isn't understood */
-						if (p_options.ShouldIncludeMetric(MetricUnit::getMetricShortName(metric)))
+						if (p_options.ShouldIncludeMetric(metric))
 						{
 							std::string metricName;
 
@@ -175,7 +175,7 @@ void MetricDumper::dump(const MetricUnit* const p_topLevel, const MetricOptions&
 				/* TODO: duped above */
 				const bool localAndCumulativeOutputs = metricIsCumulative && MetricUnit::isMetricLocalAndCumulative(metric);
 
-				if (p_options.ShouldIncludeMetric(MetricUnit::getMetricShortName(metric)))
+				if (p_options.ShouldIncludeMetric(metric))
 				{
 					/* Filter out metrics which only apply at file/method level */
 					if (MetricUnit::doesMetricApplyForUnit(metric, metricUnitType))

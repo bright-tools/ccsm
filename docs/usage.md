@@ -64,3 +64,20 @@ file.
 Note that the limits checking support does not allow for complex rules to
 describe the limits.  It's suggested that such behaviour be supported by
 a dedicated custom script which consumes the TSV or CSV output of CCSM.
+
+Choosing Which Metrics Are Output
+---------------------------------
+
+By default CCSM will output all of the metrics (unless using a sparse output
+format, where only metrics with a non-zero value will be output), however the
+`--output-metrics` option allows the caller control over which metrics are
+output.
+
+The option takes a set of comma-separated strings, where each string is either:
+* The short name of a metric or alias (e.g. `FILE_CNT`)
+or
+* A regex for one or more metrics or aliases (e.g. `RAW_KW.*`).  Regular expresions are POSIX format.
+
+For example
+
+    --output-metrics=FILE_CNT,RAW_KW.*

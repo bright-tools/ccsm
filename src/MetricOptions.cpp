@@ -21,20 +21,9 @@
 #include <iostream>
 #include <fstream>
 
-static const std::pair<std::string, std::string> metricAliasListData[] =
-{
-#define METRIC_ALIAS( _name, _alias ) std::make_pair( _name, _alias ),
-#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _multipass, _report_local, _scaling, _description  )
-#include "metrics.def"
-#undef  METRIC
-#undef  METRIC_ALIAS
-};
-static const std::set<std::pair<std::string, std::string>> metricAliasList(metricAliasListData,
-	metricAliasListData + sizeof metricAliasListData / sizeof metricAliasListData[0]);
-
 MetricOptions::MetricOptions( std::vector<std::string>* const p_excludeFiles, 
 							  std::vector<std::string>* const p_excludeFunctions, 
-							  std::vector<std::string>* const p_outputMetrics, 
+							  std::set<MetricType_e>          p_outputMetrics,
 							  std::vector<std::string>* const p_defFiles )
 	: ExcludeFiles( p_excludeFiles ), ExcludeFunctions( p_excludeFunctions ), 
 	  OutputMetrics( p_outputMetrics ), DefFiles( p_defFiles ),
@@ -110,53 +99,9 @@ bool MetricOptions::ShouldIncludeFunction( const std::string& p_fn ) const
 			( std::find( ExcludeFunctions->begin(), ExcludeFunctions->end(), p_fn ) == ExcludeFunctions->end() ));
 }
 
-bool MetricOptions::ShouldIncludeMetric( const std::string& p_name, bool p_checkAliases ) const
+bool MetricOptions::ShouldIncludeMetric(MetricType_e p_metric) const
 {
-	bool ret_val = false;
-
-	if(( OutputMetrics == NULL ) ||
-	   ( OutputMetrics->size() == 0 ))
-	{
-		ret_val = true;
-	}
-	else
-	{
-		for( std::vector<std::string>::const_iterator it = OutputMetrics->begin();
-		     (it != OutputMetrics->end()) && !ret_val;
-			 it++ )
-		{
-			size_t len = (*it).length();
-			size_t lmo = len - 1;
-
-			/* Check to see if last character is a wildcard */
-			if(( len > 0 ) && ((*it)[lmo] == '*' ))
-			{
-				if( p_name.substr( 0, lmo ) == (*it).substr( 0, lmo ))
-				{
-					ret_val = true;
-				}
-			}
-			else if( (*it) == p_name )
-			{
-				ret_val = true;
-			}
-		}
-
-		/* Check against the list of aliases for the metric, if necessary */
-		if (!ret_val && p_checkAliases)
-		{
-			for (std::set<std::pair<std::string, std::string>>::const_iterator it = metricAliasList.begin();
-				(it != metricAliasList.end()) && !ret_val;
-				it++)
-			{
-				if (it->first == p_name)
-				{
-					ret_val = ShouldIncludeMetric(it->second,false); 
-				}
-			}
-		}
-	}
-	return ret_val;
+	return OutputMetrics.find(p_metric) != OutputMetrics.end();
 }
 
 void MetricOptions::setDumpTokens( const bool p_dump )

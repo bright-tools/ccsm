@@ -42,6 +42,7 @@ METRIC( METRIC_TYPE_DEFAULT,                                  "KW_DEFAULT_CNT", 
 METRIC( METRIC_TYPE_TOKEN_DEFAULT,                            "RAW_KW_DEFAULT_CNT",             "'default' keyword count (raw source)",				true,  true,  true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_GOTO,                                     "KW_GOTO_CNT",                    "'goto' keyword count",							    true,  true,  true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_TOKEN_GOTO,                               "RAW_KW_GOTO_CNT",                "'goto' keyword count (raw source)",			    true,  true,  true,  true,  true,       false,     false,        1,        "" )
+METRIC_ALIAS( "RAW_KW_GOTO_CNT", "HIS_GOTO" )
 METRIC( METRIC_TYPE_AUTO,                                     "KW_AUTO_CNT",                    "'auto' keyword count",							    true,  true,  true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_TOKEN_AUTO,                               "RAW_KW_AUTO_CNT",                "'auto' keyword count (raw source)",				true,  true,  true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_VOLATILE,                                 "KW_VOLATILE_CNT",                "'volatile' keyword count",						    true,  true,  true,  true,  true,       false,     true,         1,        "" )
@@ -112,11 +113,14 @@ METRIC( METRIC_TYPE_VARIABLE_FN_AUTO,                         "VAR_FN_LOC_AUTO_C
 METRIC( METRIC_TYPE_VARIABLE_FN_EXTERN,                       "VAR_FN_EXT_CNT",                 "Function-scope external variable declarations",    true,  false, true,  true,  true,       false,     false,        1,        "" )
 
 METRIC( METRIC_TYPE_RETURNPOINTS,                             "RETURN_POINT_CNT",               "Return points",                                    false, false, true,  true,  true,       false,     false,        1,        "" )
+METRIC_ALIAS( "RETURN_POINT_CNT", "HIS_RETURN" )
 
 METRIC( METRIC_TYPE_STATEMENTS,                               "STMT_CNT",                       "Statement count",								    true,  true,  true,  true,  true,       false,     true,         1,        "Number of statements" )
 METRIC( METRIC_TYPE_TOKEN_STATEMENTS,                         "RAW_STMT_CNT",                   "Statement count (raw source)",						true,  true,  true,  true,  true,       false,     true,         1,        "Number of statements in the code before pre-processing" )
+METRIC_ALIAS( "RAW_STMT_CNT", "HIS_STMT" )
 
 METRIC( METRIC_TYPE_HIS_COMMENT_DENSITY,                      "COMMENT_HIS_COMF",               "Comment density",									true,  true,  false, false, true,       false,     false,     1000,        "Relationship of the number of comments to the number of statements, with range 0-1.  HIS metric." )
+METRIC_ALIAS( "COMMENT_HIS_COMF", "HIS_COMF" )
 METRIC( METRIC_TYPE_COMMENT_BYTE_COUNT,                       "COMMENT_BYTE_CNT",               "Comments in bytes",								true,  true,  false, false, true,       false,     false,        1,        "Counts the total number of bytes which are used in comments.  Note that --exclude-function does not have any effect on this metric." )
 METRIC( METRIC_TYPE_COMMENT_COUNT,                            "COMMENT_CNT",                    "Comment count",									true,  true,  false, false, true,       false,     false,        1,        "Counts the total number of comments.  Note that --exclude-function does not have any effect on this metric." )
 
@@ -124,6 +128,7 @@ METRIC( METRIC_TYPE_COMMENT_COUNT,                            "COMMENT_CNT",    
 METRIC( METRIC_TYPE_CYCLOMATIC,                               "MCCABE",                         "McCabe complexity",							    false, false, true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_MODIFIED_CYCLOMATIC,                      "MCCABE_MOD",                     "Modified McCabe complexity", 					    false, false, true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_TOK_CYCLOMATIC,                           "RAW_MCCABE",                     "McCabe complexity (raw source)",					false, false, true,  true,  true,       false,     false,        1,        "" )
+METRIC_ALIAS( "RAW_MCCABE", "HIS_MCCABE" )
 METRIC( METRIC_TYPE_TOK_MODIFIED_CYCLOMATIC,                  "RAW_MCCABE_MOD",                 "Modified McCabe complexity (raw source)",  		false, false, true,  true,  true,       false,     false,        1,        "" )
 
 METRIC( METRIC_TYPE_LOCAL_FUNCTIONS,                          "FUNC_LOCAL_CNT",                 "Local Functions",									true,  true,  false, false, true,       false,     false,        1,        "" )
@@ -134,14 +139,18 @@ METRIC( METRIC_TYPE_CALLED_BY_LOCAL,                          "FUNC_CALLED_BY_LO
 METRIC( METRIC_TYPE_CALLED_BY_EXTERN,                         "FUNC_CALLED_BY_EXTERN",          "Number of external functions calling this function",false, false, true,  true,  true,       true,      false,        1,        "" )
 METRIC( METRIC_TYPE_FUNCTION_CALLS,                           "OP_FN_CALL_CNT",                 "Function Calls",									false, false, true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_FUNCTION_PATHS,                           "FUNC_PATHS",                     "Number of paths through the function",				false, false, true,  true,  false,      false,     false,        1,        "" )
+METRIC_ALIAS( "FUNC_PATHS", "HIS_PATH" )
 METRIC( METRIC_TYPE_DIFFERENT_FUNCTIONS_CALLED,               "OP_FN_CALL_UNIQUE_CNT",          "No. different functions called",					false, false, true,  true,  true,       false,     false,        1,        "Of the total number of functions called (see OP_FN_CALL_CNT), this represents the number of uniquely addressed functions.  Does not include functions called via function pointers" )
+METRIC_ALIAS( "OP_FN_CALL_UNIQUE_CNT", "HIS_CALLS" )
 METRIC( METRIC_TYPE_LOCAL_FUNCTION_CALLS,                     "LOCAL_FN_CALL_CNT",              "Local Function Calls",								false, false, true,  true,  true,       true,      false,        1,        "Does not include functions called via function pointers" )
 METRIC( METRIC_TYPE_LINE_COUNT,                               "FILE_LINE_CNT",                  "Size in lines",									true,  true,  false, false, true,       false,     false,        1,        "Counts number of newlines in the file" )
 METRIC( METRIC_TYPE_FUNCTION_LINE_COUNT,                      "FUNC_LINE_CNT",                  "Function (body) size in lines",					false, false, true,  true,  true,       false,     false,        1,        "Counts number of newlines in the function body" )
 METRIC( METRIC_TYPE_FUNCTION_PARAMETERS,                      "STMT_HIS_PARAM",                 "Function Parameters",								false, false, true, true,  true,        false,     false,        1,        "Number of parameters associated with a function definition (declarations are not included)." )
+METRIC_ALIAS( "STMT_HIS_PARAM", "HIS_PARAM" )
 METRIC( METRIC_TYPE_DECISIONS,                                "TODO",                           "Decisions",										true,  true,  true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_LOOPS,                                    "TODO",                           "Loops",											true,  true,  true,  true,  true,       false,     false,        1,        "" )
 METRIC( METRIC_TYPE_NESTING_LEVEL,                            "FUNC_NESTING",                   "Nesting Level",									false, false, true,  true,  true,       false,     false,        1,        "" )
+METRIC_ALIAS( "FUNC_NESTING", "HIS_LEVEL" )
 METRIC( METRIC_TYPE_VOCF,                                     "HIS_VOCF",                       "VOCF",												true,  true,  true,  true,  true,       false,     false,        1,        "" )
 
 METRIC( METRIC_TYPE_OPERATOR_ARITHMETIC_ASSIGN,               "OP_ASSIGN_CNT",                  "Basic assignment operators",						true,  true,  true,  true,  true,       false,     false,        1,        "" )

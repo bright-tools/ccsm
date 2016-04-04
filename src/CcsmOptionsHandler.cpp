@@ -22,7 +22,21 @@
 #include "llvm/Support/CommandLine.h"
 #include "clang/Basic/Version.h"
 
+#include <llvm/Support/Regex.h>
+#include <llvm/ADT/StringRef.h>
+
 #include <iostream>
+
+static const std::pair<std::string, std::string> metricAliasListData[] =
+{
+#define METRIC_ALIAS( _name, _alias ) std::make_pair( _name, _alias ),
+#define METRIC( _enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function, _applies_method, _cumulative, _multipass, _report_local, _scaling, _description  )
+#include "metrics.def"
+#undef  METRIC
+#undef  METRIC_ALIAS
+};
+static const std::set<std::pair<std::string, std::string>> metricAliasList(metricAliasListData,
+	metricAliasListData + sizeof metricAliasListData / sizeof metricAliasListData[0]);
 
 // Set up the command line options
 static llvm::cl::OptionCategory CCSMToolCategory("ccsm options");
@@ -202,11 +216,78 @@ CcsmOptionsHandler::~CcsmOptionsHandler()
 	delete(m_metricOptions);
 }
 
+void CcsmOptionsHandler::processOutputMetricList()
+{
+	/* If no output metrics are specified, add all of them*/
+	if (OutputMetricList.size() == 0)
+	{
+		for (uint16_t metric = 0;
+			metric < METRIC_TYPE_MAX;
+			metric++)
+		{
+			m_outputMetrics.insert(static_cast<MetricType_e>(metric));
+		}
+	}
+	else
+	{
+		/* Iterate all the metric strings specified on the command line */
+		for (std::vector<std::string>::const_iterator it = OutputMetricList.begin();
+			 it != OutputMetricList.end();
+			 it++ )
+		{
+			std::string metricName = *it;
+			bool added = false;
+
+			/* Is it a regex? */
+			if (metricName.find_first_of(".[{}()\\*+?|^$") == std::string::npos)
+			{
+				/* No - decorate it so that it will only match exactly */
+				metricName = "^" + metricName + "$";
+			}
+
+			llvm::Regex metricNameRegex(metricName);
+
+			/* Loop all the metrics and determine whether or not they match the regex*/
+			for (uint16_t metric = 0;
+				metric < METRIC_TYPE_MAX;
+				metric++)
+			{
+				if (metricNameRegex.match(MetricUnit::getMetricShortName(static_cast<MetricType_e>(metric))))
+				{
+					m_outputMetrics.insert(static_cast<MetricType_e>(metric));
+					added = true;
+				}
+			}
+
+			/* Loop all the aliases and determine whether or not they match the regex */
+			for (std::set<std::pair<std::string, std::string>>::const_iterator it = metricAliasList.begin();
+				(it != metricAliasList.end());
+				it++)
+			{
+				if (metricNameRegex.match(it->second))
+				{
+					m_outputMetrics.insert(MetricUnit::getMetricByShortName(it->first));
+					added = true;
+				}
+			}
+
+			if (!added)
+			{
+				std::cerr << "Unrecognised parameter to --output-metrics: " << *it << "\n";
+				exit(EXIT_FAILURE);
+			}
+		}
+	}
+}
+
 void CcsmOptionsHandler::ParseOptions(int argc,
                                       const char ** const argv )
 {
-	m_metricOptions = new MetricOptions(&ExcludeFileList, &ExcludeFunctionList, &OutputMetricList, &IncludeInParentFileList);
 	m_optionsParser = new clang::tooling::CommonOptionsParser(argc, argv, CCSMToolCategory);
+
+	processOutputMetricList();
+
+	m_metricOptions = new MetricOptions(&ExcludeFileList, &ExcludeFunctionList, m_outputMetrics, &IncludeInParentFileList);
 
 	m_metricOptions->setDumpTokens(DumpTokens);
 	m_metricOptions->setDumpAST(DumpAST);
