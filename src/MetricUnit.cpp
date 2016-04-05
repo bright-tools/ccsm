@@ -564,7 +564,13 @@ std::string MetricUnit::getUnitName(const MetricOptions& p_options) const
 	}
 	else
 	{
-		ret_val = m_name;
+		if ((this->m_type == METRIC_UNIT_FUNCTION) &&
+			(p_options.getUsePrefix()))
+		{
+			ret_val = getParent()->getUnitName(p_options) + "::";
+		}
+
+		ret_val += m_name;
 	}
 
 	return ret_val;

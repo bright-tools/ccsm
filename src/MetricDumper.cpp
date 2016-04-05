@@ -148,12 +148,6 @@ void MetricDumper::dump(const MetricUnit* const p_topLevel, const MetricOptions&
 			}
 		}
 
-		if ((metricUnitType == METRIC_UNIT_FUNCTION) && 
-		    (p_options.getUsePrefix()))
-		{
-			out << p_topLevel->getParent()->getUnitName(p_options) << "::";
-		}
-
 			out << p_topLevel->getUnitName(p_options) << sep;
 
 		if ((p_fmt == METRIC_DUMP_FORMAT_TSV) ||
