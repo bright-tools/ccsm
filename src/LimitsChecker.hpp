@@ -30,6 +30,7 @@
 class LimitsChecker
 {
     protected:
+		static std::string check(const MetricUnit* const p_topLevel, const MetricOptions& p_options, const LimitLibrary& p_limits);
     public:
         static void dump(const MetricUnit* const p_topLevel, const MetricOptions& p_options );
 		static void dump(const MetricUnit* const p_topLevel, const MetricOptions& p_options, const LimitLibrary& p_limits);

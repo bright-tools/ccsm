@@ -187,6 +187,13 @@ static llvm::cl::opt<bool> PrefixFunctionName(
 	llvm::cl::cat(CCSMToolCategory)
 	);
 
+static llvm::cl::opt<bool> OutputGroupLimitWarningsByFile(
+	"output-group-limit-warnings-by-file",
+	llvm::cl::desc("Group the output of limit warnings by file"),
+	llvm::cl::init(false),
+	llvm::cl::cat(CCSMToolCategory)
+	);
+
 static llvm::cl::list<std::string> LimitsFile(
 	"limits",
 	llvm::cl::desc("Specify a file to read limits data from"),
@@ -194,7 +201,6 @@ static llvm::cl::list<std::string> LimitsFile(
 	llvm::cl::ZeroOrMore,
 	llvm::cl::value_desc("filename"),
 	llvm::cl::cat(CCSMToolCategory));
-
 
 static llvm::cl::extrahelp MoreHelp("\nVersion: " GEN_VER_VERSION_STRING);
 
@@ -300,6 +306,7 @@ void CcsmOptionsHandler::ParseOptions(int argc,
 	// TODO: Handle failure
 	m_metricOptions->setOutputFile(OutputToFile);
 	m_metricOptions->setUsePrefix(PrefixFunctionName);
+	m_metricOptions->setGroupLimitWarningsByFile(OutputGroupLimitWarningsByFile);
 
 	m_metricOptions->setOutputMetric(METRIC_UNIT_METHOD, !NoMethod);
 	m_metricOptions->setOutputMetric(METRIC_UNIT_FUNCTION, !NoFunction);

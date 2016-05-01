@@ -49,7 +49,7 @@ class LimitLibrary
 
         patternMap_t m_patternMap;
 
-		static void checkUnitPassesMetricLimit(const MetricUnit& p_unit, const MetricOptions& p_options, const MetricType_e p_metric, const limitPattern_t* const p_pattern);
+	    std::string checkUnitPassesMetricLimit(const MetricUnit& p_unit, const MetricOptions& p_options, const MetricType_e p_metric, const limitPattern_t* const p_pattern) const;
 		static bool unitMatchesLimitPattern(const MetricUnit& p_unit, const MetricOptions& p_options, const limitPattern_t* const p_pattern);
 		void parseCsvLine(csv::ifstream& p_is);
 		const limitPattern_t* findHighestPresidenceRule(const patternSet_t& p_set,const MetricUnit& p_unit, const MetricOptions& p_options) const;
@@ -59,7 +59,7 @@ class LimitLibrary
         bool load( const std::string p_fileName );
 		bool load( const std::vector<std::string>& p_fileNames);
 
-		void checkLimit(const MetricUnit& p_unit, const MetricOptions& p_options) const;
+		std::string checkLimit(const MetricUnit& p_unit, const MetricOptions& p_options) const;
 };
 
 #endif

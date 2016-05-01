@@ -150,8 +150,10 @@ const LimitLibrary::limitPattern_t* LimitLibrary::findHighestPresidenceRule(cons
 	return pattern;
 }
 
-void LimitLibrary::checkLimit(const MetricUnit& p_unit, const MetricOptions& p_options) const
+std::string LimitLibrary::checkLimit(const MetricUnit& p_unit, const MetricOptions& p_options) const
 {
+	std::stringstream out;
+
 	unsigned loop;
 	for (loop = 0;
 		loop < METRIC_TYPE_MAX;
@@ -170,14 +172,18 @@ void LimitLibrary::checkLimit(const MetricUnit& p_unit, const MetricOptions& p_o
 				/* Find the highest precident rule where the rule pattern matches this unit (if there is one) */
 				pattern = findHighestPresidenceRule(it->second, p_unit, p_options);
 
-				checkUnitPassesMetricLimit(p_unit, p_options, metric, pattern);
+				out << checkUnitPassesMetricLimit(p_unit, p_options, metric, pattern);
 			}
 		}
 	}
+
+	return out.str();
 }
 
-void LimitLibrary::checkUnitPassesMetricLimit(const MetricUnit& p_unit, const MetricOptions& p_options, const MetricType_e p_metric, const limitPattern_t* const p_pattern)
+std::string LimitLibrary::checkUnitPassesMetricLimit(const MetricUnit& p_unit, const MetricOptions& p_options, const MetricType_e p_metric, const limitPattern_t* const p_pattern) const
 {
+	std::stringstream out;
+
 	if (p_pattern != NULL)
 	{
 		MetricUnit::counter_t val = p_unit.getCounter(p_metric, MetricUnit::isMetricCumulative(p_metric));
@@ -195,8 +201,6 @@ void LimitLibrary::checkUnitPassesMetricLimit(const MetricUnit& p_unit, const Me
 		}
 		else
 		{
-			std::ostream& out = p_options.getOutput();
-
 			out << p_unit.getUnitName(p_options) << " failed limits check '" << MetricUnit::getMetricName(p_metric) << "' (actual: "
 			    << MetricUnit::getScaledMetricString(p_metric,val) << " expected: " << p_pattern->operand
 				<< MetricUnit::getScaledMetricString(p_metric, p_pattern->limit) << ")";
@@ -206,9 +210,10 @@ void LimitLibrary::checkUnitPassesMetricLimit(const MetricUnit& p_unit, const Me
 				out << ": " << p_pattern->text;
 			}
 			out << "\n";
-
 		}
 	}
+
+	return out.str();
 }
 
 bool LimitLibrary::unitMatchesLimitPattern(const MetricUnit& p_unit, const MetricOptions& p_options, const limitPattern_t* const p_pattern)

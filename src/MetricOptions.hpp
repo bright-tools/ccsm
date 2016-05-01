@@ -53,6 +53,7 @@ protected:
 	bool m_useAbsoluteFileNames        = false;
 	bool m_dumpFnMap                   = false;
 	bool m_excludeStdHeaders           = false;
+	bool m_groupLimitWarningsByFile    = false;
 	MetricDumpFormat_e m_outputFormat  = METRIC_DUMP_FORMAT_TREE;
 	bool m_outputMetric[METRIC_UNIT_MAX];
 	std::string m_outputFileName;
@@ -99,6 +100,8 @@ public:
 	bool optionsOk(void) const;
 	void setUsePrefix(const bool p_prefix);
 	bool getUsePrefix() const;
+	void setGroupLimitWarningsByFile(const bool p_groupByFile);
+	bool getGroupLimitWarningsByFile() const;
 };
 
 #endif
