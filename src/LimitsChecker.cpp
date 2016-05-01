@@ -41,36 +41,39 @@ std::string LimitsChecker::check(const MetricUnit* const p_topLevel, const Metri
 	std::stringstream out;
 	std::stringstream checkOut;
 	std::string thisCheck;
+	const std::string FILE_SEP = "----\n";
+
 	const bool groupWarnings = p_options.getGroupLimitWarningsByFile();
 
 	bool outputTail = false;
-	if (groupWarnings && (p_topLevel->GetType() == METRIC_UNIT_FILE))
+	thisCheck = p_limits.checkLimit(*p_topLevel, p_options);
+
+	const MetricUnit::SubUnitMap_t* const subUnits = p_topLevel->getSubUnits();
+	for (MetricUnit::SubUnitMap_t::const_iterator unitIt = subUnits->begin();
+		unitIt != subUnits->end();
+		++unitIt)
+	{
+		checkOut << check((*unitIt).second, p_options, p_limits);
+	}
+
+	if (groupWarnings && (checkOut.str().length() || thisCheck.length()) && (p_topLevel->GetType() == METRIC_UNIT_FILE))
 	{
 		out << "== Limit warnings for: " << p_topLevel->getUnitName(p_options) << "\n";
 		outputTail = true;
 	}
 
-	thisCheck = p_limits.checkLimit(*p_topLevel, p_options);
 	out << thisCheck;
 
-	const MetricUnit::SubUnitMap_t* const subUnits = p_topLevel->getSubUnits();
-	for (MetricUnit::SubUnitMap_t::const_iterator unitIt = subUnits->begin();
-		 unitIt != subUnits->end();
-		 ++unitIt)
+	if (groupWarnings && checkOut.str().length() && (p_topLevel->GetType() == METRIC_UNIT_GLOBAL) && thisCheck.length())
 	{
-		checkOut << check((*unitIt).second, p_options, p_limits);
-	}
-
-	if (groupWarnings && (p_topLevel->GetType() == METRIC_UNIT_GLOBAL) && checkOut.str().length() && thisCheck.length())
-	{
-		out << "----\n";
+		out << FILE_SEP;
 	}
 
 	out << checkOut.str();
 
 	if (outputTail)
 	{
-		out << "----\n";
+		out << FILE_SEP;
 	}
 
 	return out.str();
