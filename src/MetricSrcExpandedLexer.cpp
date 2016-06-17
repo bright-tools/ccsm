@@ -230,6 +230,11 @@ void MetricSrcExpandedLexer::ProcessToken(clang::Token& p_token)
 					}
 					m_currentFnIdentifiers.insert(tok_data);
 					m_currentUnit->increment(METRIC_TYPE_UNRESERVED_IDENTIFIERS);
+					if (m_inBody)
+					{
+						m_currentBodyIdentifiers.insert(tok_data);
+						m_currentUnit->increment(METRIC_TYPE_BODY_UNRESERVED_IDENTIFIERS);
+					}
 				}
 				else
 				{
@@ -274,10 +279,12 @@ void MetricSrcExpandedLexer::CloseOutFnOrMtd(void)
 		m_currentUnit->setSupplementary(METRIC_TYPE_STRING_LITERALS, m_currentFnStrings);
 		m_currentUnit->setSupplementary(METRIC_TYPE_CHAR_CONSTS, m_currentFnCharConsts);
 		m_currentUnit->setSupplementary(METRIC_TYPE_UNRESERVED_IDENTIFIERS, m_currentFnIdentifiers);
+		m_currentUnit->setSupplementary(METRIC_TYPE_BODY_UNRESERVED_IDENTIFIERS, m_currentBodyIdentifiers);
 	}
 	m_currentFnNumerics.clear();
 	m_currentFnStrings.clear();
 	m_currentFnIdentifiers.clear();
+	m_currentBodyIdentifiers.clear();
 	m_currentFnCharConsts.clear();
 }
 

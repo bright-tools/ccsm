@@ -40,7 +40,7 @@ int main(int argc, const char **argv) {
 	{
 		GlobalFunctionLocator srcMap(*(OptionsHandler.getMetricOptions()));
 
-		llvm::sys::PrintStackTraceOnErrorSignal();
+		llvm::sys::PrintStackTraceOnErrorSignal(argv[0]);
 
 		clang::tooling::ClangTool Tool(OptionsHandler.getOptionsParser()->getCompilations(),
 			OptionsHandler.getOptionsParser()->getSourcePathList());

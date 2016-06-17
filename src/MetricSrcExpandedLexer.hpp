@@ -36,6 +36,7 @@ class MetricSrcExpandedLexer : public MetricSrcLexer
 		std::set<std::string>   m_currentFnStrings;
 		std::set<std::string>   m_currentFnCharConsts;
 		std::set<std::string>   m_currentFnIdentifiers;
+		std::set<std::string>   m_currentBodyIdentifiers;
 
 		bool					m_dumpNewline = false;
 
