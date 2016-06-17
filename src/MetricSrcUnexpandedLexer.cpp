@@ -22,6 +22,25 @@
 
 #include <iostream>
 
+const static std::pair<MetricType_e, MetricType_e> metricToBodyMetricMapData[] = {
+	std::make_pair(METRIC_TYPE_TOKEN_DOUBLE,   METRIC_TYPE_TOKEN_BODY_DOUBLE),
+	std::make_pair(METRIC_TYPE_TOKEN_FLOAT,    METRIC_TYPE_TOKEN_BODY_FLOAT),
+	std::make_pair(METRIC_TYPE_TOKEN_CONST,    METRIC_TYPE_TOKEN_BODY_CONST),
+	std::make_pair(METRIC_TYPE_TOKEN_CHAR,     METRIC_TYPE_TOKEN_BODY_CHAR),
+	std::make_pair(METRIC_TYPE_TOKEN_SHORT,    METRIC_TYPE_TOKEN_BODY_SHORT),
+	std::make_pair(METRIC_TYPE_TOKEN_LONG,     METRIC_TYPE_TOKEN_BODY_LONG),
+	std::make_pair(METRIC_TYPE_TOKEN_UNSIGNED, METRIC_TYPE_TOKEN_BODY_UNSIGNED),
+	std::make_pair(METRIC_TYPE_TOKEN_SIGNED,   METRIC_TYPE_TOKEN_BODY_SIGNED),
+	std::make_pair(METRIC_TYPE_TOKEN_STATIC,   METRIC_TYPE_TOKEN_BODY_STATIC),
+	std::make_pair(METRIC_TYPE_TOKEN_UNION,    METRIC_TYPE_TOKEN_BODY_UNION),
+	std::make_pair(METRIC_TYPE_TOKEN_VOID,     METRIC_TYPE_TOKEN_BODY_VOID),
+	std::make_pair(METRIC_TYPE_TOKEN_STRUCT,   METRIC_TYPE_TOKEN_BODY_STRUCT),
+	std::make_pair(METRIC_TYPE_TOKEN_ENUM,     METRIC_TYPE_TOKEN_BODY_ENUM),
+	std::make_pair(METRIC_TYPE_TOKEN_INT,      METRIC_TYPE_TOKEN_BODY_INT)
+};
+
+const std::map<MetricType_e, MetricType_e> MetricSrcUnexpandedLexer::m_metricToBodyMetricMap(metricToBodyMetricMapData,
+	metricToBodyMetricMapData + sizeof metricToBodyMetricMapData / sizeof metricToBodyMetricMapData[0]);
 
 const static std::pair<clang::tok::TokenKind,MetricType_e> tokenKindToTypeMapData[] = {
 	std::make_pair(clang::tok::exclaim,      METRIC_TYPE_TOKEN_NOT),
@@ -157,6 +176,14 @@ void MetricSrcUnexpandedLexer::HandleBasicToken(clang::Token& p_token)
 	if( typeLookup != m_tokenKindToTypeMap.end() )
 	{
 		m_currentUnit->increment( (*typeLookup).second );
+		if (m_inBody)
+		{
+			std::map<MetricType_e, MetricType_e>::const_iterator bodyTypeLookup = m_metricToBodyMetricMap.find((*typeLookup).second);
+			if (bodyTypeLookup != m_metricToBodyMetricMap.end())
+			{
+				m_currentUnit->increment((*bodyTypeLookup).second);
+			}
+		}
 	}
 	else
 	{
@@ -167,14 +194,7 @@ void MetricSrcUnexpandedLexer::HandleBasicToken(clang::Token& p_token)
 			{
 				m_options.getOutput() << ",unreserved:" << tok_data;
 			}
-			if( m_currentUnit->isFnOrMethod() )
-			{
-				m_currentFnIdentifiers.insert( tok_data );
-			}
-			else
-			{
-				m_currentFileIdentifiers.insert( tok_data );
-			}
+			m_currentFnIdentifiers.insert( tok_data );
 			m_currentUnit->increment( METRIC_TYPE_TOKEN_UNRESERVED_IDENTIFIERS );
 
 			/* We treat each macro invokation as a statement */
@@ -217,38 +237,17 @@ void MetricSrcUnexpandedLexer::ProcessToken(clang::Token& p_token)
 	{
 		case clang::tok::numeric_constant:
 			tok_data = clang::StringRef(p_token.getLiteralData(), tok_len).str();
-			if( m_currentUnit->isFnOrMethod() )
-			{
-				m_currentFnNumerics.insert( tok_data );
-			}
-			else
-			{
-				m_currentFileNumerics.insert( tok_data );
-			}
+			m_currentFnNumerics.insert( tok_data );
 			m_currentUnit->increment( METRIC_TYPE_TOKEN_NUMERIC_CONSTANTS );
 			break;
 		case clang::tok::char_constant:
 			tok_data = clang::StringRef(p_token.getLiteralData(), tok_len).str();
-			if( m_currentUnit->isFnOrMethod() )
-			{
-				m_currentFnCharConsts.insert( tok_data );
-			}
-			else
-			{
-				m_currentFileCharConsts.insert( tok_data );
-			}
+			m_currentFnCharConsts.insert( tok_data );
 			m_currentUnit->increment( METRIC_TYPE_TOKEN_CHAR_CONSTS );
 			break;
 		case clang::tok::string_literal:
 			tok_data = clang::StringRef(p_token.getLiteralData(), tok_len).str();
-			if( m_currentUnit->isFnOrMethod() )
-			{
-				m_currentFnStrings.insert( tok_data );
-			}
-			else
-			{
-				m_currentFileStrings.insert( tok_data );
-			}
+			m_currentFnStrings.insert( tok_data );
 			m_currentUnit->increment( METRIC_TYPE_TOKEN_STRING_LITERALS );
 			break;
 		case clang::tok::semi:
@@ -283,15 +282,11 @@ void MetricSrcUnexpandedLexer::CloseOutFnOrMtd(void)
 	/* Have a current unit? */
 	if( m_currentUnit != NULL )
 	{
-		/* Is it of the appropriate type? */
-		if( m_currentUnit->isFnOrMethod() )
-		{
-			/* Close off accumulated metrics */
-			m_currentUnit->set( METRIC_TYPE_TOKEN_NUMERIC_CONSTANTS_UNIQ, m_currentFnNumerics.size() );
-			m_currentUnit->set( METRIC_TYPE_TOKEN_STRING_LITERALS_UNIQ, m_currentFnStrings.size() );
-			m_currentUnit->set( METRIC_TYPE_TOKEN_UNRESERVED_IDENTIFIERS_UNIQ, m_currentFnIdentifiers.size() );
-			m_currentUnit->set( METRIC_TYPE_TOKEN_CHAR_CONSTS_UNIQ, m_currentFnCharConsts.size() );
-		}
+		/* Close off accumulated metrics */
+		m_currentUnit->setSupplementary(METRIC_TYPE_TOKEN_NUMERIC_CONSTANTS, m_currentFnNumerics);
+		m_currentUnit->setSupplementary(METRIC_TYPE_TOKEN_STRING_LITERALS, m_currentFnStrings);
+		m_currentUnit->setSupplementary(METRIC_TYPE_TOKEN_UNRESERVED_IDENTIFIERS, m_currentFnIdentifiers);
+		m_currentUnit->setSupplementary(METRIC_TYPE_TOKEN_CHAR_CONSTS, m_currentFnCharConsts);
 	}
 	m_currentFnNumerics.clear();
 	m_currentFnStrings.clear();
@@ -305,4 +300,12 @@ void MetricSrcUnexpandedLexer::LexSources(clang::CompilerInstance& p_ci, const T
 	PP.SetMacroExpansionOnlyInDirectives();
 
 	MetricSrcLexer::LexSources(p_ci, p_fnLocator);
+}
+
+void MetricSrcUnexpandedLexer::EnterFileScope(void)
+{
+	m_currentFnNumerics    = m_currentUnit->getSupplementary(METRIC_TYPE_TOKEN_NUMERIC_CONSTANTS);
+	m_currentFnStrings     = m_currentUnit->getSupplementary(METRIC_TYPE_TOKEN_STRING_LITERALS);
+	m_currentFnIdentifiers = m_currentUnit->getSupplementary(METRIC_TYPE_TOKEN_UNRESERVED_IDENTIFIERS);
+	m_currentFnCharConsts  = m_currentUnit->getSupplementary(METRIC_TYPE_TOKEN_CHAR_CONSTS);
 }

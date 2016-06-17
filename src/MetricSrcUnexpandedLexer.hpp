@@ -37,15 +37,12 @@ class MetricSrcUnexpandedLexer : public MetricSrcLexer
 		std::set<std::string>   m_currentFnCharConsts;
 		std::set<std::string>   m_currentFnIdentifiers;
 
-		std::set<std::string>   m_currentFileNumerics;
-		std::set<std::string>   m_currentFileStrings;
-		std::set<std::string>   m_currentFileCharConsts;
-		std::set<std::string>   m_currentFileIdentifiers;
-
 		static const std::map<clang::tok::TokenKind,MetricType_e> m_tokenKindToTypeMap;
+		static const std::map<MetricType_e, MetricType_e> m_metricToBodyMetricMap;
 
 		virtual void ProcessToken( clang::Token& p_token );
-		void CloseOutFnOrMtd( void );
+		virtual void CloseOutFnOrMtd( void );
+		virtual void EnterFileScope(void);
 		void HandleBasicToken( clang::Token& p_token );
 		virtual MetricUnitProcessingType_e getLexType(void) const;
 

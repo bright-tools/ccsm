@@ -85,6 +85,7 @@ protected:
 	   function hosting the call was processed */
 	std::set<std::string> m_unresolvedFnCalls;
 	counter_t m_counters[METRIC_TYPE_MAX];
+	std::map<MetricType_e, std::set<std::string>> m_supplementary;
 
 public:
 	typedef std::map<std::string, MetricUnit*> FunctionMap_t;
@@ -92,15 +93,17 @@ public:
 	static bool isMultiPassAllowed( const MetricType_e p_type );
 	static bool isMetricCumulative(const MetricType_e p_type);
 
-	static std::string getMetricName( const MetricType_e p_type );
-	static std::string getMetricShortName(const MetricType_e p_type);
+	static std::string  getMetricName( const MetricType_e p_type );
+	static std::string  getMetricShortName(const MetricType_e p_type);
 	static MetricType_e getMetricByShortName(const std::string p_shortName);
-	static uint32_t    getMetricScaling(const MetricType_e p_type);
-	static bool        doesMetricApplyForUnit(const MetricType_e p_MetricType, const MetricUnitType_e p_unitType);
-	static bool        isMetricLocalAndCumulative(const MetricType_e p_type);
-	static float       getScaledMetric(const MetricType_e p_type, counter_t p_val);
-	static std::string getScaledMetricString(const MetricType_e p_type, counter_t p_val);
+	static uint32_t     getMetricScaling(const MetricType_e p_type);
+	static bool         doesMetricApplyForUnit(const MetricType_e p_MetricType, const MetricUnitType_e p_unitType);
+	static bool         isMetricLocalAndCumulative(const MetricType_e p_type);
+	static float        getScaledMetric(const MetricType_e p_type, counter_t p_val);
+	static std::string  getScaledMetricString(const MetricType_e p_type, counter_t p_val);
 
+	const std::set<std::string> getSupplementary(MetricType_e p_metric, const bool p_recurse = false) const;
+	void setSupplementary(MetricType_e p_metric, const std::set<std::string> p_val );
 
 	static const uint32_t counter_t_Max;
 

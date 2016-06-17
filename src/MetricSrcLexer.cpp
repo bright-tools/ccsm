@@ -88,7 +88,8 @@ void MetricSrcLexer::LexSources( clang::CompilerInstance& p_ci, const Translatio
 				// Check to see if we need to do a new function name lookup
 				if ((m_currentFunctionName == "") || (tokenLoc.getRawEncoding() > fnEnd.getRawEncoding()) || (tokenLoc.getRawEncoding() < fnStart.getRawEncoding()))
 				{
-					std::string funcName = p_fnLocator->FindFunction( SM, tokenLoc, &fnEnd );
+					std::string funcName = p_fnLocator->FindFunction(SM, tokenLoc, &fnEnd, &m_bodyStartLocation);
+					m_inBody = false;
 					fnStart = tokenLoc;
 
 					if(( funcName.length() > 0 ) && m_options.getDumpTokens() )
@@ -102,16 +103,36 @@ void MetricSrcLexer::LexSources( clang::CompilerInstance& p_ci, const Translatio
 					{
 						if( m_options.ShouldIncludeFunction( m_currentFunctionName ))
 						{
+							CloseOutFnOrMtd();
 							m_currentUnit = fileUnit->getSubUnit(m_currentFunctionName, METRIC_UNIT_FUNCTION);
+							m_waitingForBody = true;
 						}
 						else
 						{
+							CloseOutFnOrMtd();
 							m_currentUnit = NULL;
 						}
 					}
 					else
 					{
-						m_currentUnit = fileUnit;
+						if (m_currentUnit != fileUnit)
+						{
+							CloseOutFnOrMtd();
+							m_currentUnit = fileUnit;
+							EnterFileScope();
+						}
+					}
+				}
+				else
+				{
+					if (m_waitingForBody)
+					{
+						if ((m_bodyStartLocation < tokenLoc) ||
+							(m_bodyStartLocation == tokenLoc))
+						{
+							m_inBody = true;
+							m_waitingForBody = false;
+						}
 					}
 				}
 
@@ -132,6 +153,11 @@ void MetricSrcLexer::LexSources( clang::CompilerInstance& p_ci, const Translatio
 			}
 		}
 	} while (result.isNot(clang::tok::eof));
+
+	if (m_currentUnit != NULL)
+	{
+		CloseOutFnOrMtd();
+	}
 
 	for (clang::SourceManager::fileinfo_iterator it = SM.fileinfo_begin();
 		it != SM.fileinfo_end();

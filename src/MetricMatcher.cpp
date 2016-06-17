@@ -65,7 +65,6 @@ const std::pair<clang::BinaryOperator::Opcode, MetricType_e> MetricVisitor::bina
 const std::map<clang::BinaryOperator::Opcode, MetricType_e> MetricVisitor::binaryOperatorToMetricMap(binaryOperatorToMetricPairs,
 	binaryOperatorToMetricPairs + sizeof binaryOperatorToMetricPairs / sizeof binaryOperatorToMetricPairs[0]);
 
-
 MetricVisitor::MetricVisitor(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, MetricOptions& p_options, TranslationUnitFunctionLocator* p_fnLocator) : 
 	                                                                                                           m_compilerInstance(p_CI), 
 																											   m_astContext(&(p_CI.getASTContext())),
@@ -430,6 +429,43 @@ MetricVisitor::PathResults MetricVisitor::getOtherPathCount(const clang::Stmt* c
 	return ret_val;
 }
 
+void MetricVisitor::CalcFnLineCnt(clang::FunctionDecl *func)
+{
+	clang::SourceLocation bodyStartLoc = func->getBody()->getLocStart();
+	clang::SourceLocation bodyEndLoc = func->getBody()->getLocEnd();
+	clang::SourceLocation defStartLoc = func->getLocStart();
+	clang::SourceLocation defEndLoc = func->getLocEnd();
+
+	if (bodyStartLoc.isMacroID())
+	{
+		bodyStartLoc = m_astContext->getSourceManager().getFileLoc(bodyStartLoc);
+	}
+	if (bodyEndLoc.isMacroID())
+	{
+		bodyEndLoc = m_astContext->getSourceManager().getFileLoc(bodyEndLoc);
+	}
+	if (defStartLoc.isMacroID())
+	{
+		defStartLoc = m_astContext->getSourceManager().getFileLoc(defStartLoc);
+	}
+	if (defEndLoc.isMacroID())
+	{
+		defEndLoc = m_astContext->getSourceManager().getFileLoc(defEndLoc);
+	}
+
+	/* Obtain the buffer for the function body, then count the lines */ 
+	const char * body_start = m_astContext->getSourceManager().getCharacterData(bodyStartLoc);
+	const char * body_end = m_astContext->getSourceManager().getCharacterData(bodyEndLoc);
+	clang::StringRef body_buffer(body_start, body_end - body_start);
+	m_currentUnit->set(METRIC_TYPE_FUNCTION_BODY_LINE_COUNT, countNewlines(body_buffer)+1);
+
+	/* Obtain buffer for whole function then count the lines */
+	const char * def_start = m_astContext->getSourceManager().getCharacterData(defStartLoc);
+	const char * def_end = m_astContext->getSourceManager().getCharacterData(defEndLoc);
+	clang::StringRef def_buffer(def_start, def_end - def_start);
+	m_currentUnit->set(METRIC_TYPE_FUNCTION_DEF_LINE_COUNT, countNewlines(def_buffer)+1);
+}
+
 bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
     
 #if defined( DEBUG_FN_TRACE_OUTOUT )
@@ -472,11 +508,7 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 		
 			m_currentUnit = fileUnit->getSubUnit(m_currentFunctionName, type);
 
-			/* Obtain the buffer for the function body, then count the lines */ 
-			const char * start = m_astContext->getSourceManager().getCharacterData( func->getBody()->getLocStart() );
-			const char * end = m_astContext->getSourceManager().getCharacterData( func->getBody()->getLocEnd() );
-			clang::StringRef buffer(start, end - start);
-			m_currentUnit->set( METRIC_TYPE_FUNCTION_LINE_COUNT, countNewlines( buffer ) );
+			CalcFnLineCnt(func);
 
 			if( func->isInlineSpecified() )
 			{
@@ -582,7 +614,7 @@ void MetricVisitor::DeclCommon(const clang::DeclContext* p_declCtxt, const clang
 		CloseOutFnOrMtd();
 
 		HandleLoc(p_decl->getLocation());
-	}
+	} 
 }
 
 void MetricVisitor::HandleLoc( const clang::SourceLocation& p_loc)
@@ -1053,16 +1085,16 @@ bool MetricVisitor::VisitUnaryOperator(clang::UnaryOperator *p_uOp)
 				break;
 			case clang::UO_Plus:
 				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ARITHMETIC_UNARY_PLUS );
-				break; 	
+				break;
 			case clang::UO_Minus:
 				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ARITHMETIC_UNARY_MINUS );
-				break; 	
+				break;
 			case clang::UO_Not:
 				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_BITWISE_NOT );
-				break; 	
+				break;
 			case clang::UO_LNot:
 				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_LOGICAL_NOT );
-				break; 	
+				break;
 			case clang::UO_Real:
 				/* TODO */
 				break; 	

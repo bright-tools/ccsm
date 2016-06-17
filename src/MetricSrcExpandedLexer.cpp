@@ -22,6 +22,26 @@
 
 #include <iostream>
 
+const static std::pair<MetricType_e, MetricType_e> metricToBodyMetricMapData[] = {
+	std::make_pair(METRIC_TYPE_DOUBLE,   METRIC_TYPE_BODY_DOUBLE),
+	std::make_pair(METRIC_TYPE_FLOAT,    METRIC_TYPE_BODY_FLOAT),
+	std::make_pair(METRIC_TYPE_CONST,    METRIC_TYPE_BODY_CONST),
+	std::make_pair(METRIC_TYPE_CHAR,     METRIC_TYPE_BODY_CHAR),
+	std::make_pair(METRIC_TYPE_SHORT,    METRIC_TYPE_BODY_SHORT),
+	std::make_pair(METRIC_TYPE_LONG,     METRIC_TYPE_BODY_LONG),
+	std::make_pair(METRIC_TYPE_UNSIGNED, METRIC_TYPE_BODY_UNSIGNED),
+	std::make_pair(METRIC_TYPE_SIGNED,   METRIC_TYPE_BODY_SIGNED),
+	std::make_pair(METRIC_TYPE_STATIC,   METRIC_TYPE_BODY_STATIC),
+	std::make_pair(METRIC_TYPE_UNION,    METRIC_TYPE_BODY_UNION),
+	std::make_pair(METRIC_TYPE_ENUM,     METRIC_TYPE_BODY_ENUM),
+	std::make_pair(METRIC_TYPE_VOID,     METRIC_TYPE_BODY_VOID),
+	std::make_pair(METRIC_TYPE_STRUCT,   METRIC_TYPE_BODY_STRUCT),
+	std::make_pair(METRIC_TYPE_INT,      METRIC_TYPE_BODY_INT)
+};
+
+const std::map<MetricType_e, MetricType_e> MetricSrcExpandedLexer::m_metricToBodyMetricMap(metricToBodyMetricMapData,
+	metricToBodyMetricMapData + sizeof metricToBodyMetricMapData / sizeof metricToBodyMetricMapData[0]);
+
 const static std::pair<clang::tok::TokenKind,MetricType_e> tokenKindToTypeMapData[] = {
 //	std::make_pair(clang::tok::exclaim,      METRIC_TYPE_TOKEN_NOT),
 //	std::make_pair(clang::tok::exclaimequal, METRIC_TYPE_TOKEN_NOT),
@@ -134,8 +154,7 @@ const std::map<clang::tok::TokenKind, MetricType_e> MetricSrcExpandedLexer::m_to
     tokenKindToTypeMapData + sizeof tokenKindToTypeMapData / sizeof tokenKindToTypeMapData[0]);
 
 
-MetricSrcExpandedLexer::MetricSrcExpandedLexer(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, MetricOptions& p_options) : MetricSrcLexer( p_CI, p_topUnit, p_options ),
-																												 m_dumpNewline( false )
+MetricSrcExpandedLexer::MetricSrcExpandedLexer(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, MetricOptions& p_options) : MetricSrcLexer( p_CI, p_topUnit, p_options )
 {
 }
 
@@ -146,6 +165,10 @@ MetricSrcExpandedLexer::~MetricSrcExpandedLexer(void)
 MetricUnitProcessingType_e MetricSrcExpandedLexer::getLexType(void) const
 {
 	return METRIC_UNIT_PROCESS_LEX_EXPANDED;
+}
+
+void MetricSrcExpandedLexer::HandleOperand(clang::Token& p_token)
+{
 }
 
 void MetricSrcExpandedLexer::ProcessToken(clang::Token& p_token)
@@ -162,39 +185,18 @@ void MetricSrcExpandedLexer::ProcessToken(clang::Token& p_token)
 	{
 		case clang::tok::numeric_constant:
 			tok_data = clang::StringRef(p_token.getLiteralData(), tok_len).str();
-			if( m_currentUnit->isFnOrMethod() )
-			{
-				m_currentFnNumerics.insert( tok_data );
-			}
-			else
-			{
-				m_currentFileNumerics.insert( tok_data );
-			}
-			m_currentUnit->increment( METRIC_TYPE_TOKEN_NUMERIC_CONSTANTS );
+			m_currentFnNumerics.insert( tok_data );
+			m_currentUnit->increment( METRIC_TYPE_NUMERIC_CONSTANTS );
 			break;
 		case clang::tok::char_constant:
 			tok_data = clang::StringRef(p_token.getLiteralData(), tok_len).str();
-			if( m_currentUnit->isFnOrMethod() )
-			{
-				m_currentFnCharConsts.insert( tok_data );
-			}
-			else
-			{
-				m_currentFileCharConsts.insert( tok_data );
-			}
-			m_currentUnit->increment( METRIC_TYPE_TOKEN_CHAR_CONSTS );
+			m_currentFnCharConsts.insert( tok_data );
+			m_currentUnit->increment( METRIC_TYPE_CHAR_CONSTS );
 			break;
 		case clang::tok::string_literal:
 			tok_data = clang::StringRef(p_token.getLiteralData(), tok_len).str();
-			if( m_currentUnit->isFnOrMethod() )
-			{
-				m_currentFnStrings.insert( tok_data );
-			}
-			else
-			{
-				m_currentFileStrings.insert( tok_data );
-			}
-			m_currentUnit->increment( METRIC_TYPE_TOKEN_STRING_LITERALS );
+			m_currentFnStrings.insert( tok_data );
+			m_currentUnit->increment( METRIC_TYPE_STRING_LITERALS );
 			break;
 		case clang::tok::comment:
 			/* TODO */
@@ -208,9 +210,39 @@ void MetricSrcExpandedLexer::ProcessToken(clang::Token& p_token)
 			if (typeLookup != m_tokenKindToTypeMap.end())
 			{
 				m_currentUnit->increment((*typeLookup).second);
+				if (m_inBody)
+				{
+					std::map<MetricType_e, MetricType_e>::const_iterator bodyTypeLookup = m_metricToBodyMetricMap.find((*typeLookup).second);
+					if (bodyTypeLookup != m_metricToBodyMetricMap.end())
+					{
+						m_currentUnit->increment((*bodyTypeLookup).second);
+					}
+				}
 			}
+			else
+			{
+				if (p_token.isAnyIdentifier())
+				{
+					std::string tok_data = p_token.getIdentifierInfo()->getName();
+					if (m_options.getDumpTokens())
+					{
+						m_options.getOutput() << ",unreserved:" << tok_data;
+					}
+					m_currentFnIdentifiers.insert(tok_data);
+					m_currentUnit->increment(METRIC_TYPE_UNRESERVED_IDENTIFIERS);
+				}
+				else
+				{
+					/* TODO */
+				}
+				/* TODO */
+			}
+
+
 			break;
 	}
+
+	HandleOperand(p_token);
 
 	if( m_options.getDumpTokens() )
 	{
@@ -237,19 +269,22 @@ void MetricSrcExpandedLexer::CloseOutFnOrMtd(void)
 	/* Have a current unit? */
 	if( m_currentUnit != NULL )
 	{
-		/* Is it of the appropriate type? */
-		if( m_currentUnit->isFnOrMethod() )
-		{
-			/* Close off accumulated metrics */
-
-			m_currentUnit->set( METRIC_TYPE_TOKEN_NUMERIC_CONSTANTS_UNIQ, m_currentFnNumerics.size() );
-			m_currentUnit->set( METRIC_TYPE_TOKEN_STRING_LITERALS_UNIQ, m_currentFnStrings.size() );
-			m_currentUnit->set( METRIC_TYPE_TOKEN_UNRESERVED_IDENTIFIERS_UNIQ, m_currentFnIdentifiers.size() );
-			m_currentUnit->set( METRIC_TYPE_TOKEN_CHAR_CONSTS_UNIQ, m_currentFnCharConsts.size() );
-		}
+		/* Close off accumulated metrics */
+		m_currentUnit->setSupplementary(METRIC_TYPE_NUMERIC_CONSTANTS, m_currentFnNumerics);
+		m_currentUnit->setSupplementary(METRIC_TYPE_STRING_LITERALS, m_currentFnStrings);
+		m_currentUnit->setSupplementary(METRIC_TYPE_CHAR_CONSTS, m_currentFnCharConsts);
+		m_currentUnit->setSupplementary(METRIC_TYPE_UNRESERVED_IDENTIFIERS, m_currentFnIdentifiers);
 	}
 	m_currentFnNumerics.clear();
 	m_currentFnStrings.clear();
 	m_currentFnIdentifiers.clear();
 	m_currentFnCharConsts.clear();
+}
+
+void MetricSrcExpandedLexer::EnterFileScope(void)
+{
+	m_currentFnNumerics    = m_currentUnit->getSupplementary(METRIC_TYPE_NUMERIC_CONSTANTS);
+	m_currentFnStrings     = m_currentUnit->getSupplementary(METRIC_TYPE_STRING_LITERALS);
+	m_currentFnCharConsts  = m_currentUnit->getSupplementary(METRIC_TYPE_CHAR_CONSTS);
+	m_currentFnIdentifiers = m_currentUnit->getSupplementary(METRIC_TYPE_UNRESERVED_IDENTIFIERS);
 }
