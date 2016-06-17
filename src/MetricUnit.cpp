@@ -642,9 +642,37 @@ MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType, c
 		case METRIC_TYPE_TOKEN_UNRESERVED_IDENTIFIERS_UNIQ:
 			return getSupplementary(METRIC_TYPE_TOKEN_UNRESERVED_IDENTIFIERS, p_recurse).size();
 			break;
+		case METRIC_TYPE_HALSTEAD_VOCABULARY:
+			return (getCounter(METRIC_TYPE_OPERATOR_HALSTEAD_UNIQUE, p_recurse) + getCounter(METRIC_TYPE_OPERAND_HALSTEAD_UNIQUE, p_recurse));
+			break;
+		case METRIC_TYPE_HALSTEAD_LENGTH:
+			return (getCounter(METRIC_TYPE_OPERATOR_HALSTEAD_COUNT, p_recurse) + getCounter(METRIC_TYPE_OPERAND_HALSTEAD_COUNT, p_recurse));
+			break;
+		case METRIC_TYPE_HALSTEAD_CALC_LENGTH:
+		{
+			float oper_unique = getCounter(METRIC_TYPE_OPERATOR_HALSTEAD_UNIQUE, p_recurse);
+			float opan_unique = getCounter(METRIC_TYPE_OPERAND_HALSTEAD_UNIQUE, p_recurse);
+			return ((oper_unique * log2(oper_unique)) + (opan_unique * log2(opan_unique))) * m_metricScaling[METRIC_TYPE_HALSTEAD_CALC_LENGTH];
+		}
+			break;
+		case METRIC_TYPE_HALSTEAD_VOLUME:
+		{
+			float vocab = getCounter(METRIC_TYPE_HALSTEAD_VOCABULARY, p_recurse);
+			return (getCounter(METRIC_TYPE_HALSTEAD_LENGTH, p_recurse) * log2(vocab)) * m_metricScaling[METRIC_TYPE_HALSTEAD_VOLUME];
+		}
+		break;
+		case METRIC_TYPE_HALSTEAD_DIFFICULTY:
+		{
+			float oper_unique = getCounter(METRIC_TYPE_OPERATOR_HALSTEAD_UNIQUE, p_recurse);
+			float opan_unique = getCounter(METRIC_TYPE_OPERAND_HALSTEAD_UNIQUE, p_recurse);
+			// TODO: div by zero protect
+			return (oper_unique / 2.0F) * (getCounter(METRIC_TYPE_OPERATOR_HALSTEAD_UNIQUE, p_recurse) / opan_unique);
+		}
+		break;
 		case METRIC_TYPE_VOCF:
-			ret_val = ((getCounter(METRIC_TYPE_OPERATOR_HALSTEAD_COUNT, p_recurse) + getCounter(METRIC_TYPE_OPERAND_HALSTEAD_COUNT, p_recurse)) * m_metricScaling[METRIC_TYPE_VOCF]) / 
-				      (getCounter(METRIC_TYPE_OPERATOR_HALSTEAD_UNIQUE, p_recurse) + getCounter(METRIC_TYPE_OPERAND_HALSTEAD_UNIQUE, p_recurse));
+			// TODO: div by zero protect
+			ret_val = (getCounter(METRIC_TYPE_HALSTEAD_LENGTH, p_recurse) * m_metricScaling[METRIC_TYPE_VOCF]) /
+					  getCounter(METRIC_TYPE_HALSTEAD_VOCABULARY, p_recurse);
 			break;
 		default:
 			ret_val  = m_counters[ p_metricType ];
