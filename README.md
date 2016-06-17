@@ -376,7 +376,7 @@ HIS Metrics Support
 
 | Metric      | Status                                            | Description     |
 |-------------|---------------------------------------------------|-----------------|
-| COMF        | Implemented - `TOK_HIS_COMF`                      | Comment density.  Ratio of comments to 'statements' |
+| COMF        | Implemented - `COMMENT_HIS_COMF`                  | Comment density.  Ratio of comments to 'statements' |
 | PATH        | Implemented - `FUNC_PATHS`                        | Number of non-cyclic execution paths in the function |
 | GOTO        | Implemented - `KW_GOTO_CNT` and `RAW_KW_GOTO_CNT` | Number of GOTO statements |
 | v(G)        | Implemented - `MCCABE` and `RAW_MCCABE`           | Cyclomatic complexity     |
@@ -384,10 +384,10 @@ HIS Metrics Support
 | CALLS       | Implemented - `OP_FN_CALL_UNIQUE_CNT`             | Number of different functions called.  Note that functions called via function pointer are not counted |
 | PARAM       | Implemented - `STMT_HIS_PARAM`                    | Number of function parameters.  Note that only one variant of this metric exists as parameters hidden within macros are still parameters. |
 | STMT        | Implemented - `STMT_CNT` and `RAW_STMT_CNT`       | Number of instructions per function. |
-| LEVEL       | Implemented - `FUNC_DEPTH`                        | Nesting depth within a function.  Note that HIS says that this is defined as "Maximum nesting levels within a function + 1", however the allowable range is 0-4, which doesn't seem consistent.  `FUNC_DEPTH` in this implementation is zero for an empty function |
+| LEVEL       | Implemented - `FUNC_NESTING`                      | Nesting depth within a function.  Note that HIS says that this is defined as "Maximum nesting levels within a function + 1", however the allowable range is 0-4, which doesn't seem consistent.  `FUNC_DEPTH` in this implementation is zero for an empty function |
 | RETURN      | Implemented - `RETURN_POINT_CNT`                  | Number of return points in a function.  Note that only one variant of this metric exists as return points hidden within macros are still return points.  Note Issue #54 with respect to this metric. |
 | S           | Not planned                                       | |
-| VOCF        | Not yet implemented                               | |
+| VOCF        | Implemented - `HIS_VOCF`                          | Language scope indicator |
 | NOMV        | Not planned                                       | |
 | NOMVPR      | Not planned                                       | |
 | ap_cg_cycle | Not planned                                       | |
