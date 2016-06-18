@@ -145,41 +145,92 @@ Metric Details
 | RAW_KW_VOLATILE_CNT | 'volatile' keyword count (raw source) |  |
 | KW_CONST_CNT | 'const' keyword count |  |
 | RAW_KW_CONST_CNT | 'const' keyword count (raw source) |  |
+| KW_BODY_CONST_CNT | 'const' keyword count (within function body) |  |
+| RAW_KW_BODY_CONST_CNT | 'const' keyword count (raw source, within function body) |  |
 | KW_TYPEDEF_CNT | 'typedef' keyword count |  |
 | RAW_KW_TYPEDEF_CNT | 'typedef' keyword count (raw source) |  |
 | KW_CONTINUE_CNT | 'continue' keyword count |  |
 | RAW_KW_CONTINUE_CNT | 'continue' keyword count (raw source) |  |
 | KW_UNION_CNT | 'union' keyword count |  |
+| KW_BODY_UNION_CNT | 'union' keyword count (within function body) |  |
 | RAW_KW_UNION_CNT | 'union' keyword count (raw source) |  |
+| RAW_KW_BODY_UNION_CNT | 'union' keyword count (raw source, within function body) |  |
 | KW_STRUCT_CNT | 'struct' keyword count |  |
+| KW_BODY_STRUCT_CNT | 'struct' keyword count (within function body) |  |
 | RAW_KW_STRUCT_CNT | 'struct' keyword count (raw source) |  |
+| RAW_KW_BODY_STRUCT_CNT | 'struct' keyword count (raw source, within function body) |  |
 | KW_ENUM_CNT | 'enum' keyword count |  |
+| KW_BODY_ENUM_CNT | 'enum' keyword count (within function body) |  |
 | RAW_KW_ENUM_CNT | 'enum' keyword count (raw source) |  |
+| RAW_KW_BODY_ENUM_CNT | 'enum' keyword count (raw source, within function body) |  |
 | KW_CHAR_CNT | 'char' keyword count |  |
+| KW_BODY_CHAR_CNT | 'char' keyword count (within function body) |  |
 | RAW_KW_CHAR_CNT | 'char' keyword count (raw source) |  |
+| RAW_KW_BODY_CHAR_CNT | 'char' keyword count (raw source, within function body) |  |
 | KW_UNSIGNED_CNT | 'unsigned' keyword count |  |
+| KW_BODY_UNSIGNED_CNT | 'unsigned' keyword count (within function body) |  |
 | RAW_KW_UNSIGNED_CNT | 'unsigned' keyword count (raw source) |  |
+| RAW_KW_BODY_UNSIGNED_CNT | 'unsigned' keyword count (raw source, within function body) |  |
 | KW_SIGNED_CNT | 'signed' keyword count |  |
+| KW_BODY_SIGNED_CNT | 'signed' keyword count (within function body) |  |
 | RAW_KW_SIGNED_CNT | 'signed' keyword count (raw source) |  |
+| RAW_KW_BODY_SIGNED_CNT | 'signed' keyword count (raw source, within function body) |  |
 | KW_DOUBLE_CNT | 'double' keyword count |  |
+| KW_BODY_DOUBLE_CNT | 'double' keyword count (within function body) |  |
 | RAW_KW_DOUBLE_CNT | 'double' keyword count (raw source) |  |
+| RAW_KW_BODY_DOUBLE_CNT | 'double' keyword count (raw source, within function body) |  |
 | KW_FLOAT_CNT | 'float' keyword count |  |
+| KW_BODY_FLOAT_CNT | 'float' keyword count (within function body) |  |
 | RAW_KW_FLOAT_CNT | 'float' keyword count (raw source) |  |
+| RAW_KW_BODY_FLOAT_CNT | 'float' keyword count (raw source, within function body) |  |
 | KW_INT_CNT | 'int' keyword count |  |
 | RAW_KW_INT_CNT | 'int' keyword count (raw source) |  |
+| KW_BODY_INT_CNT | 'int' keyword count (within function body) |  |
+| RAW_KW_BODY_INT_CNT | 'int' keyword count (raw source, within function body) |  |
 | KW_LONG_CNT | 'long' keyword count |  |
+| KW_BODY_LONG_CNT | 'long' keyword count (within function body) |  |
 | RAW_KW_LONG_CNT | 'long' keyword count (raw source) |  |
+| RAW_KW_BODY_LONG_CNT | 'long' keyword count (raw source, within function body) |  |
 | KW_SHORT_CNT | 'short' keyword count |  |
+| KW_BODY_SHORT_CNT | 'short' keyword count (within function body) |  |
 | RAW_KW_SHORT_CNT | 'short' keyword count (raw source) |  |
+| RAW_KW_BODY_SHORT_CNT | 'short' keyword count (raw source, within function body) |  |
 | KW_STATIC_CNT | 'static' keyword count |  |
+| KW_BODY_STATIC_CNT | 'static' keyword count (within function body) |  |
 | RAW_KW_STATIC_CNT | 'static' keyword count (raw source) |  |
+| RAW_KW_BODY_STATIC_CNT | 'static' keyword count (raw source, within function body) |  |
 | KW_EXTERN_CNT | 'extern' keyword count |  |
 | RAW_KW_EXTERN_CNT | 'extern' keyword count (raw source) |  |
 | KW_REGISTER_CNT | 'register' keyword count |  |
 | RAW_KW_REGISTER_CNT | 'register' keyword count (raw source) |  |
+| KW_VOID_CNT | 'void' keyword count |  |
+| KW_BODY_VOID_CNT | 'void' keyword count (within function body) |  |
+| RAW_KW_VOID_CNT | 'void' keyword count (raw source) |  |
+| RAW_KW_BODY_VOID_CNT | 'void' keyword count (raw source, within function body) |  |
+| OP_SIZEOF_CNT | 'sizeof' keyword/operator count |  |
+| RAW_OP_SIZEOF_CNT | 'sizeof' keyword/operator count (raw source) |  |
 | KW_CNT | Number of keywords used | Total number of C keywords used |
 | KW_TYPES_CNT | Number of types of keyword used |  |
-| KW_LABEL_CNT | 'label' keyword count |  |
+| IDENT_LABEL_CNT | label name count |  |
+| RAW_IDENT_LABEL_CNT | label name count (raw source) |  |
+| NUMERIC_CONST_CNT | Number of instances of numeric constants |  |
+| NUMERIC_CONST_UNIQ | Number of unique numerical constant tokens | Note that different representations of the same numeric value (e.g. '1' and '0x1') are currently treated as being different and each would be unique |
+| RAW_NUMERIC_CONST_CNT | Number of numerical constant tokens (raw source) |  |
+| RAW_NUMERIC_CONST_UNIQ | Number of unique numerical constant tokens (raw source) |  |
+| STRING_LITERALS | Number of string literal tokens |  |
+| STRING_LITERALS_UNIQ | Number of unique string literal tokens |  |
+| RAW_STRING_LITERALS | Number of string literal tokens (raw source) |  |
+| RAW_STRING_LITERALS_UNIQ | Number of unique string literal tokens (raw source) |  |
+| CHAR_CONSTS | Number of character constants |  |
+| CHAR_CONSTS_UNIQ | Number of unique character constants |  |
+| RAW_CHAR_CONSTS | Number of character constants (raw source) |  |
+| RAW_CHAR_CONSTS_UNIQ | Number of unique character constants (raw source) |  |
+| UNRESERVED_IDENTIFIERS | Number of (unreserved) identifier tokens |  |
+| UNRESERVED_IDENTIFIERS_UNIQ | Number of unique (unreserved) identifier tokens |  |
+| BODY_UNRESERVED_IDENTIFIERS | Number of (unreserved) identifier tokens (within function body) |  |
+| BODY_UNRESERVED_IDENTIFIERS_UNIQ | Number of unique (unreserved) identifier tokens (within function body) |  |
+| RAW_UNRESERVED_IDENTIFIERS | Number of (unreserved) identifier tokens (raw source) |  |
+| RAW_UNRESERVED_IDENTIFIERS_UNIQ | Number of unique (unreserved) identifier tokens (raw source) |  |
 | VAR_FILE_LOC_CNT | File-scope total local variable declarations | Includes auto and static but not extern |
 | VAR_FILE_LOC_STATIC_CNT | File-scope static variable declarations |  |
 | VAR_FILE_EXT_CNT | File-scope external variable declarations |  |
@@ -194,6 +245,7 @@ Metric Details
 | VAR_FN_EXT_CNT | Function-scope external variable declarations |  |
 | RETURN_POINT_CNT | Return points |  |
 | STMT_CNT | Statement count | Number of statements |
+| RAW_STMT_CNT | Statement count (raw source) | Number of statements in the code before pre-processing |
 | COMMENT_HIS_COMF | Comment density | Relationship of the number of comments to the number of statements, with range 0-1.  HIS metric. |
 | COMMENT_BYTE_CNT | Comments in bytes | Counts the total number of bytes which are used in comments.  Note that --exclude-function does not have any effect on this metric. |
 | COMMENT_CNT | Comment count | Counts the total number of comments.  Note that --exclude-function does not have any effect on this metric. |
@@ -212,8 +264,9 @@ Metric Details
 | OP_FN_CALL_UNIQUE_CNT | No. different functions called | Of the total number of functions called (see OP_FN_CALL_CNT), this represents the number of uniquely addressed functions.  Does not include functions called via function pointers |
 | LOCAL_FN_CALL_CNT | Local Function Calls | Does not include functions called via function pointers |
 | FILE_LINE_CNT | Size in lines | Counts number of newlines in the file |
-| FUNC_LINE_CNT | Function (body) size in lines | Counts number of newlines in the function body |
-| STMT_HIS_PARAM | Function Parameters |  |
+| FUNC_DEFINITION_LINE_CNT | Function (definition) size in lines | Counts number of newlines in the function body |
+| FUNC_BODY_LINE_CNT | Function (body) size in lines | Counts number of newlines in the function body |
+| STMT_HIS_PARAM | Function Parameters | Number of parameters associated with a function definition (declarations are not included). |
 | TODO | Decisions |  |
 | TODO | Loops |  |
 | FUNC_NESTING | Nesting Level |  |
@@ -247,16 +300,16 @@ Metric Details
 | OP_CMP_NEQ_CNT | Inequality operators |  |
 | OP_COMMA_CNT | Comma operators |  |
 | OP_TERNARY_CNT | TERNARY operators |  |
-| OP_LOG_AND_CNT | LOGICAL AND operators |  |
-| OP_LOG_OR_CNT | LOGICAL OR operators |  |
-| OP_LOG_NIT_CNT | LOGICAL NOT operators |  |
-| OP_BITWISE_AND_CNT | Bitwise and operators |  |
-| OP_BITWISE_AND_ASSIGN_CNT | Bitwise and with assign operators |  |
-| OP_BITWISE_OR_CNT | Bitwise or operators |  |
-| OP_BITWISE_OR_ASSIGN_CNT | Bitwise or with assign operators |  |
-| OP_BITWISE_XOR_CNT | Bitwise xor operators |  |
-| OP_BITWISE_XOR_ASSIGN_CNT | Bitwise xor with assign operators |  |
-| OP_BITWISE_NIT_CNT | Bitwise not operators |  |
+| OP_LOG_AND_CNT | Logical AND operators |  |
+| OP_LOG_OR_CNT | Logical OR operators |  |
+| OP_LOG_NIT_CNT | Logical NOT operators |  |
+| OP_BITWISE_AND_CNT | Bitwise AND operators |  |
+| OP_BITWISE_AND_ASSIGN_CNT | Bitwise AND with assign operators |  |
+| OP_BITWISE_OR_CNT | Bitwise OR operators |  |
+| OP_BITWISE_OR_ASSIGN_CNT | Bitwise OR with assign operators |  |
+| OP_BITWISE_XOR_CNT | Bitwise XOR operators |  |
+| OP_BITWISE_XOR_ASSIGN_CNT | Bitwise XOR with assign operators |  |
+| OP_BITWISE_NOT_CNT | Bitwise NOT operators |  |
 | OP_PTR_TO_MEMBER_DIRECT_CNT | Pointer to member (direct) operators |  |
 | OP_PTR_TO_MEMBER_INDIRECT_CNT | Pointer to member (indirect) operators |  |
 | OP_ADDR_OF_CNT | Address of operators |  |
@@ -264,15 +317,20 @@ Metric Details
 | OP_ARRAY_SUBSCRIPT_CNT | Array subscript operators |  |
 | OP_MEMBER_ACCESS_DIRECT_CNT | Member access (direct) operators |  |
 | OP_MEMBER_ACCESS_POINTER_CNT | Member access (via pointer) operators |  |
-| OP_SIZEOF_CNT | Sizeof operators |  |
 | OP_ALIGNOF_CNT | Alignof operators |  |
 | OP_CAST_CNT | Cast operators |  |
 | OP_TYPES_CNT | Number of different types of C operator | Number of distinct different types of operators. |
 | OP_CNT | Number of operators | Total number of operators used |
-| OP_HALSTEAD_TYPES_CNT | Number of different types of halstead operators | Number of distinct different types of operators (as classified for the purpose of Halstead metrics; this is not the same classification as the 'C' standard) |
-| OP_HALSTEAD_CNT | Number of halstead operators | Total number of operators (as classified for the purpose of Halstead metrics; this is not the same classification as the 'C' standard) used |
+| HALSTEAD_OPERATOR_UNIQUE_CNT | Number of different types of halstead operators | Number of distinct different types of operators (as classified for the purpose of Halstead metrics; this is not the same classification as the 'C' standard) |
+| HALSTEAD_OPERATOR_CNT | Number of halstead operators | Total number of operators (as classified for the purpose of Halstead metrics; this is not the same classification as the 'C' standard) used |
+| HALSTEAD_OPERAND_UNIQUE_CNT | Number of different halstead operands | Number of distinct different types of operand (as classified for the purpose of Halstead metrics; this is not the same classification as the 'C' standard) |
+| HALSTEAD_OPERAND_CNT | Number of halstead operands | Total number of operands (as classified for the purpose of Halstead metrics; this is not the same classification as the 'C' standard) used |
+| HALSTEAD_VOCABULARY | Halstead program vocabulary |  |
+| HALSTEAD_LENGTH | Halstead program length |  |
+| HALSTEAD_CALC_LENGTH | Halstead calculated program length |  |
+| HALSTEAD_VOLUME | Halstead volume |  |
+| HALSTEAD_DIFFICULTY | Halstead difficulty |  |
 | TOK_BOOL | Number of 'bool' tokens |  |
-| TOK_VOID | Number of 'void' tokens |  |
 | TOK_INLINE | Number of 'inline' tokens |  |
 | TOK_VIRTUAL | Number of 'virtual' tokens |  |
 | TOK_MUTABLE | Number of 'mutable' tokens |  |
@@ -285,7 +343,6 @@ Metric Details
 | TOK_PRIVATE | Number of 'private' tokens |  |
 | TOK_PROTECTED | Number of 'protected' tokens |  |
 | TOK_PUBLIC | Number of 'public' tokens |  |
-| TOK_SIZEOF | Number of 'sizeof' tokens |  |
 | TOK_THIS | Number of 'this' tokens |  |
 | TOK_NAMESPACE | Number of 'namespace' tokens |  |
 | TOK_USING | Number of 'using' tokens |  |
@@ -304,7 +361,7 @@ Metric Details
 | TOK_MODULO_ASSIGN | Number of '%=' tokens |  |
 | TOK_AMP | Number of '&' tokens |  |
 | TOK_AMPAMP | Number of '&&' tokens |  |
-| TOK_PIPEPIPE | Number of '<code>&#124;</code><code>&#124;</code>' tokens |  |
+| TOK_PIPEPIPE | Number of '<code>&#124;</code><code>&#124;</code>'' tokens |  |
 | TOK_AND_ASSIGN | Number of '&=' tokens |  |
 | TOK_LPAREN | Number of '(' tokens |  |
 | TOK_RPAREN | Number of ')' tokens |  |
@@ -344,14 +401,6 @@ Metric Details
 | TOK_PIPE | Number of '<code>&#124;</code>' tokens |  |
 | TOK_PIPE_ASSIGN | Number of '<code>&#124;</code>=' tokens |  |
 | TOK_TILDE | Number of '~' tokens |  |
-| TOK_NUMERIC_CONST | Number of numerical constant tokens |  |
-| TOK_NUMERIC_CONST_UNIQ | Number of unique numerical constant tokens |  |
-| TOK_STRING_LITERALS | Number of string literal tokens |  |
-| TOK_STRING_LITERALS_UNIQ | Number of unique string literal tokens |  |
-| TOK_UNRESERVED_IDENTIFIERS | Number of (unreserved) identifier tokens |  |
-| TOK_UNRESERVED_IDENTIFIERS_UNIQ | Number of unique (unreserved) identifier tokens |  |
-| TOK_CHAR_CONSTS | Number of character constants |  |
-| TOK_CHAR_CONSTS_UNIQ | Number of unique character constants |  |
 | HIS_CALLING | Number of functions which call this function |  |
 
 Raw & Parsed Metrics
