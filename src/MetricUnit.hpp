@@ -62,7 +62,8 @@ class MetricUnit
 public:
 	typedef std::map<std::string, MetricUnit*> SubUnitMap_t;
 
-	/* See also counter_t_Max */
+	/** Type for holding metric values.
+	    See also counter_t_Max */
 	typedef uint32_t counter_t;
 
 private:

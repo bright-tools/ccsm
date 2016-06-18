@@ -43,30 +43,46 @@ const std::map<MetricType_e, MetricType_e> MetricSrcExpandedLexer::m_metricToBod
 	metricToBodyMetricMapData + sizeof metricToBodyMetricMapData / sizeof metricToBodyMetricMapData[0]);
 
 const static std::pair<clang::tok::TokenKind,MetricType_e> tokenKindToTypeMapData[] = {
-//	std::make_pair(clang::tok::exclaim,      METRIC_TYPE_TOKEN_NOT),
-//	std::make_pair(clang::tok::exclaimequal, METRIC_TYPE_TOKEN_NOT),
-//	std::make_pair(clang::tok::percent,      METRIC_TYPE_TOKEN_MODULO),
-//	std::make_pair(clang::tok::percentequal, METRIC_TYPE_TOKEN_MODULO_ASSIGN),
-//	std::make_pair(clang::tok::amp,          METRIC_TYPE_TOKEN_AMP),
-//	std::make_pair(clang::tok::ampamp,       METRIC_TYPE_TOKEN_AMPAMP),
-//	std::make_pair(clang::tok::pipepipe,     METRIC_TYPE_TOKEN_PIPEPIPE),
-//	std::make_pair(clang::tok::ampequal,     METRIC_TYPE_TOKEN_AND_ASSIGN),
+#if 0
+	/* These are handed in metric matcher such that the difference between unary and non-unary operators can be 
+	   distinguished */
+	std::make_pair(clang::tok::plus,         METRIC_TYPE_OPERATOR_ARITHMETIC_ADDITION),
+	std::make_pair(clang::tok::minus,        METRIC_TYPE_OPERATOR_ARITHMETIC_SUBTRACTION),
+
+	/* This is handled in MetricMatcher such that the difference between multiplication and pointer de-reference
+	   can be distinguished */
+	std::make_pair(clang::tok::star,         METRIC_TYPE_OPERATOR_ARITHMETIC_MULTIPLICATION),
+
+	/* This is handled in MetricMatcher such that the difference between a bitwise AND and address-of can be
+	   distinguished */
+	std::make_pair(clang::tok::amp,          METRIC_TYPE_OPERATOR_BITWISE_AND),
+
+	/* These are handled in MetricMatcher such that the difference between array subscripts and array declarations
+	   can be distinguished */
+	std::make_pair(clang::tok::l_brace,             METRIC_TYPE_TOKEN_LBRACE),
+	std::make_pair(clang::tok::r_brace,             METRIC_TYPE_TOKEN_RBRACE),
+#endif
+	
+	//	std::make_pair(clang::tok::exclaim,      METRIC_TYPE_TOKEN_NOT),
+	std::make_pair(clang::tok::exclaimequal, METRIC_TYPE_OPERATOR_COMP_NOT_EQUAL),
+	std::make_pair(clang::tok::percent,      METRIC_TYPE_OPERATOR_ARITHMETIC_MODULO),
+	std::make_pair(clang::tok::percentequal, METRIC_TYPE_OPERATOR_ARITHMETIC_MODULO_ASSIGN),
+	std::make_pair(clang::tok::ampamp,       METRIC_TYPE_OPERATOR_LOGICAL_AND),
+	std::make_pair(clang::tok::pipepipe,     METRIC_TYPE_OPERATOR_LOGICAL_OR),
+	std::make_pair(clang::tok::ampequal,     METRIC_TYPE_OPERATOR_BITWISE_AND_ASSIGN),
 //	std::make_pair(clang::tok::l_paren,      METRIC_TYPE_TOKEN_LPAREN),
 //	std::make_pair(clang::tok::r_paren,      METRIC_TYPE_TOKEN_RPAREN),
-//	std::make_pair(clang::tok::star,         METRIC_TYPE_TOKEN_ASTERISK),
-//	std::make_pair(clang::tok::starequal,    METRIC_TYPE_TOKEN_ASTERISK_ASSIGN),
-//	std::make_pair(clang::tok::plus,         METRIC_TYPE_TOKEN_PLUS),
+	std::make_pair(clang::tok::starequal,    METRIC_TYPE_OPERATOR_ARITHMETIC_MULTIPLICATION_ASSIGN),
 //	std::make_pair(clang::tok::plusplus,     METRIC_TYPE_TOKEN_PLUSPLUS),
-//	std::make_pair(clang::tok::plusequal,    METRIC_TYPE_TOKEN_PLUS_ASSIGN),
+	std::make_pair(clang::tok::plusequal,    METRIC_TYPE_OPERATOR_ARITHMETIC_ADDITION_ASSIGN),
 //	std::make_pair(clang::tok::comma,        METRIC_TYPE_TOKEN_COMMA),
-//	std::make_pair(clang::tok::minus,        METRIC_TYPE_TOKEN_MINUS),
 //	std::make_pair(clang::tok::minusminus,   METRIC_TYPE_TOKEN_MINUSMINUS),
-//	std::make_pair(clang::tok::minusequal,   METRIC_TYPE_TOKEN_MINUS_ASSIGN),
+	std::make_pair(clang::tok::minusequal,   METRIC_TYPE_OPERATOR_ARITHMETIC_SUBTRACTION_ASSIGN),
 //	std::make_pair(clang::tok::arrow,        METRIC_TYPE_TOKEN_MEMBER_POINTER),
 //	std::make_pair(clang::tok::period,       METRIC_TYPE_TOKEN_MEMBER_REF),
 //	std::make_pair(clang::tok::ellipsis,     METRIC_TYPE_TOKEN_ELLIPSIS),
-//	std::make_pair(clang::tok::slash,        METRIC_TYPE_TOKEN_SLASH),
-//	std::make_pair(clang::tok::slashequal,   METRIC_TYPE_TOKEN_SLASH_ASSIGN),
+	std::make_pair(clang::tok::slash,        METRIC_TYPE_OPERATOR_ARITHMETIC_DIVISION),
+	std::make_pair(clang::tok::slashequal,   METRIC_TYPE_OPERATOR_ARITHMETIC_DIVISION_ASSIGN),
 //	std::make_pair(clang::tok::colon,        METRIC_TYPE_TOKEN_COLON),
 //	std::make_pair(clang::tok::kw_inline,    METRIC_TYPE_TOKEN_INLINE),
 //	std::make_pair(clang::tok::kw_typedef,   METRIC_TYPE_TOKEN_TYPEDEF),
@@ -128,25 +144,23 @@ const static std::pair<clang::tok::TokenKind,MetricType_e> tokenKindToTypeMapDat
 //	std::make_pair(clang::tok::kw_false,            METRIC_TYPE_TOKEN_FALSE),
 //	std::make_pair(clang::tok::kw_typename,         METRIC_TYPE_TOKEN_TYPENAME),
 //	std::make_pair(clang::tok::coloncolon,          METRIC_TYPE_TOKEN_COLONCOLON),
-//	std::make_pair(clang::tok::less,                METRIC_TYPE_TOKEN_LESS),
-//	std::make_pair(clang::tok::lessless,            METRIC_TYPE_TOKEN_LESSLESS),
-//	std::make_pair(clang::tok::lesslessequal,       METRIC_TYPE_TOKEN_LESSLESS_ASSIGN),
-//	std::make_pair(clang::tok::lessequal,           METRIC_TYPE_TOKEN_LESS_EQUAL),
-//	std::make_pair(clang::tok::equal,               METRIC_TYPE_TOKEN_ASSIGN),
-//	std::make_pair(clang::tok::equalequal,          METRIC_TYPE_TOKEN_COMPARISON),
-//	std::make_pair(clang::tok::greater,             METRIC_TYPE_TOKEN_MORE),
-//	std::make_pair(clang::tok::greaterequal,        METRIC_TYPE_TOKEN_MORE_EQUAL),
-//	std::make_pair(clang::tok::greatergreater,      METRIC_TYPE_TOKEN_MOREMORE),
-//	std::make_pair(clang::tok::greatergreaterequal, METRIC_TYPE_TOKEN_MOREMORE_ASSIGN),
+	std::make_pair(clang::tok::less,                METRIC_TYPE_OPERATOR_COMP_LESS_THAN),
+    std::make_pair(clang::tok::lessless,            METRIC_TYPE_OPERATOR_SHIFT_LEFT),
+	std::make_pair(clang::tok::lesslessequal,       METRIC_TYPE_OPERATOR_SHIFT_LEFT_ASSIGN),
+	std::make_pair(clang::tok::lessequal,           METRIC_TYPE_OPERATOR_COMP_LESS_THAN_EQUAL),
+    std::make_pair(clang::tok::equal,               METRIC_TYPE_OPERATOR_ARITHMETIC_ASSIGN),
+	std::make_pair(clang::tok::equalequal,          METRIC_TYPE_OPERATOR_COMP_EQUAL),
+	std::make_pair(clang::tok::greater,             METRIC_TYPE_OPERATOR_COMP_GREATER_THAN),
+	std::make_pair(clang::tok::greaterequal,        METRIC_TYPE_OPERATOR_COMP_GREATER_THAN_EQUAL),
+	std::make_pair(clang::tok::greatergreater,      METRIC_TYPE_OPERATOR_SHIFT_RIGHT),
+	std::make_pair(clang::tok::greatergreaterequal, METRIC_TYPE_OPERATOR_SHIFT_RIGHT_ASSIGN),
 //	std::make_pair(clang::tok::question,            METRIC_TYPE_TOKEN_QUESTION),
 //	std::make_pair(clang::tok::l_square,            METRIC_TYPE_TOKEN_LSQUARE),
 //	std::make_pair(clang::tok::r_square,            METRIC_TYPE_TOKEN_RSQUARE),
-//	std::make_pair(clang::tok::caret,               METRIC_TYPE_TOKEN_CARET),
-//	std::make_pair(clang::tok::caretequal,          METRIC_TYPE_TOKEN_CARET_ASSIGN),
-//	std::make_pair(clang::tok::l_brace,             METRIC_TYPE_TOKEN_LBRACE),
-//	std::make_pair(clang::tok::r_brace,             METRIC_TYPE_TOKEN_RBRACE),
-//	std::make_pair(clang::tok::pipe,                METRIC_TYPE_TOKEN_PIPE),
-//	std::make_pair(clang::tok::pipeequal,           METRIC_TYPE_TOKEN_PIPE_ASSIGN),
+	std::make_pair(clang::tok::caret,               METRIC_TYPE_OPERATOR_BITWISE_XOR),
+	std::make_pair(clang::tok::caretequal,          METRIC_TYPE_OPERATOR_BITWISE_XOR_ASSIGN),
+    std::make_pair(clang::tok::pipe,                METRIC_TYPE_OPERATOR_BITWISE_OR),
+	std::make_pair(clang::tok::pipeequal,           METRIC_TYPE_OPERATOR_BITWISE_OR_ASSIGN),
 //	std::make_pair(clang::tok::tilde,               METRIC_TYPE_TOKEN_TILDE)
 };
 

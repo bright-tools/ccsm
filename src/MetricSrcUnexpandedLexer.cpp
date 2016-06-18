@@ -44,7 +44,7 @@ const std::map<MetricType_e, MetricType_e> MetricSrcUnexpandedLexer::m_metricToB
 
 const static std::pair<clang::tok::TokenKind,MetricType_e> tokenKindToTypeMapData[] = {
 	std::make_pair(clang::tok::exclaim,      METRIC_TYPE_TOKEN_NOT),
-	std::make_pair(clang::tok::exclaimequal, METRIC_TYPE_TOKEN_NOT),
+	std::make_pair(clang::tok::exclaimequal, METRIC_TYPE_TOKEN_NOT_EQUAL),
 	std::make_pair(clang::tok::percent,      METRIC_TYPE_TOKEN_MODULO),
 	std::make_pair(clang::tok::percentequal, METRIC_TYPE_TOKEN_MODULO_ASSIGN),
 	std::make_pair(clang::tok::amp,          METRIC_TYPE_TOKEN_AMP),
