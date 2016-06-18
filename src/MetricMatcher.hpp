@@ -50,6 +50,7 @@ protected:
 	/** Map used to look up the metric associated with a particular binary operator */
 	const static std::map<clang::BinaryOperator::Opcode, MetricType_e> binaryOperatorToMetricMap;
 
+
 	clang::CompilerInstance&        m_compilerInstance;
 	clang::ASTContext*		        m_astContext           = NULL;
 	MetricUnit*		                m_topUnit              = NULL;
@@ -74,6 +75,7 @@ protected:
 	PathResults getSwitchPathCount(const clang::SwitchStmt* const p_stmt, uint16_t depth = 0);
 	void CountStatements(const clang::Stmt* const p_stmt);
 	void CountStatements(const clang::Stmt::const_child_range& p_children);
+	void CalcFnLineCnt(clang::FunctionDecl *func);
 
 public:
 	
@@ -108,7 +110,6 @@ public:
 	virtual bool TraverseStmt(clang::Stmt *p_stmt);
 	virtual bool VisitEnumDecl(clang::EnumDecl* p_enumDecl);
 	virtual bool VisitCastExpr(clang::CastExpr *p_castExp);
-
 
 #if 0
 	void dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE );

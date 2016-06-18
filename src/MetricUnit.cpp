@@ -228,6 +228,119 @@ MetricUnit::counter_t MetricUnit::getSubUnitCount( const MetricUnitType_e p_type
 }
 
 /* TODO: This doesn't deal with C++ only operators */
+const std::set<MetricType_e> m_halsteadOperatorMetrics = {
+	METRIC_TYPE_OPERATOR_ARITHMETIC_ASSIGN,
+	METRIC_TYPE_OPERATOR_ARITHMETIC_ADDITION,
+	METRIC_TYPE_OPERATOR_ARITHMETIC_SUBTRACTION,
+	METRIC_TYPE_OPERATOR_ARITHMETIC_UNARY_PLUS,
+	METRIC_TYPE_OPERATOR_ARITHMETIC_UNARY_MINUS,
+	METRIC_TYPE_OPERATOR_ARITHMETIC_MULTIPLICATION,
+	METRIC_TYPE_OPERATOR_ARITHMETIC_DIVISION,
+	METRIC_TYPE_OPERATOR_ARITHMETIC_MODULO,
+	METRIC_TYPE_OPERATOR_ARITHMETIC_INCREMENT_PRE,
+	METRIC_TYPE_OPERATOR_ARITHMETIC_INCREMENT_POST,
+	METRIC_TYPE_OPERATOR_ARITHMETIC_DECREMENT_PRE,
+	METRIC_TYPE_OPERATOR_ARITHMETIC_DECREMENT_POST,
+
+	METRIC_TYPE_OPERATOR_COMP_EQUAL,
+	METRIC_TYPE_OPERATOR_COMP_NOT_EQUAL,
+	METRIC_TYPE_OPERATOR_COMP_GREATER_THAN,
+	METRIC_TYPE_OPERATOR_COMP_LESS_THAN,
+	METRIC_TYPE_OPERATOR_COMP_GREATER_THAN_EQUAL,
+	METRIC_TYPE_OPERATOR_COMP_LESS_THAN_EQUAL,
+
+	METRIC_TYPE_OPERATOR_LOGICAL_NOT,
+	METRIC_TYPE_OPERATOR_LOGICAL_AND,
+	METRIC_TYPE_OPERATOR_LOGICAL_OR,
+
+	METRIC_TYPE_OPERATOR_BITWISE_NOT,
+	METRIC_TYPE_OPERATOR_BITWISE_AND,
+	METRIC_TYPE_OPERATOR_BITWISE_OR,
+	METRIC_TYPE_OPERATOR_BITWISE_XOR,
+	METRIC_TYPE_OPERATOR_SHIFT_LEFT,
+	METRIC_TYPE_OPERATOR_SHIFT_RIGHT,
+
+	METRIC_TYPE_OPERATOR_ARITHMETIC_ADDITION_ASSIGN,
+	METRIC_TYPE_OPERATOR_ARITHMETIC_SUBTRACTION_ASSIGN,
+	METRIC_TYPE_OPERATOR_ARITHMETIC_MULTIPLICATION_ASSIGN,
+	METRIC_TYPE_OPERATOR_ARITHMETIC_DIVISION_ASSIGN,
+	METRIC_TYPE_OPERATOR_ARITHMETIC_MODULO_ASSIGN,
+	METRIC_TYPE_OPERATOR_BITWISE_AND_ASSIGN,
+	METRIC_TYPE_OPERATOR_BITWISE_OR_ASSIGN,
+	METRIC_TYPE_OPERATOR_BITWISE_XOR_ASSIGN,
+	METRIC_TYPE_OPERATOR_SHIFT_LEFT_ASSIGN,
+	METRIC_TYPE_OPERATOR_SHIFT_RIGHT_ASSIGN,
+
+	METRIC_TYPE_OPERATOR_ARRAY_SUBSCRIPT,
+	METRIC_TYPE_OPERATOR_DEREFERENCE,
+	METRIC_TYPE_OPERATOR_ADDRESS_OF,
+	METRIC_TYPE_OPERATOR_MEMBER_ACCESS_POINTER,
+	METRIC_TYPE_OPERATOR_MEMBER_ACCESS_DIRECT,
+	METRIC_TYPE_OPERATOR_PTR_TO_MEMBER_INDIRECT,
+	METRIC_TYPE_OPERATOR_PTR_TO_MEMBER_DIRECT,
+
+	METRIC_TYPE_AUTO,
+	METRIC_TYPE_EXTERN,
+//	METRIC_TYPE_INLINE,
+	METRIC_TYPE_REGISTER,
+	METRIC_TYPE_STATIC,
+	METRIC_TYPE_TYPEDEF,
+//	METRIC_TYPE_VIRTUAL,
+//  METRIC_TYPE_MUTABLE,
+
+	METRIC_TYPE_BODY_CONST,
+	// TODO: should be BODY_VOLATILE
+	// 	METRIC_TYPE_FRIEND
+	METRIC_TYPE_VOLATILE,
+
+//	METRIC_TYPE_ASM,
+	METRIC_TYPE_BREAK,
+	METRIC_TYPE_CASE,
+	//METRIC_TYPE_CLASS,
+	METRIC_TYPE_DEFAULT,
+	METRIC_TYPE_DO,
+//	METRIC_TYPE_DELETE,
+	METRIC_TYPE_ELSE,
+	METRIC_TYPE_BODY_ENUM,
+	METRIC_TYPE_FORLOOP,
+	METRIC_TYPE_GOTO,
+	METRIC_TYPE_IF,
+	//METRIC_TYPE_NEW,
+	//METRIC_TYPE_OPERATOR,
+	//METRIC_TYPE_PRIVATE,
+	//METRIC_TYPE_PROTECTED,
+	//METRIC_TYPE_PUBLIC,
+	METRIC_TYPE_RETURN,
+	METRIC_TYPE_OPERATOR_SIZE_OF,
+	METRIC_TYPE_STRUCT,
+	METRIC_TYPE_SWITCH,
+	//METRIC_TYPE_THIS,
+	METRIC_TYPE_UNION,
+	METRIC_TYPE_WHILE,
+	//METRIC_TYPE_NAMESPACE,
+	//METRIC_TYPE_USING,
+	//METRIC_TYPE_TRY,
+	//METRIC_TYPE_CATCH,
+	//METRIC_TYPE_THROW,
+	//METRIC_TYPE_CONST_CAST,
+	//METRIC_TYPE_STATIC_CAST,
+	//METRIC_TYPE_DYNAMIC_CAST,
+	//METRIC_TYPE_REINTERPRET_CAST,
+	//METRIC_TYPE_TYPEID,
+	//METRIC_TYPE_TEMPLATE,
+	//METRIC_TYPE_EXPLICIT,
+	//METRIC_TYPE_TRUE,
+	//METRIC_TYPE_FALSE,
+	//METRIC_TYPE_TYPENAME,
+
+	METRIC_TYPE_FUNCTION_CALLS,
+	METRIC_TYPE_OPERATOR_COMMA,
+	METRIC_TYPE_OPERATOR_TERNARY,
+	METRIC_TYPE_OPERATOR_ALIGN_OF,
+	METRIC_TYPE_OPERATOR_CAST
+};
+
+/* TODO: This doesn't deal with C++ only operators */
 const std::set<MetricType_e> m_operatorMetrics = {
 	METRIC_TYPE_OPERATOR_ARITHMETIC_ASSIGN,
 	METRIC_TYPE_OPERATOR_ARITHMETIC_ADDITION,
@@ -328,6 +441,21 @@ const std::set<MetricType_e> m_keywordMetrics = {
 	// TODO - no _Bool, _Complex or _Imaginary
 };
 
+/* TODO: This doesn't deal with C99/C++ only keywoards */
+const std::set<MetricType_e> m_halsteadOperandMetrics = {
+	METRIC_TYPE_BODY_CHAR,
+	METRIC_TYPE_BODY_DOUBLE,
+	METRIC_TYPE_BODY_FLOAT,
+	METRIC_TYPE_BODY_INT,
+	METRIC_TYPE_BODY_LONG,
+	METRIC_TYPE_BODY_SHORT,
+	METRIC_TYPE_BODY_SIGNED,
+	METRIC_TYPE_BODY_UNSIGNED,
+	METRIC_TYPE_BODY_VOID
+	// TODO
+	// TODO - no _Bool, _Complex or _Imaginary
+};
+
 MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType, const bool p_recurse ) const
 {
 	counter_t ret_val = 0;
@@ -355,13 +483,54 @@ MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType, c
 			}
 			break;
 		case METRIC_TYPE_KEYWORD_TYPES:
-			/* TODO */
+			for (std::set<MetricType_e>::const_iterator it = m_keywordMetrics.begin();
+				it != m_keywordMetrics.end();
+				it++)
+			{
+				ret_val += (getCounter(*it, p_recurse) > 0);
+			}
 			break;
-		case METRIC_TYPE_OPERATOR_HALSTEAD_TYPES:
-			ret_val = getCounter(METRIC_TYPE_OPERATOR_TYPES, p_recurse) +
-				      getCounter(METRIC_TYPE_KEYWORD_TYPES);
+		case METRIC_TYPE_OPERAND_HALSTEAD_COUNT:
+			for (std::set<MetricType_e>::const_iterator it = m_halsteadOperandMetrics.begin();
+				it != m_halsteadOperandMetrics.end();
+				it++)
+			{
+				ret_val += getCounter(*it, p_recurse);
+			}
+			ret_val += getCounter(METRIC_TYPE_NUMERIC_CONSTANTS, p_recurse);
+			ret_val += getCounter(METRIC_TYPE_CHAR_CONSTS, p_recurse);
+			ret_val += getCounter(METRIC_TYPE_STRING_LITERALS, p_recurse);
+			ret_val += getCounter(METRIC_TYPE_BODY_UNRESERVED_IDENTIFIERS, p_recurse);
 			break;
-	    case METRIC_TYPE_OPERATOR_TYPES:
+		case METRIC_TYPE_OPERAND_HALSTEAD_UNIQUE:
+			for (std::set<MetricType_e>::const_iterator it = m_halsteadOperandMetrics.begin();
+				it != m_halsteadOperandMetrics.end();
+				it++)
+			{
+				ret_val += (getCounter(*it, p_recurse) > 0);
+			}
+			ret_val += getCounter(METRIC_TYPE_NUMERIC_CONSTANTS_UNIQ, p_recurse);
+			ret_val += getCounter(METRIC_TYPE_CHAR_CONSTS_UNIQ, p_recurse);
+			ret_val += getCounter(METRIC_TYPE_STRING_LITERALS_UNIQ, p_recurse);
+			ret_val += getCounter(METRIC_TYPE_BODY_UNRESERVED_IDENTIFIERS_UNIQ, p_recurse);
+			break;
+		case METRIC_TYPE_OPERATOR_HALSTEAD_UNIQUE:
+			for (std::set<MetricType_e>::const_iterator it = m_halsteadOperatorMetrics.begin();
+				it != m_halsteadOperatorMetrics.end();
+				it++)
+			{
+				ret_val += (getCounter(*it, p_recurse) > 0);
+			}
+			break;
+		case METRIC_TYPE_OPERATOR_HALSTEAD_COUNT:
+			for (std::set<MetricType_e>::const_iterator it = m_halsteadOperatorMetrics.begin();
+				it != m_halsteadOperatorMetrics.end();
+				it++)
+			{
+				ret_val += getCounter(*it, p_recurse);
+			}
+			break;
+		case METRIC_TYPE_OPERATOR_TYPES:
 			for (std::set<MetricType_e>::const_iterator it = m_operatorMetrics.begin();
 				it != m_operatorMetrics.end();
 				it++)
@@ -375,11 +544,11 @@ MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType, c
 				/* Div-by-zero protection */
 				if( stmtCount > 0 )
 				{
-					ret_val = ((float)getCounter( METRIC_TYPE_COMMENT_COUNT, p_recurse ) / stmtCount) * 1000;
+					ret_val = (getCounter(METRIC_TYPE_COMMENT_COUNT, p_recurse) * m_metricScaling[METRIC_TYPE_HIS_COMMENT_DENSITY]) / stmtCount;
 					/* Clip at 1.0 */
-					if( ret_val > 1000 )
+					if (ret_val > m_metricScaling[METRIC_TYPE_HIS_COMMENT_DENSITY])
 					{
-						ret_val = 1000;
+						ret_val = m_metricScaling[METRIC_TYPE_HIS_COMMENT_DENSITY];
 					}
 				}
 				else
@@ -437,7 +606,81 @@ MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType, c
 						  getCounter( METRIC_TYPE_OPERATOR_TERNARY, p_recurse ) + 1;
 			}
 			break;
+		case METRIC_TYPE_NUMERIC_CONSTANTS_UNIQ:
+			ret_val = getSupplementary(METRIC_TYPE_NUMERIC_CONSTANTS, p_recurse).size();
+			break;
+		case METRIC_TYPE_TOKEN_NUMERIC_CONSTANTS_UNIQ:
+			ret_val = getSupplementary(METRIC_TYPE_TOKEN_NUMERIC_CONSTANTS, p_recurse).size();
+			break;
+		case METRIC_TYPE_STRING_LITERALS_UNIQ:
+			ret_val = getSupplementary(METRIC_TYPE_STRING_LITERALS, p_recurse).size();
+			break;
+		case METRIC_TYPE_TOKEN_STRING_LITERALS_UNIQ:
+			ret_val = getSupplementary(METRIC_TYPE_TOKEN_STRING_LITERALS, p_recurse).size();
+			break;
+		case METRIC_TYPE_CHAR_CONSTS_UNIQ:
+			ret_val = getSupplementary(METRIC_TYPE_CHAR_CONSTS, p_recurse).size();
+			break;
+		case METRIC_TYPE_TOKEN_CHAR_CONSTS_UNIQ:
+			return getSupplementary(METRIC_TYPE_TOKEN_CHAR_CONSTS, p_recurse).size();
+			break;
+		case METRIC_TYPE_UNRESERVED_IDENTIFIERS_UNIQ:
+			ret_val = getSupplementary(METRIC_TYPE_UNRESERVED_IDENTIFIERS, p_recurse).size();
+			break;
+		case METRIC_TYPE_BODY_UNRESERVED_IDENTIFIERS_UNIQ:
+			ret_val = getSupplementary(METRIC_TYPE_BODY_UNRESERVED_IDENTIFIERS, p_recurse).size();
+			break;
+		case METRIC_TYPE_TOKEN_UNRESERVED_IDENTIFIERS_UNIQ:
+			ret_val = getSupplementary(METRIC_TYPE_TOKEN_UNRESERVED_IDENTIFIERS, p_recurse).size();
+			break;
+		case METRIC_TYPE_HALSTEAD_VOCABULARY:
+			ret_val = (getCounter(METRIC_TYPE_OPERATOR_HALSTEAD_UNIQUE, p_recurse) + getCounter(METRIC_TYPE_OPERAND_HALSTEAD_UNIQUE, p_recurse));
+			break;
+		case METRIC_TYPE_HALSTEAD_LENGTH:
+			ret_val = (getCounter(METRIC_TYPE_OPERATOR_HALSTEAD_COUNT, p_recurse) + getCounter(METRIC_TYPE_OPERAND_HALSTEAD_COUNT, p_recurse));
+			break;
+		case METRIC_TYPE_HALSTEAD_CALC_LENGTH:
+		{
+			float oper_unique = getCounter(METRIC_TYPE_OPERATOR_HALSTEAD_UNIQUE, p_recurse);
+			float opan_unique = getCounter(METRIC_TYPE_OPERAND_HALSTEAD_UNIQUE, p_recurse);
+			ret_val = ((oper_unique * log2(oper_unique)) + (opan_unique * log2(opan_unique))) * m_metricScaling[METRIC_TYPE_HALSTEAD_CALC_LENGTH];
+		}
+			break;
+		case METRIC_TYPE_HALSTEAD_VOLUME:
+		{
+			float vocab = getCounter(METRIC_TYPE_HALSTEAD_VOCABULARY, p_recurse);
+			ret_val = (getCounter(METRIC_TYPE_HALSTEAD_LENGTH, p_recurse) * log2(vocab)) * m_metricScaling[METRIC_TYPE_HALSTEAD_VOLUME];
+		}
+		break;
+		case METRIC_TYPE_HALSTEAD_DIFFICULTY:
+		{
+			float oper_unique = getCounter(METRIC_TYPE_OPERATOR_HALSTEAD_UNIQUE, p_recurse);
+			counter_t opan_unique = getCounter(METRIC_TYPE_OPERAND_HALSTEAD_UNIQUE, p_recurse);
+			if (opan_unique > 0)
+			{
+				ret_val = (oper_unique / 2.0F) * ((float)getCounter(METRIC_TYPE_OPERATOR_HALSTEAD_UNIQUE, p_recurse) / opan_unique) * m_metricScaling[METRIC_TYPE_HALSTEAD_DIFFICULTY];
+			}
+			else
+			{
+				ret_val = counter_t_Max;
+			}
+		}
+		break;
 		case METRIC_TYPE_VOCF:
+			{
+				counter_t vocab = getCounter(METRIC_TYPE_HALSTEAD_VOCABULARY, p_recurse);
+
+				if (vocab > 0)
+				{
+					ret_val = (getCounter(METRIC_TYPE_HALSTEAD_LENGTH, p_recurse) * m_metricScaling[METRIC_TYPE_VOCF]) /
+						      vocab;
+				}
+				else
+				{
+					ret_val = counter_t_Max;
+				}
+			}
+
 			break;
 		default:
 			ret_val  = m_counters[ p_metricType ];
@@ -624,4 +867,32 @@ std::string MetricUnit::getScaledMetricString(const MetricType_e p_type, MetricU
 	}
 
 	return strStream.str();
+}
+
+const std::set<std::string> MetricUnit::getSupplementary(MetricType_e p_metric, const bool p_recurse) const
+{
+	std::set<std::string> ret_val;
+	
+	std::map<MetricType_e,std::set<std::string>>::const_iterator find = m_supplementary.find(p_metric);
+	if (find != m_supplementary.end())
+	{
+		ret_val.insert(find->second.begin(), find->second.end());
+	}
+	if (p_recurse)
+	{
+		for (SubUnitMap_t::const_iterator unitIt = m_subUnits.begin();
+			unitIt != m_subUnits.end();
+			++unitIt)
+		{
+			std::set<std::string> sub = (*unitIt).second->getSupplementary(p_metric, p_recurse);
+
+			ret_val.insert(sub.begin(), sub.end());
+		}
+	}
+	return ret_val;
+}
+
+void MetricUnit::setSupplementary(MetricType_e p_metric, const std::set<std::string> p_val)
+{
+	m_supplementary[p_metric] = p_val;
 }

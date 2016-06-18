@@ -47,7 +47,8 @@ extern size_t countNewlines( clang::StringRef& p_buffer )
 {
 	size_t pos = 0;
 	size_t cnt = 0;
-	while(( pos = p_buffer.find( '\n', pos )) && ( pos != p_buffer.npos))
+	size_t npos = p_buffer.npos;
+	while ((pos != p_buffer.npos) && (pos = p_buffer.find('\n', pos)) && (pos != p_buffer.npos))
 	{
 		cnt++;
 		pos++;

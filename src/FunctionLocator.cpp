@@ -83,6 +83,7 @@ void TranslationUnitFunctionLocator::addFunctionLocation(const clang::ASTContext
 {
 	// TODO: need to check if getLocEnd() is a macro location?
 	clang::SourceLocation endLoc = p_func->getBody()->getLocEnd();
+	clang::SourceLocation bodyStart = p_func->getBody()->getLocStart();
 	clang::SourceLocation startLoc;
 
 	if (m_options.getPrototypesAreFileScope())
@@ -93,10 +94,17 @@ void TranslationUnitFunctionLocator::addFunctionLocation(const clang::ASTContext
 	{
 		startLoc = p_func->getLocStart();
 	}
+
 	if (startLoc.isMacroID())
 	{
 		startLoc = p_context->getSourceManager().getFileLoc(startLoc);
 	}
+
+	if (bodyStart.isMacroID())
+	{
+		bodyStart = p_context->getSourceManager().getFileLoc(bodyStart);
+	}
+
 	clang::FileID fId = p_context->getSourceManager().getFileID(startLoc);
 	unsigned int hashVal = fId.getHashValue();
 
@@ -104,8 +112,8 @@ void TranslationUnitFunctionLocator::addFunctionLocation(const clang::ASTContext
 	std::cout << "addFunctionLocation : Adding to function map: " << p_name << " " << hashVal << " ( " << startLoc.getRawEncoding() << " to " << endLoc.getRawEncoding() << ")" << std::endl;
 #endif
 
-	LocationNamePair_t endNamePair( endLoc, p_name );
-	m_map[ hashVal ][ startLoc ] = endNamePair;
+	FunctionInfo_t funcInfo = { endLoc, bodyStart, p_name };
+	m_map[hashVal][startLoc] = funcInfo;
 }
 
 void TranslationUnitFunctionLocator::dump() const
@@ -117,39 +125,43 @@ void TranslationUnitFunctionLocator::dump() const
 		 it++ )
 	{
 		m_options.getOutput() << " File ID: " << it->first << std::endl;
-		StartEndPair_t::const_iterator pit;
+		StartInfoPair_t::const_iterator pit;
 
 		for( pit = it->second.begin();
 			 pit != it->second.end();
 			 pit++ )
 		{
-			m_options.getOutput() << "  Function Definition: " << pit->second.second << " (" << pit->first.getRawEncoding() << "-" << pit->second.first.getRawEncoding() << ")" << std::endl;
+			m_options.getOutput() << "  Function Definition: " << pit->second.Name << " (" << pit->first.getRawEncoding() << "-" << pit->second.EndLocation.getRawEncoding() << ")" << std::endl;
 		}
 	}
 }
 
-std::string TranslationUnitFunctionLocator::FindFunction( const clang::SourceManager& p_SourceManager, clang::SourceLocation& p_loc, clang::SourceLocation* p_end ) const
+std::string TranslationUnitFunctionLocator::FindFunction(const clang::SourceManager& p_SourceManager, clang::SourceLocation& p_loc, clang::SourceLocation* p_end, clang::SourceLocation* p_body) const
 {
 	std::string ret_val = "";
 	unsigned fileIdHash = p_SourceManager.getFileID( p_loc ).getHashValue();
 	SrcStartToFunctionMap_t::const_iterator file_it = m_map.find(fileIdHash);
 	if( file_it != m_map.end() )
 	{
-		StartEndPair_t::const_iterator func_it = file_it->second.begin();
+		StartInfoPair_t::const_iterator func_it = file_it->second.begin();
 
 		/* While we've not found a matching function and there are still functions to consider ... */
 		while(( ret_val == "" ) && ( func_it != file_it->second.end()))
 		{
 			/* Does the location we're considering match the function start or end or is it within those bounds? */
 			if(( p_loc == (*func_it).first ) || 
-				( p_loc == (*func_it).second.first ) ||
-				(( (*func_it).first < p_loc ) &&
-				 ( p_loc < (*func_it).second.first )))
+			   (p_loc == (*func_it).second.EndLocation) ||
+			   (( (*func_it).first < p_loc ) &&
+				(p_loc < (*func_it).second.EndLocation)))
 			{
-				ret_val = (*func_it).second.second;
+				ret_val = (*func_it).second.Name;
 				if( p_end != NULL )
 				{
-					*p_end = (*func_it).second.first;
+					*p_end = (*func_it).second.EndLocation;
+				}
+				if (p_body != NULL)
+				{
+					*p_body = (*func_it).second.BodyStart;
 				}
 				break;
 			}

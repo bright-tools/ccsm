@@ -28,43 +28,46 @@ const std::pair<clang::Stmt::StmtClass, MetricType_e> keywordToMetricPairs[] = {
 };
 
 const std::pair<clang::BinaryOperator::Opcode, MetricType_e> MetricVisitor::binaryOperatorToMetricPairs[] = {
-	std::make_pair(clang::BO_PtrMemD, METRIC_TYPE_OPERATOR_PTR_TO_MEMBER_DIRECT),
-	std::make_pair(clang::BO_PtrMemI, METRIC_TYPE_OPERATOR_PTR_TO_MEMBER_INDIRECT),
-	std::make_pair(clang::BO_Mul, METRIC_TYPE_OPERATOR_ARITHMETIC_MULTIPLICATION),
-	std::make_pair(clang::BO_Div, METRIC_TYPE_OPERATOR_ARITHMETIC_DIVISION),
-	std::make_pair(clang::BO_Rem, METRIC_TYPE_OPERATOR_ARITHMETIC_MODULO),
-	std::make_pair(clang::BO_Add, METRIC_TYPE_OPERATOR_ARITHMETIC_ADDITION),
-	std::make_pair(clang::BO_Sub, METRIC_TYPE_OPERATOR_ARITHMETIC_SUBTRACTION),
-	std::make_pair(clang::BO_Shl, METRIC_TYPE_OPERATOR_SHIFT_LEFT),
-	std::make_pair(clang::BO_Shr, METRIC_TYPE_OPERATOR_SHIFT_RIGHT),
-	std::make_pair(clang::BO_LT, METRIC_TYPE_OPERATOR_COMP_LESS_THAN),
-	std::make_pair(clang::BO_GT, METRIC_TYPE_OPERATOR_COMP_GREATER_THAN),
-	std::make_pair(clang::BO_LE, METRIC_TYPE_OPERATOR_COMP_LESS_THAN_EQUAL),
-	std::make_pair(clang::BO_GE, METRIC_TYPE_OPERATOR_COMP_GREATER_THAN_EQUAL),
-	std::make_pair(clang::BO_EQ, METRIC_TYPE_OPERATOR_COMP_EQUAL),
-	std::make_pair(clang::BO_NE, METRIC_TYPE_OPERATOR_COMP_NOT_EQUAL),
-	std::make_pair(clang::BO_And, METRIC_TYPE_OPERATOR_BITWISE_AND),
-	std::make_pair(clang::BO_Xor, METRIC_TYPE_OPERATOR_BITWISE_XOR),
-	std::make_pair(clang::BO_Or, METRIC_TYPE_OPERATOR_BITWISE_OR),
-	std::make_pair(clang::BO_LAnd, METRIC_TYPE_OPERATOR_LOGICAL_AND),
-	std::make_pair(clang::BO_LOr, METRIC_TYPE_OPERATOR_LOGICAL_OR),
-	std::make_pair(clang::BO_Assign, METRIC_TYPE_OPERATOR_ARITHMETIC_ASSIGN),
-	std::make_pair(clang::BO_MulAssign, METRIC_TYPE_OPERATOR_ARITHMETIC_MULTIPLICATION_ASSIGN),
-	std::make_pair(clang::BO_DivAssign, METRIC_TYPE_OPERATOR_ARITHMETIC_DIVISION_ASSIGN),
-	std::make_pair(clang::BO_RemAssign, METRIC_TYPE_OPERATOR_ARITHMETIC_MODULO_ASSIGN),
-	std::make_pair(clang::BO_AddAssign, METRIC_TYPE_OPERATOR_ARITHMETIC_ADDITION_ASSIGN),
-	std::make_pair(clang::BO_SubAssign, METRIC_TYPE_OPERATOR_ARITHMETIC_SUBTRACTION_ASSIGN),
-	std::make_pair(clang::BO_ShlAssign, METRIC_TYPE_OPERATOR_SHIFT_LEFT_ASSIGN),
-	std::make_pair(clang::BO_ShrAssign, METRIC_TYPE_OPERATOR_SHIFT_RIGHT_ASSIGN),
-	std::make_pair(clang::BO_AndAssign, METRIC_TYPE_OPERATOR_BITWISE_AND_ASSIGN),
-	std::make_pair(clang::BO_XorAssign, METRIC_TYPE_OPERATOR_BITWISE_XOR_ASSIGN),
-	std::make_pair(clang::BO_OrAssign, METRIC_TYPE_OPERATOR_BITWISE_OR_ASSIGN),
+	std::make_pair(clang::BO_PtrMemD,   METRIC_TYPE_OPERATOR_PTR_TO_MEMBER_DIRECT),
+	std::make_pair(clang::BO_PtrMemI,   METRIC_TYPE_OPERATOR_PTR_TO_MEMBER_INDIRECT),
+	std::make_pair(clang::BO_Mul,       METRIC_TYPE_OPERATOR_ARITHMETIC_MULTIPLICATION),
+	std::make_pair(clang::BO_Add,       METRIC_TYPE_OPERATOR_ARITHMETIC_ADDITION),
+	std::make_pair(clang::BO_Sub,       METRIC_TYPE_OPERATOR_ARITHMETIC_SUBTRACTION),
+	std::make_pair(clang::BO_And,       METRIC_TYPE_OPERATOR_BITWISE_AND),
+#if 0
+	/* These are currently handled in MetricSrcExpandedLexer at the token level as the tokens
+	   have unambiguous meaning */
+	//std::make_pair(clang::BO_Div,       METRIC_TYPE_OPERATOR_ARITHMETIC_DIVISION),
+	//std::make_pair(clang::BO_Rem,       METRIC_TYPE_OPERATOR_ARITHMETIC_MODULO),
+	//std::make_pair(clang::BO_Shl,       METRIC_TYPE_OPERATOR_SHIFT_LEFT),
+	//std::make_pair(clang::BO_Shr,       METRIC_TYPE_OPERATOR_SHIFT_RIGHT),
+	//std::make_pair(clang::BO_LT,        METRIC_TYPE_OPERATOR_COMP_LESS_THAN),
+	//std::make_pair(clang::BO_GT,        METRIC_TYPE_OPERATOR_COMP_GREATER_THAN),
+	//std::make_pair(clang::BO_LE,        METRIC_TYPE_OPERATOR_COMP_LESS_THAN_EQUAL),
+	//std::make_pair(clang::BO_GE,        METRIC_TYPE_OPERATOR_COMP_GREATER_THAN_EQUAL),
+	//std::make_pair(clang::BO_EQ,        METRIC_TYPE_OPERATOR_COMP_EQUAL),
+	//std::make_pair(clang::BO_NE,        METRIC_TYPE_OPERATOR_COMP_NOT_EQUAL),
+	//std::make_pair(clang::BO_Xor,       METRIC_TYPE_OPERATOR_BITWISE_XOR),
+	//std::make_pair(clang::BO_Or,        METRIC_TYPE_OPERATOR_BITWISE_OR),
+	//std::make_pair(clang::BO_LAnd,      METRIC_TYPE_OPERATOR_LOGICAL_AND),
+	//std::make_pair(clang::BO_LOr,       METRIC_TYPE_OPERATOR_LOGICAL_OR),
+	//std::make_pair(clang::BO_Assign,    METRIC_TYPE_OPERATOR_ARITHMETIC_ASSIGN),
+	//std::make_pair(clang::BO_MulAssign, METRIC_TYPE_OPERATOR_ARITHMETIC_MULTIPLICATION_ASSIGN),
+	//std::make_pair(clang::BO_DivAssign, METRIC_TYPE_OPERATOR_ARITHMETIC_DIVISION_ASSIGN),
+	//std::make_pair(clang::BO_RemAssign, METRIC_TYPE_OPERATOR_ARITHMETIC_MODULO_ASSIGN),
+	//std::make_pair(clang::BO_AddAssign, METRIC_TYPE_OPERATOR_ARITHMETIC_ADDITION_ASSIGN),
+	//std::make_pair(clang::BO_SubAssign, METRIC_TYPE_OPERATOR_ARITHMETIC_SUBTRACTION_ASSIGN),
+	//std::make_pair(clang::BO_ShlAssign, METRIC_TYPE_OPERATOR_SHIFT_LEFT_ASSIGN),
+	//std::make_pair(clang::BO_ShrAssign, METRIC_TYPE_OPERATOR_SHIFT_RIGHT_ASSIGN),
+	//std::make_pair(clang::BO_AndAssign, METRIC_TYPE_OPERATOR_BITWISE_AND_ASSIGN),
+	//std::make_pair(clang::BO_XorAssign, METRIC_TYPE_OPERATOR_BITWISE_XOR_ASSIGN),
+	//std::make_pair(clang::BO_OrAssign,  METRIC_TYPE_OPERATOR_BITWISE_OR_ASSIGN),
+#endif
 	std::make_pair(clang::BO_Comma, METRIC_TYPE_OPERATOR_COMMA),
 };
 
 const std::map<clang::BinaryOperator::Opcode, MetricType_e> MetricVisitor::binaryOperatorToMetricMap(binaryOperatorToMetricPairs,
 	binaryOperatorToMetricPairs + sizeof binaryOperatorToMetricPairs / sizeof binaryOperatorToMetricPairs[0]);
-
 
 MetricVisitor::MetricVisitor(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, MetricOptions& p_options, TranslationUnitFunctionLocator* p_fnLocator) : 
 	                                                                                                           m_compilerInstance(p_CI), 
@@ -430,6 +433,43 @@ MetricVisitor::PathResults MetricVisitor::getOtherPathCount(const clang::Stmt* c
 	return ret_val;
 }
 
+void MetricVisitor::CalcFnLineCnt(clang::FunctionDecl *func)
+{
+	clang::SourceLocation bodyStartLoc = func->getBody()->getLocStart();
+	clang::SourceLocation bodyEndLoc = func->getBody()->getLocEnd();
+	clang::SourceLocation defStartLoc = func->getLocStart();
+	clang::SourceLocation defEndLoc = func->getLocEnd();
+
+	if (bodyStartLoc.isMacroID())
+	{
+		bodyStartLoc = m_astContext->getSourceManager().getFileLoc(bodyStartLoc);
+	}
+	if (bodyEndLoc.isMacroID())
+	{
+		bodyEndLoc = m_astContext->getSourceManager().getFileLoc(bodyEndLoc);
+	}
+	if (defStartLoc.isMacroID())
+	{
+		defStartLoc = m_astContext->getSourceManager().getFileLoc(defStartLoc);
+	}
+	if (defEndLoc.isMacroID())
+	{
+		defEndLoc = m_astContext->getSourceManager().getFileLoc(defEndLoc);
+	}
+
+	/* Obtain the buffer for the function body, then count the lines */ 
+	const char * body_start = m_astContext->getSourceManager().getCharacterData(bodyStartLoc);
+	const char * body_end = m_astContext->getSourceManager().getCharacterData(bodyEndLoc);
+	clang::StringRef body_buffer(body_start, body_end - body_start);
+	m_currentUnit->set(METRIC_TYPE_FUNCTION_BODY_LINE_COUNT, countNewlines(body_buffer)+1);
+
+	/* Obtain buffer for whole function then count the lines */
+	const char * def_start = m_astContext->getSourceManager().getCharacterData(defStartLoc);
+	const char * def_end = m_astContext->getSourceManager().getCharacterData(defEndLoc);
+	clang::StringRef def_buffer(def_start, def_end - def_start);
+	m_currentUnit->set(METRIC_TYPE_FUNCTION_DEF_LINE_COUNT, countNewlines(def_buffer)+1);
+}
+
 bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
     
 #if defined( DEBUG_FN_TRACE_OUTOUT )
@@ -472,11 +512,7 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 		
 			m_currentUnit = fileUnit->getSubUnit(m_currentFunctionName, type);
 
-			/* Obtain the buffer for the function body, then count the lines */ 
-			const char * start = m_astContext->getSourceManager().getCharacterData( func->getBody()->getLocStart() );
-			const char * end = m_astContext->getSourceManager().getCharacterData( func->getBody()->getLocEnd() );
-			clang::StringRef buffer(start, end - start);
-			m_currentUnit->set( METRIC_TYPE_FUNCTION_LINE_COUNT, countNewlines( buffer ) );
+			CalcFnLineCnt(func);
 
 			if( func->isInlineSpecified() )
 			{
@@ -582,7 +618,7 @@ void MetricVisitor::DeclCommon(const clang::DeclContext* p_declCtxt, const clang
 		CloseOutFnOrMtd();
 
 		HandleLoc(p_decl->getLocation());
-	}
+	} 
 }
 
 void MetricVisitor::HandleLoc( const clang::SourceLocation& p_loc)
@@ -1053,16 +1089,16 @@ bool MetricVisitor::VisitUnaryOperator(clang::UnaryOperator *p_uOp)
 				break;
 			case clang::UO_Plus:
 				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ARITHMETIC_UNARY_PLUS );
-				break; 	
+				break;
 			case clang::UO_Minus:
 				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ARITHMETIC_UNARY_MINUS );
-				break; 	
+				break;
 			case clang::UO_Not:
 				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_BITWISE_NOT );
-				break; 	
+				break;
 			case clang::UO_LNot:
 				IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_LOGICAL_NOT );
-				break; 	
+				break;
 			case clang::UO_Real:
 				/* TODO */
 				break; 	
