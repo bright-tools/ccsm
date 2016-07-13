@@ -476,7 +476,7 @@ void MetricVisitor::CalcFnLineCnt(clang::FunctionDecl *func)
 
 bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) 
 {
-	const clang::SourceLocation funcLoc = func->getLocation();
+	const clang::SourceLocation funcStartLoc = func->getLocation();
 
 #if defined( DEBUG_FN_TRACE_OUTOUT )
 	std::cout << "VisitFunctionDecl - CONTEXT " << m_currentFileName << std::endl;
@@ -490,7 +490,7 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func)
 	{		
 		const clang::SourceLocation funcEndLoc = func->getLocEnd();
 
-		UpdateCurrentFileName( funcLoc );
+		UpdateCurrentFileName(funcEndLoc);
 		
 		m_currentFunctionName = func->getQualifiedNameAsString();
 
@@ -529,7 +529,7 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func)
 
 			PathResults pathResults = getPathCount(func->getBody());
 
-			m_currentUnit->set(METRIC_TYPE_FUNCTION_PATHS, pathResults.path_count, &funcLoc);
+			m_currentUnit->set(METRIC_TYPE_FUNCTION_PATHS, pathResults.path_count, &funcStartLoc);
 
 			if (!pathResults.path_has_return)
 			{
@@ -565,10 +565,10 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func)
 			{
 				case clang::SC_None:
 					/* No storage class specified - implicitly the function is extern */
-					IncrementMetric(m_currentUnit, METRIC_TYPE_EXTERN_IMPL_FUNCTIONS, &funcLoc);
+					IncrementMetric(m_currentUnit, METRIC_TYPE_EXTERN_IMPL_FUNCTIONS, &funcStartLoc);
 					break;
 				case clang::SC_Extern:
-					IncrementMetric(m_currentUnit, METRIC_TYPE_EXTERN_EXPL_FUNCTIONS, &funcLoc);
+					IncrementMetric(m_currentUnit, METRIC_TYPE_EXTERN_EXPL_FUNCTIONS, &funcStartLoc);
 					break;
 				default:
 					/* Not currently of interest */
