@@ -24,6 +24,8 @@
 #if !defined( METRIC_UNIT_HPP )
 #define       METRIC_UNIT_HPP
 
+#include "clang/Basic/SourceLocation.h"
+
 typedef enum
 {
 #define METRIC_ALIAS( _name, _alias )
@@ -113,15 +115,14 @@ public:
 	void addUnresolvedFn(const std::string& p_fnName);
 	const std::set<std::string>& getUnresolvedFns() const;
 
-	void increment( const MetricType_e p_metricType, const counter_t p_inc = 1 );
-	void set( const MetricType_e p_metricType, const MetricUnit::counter_t p_val );
-
 	void setExternalLinkage(const bool p_isExternal = true);
 	bool hasExternalLinkage(void) const;
 	FunctionMap_t getAllFunctionMap(void);
 
 	/** Sets a metric to the maximum of the current value and the specified value */
-	void setMax(const MetricType_e p_metricType, const MetricUnit::counter_t p_val);
+	void setMax(const MetricType_e p_metricType, const MetricUnit::counter_t p_val, const clang::SourceLocation* const p_sourceLoc);
+	void increment(const MetricType_e p_metricType, const clang::SourceLocation* const p_sourceLoc, const counter_t p_inc = 1);
+	void set(const MetricType_e p_metricType, const MetricUnit::counter_t p_val, const clang::SourceLocation* const p_sourceLoc);
 
 	counter_t getCounter( const MetricType_e p_metricType, const bool p_recurse = false ) const;
 

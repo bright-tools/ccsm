@@ -16,6 +16,8 @@
 
 #include "MetricPPCustomer.hpp"
 
+#include "clang/Basic/SourceLocation.h"
+
 MetricPPCustomer::MetricPPCustomer( MetricUnit* p_topUnit, std::set<std::string>* p_commentFileList, MetricOptions& p_options ) 
 	: clang::PPCallbacks(), CommentHandler(), m_topUnit(p_topUnit), m_options(p_options), m_commentFileList(p_commentFileList)
 {
@@ -46,8 +48,8 @@ bool MetricPPCustomer::HandleComment(clang::Preprocessor &PP, clang::SourceRange
 		if( m_options.ShouldIncludeFile( fileName ))
 		{
 			MetricUnit* unit = m_topUnit->getSubUnit(fileName, METRIC_UNIT_FILE);
-			unit->increment( METRIC_TYPE_COMMENT_BYTE_COUNT, C.length() );
-			unit->increment( METRIC_TYPE_COMMENT_COUNT );
+			unit->increment(METRIC_TYPE_COMMENT_BYTE_COUNT, &Start, C.length());
+			unit->increment(METRIC_TYPE_COMMENT_COUNT, &Start);
 		}
 
 		m_commentFile = fileName;

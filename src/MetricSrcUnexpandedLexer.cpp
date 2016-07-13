@@ -170,18 +170,19 @@ MetricUnitProcessingType_e MetricSrcUnexpandedLexer::getLexType(void) const
 void MetricSrcUnexpandedLexer::HandleBasicToken(clang::Token& p_token)
 {
 	const clang::tok::TokenKind tokenKind = p_token.getKind();
+	clang::SourceLocation startLoc = p_token.getLocation();
 
 	std::map<clang::tok::TokenKind, MetricType_e>::const_iterator typeLookup = m_tokenKindToTypeMap.find(tokenKind);
 
 	if( typeLookup != m_tokenKindToTypeMap.end() )
 	{
-		m_currentUnit->increment( (*typeLookup).second );
+		m_currentUnit->increment((*typeLookup).second, &startLoc);
 		if (m_inBody)
 		{
 			std::map<MetricType_e, MetricType_e>::const_iterator bodyTypeLookup = m_metricToBodyMetricMap.find((*typeLookup).second);
 			if (bodyTypeLookup != m_metricToBodyMetricMap.end())
 			{
-				m_currentUnit->increment((*bodyTypeLookup).second);
+				m_currentUnit->increment((*bodyTypeLookup).second, &startLoc);
 			}
 		}
 	}
@@ -195,7 +196,7 @@ void MetricSrcUnexpandedLexer::HandleBasicToken(clang::Token& p_token)
 				m_options.getOutput() << ",unreserved:" << tok_data;
 			}
 			m_currentFnIdentifiers.insert( tok_data );
-			m_currentUnit->increment( METRIC_TYPE_TOKEN_UNRESERVED_IDENTIFIERS );
+			m_currentUnit->increment(METRIC_TYPE_TOKEN_UNRESERVED_IDENTIFIERS, &startLoc);
 
 			/* We treat each macro invokation as a statement */
 			if (m_compilerInstance.getPreprocessor().isMacroDefined(tok_data))
@@ -204,7 +205,7 @@ void MetricSrcUnexpandedLexer::HandleBasicToken(clang::Token& p_token)
 				{
 					m_options.getOutput() << ",macro";
 				}
-				m_currentUnit->increment(METRIC_TYPE_TOKEN_STATEMENTS);
+				m_currentUnit->increment(METRIC_TYPE_TOKEN_STATEMENTS, &startLoc);
 			}
 		}
 		else
@@ -218,7 +219,7 @@ void MetricSrcUnexpandedLexer::HandleBasicToken(clang::Token& p_token)
 	{
 		if (m_lastToken.isAnyIdentifier())
 		{
-			m_currentUnit->increment(METRIC_TYPE_TOKEN_LABEL_NAME);
+			m_currentUnit->increment(METRIC_TYPE_TOKEN_LABEL_NAME, &startLoc);
 		}
 	}
 }
@@ -227,6 +228,7 @@ void MetricSrcUnexpandedLexer::ProcessToken(clang::Token& p_token)
 {		
 	std::string tok_data;
 	unsigned int tok_len = p_token.getLength();
+	clang::SourceLocation startLoc = p_token.getLocation();
 
 	if( m_options.getDumpTokens() )
 	{
@@ -238,17 +240,17 @@ void MetricSrcUnexpandedLexer::ProcessToken(clang::Token& p_token)
 		case clang::tok::numeric_constant:
 			tok_data = clang::StringRef(p_token.getLiteralData(), tok_len).str();
 			m_currentFnNumerics.insert( tok_data );
-			m_currentUnit->increment( METRIC_TYPE_TOKEN_NUMERIC_CONSTANTS );
+			m_currentUnit->increment(METRIC_TYPE_TOKEN_NUMERIC_CONSTANTS, &startLoc);
 			break;
 		case clang::tok::char_constant:
 			tok_data = clang::StringRef(p_token.getLiteralData(), tok_len).str();
 			m_currentFnCharConsts.insert( tok_data );
-			m_currentUnit->increment( METRIC_TYPE_TOKEN_CHAR_CONSTS );
+			m_currentUnit->increment(METRIC_TYPE_TOKEN_CHAR_CONSTS, &startLoc);
 			break;
 		case clang::tok::string_literal:
 			tok_data = clang::StringRef(p_token.getLiteralData(), tok_len).str();
 			m_currentFnStrings.insert( tok_data );
-			m_currentUnit->increment( METRIC_TYPE_TOKEN_STRING_LITERALS );
+			m_currentUnit->increment(METRIC_TYPE_TOKEN_STRING_LITERALS, &startLoc);
 			break;
 		case clang::tok::semi:
 			break;

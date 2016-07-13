@@ -198,6 +198,8 @@ void MetricSrcExpandedLexer::ProcessToken(clang::Token& p_token)
 {		
 	std::string tok_data;
 	unsigned int tok_len = p_token.getLength();
+	const clang::SourceLocation startLoc = p_token.getLocation();
+
 
 	if( m_options.getDumpTokens() )
 	{
@@ -209,17 +211,17 @@ void MetricSrcExpandedLexer::ProcessToken(clang::Token& p_token)
 		case clang::tok::numeric_constant:
 			tok_data = clang::StringRef(p_token.getLiteralData(), tok_len).str();
 			m_currentFnNumerics.insert( tok_data );
-			m_currentUnit->increment( METRIC_TYPE_NUMERIC_CONSTANTS );
+			m_currentUnit->increment(METRIC_TYPE_NUMERIC_CONSTANTS, &startLoc);
 			break;
 		case clang::tok::char_constant:
 			tok_data = clang::StringRef(p_token.getLiteralData(), tok_len).str();
 			m_currentFnCharConsts.insert( tok_data );
-			m_currentUnit->increment( METRIC_TYPE_CHAR_CONSTS );
+			m_currentUnit->increment(METRIC_TYPE_CHAR_CONSTS, &startLoc);
 			break;
 		case clang::tok::string_literal:
 			tok_data = clang::StringRef(p_token.getLiteralData(), tok_len).str();
 			m_currentFnStrings.insert( tok_data );
-			m_currentUnit->increment( METRIC_TYPE_STRING_LITERALS );
+			m_currentUnit->increment(METRIC_TYPE_STRING_LITERALS, &startLoc);
 			break;
 		case clang::tok::comment:
 			/* TODO */
@@ -232,13 +234,13 @@ void MetricSrcExpandedLexer::ProcessToken(clang::Token& p_token)
 
 			if (typeLookup != m_tokenKindToTypeMap.end())
 			{
-				m_currentUnit->increment((*typeLookup).second);
+				m_currentUnit->increment((*typeLookup).second, &startLoc);
 				if (m_inBody)
 				{
 					std::map<MetricType_e, MetricType_e>::const_iterator bodyTypeLookup = m_metricToBodyMetricMap.find((*typeLookup).second);
 					if (bodyTypeLookup != m_metricToBodyMetricMap.end())
 					{
-						m_currentUnit->increment((*bodyTypeLookup).second);
+						m_currentUnit->increment((*bodyTypeLookup).second, &startLoc);
 					}
 				}
 			}
@@ -252,11 +254,11 @@ void MetricSrcExpandedLexer::ProcessToken(clang::Token& p_token)
 						m_options.getOutput() << ",unreserved:" << tok_data;
 					}
 					m_currentFnIdentifiers.insert(tok_data);
-					m_currentUnit->increment(METRIC_TYPE_UNRESERVED_IDENTIFIERS);
+					m_currentUnit->increment(METRIC_TYPE_UNRESERVED_IDENTIFIERS, &startLoc);
 					if (m_inBody)
 					{
 						m_currentBodyIdentifiers.insert(tok_data);
-						m_currentUnit->increment(METRIC_TYPE_BODY_UNRESERVED_IDENTIFIERS);
+						m_currentUnit->increment(METRIC_TYPE_BODY_UNRESERVED_IDENTIFIERS, &startLoc);
 					}
 				}
 				else

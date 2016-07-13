@@ -129,7 +129,7 @@ MetricUnit::MetricUnit( MetricUnit* const p_parent, const std::string& p_name, c
 	}
 }
 
-void MetricUnit::increment( const MetricType_e p_metricType, const counter_t p_inc )
+void MetricUnit::increment(const MetricType_e p_metricType, const clang::SourceLocation* p_sourceLoc, const counter_t p_inc)
 {
 	/* Check for over-flow */
 	if(( counter_t_Max - p_inc ) > m_counters[ p_metricType ] )
@@ -147,7 +147,7 @@ void MetricUnit::increment( const MetricType_e p_metricType, const counter_t p_i
 	}
 }
 
-void MetricUnit::set( const MetricType_e p_metricType, const MetricUnit::counter_t p_val )
+void MetricUnit::set(const MetricType_e p_metricType, const MetricUnit::counter_t p_val, const clang::SourceLocation* p_sourceLoc)
 {
 	m_counters[ p_metricType ] = p_val;
 }
@@ -196,7 +196,7 @@ bool MetricUnit::hasExternalLinkage(void) const
 }
 
 
-void MetricUnit::setMax(const MetricType_e p_metricType, const MetricUnit::counter_t p_val)
+void MetricUnit::setMax(const MetricType_e p_metricType, const MetricUnit::counter_t p_val, const clang::SourceLocation* p_sourceLoc)
 {
 	if (p_val > m_counters[p_metricType])
 	{
@@ -724,7 +724,7 @@ MetricUnit* MetricUnit::getSubUnit( const std::string& p_name, const MetricUnitT
 
 			if( p_type == METRIC_UNIT_FILE )
 			{
-				this->increment( METRIC_TYPE_FILES );
+				this->increment( METRIC_TYPE_FILES, NULL );
 
 				ret_val->m_alias = makeRelative(name);
 			}
