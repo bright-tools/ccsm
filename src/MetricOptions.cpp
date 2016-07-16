@@ -254,12 +254,12 @@ const std::vector<std::string>& MetricOptions::getLimitsFiles(void) const
 	return m_limitsFileNames;
 }
 
-void MetricOptions::setGroupLimitWarningsByFile(const bool p_groupByFile)
+void MetricOptions::setLimitWarningOutputFormat(const MetricLimitsFormat_e p_format)
 {
-	m_groupLimitWarningsByFile = p_groupByFile;
+	m_limitWarningOutput = p_format;
 }
 
-bool MetricOptions::getGroupLimitWarningsByFile() const
+MetricLimitsFormat_e MetricOptions::getLimitWarningOutputFormat( void ) const
 {
-	return m_groupLimitWarningsByFile;
+	return m_limitWarningOutput;
 }

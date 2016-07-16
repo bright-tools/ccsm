@@ -24,6 +24,8 @@
 #if !defined( METRIC_UNIT_HPP )
 #define       METRIC_UNIT_HPP
 
+#include "clang/Basic/SourceLocation.h"
+
 typedef enum
 {
 #define METRIC_ALIAS( _name, _alias )
@@ -50,10 +52,18 @@ typedef enum {
 	METRIC_UNIT_PROCESS_MAX
 } MetricUnitProcessingType_e;
 
+
 #include <string>
 #include <map>
 #include <set>
 #include <stdint.h>
+
+typedef struct {
+	bool        Valid;
+	unsigned    LineNo;
+	std::string FileName;
+	unsigned    Column;
+} SourceFileAndLine_t;
 
 class MetricOptions;
 
@@ -87,6 +97,7 @@ protected:
 	std::set<std::string> m_unresolvedFnCalls;
 	counter_t m_counters[METRIC_TYPE_MAX];
 	std::map<MetricType_e, std::set<std::string>> m_supplementary;
+    SourceFileAndLine_t m_firstInstanceLocation[ METRIC_TYPE_MAX ];
 
 public:
 	typedef std::map<std::string, MetricUnit*> FunctionMap_t;
@@ -113,15 +124,14 @@ public:
 	void addUnresolvedFn(const std::string& p_fnName);
 	const std::set<std::string>& getUnresolvedFns() const;
 
-	void increment( const MetricType_e p_metricType, const counter_t p_inc = 1 );
-	void set( const MetricType_e p_metricType, const MetricUnit::counter_t p_val );
-
 	void setExternalLinkage(const bool p_isExternal = true);
 	bool hasExternalLinkage(void) const;
 	FunctionMap_t getAllFunctionMap(void);
 
 	/** Sets a metric to the maximum of the current value and the specified value */
-	void setMax(const MetricType_e p_metricType, const MetricUnit::counter_t p_val);
+	void setMax(const MetricType_e p_metricType, const MetricUnit::counter_t p_val, const SourceFileAndLine_t& p_sourceLoc);
+	void increment(const MetricType_e p_metricType, const SourceFileAndLine_t& p_sourceLoc, const counter_t p_inc = 1);
+	void set(const MetricType_e p_metricType, const MetricUnit::counter_t p_val, const SourceFileAndLine_t& p_sourceLoc);
 
 	counter_t getCounter( const MetricType_e p_metricType, const bool p_recurse = false ) const;
 
@@ -142,6 +152,9 @@ public:
 
 	const MetricUnit* getParent() const;
 
+	const SourceFileAndLine_t& getFirstInstanceLocation(const MetricType_e p_type) const;
+
+	std::string getFileName(const MetricOptions& p_options) const;
 };
 
 #endif

@@ -65,8 +65,8 @@ protected:
 	void DeclCommon(const clang::DeclContext* p_declCtxt, const clang::Decl* p_decl);
 	void CloseOutFnOrMtd( void );
 	bool ShouldIncludeFile( const std::string& p_file );
-	void IncrementMetric( MetricUnit* const p_unit, const MetricType_e p_metricType );
-	void IncrementMetric( MetricUnit* const p_unit, const MetricType_e p_metricType, const MetricUnit* const p_file );
+	void IncrementMetric(MetricUnit* const p_unit, const MetricType_e p_metricType, const clang::SourceLocation* p_startLocation);
+	void IncrementMetric(MetricUnit* const p_unit, const MetricType_e p_metricType, const MetricUnit* const p_file, const clang::SourceLocation* p_startLocation);
 	void UpdateCurrentFileName( const clang::SourceLocation &loc );
 	std::string getDefResolvedFileName( const clang::SourceLocation &loc );
 	PathResults getPathCount(const clang::Stmt* const p_stmt, uint16_t depth = 0);
@@ -84,16 +84,13 @@ public:
 	virtual bool VisitFunctionDecl(clang::FunctionDecl *func);
 	virtual bool VisitVarDecl(clang::VarDecl *p_varDec);
 	virtual bool VisitForStmt(clang::ForStmt *p_forSt);
-	virtual bool VisitGotoStmt(clang::GotoStmt *p_gotoSt);
 	virtual bool VisitLabelStmt(clang::LabelStmt *p_LabelSt);
 	virtual bool VisitDoStmt(clang::DoStmt *p_doSt);
 	virtual bool VisitWhileStmt(clang::WhileStmt *p_whileSt);
 	virtual bool VisitTypedefNameDecl(const clang::TypedefNameDecl *T);
-	virtual bool VisitReturnStmt(clang::ReturnStmt *p_returnSt);
 	virtual bool VisitSwitchStmt(clang::SwitchStmt *p_switchSt);
 	virtual bool VisitConditionalOperator(clang::ConditionalOperator *p_condOp);
 	virtual bool VisitDefaultStmt(clang::DefaultStmt *p_defaultSt);
-	virtual bool VisitContinueStmt(clang::ContinueStmt *p_continueSt);
 	virtual bool VisitCaseStmt(clang::CaseStmt *p_caseSt);
 	virtual bool VisitCompoundStmt(clang::CompoundStmt *p_compoundSt);
 	virtual bool VisitBinaryOperator(clang::BinaryOperator *p_binOp);

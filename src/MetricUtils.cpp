@@ -7,6 +7,8 @@
 
 #include <iostream>
 
+const SourceFileAndLine_t InvalidSourceAndLine = { false, 0, "", 0 };
+
 unsigned getControlDepth(const clang::Stmt* const p_stmt, clang::ASTContext* p_context )
 {
 	unsigned ret_val = 0;
@@ -179,4 +181,21 @@ std::string makeRelative(const std::string& p_path)
 {
 	const std::string cwd = getcwd(NULL, 0);
 	return makeRelative(p_path, cwd);
+}
+
+SourceFileAndLine_t getFileAndLine(const clang::SourceManager& p_sourceManager, const clang::SourceLocation* p_sourceLoc)
+{
+	SourceFileAndLine_t ret_val;
+
+	ret_val.Valid = false;
+
+	if (p_sourceLoc)
+	{
+		ret_val.Valid = true;
+		ret_val.FileName = p_sourceManager.getFilename(*p_sourceLoc);
+		ret_val.LineNo = p_sourceManager.getSpellingLineNumber(*p_sourceLoc);
+		ret_val.Column = p_sourceManager.getSpellingColumnNumber( *p_sourceLoc );
+	}
+
+	return ret_val;
 }

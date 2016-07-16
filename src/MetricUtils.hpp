@@ -25,10 +25,15 @@
 #define       METRIC_UTILS_HPP
 
 #include "clang/AST/ASTContext.h"
+#include "MetricUnit.hpp"
 
 extern unsigned getControlDepth(const clang::Stmt* const p_stmt, clang::ASTContext* p_context );
 extern size_t   countNewlines( clang::StringRef& p_buffer );
 std::string makeRelative(const std::string& p_path);
 std::string makeRelative(const std::string& p_path, const std::string& p_cwd);
+
+extern const SourceFileAndLine_t InvalidSourceAndLine;
+
+SourceFileAndLine_t getFileAndLine( const clang::SourceManager& p_sourceManager, const clang::SourceLocation* p_sourceLoc );
 
 #endif

@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include "MetricLinkageResolver.hpp"
+#include "MetricUtils.hpp"
 
 #include <iostream>
 
@@ -40,7 +41,8 @@ extern void resolveLinkages(MetricUnit* p_topUnit)
 				/* First matching function with external linkage will be assocated with the call */
 				if (fns->second->hasExternalLinkage())
 				{
-					fns->second->increment(METRIC_TYPE_CALLED_BY_EXTERN);
+					/* TODO: Adding a non-NULL SourceLocation here would be useful */
+					fns->second->increment( METRIC_TYPE_CALLED_BY_EXTERN, InvalidSourceAndLine );
 					break;
 				}
 				fns++;
