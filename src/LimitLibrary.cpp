@@ -201,7 +201,32 @@ std::string LimitLibrary::checkUnitPassesMetricLimit(const MetricUnit& p_unit, c
 		}
 		else
 		{
-			out << p_unit.getUnitName(p_options) << " failed limits check '" << MetricUnit::getMetricName(p_metric) << "' (actual: "
+			const bool gccWarnings = (p_options.getLimitWarningOutputFormat() == METRIC_LIMITS_FORMAT_GCC);
+			const std::string& fileName = p_unit.getFileName(p_options);
+			const std::string& unitName = p_unit.getUnitName(p_options);
+
+			if (gccWarnings)
+			{
+				SourceFileAndLine_t loc = p_unit.getFirstInstanceLocation(p_metric);
+				
+				out << fileName;
+
+				if ( loc.Valid )
+				{
+					out << ":" << loc.LineNo << ":" << loc.Column << ":1:";
+				}
+				else
+				{
+					out  << ":0:0:1:";
+				}
+			}
+
+			if (!gccWarnings || ( p_unit.GetType() != METRIC_UNIT_FILE))
+			{
+				out << unitName << " ";
+			}
+
+			out  << "failed limits check '" << MetricUnit::getMetricName(p_metric) << "' (actual: "
 			    << MetricUnit::getScaledMetricString(p_metric,val) << " expected: " << p_pattern->operand
 				<< MetricUnit::getScaledMetricString(p_metric, p_pattern->limit) << ")";
 

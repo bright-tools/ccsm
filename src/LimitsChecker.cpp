@@ -43,7 +43,7 @@ std::string LimitsChecker::check(const MetricUnit* const p_topLevel, const Metri
 	std::string thisCheck;
 	const std::string FILE_SEP = "----\n";
 
-	const bool groupWarnings = p_options.getGroupLimitWarningsByFile();
+	const bool groupWarnings = (p_options.getLimitWarningOutputFormat() == METRIC_LIMITS_FORMAT_GROUP_BY_FILE);
 
 	bool outputTail = false;
 	thisCheck = p_limits.checkLimit(*p_topLevel, p_options);

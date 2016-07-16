@@ -187,10 +187,16 @@ static llvm::cl::opt<bool> PrefixFunctionName(
 	llvm::cl::cat(CCSMToolCategory)
 	);
 
-static llvm::cl::opt<bool> OutputGroupLimitWarningsByFile(
-	"output-group-limit-warnings-by-file",
-	llvm::cl::desc("Group the output of limit warnings by file"),
-	llvm::cl::init(false),
+static llvm::cl::opt<MetricLimitsFormat_e> OutputLimitWarnings(
+	"output-limit-warnings",
+	llvm::cl::desc("Output format for limits warnings"),
+	llvm::cl::values(
+	    clEnumValN(METRIC_LIMITS_FORMAT_DEFAULT,       "default",  "Default output format"),
+		clEnumValN(METRIC_LIMITS_FORMAT_GROUP_BY_FILE, "byfile",   "Group warnings by file"),
+		clEnumValN(METRIC_LIMITS_FORMAT_GCC,           "gccbrief", "Use GCC brief format"),
+		clEnumValEnd
+	),
+	llvm::cl::init(METRIC_LIMITS_FORMAT_DEFAULT),
 	llvm::cl::cat(CCSMToolCategory)
 	);
 
@@ -306,7 +312,7 @@ void CcsmOptionsHandler::ParseOptions(int argc,
 	// TODO: Handle failure
 	m_metricOptions->setOutputFile(OutputToFile);
 	m_metricOptions->setUsePrefix(PrefixFunctionName);
-	m_metricOptions->setGroupLimitWarningsByFile(OutputGroupLimitWarningsByFile);
+	m_metricOptions->setLimitWarningOutputFormat(OutputLimitWarnings);
 
 	m_metricOptions->setOutputMetric(METRIC_UNIT_METHOD, !NoMethod);
 	m_metricOptions->setOutputMetric(METRIC_UNIT_FUNCTION, !NoFunction);

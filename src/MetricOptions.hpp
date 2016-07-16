@@ -38,6 +38,13 @@ typedef enum
 	METRIC_DUMP_FORMAT_CSV
 } MetricDumpFormat_e;
 
+typedef enum
+{
+	METRIC_LIMITS_FORMAT_DEFAULT,
+	METRIC_LIMITS_FORMAT_GROUP_BY_FILE,
+	METRIC_LIMITS_FORMAT_GCC
+} MetricLimitsFormat_e;
+
 class MetricOptions
 {
 protected:
@@ -53,8 +60,8 @@ protected:
 	bool m_useAbsoluteFileNames        = false;
 	bool m_dumpFnMap                   = false;
 	bool m_excludeStdHeaders           = false;
-	bool m_groupLimitWarningsByFile    = false;
-	MetricDumpFormat_e m_outputFormat  = METRIC_DUMP_FORMAT_TREE;
+	MetricLimitsFormat_e m_limitWarningOutput = METRIC_LIMITS_FORMAT_DEFAULT;
+	MetricDumpFormat_e   m_outputFormat  = METRIC_DUMP_FORMAT_TREE;
 	bool m_outputMetric[METRIC_UNIT_MAX];
 	std::string m_outputFileName;
 	std::vector<std::string> m_limitsFileNames;
@@ -100,8 +107,8 @@ public:
 	bool optionsOk(void) const;
 	void setUsePrefix(const bool p_prefix);
 	bool getUsePrefix() const;
-	void setGroupLimitWarningsByFile(const bool p_groupByFile);
-	bool getGroupLimitWarningsByFile() const;
+	void setLimitWarningOutputFormat(const MetricLimitsFormat_e p_format);
+	MetricLimitsFormat_e getLimitWarningOutputFormat( void ) const;
 };
 
 #endif

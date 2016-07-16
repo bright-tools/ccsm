@@ -23,6 +23,8 @@
 #include <iostream>
 #include <llvm/Support/raw_os_ostream.h>
 
+#define SOURCE_MANAGER (m_astContext->getSourceManager())
+
 const std::pair<clang::Stmt::StmtClass, MetricType_e> keywordToMetricPairs[] = {
 	std::make_pair(clang::Stmt::BreakStmtClass, METRIC_TYPE_BREAK),
 };
@@ -84,12 +86,12 @@ MetricVisitor::~MetricVisitor(void)
 
 std::string MetricVisitor::getDefResolvedFileName( const clang::SourceLocation &loc )
 {
-	clang::SourceManager& sm =  m_astContext->getSourceManager();
+	clang::SourceManager& sm = SOURCE_MANAGER;
 	clang::SourceLocation sLoc = loc;
 
 	if( sLoc.isMacroID() )
 	{
-		sLoc = m_astContext->getSourceManager().getFileLoc( sLoc );
+		sLoc = sm.getFileLoc( sLoc );
 	}
 
 	std::string declFn = sm.getFilename( sLoc ).str();
@@ -441,42 +443,43 @@ void MetricVisitor::CalcFnLineCnt(clang::FunctionDecl *func)
 	clang::SourceLocation bodyEndLoc = func->getBody()->getLocEnd();
 	clang::SourceLocation defStartLoc = func->getLocStart();
 	clang::SourceLocation defEndLoc = func->getLocEnd();
+	clang::SourceManager& SM = SOURCE_MANAGER;
 
 	if (bodyStartLoc.isMacroID())
 	{
-		bodyStartLoc = m_astContext->getSourceManager().getFileLoc(bodyStartLoc);
+		bodyStartLoc = SM.getFileLoc( bodyStartLoc );
 	}
 	if (bodyEndLoc.isMacroID())
 	{
-		bodyEndLoc = m_astContext->getSourceManager().getFileLoc(bodyEndLoc);
+		bodyEndLoc = SM.getFileLoc( bodyEndLoc );
 	}
 	if (defStartLoc.isMacroID())
 	{
-		defStartLoc = m_astContext->getSourceManager().getFileLoc(defStartLoc);
+		defStartLoc = SM.getFileLoc( defStartLoc );
 	}
 	if (defEndLoc.isMacroID())
 	{
-		defEndLoc = m_astContext->getSourceManager().getFileLoc(defEndLoc);
+		defEndLoc = SM.getFileLoc( defEndLoc );
 	}
 
 	/* Obtain the buffer for the function body, then count the lines */ 
-	const char * body_start = m_astContext->getSourceManager().getCharacterData(bodyStartLoc);
-	const char * body_end = m_astContext->getSourceManager().getCharacterData(bodyEndLoc);
+	const char * body_start = SM.getCharacterData( bodyStartLoc );
+	const char * body_end = SM.getCharacterData( bodyEndLoc );
 	clang::StringRef body_buffer(body_start, body_end - body_start);
 
-	m_currentUnit->set(METRIC_TYPE_FUNCTION_BODY_LINE_COUNT, countNewlines(body_buffer) + 1, &bodyStartLoc);
+	m_currentUnit->set( METRIC_TYPE_FUNCTION_BODY_LINE_COUNT, countNewlines( body_buffer ) + 1, getFileAndLine( SM, &bodyStartLoc ) );
 
 	/* Obtain buffer for whole function then count the lines */
-	const char * def_start = m_astContext->getSourceManager().getCharacterData(defStartLoc);
-	const char * def_end = m_astContext->getSourceManager().getCharacterData(defEndLoc);
+	const char * def_start = SM.getCharacterData( defStartLoc );
+	const char * def_end = SM.getCharacterData( defEndLoc );
 	clang::StringRef def_buffer(def_start, def_end - def_start);
 
-	m_currentUnit->set(METRIC_TYPE_FUNCTION_DEF_LINE_COUNT, countNewlines(def_buffer) + 1, &defStartLoc);
+	m_currentUnit->set( METRIC_TYPE_FUNCTION_DEF_LINE_COUNT, countNewlines( def_buffer ) + 1, getFileAndLine( SM, &defStartLoc ) );
 }
 
 bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) 
 {
-	const clang::SourceLocation funcStartLoc = func->getLocation();
+	const clang::SourceLocation funcStartLoc = func->getLocStart();
 
 #if defined( DEBUG_FN_TRACE_OUTOUT )
 	std::cout << "VisitFunctionDecl - CONTEXT " << m_currentFileName << std::endl;
@@ -529,7 +532,7 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func)
 
 			PathResults pathResults = getPathCount(func->getBody());
 
-			m_currentUnit->set(METRIC_TYPE_FUNCTION_PATHS, pathResults.path_count, &funcStartLoc);
+			m_currentUnit->set( METRIC_TYPE_FUNCTION_PATHS, pathResults.path_count, getFileAndLine( SOURCE_MANAGER, &funcStartLoc ) );
 
 			if (!pathResults.path_has_return)
 			{
@@ -608,7 +611,7 @@ void MetricVisitor::CloseOutFnOrMtd( void )
 	{
 		if( m_currentUnit->isFnOrMethod() )
 		{
-			m_currentUnit->set( METRIC_TYPE_DIFFERENT_FUNCTIONS_CALLED, m_fnsCalled.size(), NULL );
+			m_currentUnit->set(METRIC_TYPE_DIFFERENT_FUNCTIONS_CALLED, m_fnsCalled.size(), InvalidSourceAndLine );
 			m_fnsCalled.clear();
 		}
 	}
@@ -651,7 +654,7 @@ bool MetricVisitor::VisitCastExpr(clang::CastExpr *p_castExp)
 
 bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) 
 {
-	const clang::SourceLocation varLoc = p_varDec->getLocation();
+	const clang::SourceLocation varLoc = p_varDec->getLocStart();
 
 #if defined( DEBUG_FN_TRACE_OUTOUT )
 	std::cout << "VisitVarDecl : CONTEXT " << m_currentFileName << "::" << m_currentFunctionName << std::endl;
@@ -790,7 +793,7 @@ bool MetricVisitor::VisitForStmt(clang::ForStmt *p_forSt)
 	if( m_currentUnit )
 	{
 		const clang::SourceLocation startLoc = p_forSt->getLocStart();
-		m_currentUnit->setMax( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_forSt, m_astContext ), &startLoc);
+		m_currentUnit->setMax( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_forSt, m_astContext ), getFileAndLine( SOURCE_MANAGER, &startLoc ) );
 		IncrementMetric(m_currentUnit, METRIC_TYPE_LOOPS, &startLoc);
 
 		CountStatements(p_forSt->getBody());
@@ -818,7 +821,7 @@ bool MetricVisitor::VisitWhileStmt(clang::WhileStmt *p_whileSt)
 		const clang::SourceLocation startLoc = p_whileSt->getLocStart();
 
 		/* TODO: accessing m_currentUnit here doesn't seem right - IncrementMetric provides various protections */
-		m_currentUnit->setMax( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_whileSt, m_astContext ), &startLoc);
+		m_currentUnit->setMax( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_whileSt, m_astContext ), getFileAndLine( SOURCE_MANAGER, &startLoc ) );
 		IncrementMetric(m_currentUnit, METRIC_TYPE_LOOPS, &startLoc);
 
 		CountStatements(p_whileSt->getBody());
@@ -836,7 +839,7 @@ bool MetricVisitor::VisitDoStmt(clang::DoStmt *p_doSt)
 		const clang::SourceLocation startLoc = p_doSt->getLocStart();
 
 		/* TODO: accessing m_currentUnit here doesn't seem right - IncrementMetric provides various protections */
-		m_currentUnit->setMax(METRIC_TYPE_NESTING_LEVEL, getControlDepth(p_doSt, m_astContext), &startLoc);
+		m_currentUnit->setMax( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_doSt, m_astContext ), getFileAndLine( SOURCE_MANAGER, &startLoc ) );
 		IncrementMetric(m_currentUnit, METRIC_TYPE_LOOPS, &startLoc);
 
 		CountStatements(p_doSt->getBody());
@@ -966,7 +969,7 @@ bool MetricVisitor::VisitSwitchStmt(clang::SwitchStmt *p_switchSt)
 		const clang::SourceLocation startLoc = p_switchSt->getLocStart();
 
 		/* TODO: accessing m_currentUnit here doesn't seem right - IncrementMetric provides various protections */
-		m_currentUnit->setMax( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_switchSt, m_astContext ), &startLoc);
+		m_currentUnit->setMax( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_switchSt, m_astContext ), getFileAndLine( SOURCE_MANAGER, &startLoc ) );
 		IncrementMetric(m_currentUnit, METRIC_TYPE_DECISIONS, &startLoc);
 
 		CountStatements(p_switchSt->getBody());
@@ -1200,7 +1203,7 @@ bool MetricVisitor::VisitIfStmt(clang::IfStmt *p_ifSt)
 	const clang::SourceLocation startLoc = p_ifSt->getLocStart();
 
 		/* TODO: accessing m_currentUnit here doesn't seem right - IncrementMetric provides various protections */
-		m_currentUnit->setMax(METRIC_TYPE_NESTING_LEVEL, getControlDepth(p_ifSt, m_astContext), &startLoc);
+		m_currentUnit->setMax( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_ifSt, m_astContext ), getFileAndLine( SOURCE_MANAGER, &startLoc ) );
 		IncrementMetric( m_currentUnit, METRIC_TYPE_DECISIONS, &startLoc );
 
 		CountStatements(p_ifSt->getThen());
@@ -1287,7 +1290,7 @@ bool MetricVisitor::TraverseDecl(clang::Decl *p_decl)
 	if( declKind == clang::Decl::TranslationUnit )
 	{
 
-		clang::SourceManager& SM = m_astContext->getSourceManager();
+		clang::SourceManager& SM = SOURCE_MANAGER;
 
 		for( clang::SourceManager::fileinfo_iterator x = SM.fileinfo_begin() ;
 			x != SM.fileinfo_end() ;
@@ -1301,7 +1304,7 @@ bool MetricVisitor::TraverseDecl(clang::Decl *p_decl)
 			if( ShouldIncludeFile( name ))
 			{
 				MetricUnit* fileUnit = m_topUnit->getSubUnit(name, METRIC_UNIT_FILE);
-				fileUnit->set( METRIC_TYPE_BYTE_COUNT, (*x).first->getSize(), NULL );
+				fileUnit->set( METRIC_TYPE_BYTE_COUNT, ( *x ).first->getSize(), InvalidSourceAndLine );
 			}
 		}
 		if (m_options.getDumpAST())
@@ -1356,7 +1359,7 @@ void MetricVisitor::CountStatements(const clang::Stmt* const p_stmt)
 				if (!startLoc.isMacroID())
 				{
 					/* TODO: accessing m_currentUnit here doesn't seem right - IncrementMetric provides various protections */
-					m_currentUnit->increment(METRIC_TYPE_TOKEN_STATEMENTS, &startLoc);
+					m_currentUnit->increment( METRIC_TYPE_TOKEN_STATEMENTS, getFileAndLine( SOURCE_MANAGER, &startLoc ) );
 				}
 				break;
 		}
@@ -1393,7 +1396,7 @@ void MetricVisitor::IncrementMetric(MetricUnit* const p_unit, const MetricType_e
 	{
 		if(( ! p_file->hasBeenProcessed( METRIC_UNIT_PROCESS_AST ) ) || ( MetricUnit::isMultiPassAllowed( p_metricType )))
 		{
-			p_unit->increment( p_metricType, p_startLocation );
+			p_unit->increment( p_metricType, getFileAndLine( SOURCE_MANAGER, p_startLocation ) );
 		}
 		else
 		{

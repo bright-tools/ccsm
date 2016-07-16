@@ -126,15 +126,24 @@ MetricUnit::MetricUnit( MetricUnit* const p_parent, const std::string& p_name, c
 		 loop++ )
 	{
 		m_counters[ loop ] = 0;
+		m_firstInstanceLocation[loop] = InvalidSourceAndLine;
 	}
 }
 
-void MetricUnit::increment(const MetricType_e p_metricType, const clang::SourceLocation* p_sourceLoc, const counter_t p_inc)
+void MetricUnit::increment(const MetricType_e p_metricType, const SourceFileAndLine_t& p_sourceLoc, const counter_t p_inc)
 {
 	/* Check for over-flow */
 	if(( counter_t_Max - p_inc ) > m_counters[ p_metricType ] )
 	{
-		m_counters[ p_metricType ]+= p_inc;
+		if (m_counters[p_metricType] == 0)
+		{
+			if (p_sourceLoc.Valid)
+			{
+				m_firstInstanceLocation[ p_metricType ] = p_sourceLoc;
+			}
+		}
+
+		m_counters[p_metricType] += p_inc;
 	} 
 	else
 	{
@@ -147,9 +156,14 @@ void MetricUnit::increment(const MetricType_e p_metricType, const clang::SourceL
 	}
 }
 
-void MetricUnit::set(const MetricType_e p_metricType, const MetricUnit::counter_t p_val, const clang::SourceLocation* p_sourceLoc)
+void MetricUnit::set(const MetricType_e p_metricType, const MetricUnit::counter_t p_val, const SourceFileAndLine_t& p_sourceLoc)
 {
 	m_counters[ p_metricType ] = p_val;
+
+	if (p_sourceLoc.Valid)
+	{
+		m_firstInstanceLocation[ p_metricType ] = p_sourceLoc;
+	}
 }
 
 void MetricUnit::addUnresolvedFn(const std::string& p_fnName)
@@ -196,11 +210,16 @@ bool MetricUnit::hasExternalLinkage(void) const
 }
 
 
-void MetricUnit::setMax(const MetricType_e p_metricType, const MetricUnit::counter_t p_val, const clang::SourceLocation* p_sourceLoc)
+void MetricUnit::setMax(const MetricType_e p_metricType, const MetricUnit::counter_t p_val, const SourceFileAndLine_t& p_sourceLoc)
 {
 	if (p_val > m_counters[p_metricType])
 	{
 		m_counters[p_metricType] = p_val;
+
+		if (p_sourceLoc.Valid)
+		{
+			m_firstInstanceLocation[ p_metricType ] = p_sourceLoc;
+		}
 	}
 }
 
@@ -724,7 +743,7 @@ MetricUnit* MetricUnit::getSubUnit( const std::string& p_name, const MetricUnitT
 
 			if( p_type == METRIC_UNIT_FILE )
 			{
-				this->increment( METRIC_TYPE_FILES, NULL );
+				this->increment( METRIC_TYPE_FILES, InvalidSourceAndLine );
 
 				ret_val->m_alias = makeRelative(name);
 			}
@@ -895,4 +914,26 @@ const std::set<std::string> MetricUnit::getSupplementary(MetricType_e p_metric, 
 void MetricUnit::setSupplementary(MetricType_e p_metric, const std::set<std::string> p_val)
 {
 	m_supplementary[p_metric] = p_val;
+}
+
+const SourceFileAndLine_t& MetricUnit::getFirstInstanceLocation(const MetricType_e p_type) const
+{
+	return m_firstInstanceLocation[ p_type ];
+}
+
+std::string MetricUnit::getFileName(const MetricOptions& p_options) const
+{
+	std::string ret_val = "";
+	if (GetType() == METRIC_UNIT_FILE)
+	{
+		ret_val = getUnitName(p_options);
+	}
+	else
+	{
+		if (m_parent != NULL)
+		{
+			ret_val = m_parent->getFileName(p_options);
+		}
+	}
+	return ret_val;
 }

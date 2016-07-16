@@ -22,6 +22,8 @@
 
 #include <iostream>
 
+#define SOURCE_MANAGER (m_compilerInstance.getSourceManager())
+
 const static std::pair<MetricType_e, MetricType_e> metricToBodyMetricMapData[] = {
 	std::make_pair(METRIC_TYPE_DOUBLE,   METRIC_TYPE_BODY_DOUBLE),
 	std::make_pair(METRIC_TYPE_FLOAT,    METRIC_TYPE_BODY_FLOAT),
@@ -199,7 +201,7 @@ void MetricSrcExpandedLexer::ProcessToken(clang::Token& p_token)
 	std::string tok_data;
 	unsigned int tok_len = p_token.getLength();
 	const clang::SourceLocation startLoc = p_token.getLocation();
-
+	const SourceFileAndLine_t fileAndLineLoc = getFileAndLine( SOURCE_MANAGER, &startLoc );
 
 	if( m_options.getDumpTokens() )
 	{
@@ -211,17 +213,17 @@ void MetricSrcExpandedLexer::ProcessToken(clang::Token& p_token)
 		case clang::tok::numeric_constant:
 			tok_data = clang::StringRef(p_token.getLiteralData(), tok_len).str();
 			m_currentFnNumerics.insert( tok_data );
-			m_currentUnit->increment(METRIC_TYPE_NUMERIC_CONSTANTS, &startLoc);
+			m_currentUnit->increment( METRIC_TYPE_NUMERIC_CONSTANTS, fileAndLineLoc );
 			break;
 		case clang::tok::char_constant:
 			tok_data = clang::StringRef(p_token.getLiteralData(), tok_len).str();
 			m_currentFnCharConsts.insert( tok_data );
-			m_currentUnit->increment(METRIC_TYPE_CHAR_CONSTS, &startLoc);
+			m_currentUnit->increment( METRIC_TYPE_CHAR_CONSTS, fileAndLineLoc );
 			break;
 		case clang::tok::string_literal:
 			tok_data = clang::StringRef(p_token.getLiteralData(), tok_len).str();
 			m_currentFnStrings.insert( tok_data );
-			m_currentUnit->increment(METRIC_TYPE_STRING_LITERALS, &startLoc);
+			m_currentUnit->increment( METRIC_TYPE_STRING_LITERALS, fileAndLineLoc );
 			break;
 		case clang::tok::comment:
 			/* TODO */
@@ -234,13 +236,13 @@ void MetricSrcExpandedLexer::ProcessToken(clang::Token& p_token)
 
 			if (typeLookup != m_tokenKindToTypeMap.end())
 			{
-				m_currentUnit->increment((*typeLookup).second, &startLoc);
+				m_currentUnit->increment( ( *typeLookup ).second, fileAndLineLoc );
 				if (m_inBody)
 				{
 					std::map<MetricType_e, MetricType_e>::const_iterator bodyTypeLookup = m_metricToBodyMetricMap.find((*typeLookup).second);
 					if (bodyTypeLookup != m_metricToBodyMetricMap.end())
 					{
-						m_currentUnit->increment((*bodyTypeLookup).second, &startLoc);
+						m_currentUnit->increment( ( *bodyTypeLookup ).second, fileAndLineLoc );
 					}
 				}
 			}
@@ -254,11 +256,11 @@ void MetricSrcExpandedLexer::ProcessToken(clang::Token& p_token)
 						m_options.getOutput() << ",unreserved:" << tok_data;
 					}
 					m_currentFnIdentifiers.insert(tok_data);
-					m_currentUnit->increment(METRIC_TYPE_UNRESERVED_IDENTIFIERS, &startLoc);
+					m_currentUnit->increment( METRIC_TYPE_UNRESERVED_IDENTIFIERS, fileAndLineLoc );
 					if (m_inBody)
 					{
 						m_currentBodyIdentifiers.insert(tok_data);
-						m_currentUnit->increment(METRIC_TYPE_BODY_UNRESERVED_IDENTIFIERS, &startLoc);
+						m_currentUnit->increment( METRIC_TYPE_BODY_UNRESERVED_IDENTIFIERS, fileAndLineLoc );
 					}
 				}
 				else
