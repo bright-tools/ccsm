@@ -65,6 +65,13 @@ Note that the limits checking support does not allow for complex rules to
 describe the limits.  It's suggested that such behaviour be supported by
 a dedicated custom script which consumes the TSV or CSV output of CCSM.
 
+The format of the output of the limits checking can be customised via the
+`output-limit-warnings` command line option.  Supported values are:
+
+| `default` | Free-form descriptive output, e.g. `Global failed limits check 'Comments in bytes' (actual: 11 expected: >20): Ensure more than 20 bytes of comments in the project`|
+| `gccbrief` | Styles on the "GCC brief" format - filename:line[:column][:severity]:description - e.g.  `src\limits1.c:2:1:1:no_nest failed limits check 'Number of paths through the function' (actual: 1 expected: <1): Ensure that no_nest has no paths` |
+| `byfile` | As with `default`, but the output is broken into per-file sections |
+
 Choosing Which Metrics Are Output
 ---------------------------------
 
