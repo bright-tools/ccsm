@@ -170,8 +170,10 @@ void MetricSrcLexer::LexSources( clang::CompilerInstance& p_ci, const Translatio
 
 		if (m_options.ShouldIncludeFile( fileName))
 		{
+            const SourceFileAndLine_t location = { true, 0, fileName, 0 };
+
 			MetricUnit* fileUnit = m_topUnit->getSubUnit(fileName, METRIC_UNIT_FILE);
-			fileUnit->set( METRIC_TYPE_LINE_COUNT, countNewlines( Buffer ), InvalidSourceAndLine );
+			fileUnit->set( METRIC_TYPE_LINE_COUNT, countNewlines( Buffer ), location );
 			fileUnit->setProcessed(getLexType());
 		}
 	}

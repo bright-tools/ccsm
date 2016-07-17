@@ -916,9 +916,66 @@ void MetricUnit::setSupplementary(MetricType_e p_metric, const std::set<std::str
 	m_supplementary[p_metric] = p_val;
 }
 
+const std::set<MetricType_e> MetricUnit::m_calculatedMetricSet = {
+	METRIC_TYPE_HIS_CALLING,
+	METRIC_TYPE_OPERAND_HALSTEAD_COUNT,
+	METRIC_TYPE_OPERAND_HALSTEAD_UNIQUE,
+	METRIC_TYPE_OPERATOR_HALSTEAD_UNIQUE,
+	METRIC_TYPE_OPERATOR_HALSTEAD_COUNT,
+	METRIC_TYPE_TOK_MODIFIED_CYCLOMATIC,
+	METRIC_TYPE_MODIFIED_CYCLOMATIC,
+	METRIC_TYPE_TOK_CYCLOMATIC,
+	METRIC_TYPE_CYCLOMATIC,
+	METRIC_TYPE_BODY_UNRESERVED_IDENTIFIERS_UNIQ,
+	METRIC_TYPE_HALSTEAD_VOCABULARY,
+	METRIC_TYPE_HALSTEAD_LENGTH,
+	METRIC_TYPE_HALSTEAD_CALC_LENGTH,
+	METRIC_TYPE_HALSTEAD_VOLUME,
+	METRIC_TYPE_HALSTEAD_DIFFICULTY,
+	METRIC_TYPE_VOCF,
+	METRIC_TYPE_OPERATOR_COUNT,
+	METRIC_TYPE_KEYWORD_CNT,
+	METRIC_TYPE_KEYWORD_TYPES,
+	METRIC_TYPE_OPERATOR_TYPES,
+	METRIC_TYPE_HIS_COMMENT_DENSITY,
+	METRIC_TYPE_NUMERIC_CONSTANTS_UNIQ,
+	METRIC_TYPE_TOKEN_NUMERIC_CONSTANTS_UNIQ,
+	METRIC_TYPE_STRING_LITERALS_UNIQ,
+	METRIC_TYPE_TOKEN_STRING_LITERALS_UNIQ,
+	METRIC_TYPE_CHAR_CONSTS_UNIQ,
+	METRIC_TYPE_TOKEN_CHAR_CONSTS_UNIQ,
+	METRIC_TYPE_UNRESERVED_IDENTIFIERS_UNIQ,
+	METRIC_TYPE_TOKEN_UNRESERVED_IDENTIFIERS_UNIQ,
+};
+
 const SourceFileAndLine_t& MetricUnit::getFirstInstanceLocation(const MetricType_e p_type) const
 {
-	return m_firstInstanceLocation[ p_type ];
+	MetricType_e t_type = p_type;
+
+	const std::set<MetricType_e>::const_iterator find_it = m_calculatedMetricSet.find(t_type);
+
+    /* For calculated metrics, map to an appropriate observed metric which should be used when
+       reporting the location.
+       e.g. METRIC_TYPE_CYCLOMATIC has no location instances associated with it as it is calculated, but
+            when reporting the instance location it makes sense to report the location of the function
+            for which the calculation has been performed */
+    if (find_it != m_calculatedMetricSet.end())
+	{
+        switch( m_type )
+        {
+            case METRIC_UNIT_METHOD:
+            case METRIC_UNIT_FUNCTION:
+                t_type = METRIC_TYPE_FUNCTION_DEF_LINE_COUNT;
+                break;
+            case METRIC_UNIT_FILE:
+                t_type = METRIC_TYPE_LINE_COUNT;
+                break;
+            default:
+                break;
+        }
+	}
+
+	return m_firstInstanceLocation[t_type];
 }
 
 std::string MetricUnit::getFileName(const MetricOptions& p_options) const

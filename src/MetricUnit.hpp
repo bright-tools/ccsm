@@ -99,6 +99,9 @@ protected:
 	std::map<MetricType_e, std::set<std::string>> m_supplementary;
     SourceFileAndLine_t m_firstInstanceLocation[ METRIC_TYPE_MAX ];
 
+	/** Set containing all of the metrics which are calcuated rather than directly measured */
+    const static std::set<MetricType_e> m_calculatedMetricSet;
+
 public:
 	typedef std::map<std::string, MetricUnit*> FunctionMap_t;
 

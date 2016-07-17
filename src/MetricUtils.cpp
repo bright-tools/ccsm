@@ -191,10 +191,16 @@ SourceFileAndLine_t getFileAndLine(const clang::SourceManager& p_sourceManager, 
 
 	if (p_sourceLoc)
 	{
+		clang::SourceLocation resolved = *p_sourceLoc;
+		if (resolved.isMacroID())
+		{
+			resolved = p_sourceManager.getFileLoc(resolved);
+		}
+
 		ret_val.Valid = true;
-		ret_val.FileName = p_sourceManager.getFilename(*p_sourceLoc);
-		ret_val.LineNo = p_sourceManager.getSpellingLineNumber(*p_sourceLoc);
-		ret_val.Column = p_sourceManager.getSpellingColumnNumber( *p_sourceLoc );
+		ret_val.FileName = p_sourceManager.getFilename(resolved);
+		ret_val.LineNo = p_sourceManager.getSpellingLineNumber(resolved);
+		ret_val.Column = p_sourceManager.getSpellingColumnNumber(resolved);
 	}
 
 	return ret_val;
