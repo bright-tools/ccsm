@@ -681,7 +681,7 @@ MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType, c
 			}
 			else
 			{
-				ret_val = counter_t_Max;
+				ret_val = 0;
 			}
 		}
 		break;
@@ -696,7 +696,7 @@ MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType, c
 				}
 				else
 				{
-					ret_val = counter_t_Max;
+					ret_val = 0;
 				}
 			}
 
