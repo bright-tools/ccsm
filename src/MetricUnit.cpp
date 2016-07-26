@@ -105,8 +105,9 @@ const bool MetricUnit::m_metricApplies[ METRIC_UNIT_MAX ][ METRIC_TYPE_MAX ] = {
 	}
 };
 
-const uint32_t MetricUnit::counter_t_Max = UINT32_MAX;
-
+const MetricUnit::counter_t MetricUnit::counter_t_Max = UINT32_MAX - 2U;
+const MetricUnit::counter_t MetricUnit::counter_t_Inf = UINT32_MAX;
+const MetricUnit::counter_t MetricUnit::counter_t_Na  = UINT32_MAX - 1U;
 
 MetricUnit::MetricUnit( MetricUnit* const p_parent, const std::string& p_name, const MetricUnitType_e p_type ) : 
 		m_name(p_name), m_type(p_type), 
@@ -572,7 +573,7 @@ MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType, c
 				}
 				else
 				{
-					ret_val = counter_t_Max;
+					ret_val = counter_t_Na;
 				}
 			}
 			break;
@@ -681,7 +682,7 @@ MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType, c
 			}
 			else
 			{
-				ret_val = 0;
+				ret_val = counter_t_Na;
 			}
 		}
 		break;
@@ -696,7 +697,7 @@ MetricUnit::counter_t MetricUnit::getCounter( const MetricType_e p_metricType, c
 				}
 				else
 				{
-					ret_val = 0;
+					ret_val = counter_t_Na;
 				}
 			}
 
@@ -875,11 +876,15 @@ std::string MetricUnit::getScaledMetricString(const MetricType_e p_type, MetricU
 	}
 	else
 	{
-		if (p_val == counter_t_Max)
+		if (p_val == counter_t_Inf)
 		{
 			strStream << "Inf";
 		}
-		else
+        else if( p_val == counter_t_Na )
+        {
+            strStream << "N/A";
+        }
+        else
 		{
 			strStream << std::setprecision(6) << MetricUnit::getScaledMetric(p_type, p_val);
 		}

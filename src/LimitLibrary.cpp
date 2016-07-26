@@ -192,7 +192,10 @@ std::string LimitLibrary::checkUnitPassesMetricLimit(const MetricUnit& p_unit, c
 		std::cout << "Checking " << p_unit.getUnitName(p_options) << " for '" << MetricUnit::getMetricName(it->first) << "'\n";
 #endif
 
-		if (((p_pattern->operand == "<") && (val < p_pattern->limit)) ||
+        /* Use the operator type to determine what check to make.  
+           Don't check metrics which have "special" values (inf, N/A) against numeric limits */
+		if (( val > MetricUnit::counter_t_Max ) ||
+            ((p_pattern->operand == "<") && (val < p_pattern->limit)) ||
 			((p_pattern->operand == ">") && (val > p_pattern->limit)) ||
 			((p_pattern->operand == ">=") && (val >= p_pattern->limit)) ||
 			((p_pattern->operand == "<=") && (val <= p_pattern->limit)))

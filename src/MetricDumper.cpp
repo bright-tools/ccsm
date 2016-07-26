@@ -38,7 +38,7 @@ void MetricDumper::dumpMetric(std::ostream& out, const MetricUnit* const p_unit,
 	const MetricUnitType_e metricType = p_unit->GetType();
 
 	if ((p_fmt != METRIC_DUMP_FORMAT_SPARSE_TREE) ||
-		(val != 0))
+		((val != 0) && ( val <= MetricUnit::counter_t_Max )))
 	{
 		if (IS_OUTPUT_TREE_FORM(p_fmt)) {
 			std::string metricName;

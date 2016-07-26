@@ -120,7 +120,13 @@ public:
 	const std::set<std::string> getSupplementary(MetricType_e p_metric, const bool p_recurse = false) const;
 	void setSupplementary(MetricType_e p_metric, const std::set<std::string> p_val );
 
-	static const uint32_t counter_t_Max;
+    /** Maximum metric count which can be stored in a count_t */
+	static const counter_t counter_t_Max;
+    /** Special value stored in a count_t to indicate infinity */
+    static const counter_t counter_t_Inf;
+    /** Special value stored in a count_t to indicate that the metric could not be calculated */
+    static const counter_t counter_t_Na;
+
 
 	MetricUnit( MetricUnit* const p_parent, const std::string& p_name, const MetricUnitType_e p_type );
 
