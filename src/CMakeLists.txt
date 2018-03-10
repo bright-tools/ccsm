@@ -43,6 +43,7 @@ set(SOURCES
 add_clang_executable(ccsm ${SOURCES})
 
 target_link_libraries(ccsm
+  PRIVATE
   clangTooling
   clangBasic
   clangASTMatchers

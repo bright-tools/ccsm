@@ -41,7 +41,7 @@ void MetricSrcLexer::LexSources( clang::CompilerInstance& p_ci, const Translatio
 
 	if( m_options.getDumpTokens() )
 	{
-		m_options.getOutput() << std::endl << "Start lexing translation unit: " << SM.getFileEntryForID( SM.getMainFileID() )->getName() << std::endl;
+		m_options.getOutput() << std::endl << "Start lexing translation unit: " << SM.getFileEntryForID( SM.getMainFileID() )->getName().str() << std::endl;
 	}
 
 	// Start preprocessing the specified input file.

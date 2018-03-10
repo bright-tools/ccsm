@@ -150,8 +150,7 @@ static llvm::cl::opt<MetricDumpFormat_e> OutputFormat(
 		clEnumValN(METRIC_DUMP_FORMAT_TSV, "tsv", "Tab Seperated Values"),
     	clEnumValN(METRIC_DUMP_FORMAT_CSV, "csv", "Comma Separated Values"),
 	    clEnumValN(METRIC_DUMP_FORMAT_SPARSE_TREE, "sparsetree", "Sparse Tree (zero value nodes omitted)"),
-	    clEnumValN(METRIC_DUMP_FORMAT_TREE, "tree", "Tree Structure"),
-	    clEnumValEnd
+	    clEnumValN(METRIC_DUMP_FORMAT_TREE, "tree", "Tree Structure")
 	),
 	llvm::cl::init(METRIC_DUMP_FORMAT_TREE),
 	llvm::cl::cat(CCSMToolCategory)
@@ -193,8 +192,7 @@ static llvm::cl::opt<MetricLimitsFormat_e> OutputLimitWarnings(
 	llvm::cl::values(
 	    clEnumValN(METRIC_LIMITS_FORMAT_DEFAULT,       "default",  "Default output format"),
 		clEnumValN(METRIC_LIMITS_FORMAT_GROUP_BY_FILE, "byfile",   "Group warnings by file"),
-		clEnumValN(METRIC_LIMITS_FORMAT_GCC,           "gccbrief", "Use GCC brief format"),
-		clEnumValEnd
+		clEnumValN(METRIC_LIMITS_FORMAT_GCC,           "gccbrief", "Use GCC brief format")
 	),
 	llvm::cl::init(METRIC_LIMITS_FORMAT_DEFAULT),
 	llvm::cl::cat(CCSMToolCategory)
@@ -210,11 +208,11 @@ static llvm::cl::list<std::string> LimitsFile(
 
 static llvm::cl::extrahelp MoreHelp("\nVersion: " GEN_VER_VERSION_STRING);
 
-static void PrintVersion() {
-	std::cout << "CCSM (https://github.com/bright-tools/ccsm):" << '\n'
-	          << "  CCSM version " << GEN_VER_VERSION_STRING << '\n'
-			  << "  Built " << __DATE__ << " (" << __TIME__ << ").\n"
-	          << "Using " << clang::getClangFullVersion() << '\n';
+static void PrintVersion( llvm::raw_ostream &OS ) {
+	OS << "CCSM (https://github.com/bright-tools/ccsm):" << '\n'
+	   << "  CCSM version " << GEN_VER_VERSION_STRING << '\n'
+	   << "  Built " << __DATE__ << " (" << __TIME__ << ").\n"
+	   << "Using " << clang::getClangFullVersion() << '\n';
 }
 
 CcsmOptionsHandler::CcsmOptionsHandler()
