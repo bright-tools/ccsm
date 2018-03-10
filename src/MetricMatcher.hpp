@@ -108,6 +108,10 @@ public:
 	virtual bool VisitEnumDecl(clang::EnumDecl* p_enumDecl);
 	virtual bool VisitCastExpr(clang::CastExpr *p_castExp);
 
+	/** Try to determine whether the passed Expression evaluates to a constant
+	     and if that constant is equivelent to false */
+	bool isExprConstantAndFalse( const clang::Expr* const p_expr );
+
 #if 0
 	void dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE );
 #endif

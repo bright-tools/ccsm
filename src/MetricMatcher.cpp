@@ -295,8 +295,11 @@ MetricVisitor::PathResults MetricVisitor::getPathCount(const clang::Stmt* const 
 				ret_val = getSwitchPathCount(static_cast<const clang::SwitchStmt*>(p_stmt), thisDepth);
 				break;
 			case clang::Stmt::StmtClass::WhileStmtClass:
-				ret_val = getPathCount((static_cast<const clang::WhileStmt*>(p_stmt)->getBody()), thisDepth);
-				ret_val.path_count += 1;
+				if( !isExprConstantAndFalse( static_cast<const clang::WhileStmt*>( p_stmt )->getCond() ) )
+				{
+					ret_val = getPathCount( ( static_cast<const clang::WhileStmt*>( p_stmt )->getBody() ), thisDepth );
+					ret_val.path_count += 1;
+				}
 				break;
 			case clang::Stmt::StmtClass::ForStmtClass:
 				ret_val = getPathCount((static_cast<const clang::ForStmt*>(p_stmt)->getBody()), thisDepth);
@@ -304,7 +307,11 @@ MetricVisitor::PathResults MetricVisitor::getPathCount(const clang::Stmt* const 
 				break;
 			case clang::Stmt::StmtClass::DoStmtClass:
 				ret_val = getPathCount((static_cast<const clang::DoStmt*>(p_stmt)->getBody()), thisDepth);
-				ret_val.path_count += 1;
+				/* If the condition is constant and false, this isn't a junction point, so don't increase the path count */
+				if( !isExprConstantAndFalse( static_cast<const clang::DoStmt*>( p_stmt )->getCond() ) )
+				{
+					ret_val.path_count += 1;
+				}
 				break;
 			default:
 				ret_val = getOtherPathCount(p_stmt, thisDepth);
@@ -318,6 +325,23 @@ MetricVisitor::PathResults MetricVisitor::getPathCount(const clang::Stmt* const 
 #endif
 
 	return ret_val;
+}
+
+bool MetricVisitor::isExprConstantAndFalse( const clang::Expr* const p_expr )
+{
+	bool retVal = false;
+	llvm::APSInt val;
+
+	/* See if the expression resolves to a constant integer & get the value if so */
+	if( p_expr->isIntegerConstantExpr( val, *m_astContext ) )
+	{
+		if( val.getExtValue() == 0 )
+		{
+			retVal = true;
+		}
+	}
+
+	return retVal;
 }
 
 MetricVisitor::PathResults MetricVisitor::getOtherPathCount(const clang::Stmt* const p_stmt, uint16_t depth)
