@@ -463,6 +463,8 @@ void CcsmOptionsHandler::analyseCompilerArgs(const char* const exeName)
 			{
 				Args.push_back(Str.c_str());
 			}
+			/* Only run the analyzer on the code (i.e. don't try a link phase) */
+			Args.push_back( "--analyze" );
 			IntrusiveRefCntPtr<DiagnosticOptions> DiagOpts = new DiagnosticOptions();
 			TextDiagnosticPrinter *DiagClient =
 				new TextDiagnosticPrinter(llvm::errs(), &*DiagOpts);
