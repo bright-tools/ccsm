@@ -514,11 +514,11 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func)
 
 	/* Function body attached? */
 	if( func->doesThisDeclarationHaveABody() )
-	{		
+	{
 		const clang::SourceLocation funcEndLoc = func->getLocEnd();
 
-		UpdateCurrentFileName(funcEndLoc);
-		
+		UpdateCurrentFileName( funcEndLoc );
+
 		m_currentFunctionName = func->getQualifiedNameAsString();
 
 #if defined( DEBUG_FN_TRACE_OUTOUT )
@@ -530,13 +530,13 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func)
 			m_fnLocator->addFunctionLocation( m_astContext, m_currentFunctionName, func );
 		}
 
-		if( ShouldIncludeFile( m_currentFileName ) && 
-			m_options.ShouldIncludeFunction( m_currentFunctionName ))
+		if( ShouldIncludeFile( m_currentFileName ) &&
+			m_options.ShouldIncludeFunction( m_currentFunctionName ) )
 		{
 			const clang::SourceLocation startLoc = func->getLocStart();
 
 			/* Ensure that there is a file-level sub-unit */
-			MetricUnit* fileUnit = m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE);
+			MetricUnit* fileUnit = m_topUnit->getSubUnit( m_currentFileName, METRIC_UNIT_FILE );
 
 			MetricUnitType_e type = METRIC_UNIT_FUNCTION;
 
@@ -544,24 +544,24 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func)
 			{
 				type = METRIC_UNIT_METHOD;
 			}
-		
-			m_currentUnit = fileUnit->getSubUnit(m_currentFunctionName, type);
 
-			CalcFnLineCnt(func);
+			m_currentUnit = fileUnit->getSubUnit( m_currentFunctionName, type );
+
+			CalcFnLineCnt( func );
 
 			if( func->isInlineSpecified() )
 			{
-				IncrementMetric(fileUnit, METRIC_TYPE_INLINE_FUNCTIONS, &startLoc);
+				IncrementMetric( fileUnit, METRIC_TYPE_INLINE_FUNCTIONS, &startLoc );
 			}
 
-			PathResults pathResults = getPathCount(func->getBody());
+			PathResults pathResults = getPathCount( func->getBody() );
 
 			m_currentUnit->set( METRIC_TYPE_FUNCTION_PATHS, pathResults.path_count, getFileAndLine( SOURCE_MANAGER, &funcStartLoc ) );
 
-			if (!pathResults.path_has_return)
+			if( !pathResults.path_has_return )
 			{
 				/* Add an implicit return point */
-				IncrementMetric(m_currentUnit, METRIC_TYPE_RETURNPOINTS, &funcEndLoc);
+				IncrementMetric( m_currentUnit, METRIC_TYPE_RETURNPOINTS, &funcEndLoc );
 			}
 
 			switch( func->getLinkageAndVisibility().getLinkage() )
@@ -576,7 +576,7 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func)
 					/* Not interested at the moment */
 					break;
 			}
-			IncrementMetric(fileUnit, METRIC_TYPE_FUNCTIONS, &startLoc);
+			IncrementMetric( fileUnit, METRIC_TYPE_FUNCTIONS, &startLoc );
 		}
 		else
 		{
@@ -592,10 +592,10 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func)
 			{
 				case clang::SC_None:
 					/* No storage class specified - implicitly the function is extern */
-					IncrementMetric(m_currentUnit, METRIC_TYPE_EXTERN_IMPL_FUNCTIONS, &funcStartLoc);
+					IncrementMetric( m_currentUnit, METRIC_TYPE_EXTERN_IMPL_FUNCTIONS, &funcStartLoc );
 					break;
 				case clang::SC_Extern:
-					IncrementMetric(m_currentUnit, METRIC_TYPE_EXTERN_EXPL_FUNCTIONS, &funcStartLoc);
+					IncrementMetric( m_currentUnit, METRIC_TYPE_EXTERN_EXPL_FUNCTIONS, &funcStartLoc );
 					break;
 				default:
 					/* Not currently of interest */
@@ -603,6 +603,7 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func)
 			}
 		}
 	}
+
 	return true;     
 }     
 
@@ -650,6 +651,9 @@ void MetricVisitor::DeclCommon(const clang::DeclContext* p_declCtxt, const clang
 	// Check to see if the decl is top-level - may need to update m_currentUnit after exiting a function.
 	if (p_declCtxt->getDeclKind() == clang::Decl::TranslationUnit)
 	{
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+		std::cout << "DeclCommon - End of translation unit" << std::endl;
+#endif
 		CloseOutFnOrMtd();
 
 		HandleLoc(p_decl->getLocation());
@@ -690,6 +694,10 @@ bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec)
 
 	if( m_currentUnit )
 	{
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+		std::cout << "VisitVarDecl : Have a current unit" << std::endl;
+#endif
+
 		/* Interested in the absolute qualifiers associated with the variable */
 		const bool isVolatile = p_varDec->getType().isVolatileQualified();
 		const bool isConst = p_varDec->getType().isConstQualified();
@@ -704,7 +712,7 @@ bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec)
 			if (p_varDec->isFileVarDecl())
 			{
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-				std::cout << "VisitVarDecl : Processing file-scope var " << p_varDec->getNameAsString() << std::endl;
+				std::cout << "VisitVarDecl : Processing file-scope var " << p_varDec->getNameAsString() << ", storage class " << sc << std::endl;
 #endif
 				if (sc == clang::SC_Extern)
 				{
@@ -1382,8 +1390,7 @@ void MetricVisitor::CountStatements(const clang::Stmt* const p_stmt)
 				IncrementMetric(m_currentUnit, METRIC_TYPE_STATEMENTS, &startLoc);
 				if (!startLoc.isMacroID())
 				{
-					/* TODO: accessing m_currentUnit here doesn't seem right - IncrementMetric provides various protections */
-					m_currentUnit->increment( METRIC_TYPE_TOKEN_STATEMENTS, getFileAndLine( SOURCE_MANAGER, &startLoc ) );
+					IncrementMetric( m_currentUnit, METRIC_TYPE_TOKEN_STATEMENTS, &startLoc );
 				}
 				break;
 		}

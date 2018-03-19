@@ -145,7 +145,11 @@ void MetricUnit::increment(const MetricType_e p_metricType, const SourceFileAndL
 		}
 
 		m_counters[p_metricType] += p_inc;
-	} 
+	
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+		std::cout << "MetricUnit::increment():" << m_metricNames[p_metricType] << " [" << getUnitName(false,true) << "] (now = " << m_counters[ p_metricType ] << ")" << std::endl;
+#endif
+	}
 	else
 	{
 		/* Protect against spamming out the same message over and over again */
@@ -160,6 +164,10 @@ void MetricUnit::increment(const MetricType_e p_metricType, const SourceFileAndL
 void MetricUnit::set(const MetricType_e p_metricType, const MetricUnit::counter_t p_val, const SourceFileAndLine_t& p_sourceLoc)
 {
 	m_counters[ p_metricType ] = p_val;
+
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+	std::cout << "MetricUnit::set():" << m_metricNames[p_metricType] << " [" << getUnitName( false, true ) << "] (now = " << m_counters[ p_metricType ] << ")" << std::endl;
+#endif
 
 	if (p_sourceLoc.Valid)
 	{
@@ -763,6 +771,10 @@ bool MetricUnit::hasBeenProcessed( const MetricUnitProcessingType_e p_type ) con
 
 void MetricUnit::setProcessed( const MetricUnitProcessingType_e p_type )
 {
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+	std::cout << "MetricUnit::setProcessed(): [" << m_name << "]" << std::endl;
+#endif
+
 	m_processed[ p_type ] = true;
 }
 
@@ -816,27 +828,32 @@ bool MetricUnit::isMetricCumulative(const MetricType_e p_type)
 	return m_metricIsCumulative[p_type];
 }
 
-std::string MetricUnit::getUnitName(const MetricOptions& p_options) const
+std::string MetricUnit::getUnitName( const bool p_useAbsFN, const bool p_usePrefix ) const
 {
 	std::string ret_val;
 
-	if ((this->m_type == METRIC_UNIT_FILE) &&
-		(!p_options.getUseAbsoluteFileNames()))
+	if( ( this->m_type == METRIC_UNIT_FILE ) &&
+		( !p_useAbsFN ) )
 	{
 		ret_val = m_alias;
 	}
 	else
 	{
-		if ((this->m_type == METRIC_UNIT_FUNCTION) &&
-			(p_options.getUsePrefix()))
+		if( ( this->m_type == METRIC_UNIT_FUNCTION ) &&
+			( p_usePrefix ) )
 		{
-			ret_val = getParent()->getUnitName(p_options) + "::";
+			ret_val = getParent()->getUnitName( p_useAbsFN, p_usePrefix ) + "::";
 		}
 
 		ret_val += m_name;
 	}
 
 	return ret_val;
+}
+
+std::string MetricUnit::getUnitName(const MetricOptions& p_options) const
+{
+	return getUnitName( p_options.getUseAbsoluteFileNames(), p_options.getUsePrefix() );
 }
 
 bool MetricUnit::doesMetricApplyForUnit(const MetricType_e p_MetricType, const MetricUnitType_e p_unitType)

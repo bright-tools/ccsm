@@ -149,6 +149,7 @@ public:
 	counter_t getSubUnitCount( const MetricUnitType_e p_type ) const;
 
 	MetricUnitType_e GetType( void ) const;
+	std::string getUnitName( const bool p_useAbsFN, const bool p_usePrefix ) const;
 	std::string getUnitName(const MetricOptions& p_options) const;
 
 	const SubUnitMap_t* getSubUnits(void) const;
