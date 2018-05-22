@@ -12,7 +12,7 @@ Vagrant.configure(2) do |config|
 
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://atlas.hashicorp.com/search.
-  config.vm.box = "ubuntu/trusty64"
+  config.vm.box = "ubuntu/xenial64"
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
@@ -39,6 +39,10 @@ Vagrant.configure(2) do |config|
   # argument is a set of non-required options.
   config.vm.synced_folder "../../", "/ccsm"
 
+  # This needs the vagrant-disksize plugin
+  #  https://github.com/sprotheroe/vagrant-disksize
+  config.disksize.size = '20GB'
+
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
   # Example for VirtualBox:
@@ -49,6 +53,7 @@ Vagrant.configure(2) do |config|
   #
     # Needs to be quite beefy to build clang
     vb.memory = "4096"
+    
   end
   #
   # View the documentation for the provider you are using for more
@@ -78,17 +83,8 @@ Vagrant.configure(2) do |config|
     sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-4.9
 
     if [ ! -d llvm ]; then
-        svn co http://llvm.org/svn/llvm-project/llvm/trunk llvm
-        cd llvm/tools
-        svn co http://llvm.org/svn/llvm-project/cfe/trunk clang
-        echo "set(CCSM_DIR /ccsm)" >> clang/tools/CMakeLists.txt
-        echo "add_subdirectory(\${CCSM_DIR}/SRC \${CMAKE_CURRENT_BINARY_DIR}/ccsm)" >> clang/tools/CMakeLists.txt
-        cd ../..
+        sudo -u vagrant /vagrant/buildit.sh
     fi
-    mkdir build
-    cd build
-    cmake -G "Unix Makefiles" ../llvm
-    make
 
   SHELL
 end
