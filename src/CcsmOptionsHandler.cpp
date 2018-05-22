@@ -211,7 +211,9 @@ static llvm::cl::extrahelp MoreHelp("\nVersion: " GEN_VER_VERSION_STRING);
 static void PrintVersion( llvm::raw_ostream &OS ) {
 	OS << "CCSM (https://github.com/bright-tools/ccsm):" << '\n'
 	   << "  CCSM version " << GEN_VER_VERSION_STRING << '\n'
+#if 0
 	   << "  Built " << __DATE__ << " (" << __TIME__ << ").\n"
+#endif
 	   << "Using " << clang::getClangFullVersion() << '\n';
 }
 
