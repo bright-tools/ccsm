@@ -58,7 +58,7 @@ extern size_t countNewlines( clang::StringRef& p_buffer )
 	return cnt;
 }
 
-#ifdef LLVM_ON_WIN32
+#ifdef _WIN32
 #define HANDLE_CHAR_CASE( _x ) tolower(_x)
 #include <direct.h>
 #define getcwd _getcwd // Deal with MSFT "deprecation" warning
