@@ -81,7 +81,7 @@ Vagrant.configure(2) do |config|
     sudo apt-get install -y subversion zlib1g-dev libtool python gcc cmake g++ git
 
     if [ ! -d llvm ]; then
-        sudo -u vagrant /vagrant/buildit.sh
+        sudo -u vagrant /vagrant/buildit.sh /ccsm
     fi
 
   SHELL
