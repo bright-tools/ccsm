@@ -455,7 +455,7 @@ all dependencies installed.  See the
 [instructions](http://clang.llvm.org/get_started.html).  
 
 Currently I use Visual Studio 2015 on Windows and GCC on 
-[Ubuntu Xenial Xerus](http://releases.ubuntu.com/16.04/) for builds.
+[Ubuntu Bionic Beaver](http://releases.ubuntu.com/18.04/) for builds.
 
 Follow the instructions up to the point where you have checked out Clang, 
 then open the file `llvm\tools\clang\tools\CMakeLists.txt` and add 
