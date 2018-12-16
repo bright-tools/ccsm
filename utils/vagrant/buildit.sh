@@ -18,7 +18,7 @@ if [[ ! -d "$1/src" ]]; then
 fi
 
 function basicToolCheck {
-    TOOLS="cmake svn grep realpath"
+    TOOLS="cmake svn grep realpath nproc"
     for TOOL in $TOOLS; do
         echo "Checking for $TOOL"
         if [[ ! -x `which $TOOL` ]]; then
@@ -58,6 +58,6 @@ else
 fi
 
 cmake -G "Unix Makefiles" --build build llvm
-make -C build/tools/clang/tools/ccsm
+make -C build/tools/clang/tools/ccsm -j $(nproc --all)
 
 exit 0
