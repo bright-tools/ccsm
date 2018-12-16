@@ -52,7 +52,7 @@ if [ $(grep -c CCSM_DIR $CMAKE_FILE) -lt 1 ]; then
     CCSM_PATH=$(realpath $1)
     echo "Adding CCSM to clang tools makefile"
     echo "set(CCSM_DIR $CCSM_PATH)" >> $CMAKE_FILE
-    echo "add_subdirectory(\${CCSM_DIR}/SRC \${CMAKE_CURRENT_BINARY_DIR}/ccsm)" >> $CMAKE_FILE
+    echo "add_subdirectory(\${CCSM_DIR}/src \${CMAKE_CURRENT_BINARY_DIR}/ccsm)" >> $CMAKE_FILE
 else
     echo "CCSM already seems to be in the clang tools makefile"
 fi
