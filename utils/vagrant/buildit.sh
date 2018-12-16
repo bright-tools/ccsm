@@ -18,7 +18,7 @@ if [[ ! -d "$1/src" ]]; then
 fi
 
 function basicToolCheck {
-    TOOLS="cmake svn grep"
+    TOOLS="cmake svn grep realpath"
     for TOOL in $TOOLS; do
         echo "Checking for $TOOL"
         if [[ ! -x `which $TOOL` ]]; then
@@ -49,8 +49,9 @@ fi
 CMAKE_FILE=$CLANG_DIR/tools/CMakeLists.txt
 
 if [ $(grep -c CCSM_DIR $CMAKE_FILE) -lt 1 ]; then
+    CCSM_PATH=$(realpath $1)
     echo "Adding CCSM to clang tools makefile"
-    echo "set(CCSM_DIR $1)" >> $CMAKE_FILE
+    echo "set(CCSM_DIR $CCSM_PATH)" >> $CMAKE_FILE
     echo "add_subdirectory(\${CCSM_DIR}/SRC \${CMAKE_CURRENT_BINARY_DIR}/ccsm)" >> $CMAKE_FILE
 else
     echo "CCSM already seems to be in the clang tools makefile"
