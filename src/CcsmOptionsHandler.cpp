@@ -477,7 +477,7 @@ void CcsmOptionsHandler::analyseCompilerArgs(const char* const exeName)
 			std::unique_ptr<clang::driver::Compilation> C(TheDriver.BuildCompilation(Args));
 			const driver::JobList &Jobs = C->getJobs();
 			const driver::Command &Cmd = cast<driver::Command>(*Jobs.begin());
-			const driver::ArgStringList &CCArgs = Cmd.getArguments();
+			const llvm::opt::ArgStringList &CCArgs = Cmd.getArguments();
 			std::unique_ptr<CompilerInvocation> CI(new CompilerInvocation);
 			CompilerInvocation::CreateFromArgs(*CI,
 				const_cast<const char **>(CCArgs.data()),
