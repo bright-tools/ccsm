@@ -81,18 +81,18 @@ TranslationUnitFunctionLocator::TranslationUnitFunctionLocator(MetricOptions& p_
 
 void TranslationUnitFunctionLocator::addFunctionLocation(const clang::ASTContext* const p_context, const std::string& p_name, const clang::FunctionDecl * const p_func)
 {
-	// TODO: need to check if getLocEnd() is a macro location?
-	clang::SourceLocation endLoc = p_func->getBody()->getLocEnd();
-	clang::SourceLocation bodyStart = p_func->getBody()->getLocStart();
+	// TODO: need to check if getEndLoc() is a macro location?
+	clang::SourceLocation endLoc = p_func->getBody()->getEndLoc();
+	clang::SourceLocation bodyStart = p_func->getBody()->getBeginLoc();
 	clang::SourceLocation startLoc;
 
 	if (m_options.getPrototypesAreFileScope())
 	{
-		startLoc = p_func->getBody()->getLocStart();
+		startLoc = p_func->getBody()->getBeginLoc();
 	}
 	else
 	{
-		startLoc = p_func->getLocStart();
+		startLoc = p_func->getBeginLoc();
 	}
 
 	if (startLoc.isMacroID())

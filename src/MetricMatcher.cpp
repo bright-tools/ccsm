@@ -346,7 +346,7 @@ bool MetricVisitor::isExprConstantAndFalse( const clang::Expr* const p_expr )
 
 MetricVisitor::PathResults MetricVisitor::getOtherPathCount(const clang::Stmt* const p_stmt, uint16_t depth)
 {
-	const clang::SourceLocation startLoc = p_stmt->getLocStart();
+	const clang::SourceLocation startLoc = p_stmt->getBeginLoc();
 	PathResults ret_val;
 	ret_val.path_has_return = false;
 	ret_val.path_count = 1;
@@ -463,10 +463,10 @@ MetricVisitor::PathResults MetricVisitor::getOtherPathCount(const clang::Stmt* c
 
 void MetricVisitor::CalcFnLineCnt(clang::FunctionDecl *func)
 {
-	clang::SourceLocation bodyStartLoc = func->getBody()->getLocStart();
-	clang::SourceLocation bodyEndLoc = func->getBody()->getLocEnd();
-	clang::SourceLocation defStartLoc = func->getLocStart();
-	clang::SourceLocation defEndLoc = func->getLocEnd();
+	clang::SourceLocation bodyStartLoc = func->getBody()->getBeginLoc();
+	clang::SourceLocation bodyEndLoc = func->getBody()->getEndLoc();
+	clang::SourceLocation defStartLoc = func->getBeginLoc();
+	clang::SourceLocation defEndLoc = func->getEndLoc();
 	clang::SourceManager& SM = SOURCE_MANAGER;
 
 	if (bodyStartLoc.isMacroID())
@@ -503,7 +503,7 @@ void MetricVisitor::CalcFnLineCnt(clang::FunctionDecl *func)
 
 bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) 
 {
-	const clang::SourceLocation funcStartLoc = func->getLocStart();
+	const clang::SourceLocation funcStartLoc = func->getBeginLoc();
 
 #if defined( DEBUG_FN_TRACE_OUTOUT )
 	std::cout << "VisitFunctionDecl - CONTEXT " << m_currentFileName << std::endl;
@@ -515,7 +515,7 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func)
 	/* Function body attached? */
 	if( func->doesThisDeclarationHaveABody() )
 	{
-		const clang::SourceLocation funcEndLoc = func->getLocEnd();
+		const clang::SourceLocation funcEndLoc = func->getEndLoc();
 
 		UpdateCurrentFileName( funcEndLoc );
 
@@ -533,7 +533,7 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func)
 		if( ShouldIncludeFile( m_currentFileName ) &&
 			m_options.ShouldIncludeFunction( m_currentFunctionName ) )
 		{
-			const clang::SourceLocation startLoc = func->getLocStart();
+			const clang::SourceLocation startLoc = func->getBeginLoc();
 
 			/* Ensure that there is a file-level sub-unit */
 			MetricUnit* fileUnit = m_topUnit->getSubUnit( m_currentFileName, METRIC_UNIT_FILE );
@@ -682,7 +682,7 @@ bool MetricVisitor::VisitCastExpr(clang::CastExpr *p_castExp)
 
 bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) 
 {
-	const clang::SourceLocation varLoc = p_varDec->getLocStart();
+	const clang::SourceLocation varLoc = p_varDec->getBeginLoc();
 
 #if defined( DEBUG_FN_TRACE_OUTOUT )
 	std::cout << "VisitVarDecl : CONTEXT " << m_currentFileName << "::" << m_currentFunctionName << std::endl;
@@ -824,7 +824,7 @@ bool MetricVisitor::VisitForStmt(clang::ForStmt *p_forSt)
 
 	if( m_currentUnit )
 	{
-		const clang::SourceLocation startLoc = p_forSt->getLocStart();
+		const clang::SourceLocation startLoc = p_forSt->getBeginLoc();
 		m_currentUnit->setMax( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_forSt, m_astContext ), getFileAndLine( SOURCE_MANAGER, &startLoc ) );
 		IncrementMetric(m_currentUnit, METRIC_TYPE_LOOPS, &startLoc);
 
@@ -837,7 +837,7 @@ bool MetricVisitor::VisitLabelStmt(clang::LabelStmt *p_LabelSt)
 {
 	if( m_currentUnit )
 	{
-		const clang::SourceLocation startLoc = p_LabelSt->getLocStart();
+		const clang::SourceLocation startLoc = p_LabelSt->getBeginLoc();
 		IncrementMetric(m_currentUnit, METRIC_TYPE_LABEL_NAME, &startLoc);
 	}
     return true;
@@ -850,7 +850,7 @@ bool MetricVisitor::VisitWhileStmt(clang::WhileStmt *p_whileSt)
 #endif
 	if (m_currentUnit)
 	{
-		const clang::SourceLocation startLoc = p_whileSt->getLocStart();
+		const clang::SourceLocation startLoc = p_whileSt->getBeginLoc();
 
 		/* TODO: accessing m_currentUnit here doesn't seem right - IncrementMetric provides various protections */
 		m_currentUnit->setMax( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_whileSt, m_astContext ), getFileAndLine( SOURCE_MANAGER, &startLoc ) );
@@ -868,7 +868,7 @@ bool MetricVisitor::VisitDoStmt(clang::DoStmt *p_doSt)
 #endif
 	if (m_currentUnit)
 	{
-		const clang::SourceLocation startLoc = p_doSt->getLocStart();
+		const clang::SourceLocation startLoc = p_doSt->getBeginLoc();
 
 		/* TODO: accessing m_currentUnit here doesn't seem right - IncrementMetric provides various protections */
 		m_currentUnit->setMax( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_doSt, m_astContext ), getFileAndLine( SOURCE_MANAGER, &startLoc ) );
@@ -887,7 +887,7 @@ bool MetricVisitor::VisitCallExpr(clang::CallExpr *p_callExpr)
 
 	if( m_currentUnit )
 	{
-		const clang::SourceLocation startLoc = p_callExpr->getLocStart();
+		const clang::SourceLocation startLoc = p_callExpr->getBeginLoc();
 
 		clang::Decl* calleeDecl = p_callExpr->getCalleeDecl();
 		if (calleeDecl)
@@ -921,7 +921,7 @@ bool MetricVisitor::VisitCallExpr(clang::CallExpr *p_callExpr)
 					{
 						/* Called function is visible from the current position */
 
-						clang::SourceLocation calleeBodyLocation = calleeBody->getLocStart();
+						clang::SourceLocation calleeBodyLocation = calleeBody->getBeginLoc();
 						std::string name = getDefResolvedFileName(calleeBodyLocation);
 
 #if defined( DEBUG_FN_TRACE_OUTOUT )
@@ -998,7 +998,7 @@ bool MetricVisitor::VisitSwitchStmt(clang::SwitchStmt *p_switchSt)
 {
 	if( m_currentUnit )
 	{
-		const clang::SourceLocation startLoc = p_switchSt->getLocStart();
+		const clang::SourceLocation startLoc = p_switchSt->getBeginLoc();
 
 		/* TODO: accessing m_currentUnit here doesn't seem right - IncrementMetric provides various protections */
 		m_currentUnit->setMax( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_switchSt, m_astContext ), getFileAndLine( SOURCE_MANAGER, &startLoc ) );
@@ -1016,7 +1016,7 @@ bool MetricVisitor::VisitConditionalOperator(clang::ConditionalOperator *p_condO
 #endif
 	if( m_currentUnit )
 	{
-		const clang::SourceLocation startLoc = p_condOp->getLocStart();
+		const clang::SourceLocation startLoc = p_condOp->getBeginLoc();
 		IncrementMetric(m_currentUnit, METRIC_TYPE_OPERATOR_TERNARY, &startLoc);
 	}
     return true;
@@ -1044,7 +1044,7 @@ bool MetricVisitor::VisitUnaryExprOrTypeTraitExpr( clang::UnaryExprOrTypeTraitEx
 {
 	if( m_currentUnit )
 	{
-		const clang::SourceLocation startLoc = p_unaryExpr->getLocStart();
+		const clang::SourceLocation startLoc = p_unaryExpr->getBeginLoc();
 		switch (p_unaryExpr->getKind())
 		{
 			case clang::UETT_AlignOf:
@@ -1067,7 +1067,7 @@ bool MetricVisitor::VisitExplicitCastExpr(clang::ExplicitCastExpr *p_castExpr)
 {
 	if( m_currentUnit )
 	{
-		const clang::SourceLocation startLoc = p_castExpr->getLocStart();
+		const clang::SourceLocation startLoc = p_castExpr->getBeginLoc();
 		IncrementMetric(m_currentUnit, METRIC_TYPE_OPERATOR_CAST,&startLoc);
 	}
 	return true;
@@ -1077,7 +1077,7 @@ bool MetricVisitor::VisitMemberExpr( clang::MemberExpr* p_memberExpr )
 {
 	if( m_currentUnit )
 	{
-		const clang::SourceLocation startLoc = p_memberExpr->getLocStart();
+		const clang::SourceLocation startLoc = p_memberExpr->getBeginLoc();
 		if (p_memberExpr->isArrow())
 		{
 			IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_MEMBER_ACCESS_POINTER, &startLoc );
@@ -1094,7 +1094,7 @@ bool MetricVisitor::VisitArraySubscriptExpr (clang::ArraySubscriptExpr *p_subs)
 {
 	if( m_currentUnit )
 	{
-		const clang::SourceLocation startLoc = p_subs->getLocStart();
+		const clang::SourceLocation startLoc = p_subs->getBeginLoc();
 
 		IncrementMetric( m_currentUnit, METRIC_TYPE_OPERATOR_ARRAY_SUBSCRIPT, &startLoc );
 	}
@@ -1105,7 +1105,7 @@ bool MetricVisitor::VisitUnaryOperator(clang::UnaryOperator *p_uOp)
 {
 	if( m_currentUnit )
 	{
-		const clang::SourceLocation startLoc = p_uOp->getLocStart();
+		const clang::SourceLocation startLoc = p_uOp->getBeginLoc();
 
 		switch( p_uOp->getOpcode() )
 		{
@@ -1163,7 +1163,7 @@ bool MetricVisitor::VisitBinaryOperator(clang::BinaryOperator *p_binOp)
 {
 	if( m_currentUnit )
 	{
-		const clang::SourceLocation startLoc = p_binOp->getLocStart();
+		const clang::SourceLocation startLoc = p_binOp->getBeginLoc();
 
 		std::map<clang::BinaryOperator::Opcode, MetricType_e>::const_iterator it = binaryOperatorToMetricMap.find(p_binOp->getOpcode());
 		if (it != binaryOperatorToMetricMap.end())
@@ -1185,7 +1185,7 @@ bool MetricVisitor::VisitStmt(clang::Stmt *p_statement)
 {
 	if (m_currentUnit)
 	{
-		const clang::SourceLocation startLoc = p_statement->getLocStart();
+		const clang::SourceLocation startLoc = p_statement->getBeginLoc();
 
 		switch (p_statement->getStmtClass())
 		{
@@ -1232,7 +1232,7 @@ bool MetricVisitor::VisitIfStmt(clang::IfStmt *p_ifSt)
 #if defined( DEBUG_FN_TRACE_OUTOUT )
 	std::cout << "VisitIfStmt - Recorded" << std::endl;
 #endif
-	const clang::SourceLocation startLoc = p_ifSt->getLocStart();
+	const clang::SourceLocation startLoc = p_ifSt->getBeginLoc();
 
 		/* TODO: accessing m_currentUnit here doesn't seem right - IncrementMetric provides various protections */
 		m_currentUnit->setMax( METRIC_TYPE_NESTING_LEVEL, getControlDepth( p_ifSt, m_astContext ), getFileAndLine( SOURCE_MANAGER, &startLoc ) );
@@ -1360,7 +1360,7 @@ void MetricVisitor::CountStatements(const clang::Stmt* const p_stmt)
 {
 	if (p_stmt != NULL)
 	{
-		const clang::SourceLocation startLoc = p_stmt->getLocStart();
+		const clang::SourceLocation startLoc = p_stmt->getBeginLoc();
 
 		switch (p_stmt->getStmtClass())
 		{
