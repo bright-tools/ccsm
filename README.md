@@ -471,6 +471,16 @@ sub-directory of the clone.
 After that, follow the remainder of the instructions for building Clang.  CCSM
 should be build as part of the complete Clang build.
 
+Quick Start
+-----------
+
+A script within the repo may help get you to the stage where you can build the code:
+
+```
+git clone https://github.com/bright-tools/ccsm.git
+./ccsm/utils/vagrant/buildit.sh ccsm
+```
+
 Code Structure
 ==============
 
