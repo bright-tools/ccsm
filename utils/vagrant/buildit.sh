@@ -57,7 +57,7 @@ else
     echo "CCSM already seems to be in the clang tools makefile"
 fi
 
-cmake -G "Unix Makefiles" --build build llvm
+(mkdir -p build; cd build; cmake -G "Unix Makefiles" llvm)
 make -C build/tools/clang/tools/ccsm -j $(nproc --all)
 
 exit 0
