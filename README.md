@@ -477,7 +477,7 @@ Quick Start
 A script within the repo may help get you to the stage where you can build the code:
 
 ```
-git clone https://github.com/bright-tools/ccsm.git
+git clone --recurse-submodules https://github.com/bright-tools/ccsm.git
 ./ccsm/utils/vagrant/buildit.sh ccsm
 ```
 
