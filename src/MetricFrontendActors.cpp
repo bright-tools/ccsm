@@ -61,10 +61,10 @@ ASTMetricFrontendActionFactory::~ASTMetricFrontendActionFactory()
 #include <iostream>
 
 std::unique_ptr<clang::ASTConsumer> ASTMetricFrontendActionFactory::CreateASTConsumer(clang::CompilerInstance &CI, llvm::StringRef file) {
-	std::unique_ptr<clang::ASTConsumer> ret_val = llvm::make_unique<MetricASTConsumer>(CI,m_topUnit,m_options,m_srcMap);
+	std::unique_ptr<clang::ASTConsumer> ret_val = std::make_unique<MetricASTConsumer>(CI,m_topUnit,m_options,m_srcMap);
 	MetricPPCustomer* customer = new MetricPPCustomer( m_topUnit, m_commentFileList, m_options );
     CI.getPreprocessor().addCommentHandler(customer);
-    CI.getPreprocessor().addPPCallbacks(llvm::make_unique<MetricPPCustomer>(*customer));
+    CI.getPreprocessor().addPPCallbacks(std::make_unique<MetricPPCustomer>(*customer));
     return ret_val;
 }
 
