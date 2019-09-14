@@ -479,11 +479,7 @@ void CcsmOptionsHandler::analyseCompilerArgs(const char* const exeName)
 			const driver::Command &Cmd = cast<driver::Command>(*Jobs.begin());
 			const llvm::opt::ArgStringList &CCArgs = Cmd.getArguments();
 			std::unique_ptr<CompilerInvocation> CI(new CompilerInvocation);
-			CompilerInvocation::CreateFromArgs(*CI,
-				const_cast<const char **>(CCArgs.data()),
-				const_cast<const char **>(CCArgs.data()) +
-				CCArgs.size(),
-				Diags);
+            CompilerInvocation::CreateFromArgs(*CI, CCArgs, Diags);
 
 			if ((*CI).getLangOpts()->C11)
 			{
