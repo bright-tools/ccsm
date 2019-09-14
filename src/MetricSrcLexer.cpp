@@ -49,7 +49,7 @@ void MetricSrcLexer::LexSources( clang::CompilerInstance& p_ci, const Translatio
 	m_lastToken.setKind( clang::tok::eof );
 	PP.EnterMainSourceFile();
 	PP.SetCommentRetentionState(true,true);
-	PP.addPPCallbacks( llvm::make_unique<MetricPPIncludeHandler>( m_options, SM, m_currentFileName ) );
+	PP.addPPCallbacks( std::make_unique<MetricPPIncludeHandler>( m_options, SM, m_currentFileName ) );
 	clang::SourceLocation fnStart;
 	clang::SourceLocation fnEnd;
 	m_currentFileName = SM.getFileEntryForID( SM.getMainFileID() )->getName();
