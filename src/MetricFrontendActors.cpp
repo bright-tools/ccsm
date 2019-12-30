@@ -79,8 +79,8 @@ class ASTFrontendActionFactory : public clang::tooling::FrontendActionFactory {
 		 : clang::tooling::FrontendActionFactory(), m_options(p_options), m_topUnit(p_topUnit), m_srcMap(p_srcMap), m_commentFileList(p_commentFileList)
 	 {
 	 }
-	 clang::FrontendAction *create() override { 
-		 return new ASTMetricFrontendActionFactory( m_options, m_topUnit, m_srcMap, m_commentFileList ); 
+     std::unique_ptr <clang::FrontendAction> create() override {
+         return std::make_unique<ASTMetricFrontendActionFactory>( m_options, m_topUnit, m_srcMap, m_commentFileList );
 	 }
 	 virtual ~ASTFrontendActionFactory()
 	 {
@@ -103,8 +103,8 @@ class PPFrontendActionFactory : public clang::tooling::FrontendActionFactory {
 	 {
 	 }
 
-	 clang::FrontendAction *create() override { 
-		 return new MetricPPConsumer( m_topUnit, m_options, m_srcMap, m_expanded ); 
+     std::unique_ptr <clang::FrontendAction> create() override {
+         return std::make_unique<MetricPPConsumer>( m_topUnit, m_options, m_srcMap, m_expanded );
 	 }
 
 	 virtual ~PPFrontendActionFactory()
