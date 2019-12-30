@@ -78,7 +78,7 @@ Vagrant.configure(2) do |config|
     sudo sh -c 'echo "/swapfile none swap defaults 0 0" >> /etc/fstab'
 
     sudo apt-get update
-    sudo apt-get install -y subversion zlib1g-dev libtool python gcc cmake g++ git
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y zlib1g-dev libtool python gcc cmake g++ git
 
     if [ ! -d llvm ]; then
         sudo -u vagrant /vagrant/buildit.sh /ccsm

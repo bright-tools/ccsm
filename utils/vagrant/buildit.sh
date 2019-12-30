@@ -18,7 +18,7 @@ if [[ ! -d "$1/src" ]]; then
 fi
 
 function basicToolCheck {
-    TOOLS="cmake svn grep realpath nproc"
+    TOOLS="cmake git grep realpath nproc"
     for TOOL in $TOOLS; do
         echo "Checking for $TOOL"
         if [[ ! -x `which $TOOL` ]]; then
@@ -33,19 +33,12 @@ basicToolCheck
 LLVM_DIR=llvm
 
 if [ -d $LLVM_DIR ]; then
-    svn up $LLVM_DIR
+    git -C $LLVM_DIR pull
 else
-    svn co http://llvm.org/svn/llvm-project/llvm/trunk $LLVM_DIR
+    git clone https://github.com/llvm/llvm-project.git $LLVM_DIR
 fi
 
-CLANG_DIR=$LLVM_DIR/tools/clang
-
-if [ -d $CLANG_DIR ]; then
-    svn up $CLANG_DIR
-else
-    svn co http://llvm.org/svn/llvm-project/cfe/trunk $CLANG_DIR
-fi
-
+CLANG_DIR=$LLVM_DIR/clang
 CMAKE_FILE=$CLANG_DIR/tools/CMakeLists.txt
 
 if [ $(grep -c CCSM_DIR $CMAKE_FILE) -lt 1 ]; then
@@ -57,7 +50,7 @@ else
     echo "CCSM already seems to be in the clang tools makefile"
 fi
 
-(mkdir -p build; cd build; cmake -G "Unix Makefiles" ../llvm)
+(mkdir -p build; cd build; cmake -G "Unix Makefiles" ../llvm/llvm -DLLVM_ENABLE_PROJECTS='clang;clang-tools-extra')
 make -C build/tools/clang/tools/ccsm -j $(nproc --all)
 
 exit 0
