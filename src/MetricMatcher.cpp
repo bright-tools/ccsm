@@ -262,8 +262,8 @@ MetricVisitor::PathResults MetricVisitor::getIfPathCount(const clang::IfStmt* co
 	return ret_val;
 }
 
-/* This function determines the number of unique paths through the specified code.  It also determines whether each and every
-   path leads to a return keyword or not.
+/* This function determines the number of unique paths through the specified code.  It counts paths that lead to a return keyword
+   separately from paths that do not.
 */
 MetricVisitor::PathResults MetricVisitor::getPathCount(const clang::Stmt* const p_stmt, uint16_t depth)
 {
@@ -282,6 +282,7 @@ MetricVisitor::PathResults MetricVisitor::getPathCount(const clang::Stmt* const 
 	if (p_stmt != nullptr)
 	{
 		const uint16_t thisDepth = depth + 1;
+		const clang::SourceLocation startLoc = p_stmt->getBeginLoc();
 
 		switch (p_stmt->getStmtClass())
 		{
@@ -310,6 +311,16 @@ MetricVisitor::PathResults MetricVisitor::getPathCount(const clang::Stmt* const 
 					ret_val.path_regular += 1;
 				}
 				break;
+			case clang::Stmt::StmtClass::ReturnStmtClass:
+				IncrementMetric(m_currentUnit, METRIC_TYPE_RETURNPOINTS, &startLoc);
+				ret_val.path_return  = 1;
+				ret_val.path_regular = 0;
+
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+				std::cout << blanks << "getPathCount - Return point found" << std::endl;
+#endif
+				break;
+
 			default:
 				ret_val = getOtherPathCount(p_stmt, thisDepth);
 				break;
@@ -353,99 +364,85 @@ MetricVisitor::PathResults MetricVisitor::getOtherPathCount(const clang::Stmt* c
 	std::string blanks(depth, ' ');
 #endif
 
-	if (p_stmt->getStmtClass() == clang::Stmt::StmtClass::ReturnStmtClass)
+	bool skipAllSubsequent = false;
+	// Iterate all child statements
+	for (clang::Stmt::const_child_iterator it = p_stmt->child_begin();
+		it != p_stmt->child_end();
+		it++)
 	{
+		clang::Stmt::StmtClass clss = (*it)->getStmtClass();
+		PathResults sub_results;
 
-		/* No need to process any following statements, as they're inaccessible 
-		   TODO: unless there's a labelled statement that can receive a goto jump */
-		IncrementMetric(m_currentUnit, METRIC_TYPE_RETURNPOINTS, &startLoc);
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-		std::cout << blanks << "getOtherPathCount - Return point found" << std::endl;
+		std::cout << blanks << "getOtherPathCount - processing " << (*it)->getStmtClassName() << std::endl;
 #endif
-		ret_val.path_return  = 1;
-		ret_val.path_regular = 0;
-	}
-	else
-	{
-		bool skipAllSubsequent = false;
-		// Iterate all child statements
-		for (clang::Stmt::const_child_iterator it = p_stmt->child_begin();
-			it != p_stmt->child_end();
-			it++)
+		if (skipAllSubsequent)
 		{
-			clang::Stmt::StmtClass clss = (*it)->getStmtClass();
-			PathResults sub_results;
-
-#if defined( DEBUG_FN_TRACE_OUTOUT )
-			std::cout << blanks << "getOtherPathCount - processing " << (*it)->getStmtClassName() << std::endl;
-#endif
-			if (skipAllSubsequent)
+			if (clss == clang::Stmt::LabelStmtClass)
 			{
-				if (clss == clang::Stmt::LabelStmtClass)
-				{
-					skipAllSubsequent = false;
-				}
-#if defined( DEBUG_FN_TRACE_OUTOUT )
-				std::cout << blanks << "getOtherPathCount - skipping " << std::endl;
-#endif
+				skipAllSubsequent = false;
 			}
-			else 
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+			std::cout << blanks << "getOtherPathCount - skipping " << std::endl;
+#endif
+		}
+		else 
+		{
+			// For statement classes which have an effect on the path
+			switch (clss)
 			{
-				// For statement classes which have an effect on the path
-				switch (clss)
+			case clang::Stmt::StmtClass::GotoStmtClass:
+			case clang::Stmt::StmtClass::BreakStmtClass:
+			case clang::Stmt::StmtClass::ContinueStmtClass:
+				/* Subsequent statements are inaccessible unless there's a label 
+				   TODO: what about if the label is within a sub-tree? */
+				skipAllSubsequent = true;
+				break;
+			case clang::Stmt::StmtClass::ReturnStmtClass:
+				skipAllSubsequent = true;
+				IncrementMetric(m_currentUnit, METRIC_TYPE_RETURNPOINTS, &startLoc);
+
+				ret_val.path_return  = ret_val.path_regular;
+				ret_val.path_regular = 0;
+
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+				std::cout << blanks << "getOtherPathCount - Return point found" << std::endl;
+#endif
+
+				break;
+			case clang::Stmt::StmtClass::IfStmtClass:
+			case clang::Stmt::StmtClass::SwitchStmtClass:
+			case clang::Stmt::StmtClass::CompoundStmtClass:
+			case clang::Stmt::StmtClass::WhileStmtClass:
+			case clang::Stmt::StmtClass::DoStmtClass:
+			case clang::Stmt::StmtClass::ForStmtClass:
+				sub_results = getPathCount(*it, depth);
+				if (sub_results.path_regular == 0)
 				{
-				case clang::Stmt::StmtClass::GotoStmtClass:
-				case clang::Stmt::StmtClass::BreakStmtClass:
-				case clang::Stmt::StmtClass::ContinueStmtClass:
-					/* Subsequent statements are inaccessible unless there's a label 
-					   TODO: what about if the label is within a sub-tree? */
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+					std::cout << blanks << "getOtherPathCount - Path has a return statement" << std::endl;
+#endif
+					/* All paths had a return statement ... from now on, code should not be reachable */
 					skipAllSubsequent = true;
-					break;
-				case clang::Stmt::StmtClass::ReturnStmtClass:
-					skipAllSubsequent = true;
-					IncrementMetric(m_currentUnit, METRIC_TYPE_RETURNPOINTS, &startLoc);
-
-					ret_val.path_return  = ret_val.path_regular;
-					ret_val.path_regular = 0;
-
-#if defined( DEBUG_FN_TRACE_OUTOUT )
-					std::cout << blanks << "getOtherPathCount - Return point found" << std::endl;
-#endif
-
-					break;
-				case clang::Stmt::StmtClass::IfStmtClass:
-				case clang::Stmt::StmtClass::SwitchStmtClass:
-				case clang::Stmt::StmtClass::CompoundStmtClass:
-				case clang::Stmt::StmtClass::WhileStmtClass:
-				case clang::Stmt::StmtClass::DoStmtClass:
-				case clang::Stmt::StmtClass::ForStmtClass:
-					sub_results = getPathCount(*it, depth);
-					if (sub_results.path_regular == 0)
-					{
-#if defined( DEBUG_FN_TRACE_OUTOUT )
-						std::cout << blanks << "getOtherPathCount - Path has a return statement" << std::endl;
-#endif
-						/* All paths had a return statement ... from now on, code should not be reachable */
-						skipAllSubsequent = true;
-					}
-					else
-					{
-#if defined( DEBUG_FN_TRACE_OUTOUT )
-						std::cout << blanks << "getOtherPathCount - Path is missing a return statement" << std::endl;
-#endif
-					}
-					ret_val.path_return  += ret_val.path_regular * sub_results.path_return;
-					ret_val.path_regular *= sub_results.path_regular;
-					break;
-				default:
-					break;
 				}
+				else
+				{
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-				std::cout << blanks << "getOtherPathCount - Updated: regular - " << ret_val.path_regular << ", return " << ret_val.path_return << std::endl;
+					std::cout << blanks << "getOtherPathCount - Path is missing a return statement" << std::endl;
 #endif
+				}
+				ret_val.path_return  += ret_val.path_regular * sub_results.path_return;
+				ret_val.path_regular *= sub_results.path_regular;
+				break;
+			default:
+				break;
 			}
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+			std::cout << blanks << "getOtherPathCount - Updated: regular - " << ret_val.path_regular << ", return " << ret_val.path_return << std::endl;
+#endif
 		}
 	}
+
 #if defined( DEBUG_FN_TRACE_OUTOUT )
 	std::cout << blanks << "getOtherPathCount - Done: regular - " << ret_val.path_regular << ", return " << ret_val.path_return << std::endl;
 #endif
