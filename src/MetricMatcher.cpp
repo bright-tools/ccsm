@@ -151,7 +151,7 @@ MetricVisitor::PathResults MetricVisitor::getSwitchPathCount(const clang::Switch
 				if (subStmt != nullptr)
 				{
 					PathResults sub_count = getPathCount(subStmt, depth);
-					pathSum.path_regular += sub_count.path_regular;
+					pathSum.path_regular += sub_count.path_regular + sub_count.path_break;
 					pathSum.path_return  += sub_count.path_return;
 					firstSubst = false;
 				}
@@ -292,19 +292,19 @@ MetricVisitor::PathResults MetricVisitor::getPathCount(const clang::Stmt* const 
 				if( !isExprConstantAndFalse( static_cast<const clang::WhileStmt*>( p_stmt )->getCond() ) )
 				{
 					ret_val = getPathCount( ( static_cast<const clang::WhileStmt*>( p_stmt )->getBody() ), thisDepth );
-					ret_val.path_regular += 1;
+					ret_val.path_regular += ret_val.path_break + 1;
 				}
 				break;
 			case clang::Stmt::StmtClass::ForStmtClass:
 				ret_val = getPathCount((static_cast<const clang::ForStmt*>(p_stmt)->getBody()), thisDepth);
-				ret_val.path_regular += 1;
+				ret_val.path_regular += ret_val.path_break + 1;
 				break;
 			case clang::Stmt::StmtClass::DoStmtClass:
 				ret_val = getPathCount((static_cast<const clang::DoStmt*>(p_stmt)->getBody()), thisDepth);
 				/* If the condition is constant and false, this isn't a junction point, so don't increase the path count */
 				if( !isExprConstantAndFalse( static_cast<const clang::DoStmt*>( p_stmt )->getCond() ) )
 				{
-					ret_val.path_regular += 1;
+					ret_val.path_regular += ret_val.path_break + 1;
 				}
 				break;
 			case clang::Stmt::StmtClass::ReturnStmtClass:
@@ -315,6 +315,10 @@ MetricVisitor::PathResults MetricVisitor::getPathCount(const clang::Stmt* const 
 #if defined( DEBUG_FN_TRACE_OUTOUT )
 				std::cout << blanks << "getPathCount - Return point found" << std::endl;
 #endif
+				break;
+			case clang::Stmt::StmtClass::BreakStmtClass:
+				ret_val.path_break  = 1;
+				ret_val.path_regular = 0;
 				break;
 
 			default:
@@ -386,16 +390,25 @@ MetricVisitor::PathResults MetricVisitor::getOtherPathCount(const clang::Stmt* c
 			switch (clss)
 			{
 			case clang::Stmt::StmtClass::GotoStmtClass:
+				/* Subsequent statements are inaccessible unless there's a label 
+				   TODO: what about if the label is within a sub-tree? */
+				skipAllSubsequent = true;
+				break;
 			case clang::Stmt::StmtClass::BreakStmtClass:
 			case clang::Stmt::StmtClass::ContinueStmtClass:
 				/* Subsequent statements are inaccessible unless there's a label 
 				   TODO: what about if the label is within a sub-tree? */
 				skipAllSubsequent = true;
+				// all paths until here are return paths
+				ret_val.path_break = ret_val.path_regular;
+				ret_val.path_regular = 0;
 				break;
 			case clang::Stmt::StmtClass::ReturnStmtClass:
+				/* Subsequent statements are inaccessible unless there's a label 
+				   TODO: what about if the label is within a sub-tree? */
 				skipAllSubsequent = true;
 				IncrementMetric(m_currentUnit, METRIC_TYPE_RETURNPOINTS, &startLoc);
-
+				// all paths until here are break paths
 				ret_val.path_return  = ret_val.path_regular;
 				ret_val.path_regular = 0;
 
@@ -414,18 +427,19 @@ MetricVisitor::PathResults MetricVisitor::getOtherPathCount(const clang::Stmt* c
 				if (sub_results.path_regular == 0)
 				{
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-					std::cout << blanks << "getOtherPathCount - Path has a return statement" << std::endl;
+					std::cout << blanks << "getOtherPathCount - Path only has return/break/continue ending" << std::endl;
 #endif
-					/* All paths had a return statement ... from now on, code should not be reachable */
+					/* All paths had a break/continue/return statement ... from now on, code should not be reachable */
 					skipAllSubsequent = true;
 				}
 				else
 				{
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-					std::cout << blanks << "getOtherPathCount - Path is missing a return statement" << std::endl;
+					std::cout << blanks << "getOtherPathCount - Path has at least one regular path" << std::endl;
 #endif
 				}
 				ret_val.path_return  += ret_val.path_regular * sub_results.path_return;
+				ret_val.path_break   += ret_val.path_regular * sub_results.path_break;
 				ret_val.path_regular *= sub_results.path_regular;
 				break;
 			default:
