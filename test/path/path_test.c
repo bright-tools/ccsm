@@ -193,6 +193,7 @@ void path_016_expected_8(int a, int b){
     }
 }
 
+
 void path_017_expected_5(int a, int b){
     switch (a){
         case 0:
@@ -239,10 +240,16 @@ void path_019_expected_4(int a, int b){
     }
 }
 
-void path_020_expected_6(int a, int b){
+void path_020_expected_7(int a, int b){
     if (a > 10) {
         while (a){
             if (b == 1){
+                continue;
+            }
+            if (b == 2){
+                continue;
+            }
+            if (b == 3){
                 continue;
             }
 
@@ -277,7 +284,6 @@ void path_021_expected_7(int a, int b){
     }
 }
 
-
 void path_022_expected_10(int a, int b){
     switch (a){
         case 0:
@@ -291,6 +297,97 @@ void path_022_expected_10(int a, int b){
     }
     if (b > 0){
         b--;
+    }
+}
+
+void path_023_expected_3(int a, int b, int c){
+    switch (a){
+        case 0:
+            if (b) {
+            }
+            break;
+    }
+}
+
+void path_024_expected_5(int a, int b, int c){
+    switch (a){
+        case 0:
+            if (b){
+            }
+            if (c){
+            }
+            break;
+        case 1:
+        default:
+            break;
+    }
+}
+
+void path_025_expected_5(int a, int b, int c){
+    switch (a){
+        case 0: {
+            if (b){
+            }
+            if (c){
+            }
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+void path_026_expected_9(int a, int b, int c){
+    switch (a){
+        case 0:
+            return;
+        case 1:
+            return;
+        case 2:
+            return;
+        case 3:
+            return;
+        case 4:
+            return;
+        default:
+            break;
+    }
+    if (b){
+
+    } else {
+
+    }
+    if (c){
+
+    } else {
+
+    }
+}
+
+void path_027_expected_24(int a, int b, int c){
+    switch (a){
+        case 0:
+            break;
+        case 1:
+            break;
+        case 2:
+            break;
+        case 3:
+            break;
+        case 4:
+            break;
+        default:
+            break;
+    }
+    if (b){
+
+    } else {
+
+    }
+    if (c){
+
+    } else {
+
     }
 }
 
