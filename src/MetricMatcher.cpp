@@ -196,10 +196,7 @@ MetricVisitor::PathResults MetricVisitor::getSwitchPathCount(const clang::Switch
 
 MetricVisitor::PathResults MetricVisitor::getIfPathCount(const clang::IfStmt* const p_stmt, uint16_t depth)
 {
-	MetricVisitor::PathResults ret_val;
-	MetricUnit::counter_t pathSum_regular = 0;
-	MetricUnit::counter_t pathSum_return = 0;
-	MetricUnit::counter_t pathSum_break = 0;
+	MetricVisitor::PathResults ret_val = { 0, 0, 0};
 	bool has_return = false;
 	const clang::IfStmt* ifStmt = p_stmt;
 
@@ -250,14 +247,11 @@ MetricVisitor::PathResults MetricVisitor::getIfPathCount(const clang::IfStmt* co
 				ifStmt = nullptr;
 			}
 
-			pathSum_regular += (thenCount.path_regular + elseCount.path_regular);
-			pathSum_return  += (thenCount.path_return  + elseCount.path_return);
-			pathSum_break   += (thenCount.path_break   + elseCount.path_break);
+			ret_val.path_regular += (thenCount.path_regular + elseCount.path_regular);
+			ret_val.path_return  += (thenCount.path_return  + elseCount.path_return);
+			ret_val.path_break   += (thenCount.path_break   + elseCount.path_break);
 		}
 	}
-	ret_val.path_regular = pathSum_regular;
-	ret_val.path_return  = pathSum_return;
-	ret_val.path_break   = pathSum_break;
 
 #if defined( DEBUG_FN_TRACE_OUTOUT )
 	std::cout << blanks << "getIfPathCount - Updated: regular " << ret_val.path_regular << ", return " << ret_val.path_return << ", break " << ret_val.path_break << std::endl;
