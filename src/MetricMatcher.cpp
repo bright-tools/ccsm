@@ -120,7 +120,7 @@ void MetricVisitor::UpdateCurrentFileName( const clang::SourceLocation &loc )
 
 MetricVisitor::PathResults MetricVisitor::getSwitchPathCount(const clang::SwitchStmt* const p_stmt, uint16_t depth)
 {
-	MetricVisitor::PathResults pathSum = { 0, 0 };
+	MetricVisitor::PathResults pathSum = { 0, 0, 0 };
 	// If the switch is based on an enum and all enum values are covered then effectively there should be no need for
 	//  a default
 	// TODO: Not necessarily true - just because an enum is being used it does not stop other values
@@ -172,7 +172,7 @@ MetricVisitor::PathResults MetricVisitor::getSwitchPathCount(const clang::Switch
 			switchCase = switchCase->getNextSwitchCase();
 
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-			std::cout << blanks << "getSwitchPathCount - Updated: regular " << pathSum.path_regular << ", return " << pathSum.path_return << std::endl;
+			std::cout << blanks << "getSwitchPathCount - Updated: regular " << pathSum.path_regular << ", return " << pathSum.path_return << ", break " << pathSum.path_break << std::endl;
 #endif
 
 		} while (switchCase != nullptr);
@@ -188,7 +188,7 @@ MetricVisitor::PathResults MetricVisitor::getSwitchPathCount(const clang::Switch
 	}
 
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-	std::cout << blanks << "getSwitchPathCount - Done: regular " << pathSum.path_regular << ", return " << pathSum.path_return << std::endl;
+	std::cout << blanks << "getSwitchPathCount - Done: regular " << pathSum.path_regular << ", return " << pathSum.path_return << ", break " << pathSum.path_break << std::endl;
 #endif
 	
 	return pathSum;
@@ -199,6 +199,7 @@ MetricVisitor::PathResults MetricVisitor::getIfPathCount(const clang::IfStmt* co
 	MetricVisitor::PathResults ret_val;
 	MetricUnit::counter_t pathSum_regular = 0;
 	MetricUnit::counter_t pathSum_return = 0;
+	MetricUnit::counter_t pathSum_break = 0;
 	bool has_return = false;
 	const clang::IfStmt* ifStmt = p_stmt;
 
@@ -213,9 +214,9 @@ MetricVisitor::PathResults MetricVisitor::getIfPathCount(const clang::IfStmt* co
 		/* Loops across 'if', 'else if' and 'else' constructs */
 		while (ifStmt != nullptr)
 		{
-			MetricVisitor::PathResults thenCount = { 1, 0 };
+			MetricVisitor::PathResults thenCount = { 1, 0, 0 };
 			/* Default to one gives an count for an implicit else block in the case that there is not one in the code */
-			MetricVisitor::PathResults elseCount = { 1, 0 };
+			MetricVisitor::PathResults elseCount = { 1, 0, 0 };
 
 			/* Get the path count for the 'then' block */
 			thenCount = getPathCount(ifStmt->getThen(), depth);
@@ -234,7 +235,8 @@ MetricVisitor::PathResults MetricVisitor::getIfPathCount(const clang::IfStmt* co
 					ifStmt = static_cast<const clang::IfStmt*>(ifStmt->getElse());
 					/* No need to count an implicit else */
 					elseCount.path_regular = 0;
-					elseCount.path_return = 0;
+					elseCount.path_return  = 0;
+					elseCount.path_break   = 0;
 				}
 				else
 				{
@@ -250,13 +252,15 @@ MetricVisitor::PathResults MetricVisitor::getIfPathCount(const clang::IfStmt* co
 
 			pathSum_regular += (thenCount.path_regular + elseCount.path_regular);
 			pathSum_return  += (thenCount.path_return  + elseCount.path_return);
+			pathSum_break   += (thenCount.path_break   + elseCount.path_break);
 		}
 	}
 	ret_val.path_regular = pathSum_regular;
 	ret_val.path_return  = pathSum_return;
+	ret_val.path_break   = pathSum_break;
 
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-	std::cout << blanks << "getIfPathCount - Updated: regular " << ret_val.path_regular << ", return " << ret_val.path_return << std::endl;
+	std::cout << blanks << "getIfPathCount - Updated: regular " << ret_val.path_regular << ", return " << ret_val.path_return << ", break " << ret_val.path_break << std::endl;
 #endif
 
 	return ret_val;
@@ -267,10 +271,8 @@ MetricVisitor::PathResults MetricVisitor::getIfPathCount(const clang::IfStmt* co
 */
 MetricVisitor::PathResults MetricVisitor::getPathCount(const clang::Stmt* const p_stmt, uint16_t depth)
 {
-	PathResults ret_val;
+	PathResults ret_val = { 1, 0, 0 };
 	// TODO: Return this for null, too?
-	ret_val.path_regular = 1;
-	ret_val.path_return  = 0;
 	// TODO: Need to check that there are no GOTOs before doing the path count
 
 #if defined( DEBUG_FN_TRACE_OUTOUT )
@@ -329,7 +331,7 @@ MetricVisitor::PathResults MetricVisitor::getPathCount(const clang::Stmt* const 
 	}
 
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-	std::cout << blanks << "getPathCount - regular " << ret_val.path_regular << ", return " << ret_val.path_return << std::endl;
+	std::cout << blanks << "getPathCount - regular " << ret_val.path_regular << ", return " << ret_val.path_return << ", break " << ret_val.path_break << std::endl;
 #endif
 
 	return ret_val;
@@ -355,9 +357,7 @@ bool MetricVisitor::isExprConstantAndFalse( const clang::Expr* const p_expr )
 MetricVisitor::PathResults MetricVisitor::getOtherPathCount(const clang::Stmt* const p_stmt, uint16_t depth)
 {
 	const clang::SourceLocation startLoc = p_stmt->getBeginLoc();
-	PathResults ret_val;
-	ret_val.path_regular = 1;
-	ret_val.path_return  = 0;
+	PathResults ret_val = { 1, 0, 0 };
 	// TODO: Need to check that there are no GOTOs before doing the path count
 
 #if defined( DEBUG_FN_TRACE_OUTOUT )
@@ -438,13 +438,13 @@ MetricVisitor::PathResults MetricVisitor::getOtherPathCount(const clang::Stmt* c
 				break;
 			}
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-			std::cout << blanks << "getOtherPathCount - Updated: regular - " << ret_val.path_regular << ", return " << ret_val.path_return << std::endl;
+			std::cout << blanks << "getOtherPathCount - Updated: regular - " << ret_val.path_regular << ", return " << ret_val.path_return << ", break " << ret_val.path_break << std::endl;
 #endif
 		}
 	}
 
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-	std::cout << blanks << "getOtherPathCount - Done: regular - " << ret_val.path_regular << ", return " << ret_val.path_return << std::endl;
+	std::cout << blanks << "getOtherPathCount - Done: regular - " << ret_val.path_regular << ", return " << ret_val.path_return << ", break " << ret_val.path_break << std::endl;
 #endif
 
 	return ret_val;
