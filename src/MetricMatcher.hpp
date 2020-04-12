@@ -77,6 +77,8 @@ protected:
 	PathResults getOtherPathCount(const clang::Stmt* const p_stmt, uint16_t depth = 0);
 	PathResults getIfPathCount(const clang::IfStmt* const p_stmt, uint16_t depth = 0);
 	PathResults getSwitchPathCount(const clang::SwitchStmt* const p_stmt, uint16_t depth = 0);
+	void getSwitchPathCountHandleCaseEnd(MetricVisitor::PathResults &prev_case, MetricVisitor::PathResults &curr_case);
+	void incrementPathResults(MetricVisitor::PathResults &current, const MetricVisitor::PathResults &increment);
 	void CountStatements(const clang::Stmt* const p_stmt);
 	void CountStatements(const clang::Stmt::const_child_range& p_children);
 	void CalcFnLineCnt(clang::FunctionDecl *func);
