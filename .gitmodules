@@ -4,3 +4,9 @@
 [submodule "externals/minicsv"]
 	path = externals/minicsv
 	url = https://github.com/shaovoon/minicsv.git
+[submodule "externals/test/test_helper/bats-support"]
+	path = externals/test/test_helper/bats-support
+	url = https://github.com/ztombol/bats-support
+[submodule "externals/test/test_helper/bats-assert"]
+	path = externals/test/test_helper/bats-assert
+	url = https://github.com/bats-core/bats-assert
