@@ -1269,7 +1269,7 @@ bool MetricVisitor::TraverseStmt(clang::Stmt *p_stmt)
 		{
 			default:
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-				std::cout << "TraverseStmt - Unhandled stmt type " << stmtKind << "(" << p_stmt->getStmtClassName() <<  ")\r\n";
+				std::cout << "TraverseStmt - Unhandled stmt type " << stmtKind << "(" << p_stmt->getStmtClassName() <<  ")\n";
 #endif
 				break;
 		}
@@ -1315,7 +1315,7 @@ bool MetricVisitor::TraverseDecl(clang::Decl *p_decl)
 			break;
 		default:
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-			std::cout << "TraverseDecl - Unhandled decl type " << declKind << "(" << p_decl->getDeclKindName() << ")\r\n";
+			std::cout << "TraverseDecl - Unhandled decl type " << declKind << "(" << p_decl->getDeclKindName() << ")\n";
 #endif
 			break;
 	}

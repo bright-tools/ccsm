@@ -75,8 +75,7 @@ void MetricDumper::dump(const MetricUnit* const p_topLevel, const MetricOptions&
 			switch (p_fmt) {
 			case METRIC_DUMP_FORMAT_TREE:
 			case METRIC_DUMP_FORMAT_SPARSE_TREE:
-				// TODO: Should be endl
-				sep = "\r\n";
+				sep = "\n";
 				break;
 			case METRIC_DUMP_FORMAT_TSV:
 				sep = "\t";
