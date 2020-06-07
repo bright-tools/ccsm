@@ -37,4 +37,4 @@ for some of the metrics will vary slightly between the tools.
 Useful Links
 ============
 
-[1]: http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1256.pdf  "C99 Draft"
+1. [C99 Draft](http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1256.pdf)
