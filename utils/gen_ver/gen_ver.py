@@ -5,6 +5,8 @@ import os
 import sys
 import argparse
 
+if sys.version_info.major < 3:
+    raise Exception('Python3 is required for this script')
 
 def make_ver(git_dir=None):
 
