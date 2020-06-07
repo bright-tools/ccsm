@@ -19,6 +19,7 @@
 #include "MetricSrcExpandedLexer.hpp"
 
 #include "MetricASTConsumer.hpp"
+#include "clang/Basic/FileManager.h"
 #include "clang/Basic/SourceManager.h"
 
 MetricASTConsumer::MetricASTConsumer(clang::CompilerInstance &CI, MetricUnit* p_topUnit, MetricOptions& p_options, GlobalFunctionLocator*  p_fnLocator ) :
@@ -44,7 +45,7 @@ void MetricASTConsumer::HandleTranslationUnit(clang::ASTContext &Context)
 	std::cout << "HandleTranslationUnit::Processing " << SM.getFileEntryForID(SM.getMainFileID())->getName().str() << std::endl;
 #endif
 
-	TranslationUnitFunctionLocator* fnMap = m_fnLocator->getLocatorFor( SM.getFileEntryForID( SM.getMainFileID() )->getName() );
+	TranslationUnitFunctionLocator* fnMap = m_fnLocator->getLocatorFor( SM.getFileEntryForID( SM.getMainFileID() )->getName().str() );
 
 	MetricVisitor* visitor = new MetricVisitor(m_compilerInstance, m_topUnit, m_options, fnMap ); 
 
@@ -57,7 +58,7 @@ void MetricASTConsumer::HandleTranslationUnit(clang::ASTContext &Context)
 		 it != SM.fileinfo_end();
 		 it++ )
 	{
-		std::string fileName = it->first->getName();
+		std::string fileName = it->first->getName().str();
 
 		if( m_options.ShouldIncludeFile( fileName ) &&
 			!(m_options.isDefFile( fileName )))
@@ -95,7 +96,7 @@ void MetricPPConsumer::ExecuteAction()
 		srcLexer = new MetricSrcUnexpandedLexer(getCompilerInstance(), m_topUnit, m_options);
 	}
 	clang::SourceManager& sm = getCompilerInstance().getSourceManager();
-	std::string mainFileName = sm.getFileEntryForID( sm.getMainFileID() )->getName();
+	std::string mainFileName = sm.getFileEntryForID( sm.getMainFileID() )->getName().str();
 	
 	srcLexer->LexSources( getCompilerInstance(), m_fnLocator->getLocatorFor( mainFileName ) );
 

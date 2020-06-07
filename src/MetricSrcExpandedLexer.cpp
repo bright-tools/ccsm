@@ -250,7 +250,7 @@ void MetricSrcExpandedLexer::ProcessToken(clang::Token& p_token)
 			{
 				if (p_token.isAnyIdentifier())
 				{
-					std::string tok_data = p_token.getIdentifierInfo()->getName();
+					std::string tok_data = p_token.getIdentifierInfo()->getName().str();
 					if (m_options.getDumpTokens())
 					{
 						m_options.getOutput() << ",unreserved:" << tok_data;

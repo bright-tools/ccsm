@@ -22,6 +22,7 @@
 #include <sstream>
 #include <iostream>
 #include <llvm/Support/raw_os_ostream.h>
+#include <clang/Basic/FileManager.h>
 
 #define SOURCE_MANAGER (m_astContext->getSourceManager())
 
@@ -1328,7 +1329,7 @@ bool MetricVisitor::TraverseDecl(clang::Decl *p_decl)
 			x != SM.fileinfo_end() ;
 			x++ )
 		{
-			std::string name = (*x).first->getName();
+			std::string name = (*x).first->getName().str();
 #if 0
 			/* TODO: Cache not valid at this point, so NumLines not valid :-( */
 			std::cout << "   " << (*x).second->NumLines << std::endl;

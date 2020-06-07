@@ -20,6 +20,7 @@
 #include "MetricUnit.hpp"
 #include "clang/Lex/Preprocessor.h"
 #include "clang/AST/ASTContext.h"
+#include "clang/Basic/FileManager.h"
 
 #include <iostream>
 
@@ -52,7 +53,7 @@ void MetricSrcLexer::LexSources( clang::CompilerInstance& p_ci, const Translatio
 	PP.addPPCallbacks( std::make_unique<MetricPPIncludeHandler>( m_options, SM, m_currentFileName ) );
 	clang::SourceLocation fnStart;
 	clang::SourceLocation fnEnd;
-	m_currentFileName = SM.getFileEntryForID( SM.getMainFileID() )->getName();
+	m_currentFileName = SM.getFileEntryForID( SM.getMainFileID() )->getName().str();
 	MetricUnit* fileUnit = NULL;
 
 	do 
@@ -166,7 +167,7 @@ void MetricSrcLexer::LexSources( clang::CompilerInstance& p_ci, const Translatio
 		bool Invalid = false;
 		clang::FileID fid = SM.translateFile(it->first);
 		clang::StringRef Buffer = SM.getBufferData(fid, &Invalid);
-		std::string fileName = it->first->getName();
+		std::string fileName = it->first->getName().str();
 
 		if (m_options.ShouldIncludeFile( fileName))
 		{

@@ -19,6 +19,7 @@
 
 #include "clang/AST/Stmt.h"
 #include "clang/Basic/SourceLocation.h"
+#include "clang/Basic/SourceManager.h"
 #include "clang/AST/ASTContext.h"
 
 #include <iostream>

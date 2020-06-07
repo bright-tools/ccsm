@@ -19,8 +19,8 @@ all dependencies installed.  See the
 Currently I use Visual Studio 2019 on Windows and GCC on
 [Ubuntu Bionic Beaver](http://releases.ubuntu.com/18.04/) for builds.
 
-Follow the instructions up to the point where you have checked out Clang, 
-then open the file `llvm\tools\clang\tools\CMakeLists.txt` and add 
+Follow the instructions up to the point where you have checked out the LLVM project, 
+then open the file `llvm-project\clang\tools\CMakeLists.txt` and add 
 the following lines:
 
     set(CCSM_DIR F:/WORK/GIT/CCSM/)
