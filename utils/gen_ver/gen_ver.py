@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import subprocess
 import os
@@ -9,9 +9,9 @@ import argparse
 def make_ver(git_dir=None):
 
     # Get the version string
-    ver = subprocess.check_output(['git', 'describe', '--match', 'v[0-9]*', '--abbrev=7', 'HEAD'], cwd=git_dir)
+    ver = subprocess.check_output(['git', 'describe', '--match', 'v[0-9]*', '--abbrev=7', 'HEAD'], cwd=git_dir, encoding='UTF-8')
     # Check for local changes
-    chngs = subprocess.check_output(['git', 'diff-index', '--name-only', 'HEAD', '--'], cwd=git_dir)
+    chngs = subprocess.check_output(['git', 'diff-index', '--name-only', 'HEAD', '--'], cwd=git_dir, encoding='UTF-8')
 
     ver_str = ver.rstrip()
     if len(chngs) > 0:
@@ -79,7 +79,7 @@ if __name__ == '__main__':
         usg.parser.error(usg.msg)
     except NotGitRepo:
         print("This must be execute from a GIT repo (directory)")
-    except subprocess.CalledProcessError, e:
+    except subprocess.CalledProcessError as e:
         print("Failed to invoke git:")
         print(e.output)
     except IOError as io:
