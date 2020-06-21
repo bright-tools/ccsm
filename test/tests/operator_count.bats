@@ -55,7 +55,7 @@ Cast operators: 1
 Number of different types of C operator: 47
 Number of operators: 102
 Number of 'operator' tokens: 0
-File: src/empty.c
+File: src\empty.c
 	'sizeof' keyword/operator count(local): 0
 	'sizeof' keyword/operator count(cumulative): 0
 	'sizeof' keyword/operator count (raw source)(local): 0
@@ -113,7 +113,7 @@ File: src/empty.c
 	Number of operators(local): 0
 	Number of operators(cumulative): 0
 	Number of 'operator' tokens: 0
-File: src/oper_cnt.c
+File: src\oper_cnt.c
 	'sizeof' keyword/operator count(local): 0
 	'sizeof' keyword/operator count(cumulative): 2
 	'sizeof' keyword/operator count (raw source)(local): 0
