@@ -60,11 +60,31 @@ File: src\paths.c
 		Number of paths through the function: 9
 	Function: path_027_expected_24
 		Number of paths through the function: 24
+	Function: path_028_expected_2
+		Number of paths through the function: 2
+	Function: path_029_expected_2
+		Number of paths through the function: 2
+	Function: path_030_expected_6
+		Number of paths through the function: 6
+	Function: path_031_expected_1
+		Number of paths through the function: 1
+	Function: path_032_expected_1
+		Number of paths through the function: 1
+	Function: path_033_expected_2
+		Number of paths through the function: 1
+	Function: path_034_expected_2
+		Number of paths through the function: 2
+	Function: path_035_expected_2
+		Number of paths through the function: 2
+	Function: path_036_expected_2
+		Number of paths through the function: 2
+	Function: path_037_expected_3
+		Number of paths through the function: 3
 EOF
 )
 
 @test "Path counting" {
-  run $CCSM $TEST_SOURCE_DIR/paths.c  $TEST_SOURCE_DIR/empty.c --output-metrics=HIS_PATH --
+  run $CCSM $TEST_SOURCE_DIR/paths.c $TEST_SOURCE_DIR/empty.c $TEST_SOURCE_DIR/empty.c --output-metrics=HIS_PATH --
   assert_success
   assert_ccsm_output "$EXPECTED"
 }
