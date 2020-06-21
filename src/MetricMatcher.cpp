@@ -119,64 +119,136 @@ void MetricVisitor::UpdateCurrentFileName( const clang::SourceLocation &loc )
 	m_currentFileName = getDefResolvedFileName( loc );
 }
 
+void MetricVisitor::incrementPathResults(MetricVisitor::PathResults &current, const MetricVisitor::PathResults &increment){
+	current.path_regular += increment.path_regular;
+	current.path_return  += increment.path_return;
+	current.path_break   += increment.path_break;
+}
+
+void MetricVisitor::getSwitchPathCountHandleCaseEnd(MetricVisitor::PathResults &prevCase, MetricVisitor::PathResults &currCase){
+	// all regular paths of the previous case, if there was a fallthrough, act as a multiplier for the current case block
+	unsigned int multiplier = prevCase.path_regular + 1;
+	prevCase.path_return   = currCase.path_return  * multiplier;
+	prevCase.path_break    = currCase.path_break   * multiplier;
+	prevCase.path_regular  = currCase.path_regular * multiplier;
+}
+
 MetricVisitor::PathResults MetricVisitor::getSwitchPathCount(const clang::SwitchStmt* const p_stmt, uint16_t depth)
 {
-	MetricVisitor::PathResults pathSum = { 0, 0 };
+	// path count
+	MetricVisitor::PathResults pathSum = { 0, 0, 0 };
+
+	// path count for previous case block
+	MetricVisitor::PathResults prevCase = { 0 , 0, 0 };
+
+	// path count for current case block
+	MetricVisitor::PathResults currCase = { 0 , 0, 0 };
+
 	// If the switch is based on an enum and all enum values are covered then effectively there should be no need for
 	//  a default
 	// TODO: Not necessarily true - just because an enum is being used it does not stop other values
 	//  being assigned to the variable
 	bool hasDefault = p_stmt->isAllEnumCasesCovered();
-	const clang::SwitchCase* switchCase = p_stmt->getSwitchCaseList();
 
 #if defined( DEBUG_FN_TRACE_OUTOUT )
 	std::string blanks(depth, ' ');
 #endif
 
-	if (switchCase)
+	// iterate over all statements incl. case/break/default
+	const clang::Stmt* compound = p_stmt->getBody();
+	bool case_complete = true;
+	for (clang::Stmt::const_child_iterator it = compound->child_begin(); it != compound->child_end(); it++)
 	{
-		bool firstSubst = true;
-		do
-		{
-			const clang::Stmt* subStmt = switchCase->getSubStmt();
+		const clang::Stmt * stmt = (*it);
 
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-			std::cout << blanks << "getSwitchPathCount - Case is " << subStmt->getStmtClassName() << std::endl;
+		std::cout << blanks << "getSwitchPathCount - statement is " << stmt->getStmtClassName() << std::endl;
 #endif
 
-			/* Check that it's not a fall-through */
-			if ((subStmt->getStmtClass() != clang::Stmt::CaseStmtClass) &&
-				(subStmt->getStmtClass() != clang::Stmt::DefaultStmtClass))
-			{
-				/* Check there actually is a substatement */
-				if (subStmt != nullptr)
-				{
-					PathResults sub_count = getPathCount(subStmt, depth);
-					pathSum.path_regular += sub_count.path_regular;
-					pathSum.path_return  += sub_count.path_return;
-					firstSubst = false;
+		// case and default start new compound block
+		if ((stmt->getStmtClass() == clang::Stmt::CaseStmtClass) || (stmt->getStmtClass() == clang::Stmt::DefaultStmtClass)){
+
+			// but first handle end of previous case block if there wasn't a break (fall through)
+			if (!case_complete){
+				getSwitchPathCountHandleCaseEnd(prevCase, currCase);
+			}
+
+			// setup new case block
+			currCase.path_regular = 1;
+			currCase.path_return  = 0;
+			currCase.path_break   = 0;
+
+			case_complete = false;
+
+			// case contains next statement as body, ignore multiple cases
+			while (stmt != nullptr){
+				if (stmt->getStmtClass() == clang::Stmt::CaseStmtClass){
+					stmt = static_cast<const clang::CaseStmt*>(stmt)->getSubStmt();
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+					std::cout << blanks << "getSwitchPathCount - substatement is " << stmt->getStmtClassName() << std::endl;
+#endif
+					continue;
 				}
-			}
-			else
-			{
+				if (stmt->getStmtClass() == clang::Stmt::DefaultStmtClass){
+					hasDefault = true;
+					stmt = static_cast<const clang::DefaultStmt*>(stmt)->getSubStmt();
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-				std::cout << blanks << "getSwitchPathCount - Fallthrough" << std::endl;
+					std::cout << blanks << "getSwitchPathCount - substatement is " << stmt->getStmtClassName() << std::endl;
 #endif
+					continue;
+				}
+				break;
 			}
 
-			/* This case a 'default' statement? */
-			if (switchCase->getStmtClass() == clang::Stmt::DefaultStmtClass)
-			{
-				hasDefault = true;
-			}
+			if (stmt == nullptr) continue;
 
-			switchCase = switchCase->getNextSwitchCase();
+		}
+
+		// get path count for statement
+		PathResults sub_count = getPathCount(stmt, depth);
+
+		// integrate counts
+		currCase.path_return  += currCase.path_regular * sub_count.path_return;
+		currCase.path_break   += currCase.path_regular * sub_count.path_break;
+		currCase.path_regular *= sub_count.path_regular;
+
+		// handle case that statement has no regular paths (only break, or return) -> case block complete
+		if (sub_count.path_regular == 0){
+
+			case_complete = true;
 
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-			std::cout << blanks << "getSwitchPathCount - Updated: regular " << pathSum.path_regular << ", return " << pathSum.path_return << std::endl;
+			std::cout << blanks << "getSwitchPathCount - Prev case: regular " << prevCase.path_regular << ", return " << prevCase.path_return << ", break " << prevCase.path_break << std::endl;
+			std::cout << blanks << "getSwitchPathCount - Curr case: regular " << currCase.path_regular << ", return " << currCase.path_return << ", break " << currCase.path_break << std::endl;
+			std::cout << blanks << "getSwitchPathCount - case complete found" << std::endl;
 #endif
 
-		} while (switchCase != nullptr);
+			getSwitchPathCountHandleCaseEnd(prevCase, currCase);
+
+			// without a fall-through, we can close all previous cases
+			incrementPathResults(pathSum, prevCase);
+
+			// clear previous case state
+			prevCase.path_regular = 0;
+			prevCase.path_return  = 0;
+			prevCase.path_break   = 0;
+
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+			std::cout << blanks << "getSwitchPathCount - Update: regular " << pathSum.path_regular << ", return " << pathSum.path_return << ", break " << pathSum.path_break << std::endl;
+#endif
+		}
+	}	
+
+	// handle last incomplete case
+	if (!case_complete){
+		getSwitchPathCountHandleCaseEnd(prevCase, currCase);
+
+		// add to pathSum
+		incrementPathResults(pathSum, prevCase);
+
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+			std::cout << blanks << "getSwitchPathCount - handle incomplete last case block" << std::endl;
+#endif
 	}
 
 	/* If there wasn't an explicit default in the set of cases, add an implicit one */
@@ -185,21 +257,23 @@ MetricVisitor::PathResults MetricVisitor::getSwitchPathCount(const clang::Switch
 #if defined( DEBUG_FN_TRACE_OUTOUT )
 		std::cout << blanks << "getSwitchPathCount - Adding implicit default" << std::endl;
 #endif
-		pathSum.path_regular++;
+		pathSum.path_break++;
 	}
+
+	// all break paths are regular eventually
+	pathSum.path_regular += pathSum.path_break;
+	pathSum.path_break = 0;
 
 #if defined( DEBUG_FN_TRACE_OUTOUT )
 	std::cout << blanks << "getSwitchPathCount - Done: regular " << pathSum.path_regular << ", return " << pathSum.path_return << std::endl;
 #endif
-	
+
 	return pathSum;
 }
 
 MetricVisitor::PathResults MetricVisitor::getIfPathCount(const clang::IfStmt* const p_stmt, uint16_t depth)
 {
-	MetricVisitor::PathResults ret_val;
-	MetricUnit::counter_t pathSum_regular = 0;
-	MetricUnit::counter_t pathSum_return = 0;
+	MetricVisitor::PathResults ret_val = { 0, 0, 0};
 	bool has_return = false;
 	const clang::IfStmt* ifStmt = p_stmt;
 
@@ -214,9 +288,9 @@ MetricVisitor::PathResults MetricVisitor::getIfPathCount(const clang::IfStmt* co
 		/* Loops across 'if', 'else if' and 'else' constructs */
 		while (ifStmt != nullptr)
 		{
-			MetricVisitor::PathResults thenCount = { 1, 0 };
+			MetricVisitor::PathResults thenCount = { 1, 0, 0 };
 			/* Default to one gives an count for an implicit else block in the case that there is not one in the code */
-			MetricVisitor::PathResults elseCount = { 1, 0 };
+			MetricVisitor::PathResults elseCount = { 1, 0, 0 };
 
 			/* Get the path count for the 'then' block */
 			thenCount = getPathCount(ifStmt->getThen(), depth);
@@ -235,7 +309,8 @@ MetricVisitor::PathResults MetricVisitor::getIfPathCount(const clang::IfStmt* co
 					ifStmt = static_cast<const clang::IfStmt*>(ifStmt->getElse());
 					/* No need to count an implicit else */
 					elseCount.path_regular = 0;
-					elseCount.path_return = 0;
+					elseCount.path_return  = 0;
+					elseCount.path_break   = 0;
 				}
 				else
 				{
@@ -249,15 +324,14 @@ MetricVisitor::PathResults MetricVisitor::getIfPathCount(const clang::IfStmt* co
 				ifStmt = nullptr;
 			}
 
-			pathSum_regular += (thenCount.path_regular + elseCount.path_regular);
-			pathSum_return  += (thenCount.path_return  + elseCount.path_return);
+			ret_val.path_regular += (thenCount.path_regular + elseCount.path_regular);
+			ret_val.path_return  += (thenCount.path_return  + elseCount.path_return);
+			ret_val.path_break   += (thenCount.path_break   + elseCount.path_break);
 		}
 	}
-	ret_val.path_regular = pathSum_regular;
-	ret_val.path_return  = pathSum_return;
 
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-	std::cout << blanks << "getIfPathCount - Updated: regular " << ret_val.path_regular << ", return " << ret_val.path_return << std::endl;
+	std::cout << blanks << "getIfPathCount - Updated: regular " << ret_val.path_regular << ", return " << ret_val.path_return << ", break " << ret_val.path_break << std::endl;
 #endif
 
 	return ret_val;
@@ -268,10 +342,8 @@ MetricVisitor::PathResults MetricVisitor::getIfPathCount(const clang::IfStmt* co
 */
 MetricVisitor::PathResults MetricVisitor::getPathCount(const clang::Stmt* const p_stmt, uint16_t depth)
 {
-	PathResults ret_val;
+	PathResults ret_val = { 1, 0, 0 };
 	// TODO: Return this for null, too?
-	ret_val.path_regular = 1;
-	ret_val.path_return  = 0;
 	// TODO: Need to check that there are no GOTOs before doing the path count
 
 #if defined( DEBUG_FN_TRACE_OUTOUT )
@@ -297,19 +369,19 @@ MetricVisitor::PathResults MetricVisitor::getPathCount(const clang::Stmt* const 
 				if( !isExprConstantAndFalse( static_cast<const clang::WhileStmt*>( p_stmt )->getCond() ) )
 				{
 					ret_val = getPathCount( ( static_cast<const clang::WhileStmt*>( p_stmt )->getBody() ), thisDepth );
-					ret_val.path_regular += 1;
+					ret_val.path_regular += ret_val.path_break + 1;
 				}
 				break;
 			case clang::Stmt::StmtClass::ForStmtClass:
 				ret_val = getPathCount((static_cast<const clang::ForStmt*>(p_stmt)->getBody()), thisDepth);
-				ret_val.path_regular += 1;
+				ret_val.path_regular += ret_val.path_break + 1;
 				break;
 			case clang::Stmt::StmtClass::DoStmtClass:
 				ret_val = getPathCount((static_cast<const clang::DoStmt*>(p_stmt)->getBody()), thisDepth);
 				/* If the condition is constant and false, this isn't a junction point, so don't increase the path count */
 				if( !isExprConstantAndFalse( static_cast<const clang::DoStmt*>( p_stmt )->getCond() ) )
 				{
-					ret_val.path_regular += 1;
+					ret_val.path_regular += ret_val.path_break + 1;
 				}
 				break;
 			case clang::Stmt::StmtClass::ReturnStmtClass:
@@ -321,6 +393,11 @@ MetricVisitor::PathResults MetricVisitor::getPathCount(const clang::Stmt* const 
 				std::cout << blanks << "getPathCount - Return point found" << std::endl;
 #endif
 				break;
+			case clang::Stmt::StmtClass::BreakStmtClass:
+			case clang::Stmt::StmtClass::ContinueStmtClass:
+				ret_val.path_break  = 1;
+				ret_val.path_regular = 0;
+				break;
 
 			default:
 				ret_val = getOtherPathCount(p_stmt, thisDepth);
@@ -330,7 +407,7 @@ MetricVisitor::PathResults MetricVisitor::getPathCount(const clang::Stmt* const 
 	}
 
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-	std::cout << blanks << "getPathCount - regular " << ret_val.path_regular << ", return " << ret_val.path_return << std::endl;
+	std::cout << blanks << "getPathCount - regular " << ret_val.path_regular << ", return " << ret_val.path_return << ", break " << ret_val.path_break << std::endl;
 #endif
 
 	return ret_val;
@@ -356,9 +433,7 @@ bool MetricVisitor::isExprConstantAndFalse( const clang::Expr* const p_expr )
 MetricVisitor::PathResults MetricVisitor::getOtherPathCount(const clang::Stmt* const p_stmt, uint16_t depth)
 {
 	const clang::SourceLocation startLoc = p_stmt->getBeginLoc();
-	PathResults ret_val;
-	ret_val.path_regular = 1;
-	ret_val.path_return  = 0;
+	PathResults ret_val = { 1, 0, 0 };
 	// TODO: Need to check that there are no GOTOs before doing the path count
 
 #if defined( DEBUG_FN_TRACE_OUTOUT )
@@ -393,16 +468,25 @@ MetricVisitor::PathResults MetricVisitor::getOtherPathCount(const clang::Stmt* c
 			switch (clss)
 			{
 			case clang::Stmt::StmtClass::GotoStmtClass:
+				/* Subsequent statements are inaccessible unless there's a label 
+				   TODO: what about if the label is within a sub-tree? */
+				skipAllSubsequent = true;
+				break;
 			case clang::Stmt::StmtClass::BreakStmtClass:
 			case clang::Stmt::StmtClass::ContinueStmtClass:
 				/* Subsequent statements are inaccessible unless there's a label 
 				   TODO: what about if the label is within a sub-tree? */
 				skipAllSubsequent = true;
+				// all paths until here are return paths
+				ret_val.path_break = ret_val.path_regular;
+				ret_val.path_regular = 0;
 				break;
 			case clang::Stmt::StmtClass::ReturnStmtClass:
+				/* Subsequent statements are inaccessible unless there's a label 
+				   TODO: what about if the label is within a sub-tree? */
 				skipAllSubsequent = true;
 				IncrementMetric(m_currentUnit, METRIC_TYPE_RETURNPOINTS, &startLoc);
-
+				// all paths until here are break paths
 				ret_val.path_return  = ret_val.path_regular;
 				ret_val.path_regular = 0;
 
@@ -411,17 +495,16 @@ MetricVisitor::PathResults MetricVisitor::getOtherPathCount(const clang::Stmt* c
 #endif
 
 				break;
-			case clang::Stmt::StmtClass::IfStmtClass:
+
 			case clang::Stmt::StmtClass::SwitchStmtClass:
-			case clang::Stmt::StmtClass::CompoundStmtClass:
 			case clang::Stmt::StmtClass::WhileStmtClass:
 			case clang::Stmt::StmtClass::DoStmtClass:
 			case clang::Stmt::StmtClass::ForStmtClass:
 				sub_results = getPathCount(*it, depth);
-				if (sub_results.path_regular == 0)
+				if (sub_results.path_regular == 0 && sub_results.path_break == 0)
 				{
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-					std::cout << blanks << "getOtherPathCount - Path has a return statement" << std::endl;
+					std::cout << blanks << "getOtherPathCount switch/while/do/for only has return ending" << std::endl;
 #endif
 					/* All paths had a return statement ... from now on, code should not be reachable */
 					skipAllSubsequent = true;
@@ -429,23 +512,47 @@ MetricVisitor::PathResults MetricVisitor::getOtherPathCount(const clang::Stmt* c
 				else
 				{
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-					std::cout << blanks << "getOtherPathCount - Path is missing a return statement" << std::endl;
+					std::cout << blanks << "getOtherPathCount - Path has at least one regular path" << std::endl;
 #endif
 				}
 				ret_val.path_return  += ret_val.path_regular * sub_results.path_return;
+				ret_val.path_break   += ret_val.path_regular * sub_results.path_break;
 				ret_val.path_regular *= sub_results.path_regular;
 				break;
+
+			case clang::Stmt::StmtClass::IfStmtClass:
+			case clang::Stmt::StmtClass::CompoundStmtClass:
+				sub_results = getPathCount(*it, depth);
+				if (sub_results.path_regular == 0)
+				{
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+					std::cout << blanks << "getOtherPathCount - compound statement only has return/break/continue ending" << std::endl;
+#endif
+					/* All paths had a break/continue/return statement ... from now on, code should not be reachable */
+					skipAllSubsequent = true;
+				}
+				else
+				{
+#if defined( DEBUG_FN_TRACE_OUTOUT )
+					std::cout << blanks << "getOtherPathCount - Path has at least one regular path" << std::endl;
+#endif
+				}
+				ret_val.path_return  += ret_val.path_regular * sub_results.path_return;
+				ret_val.path_break   += ret_val.path_regular * sub_results.path_break;
+				ret_val.path_regular *= sub_results.path_regular;
+				break;
+
 			default:
 				break;
 			}
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-			std::cout << blanks << "getOtherPathCount - Updated: regular - " << ret_val.path_regular << ", return " << ret_val.path_return << std::endl;
+			std::cout << blanks << "getOtherPathCount - Updated: regular - " << ret_val.path_regular << ", return " << ret_val.path_return << ", break " << ret_val.path_break << std::endl;
 #endif
 		}
 	}
 
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-	std::cout << blanks << "getOtherPathCount - Done: regular - " << ret_val.path_regular << ", return " << ret_val.path_return << std::endl;
+	std::cout << blanks << "getOtherPathCount - Done: regular - " << ret_val.path_regular << ", return " << ret_val.path_return << ", break " << ret_val.path_break << std::endl;
 #endif
 
 	return ret_val;
