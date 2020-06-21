@@ -22,8 +22,8 @@
 #include "MetricFrontendActors.hpp"
 #include "MetricLinkageResolver.hpp"
 
-#include "clang/Tooling/Tooling.h"
-#include "llvm/Support/Signals.h"
+#include <clang/Tooling/Tooling.h>
+#include <llvm/Support/Signals.h>
 
 #include <fstream>
 #include <iostream>
