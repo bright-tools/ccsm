@@ -536,6 +536,29 @@ int path_037_expected_3( int y )
     return x;
 }
 
+void path_038_expected_1( int y )
+{
+    do
+    {
+        y++;
+    } while (0);
+}
+
+void path_039_expected_1( int y )
+{
+    while(0)
+    {
+        y++;
+    }
+}
+
+void path_040_expected_1( int y )
+{
+    do
+    {
+        y++;
+    } while (1-1);
+}
 
 int main(int argc, char ** argv){
     return 0;

@@ -80,6 +80,12 @@ File: src\paths.c
 		Number of paths through the function: 2
 	Function: path_037_expected_3
 		Number of paths through the function: 3
+	Function: path_038_expected_1
+		Number of paths through the function: 1
+	Function: path_039_expected_1
+		Number of paths through the function: 1
+	Function: path_040_expected_1
+		Number of paths through the function: 1
 EOF
 )
 
