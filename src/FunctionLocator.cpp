@@ -17,158 +17,136 @@
 #include "FunctionLocator.hpp"
 #include "MetricUtils.hpp"
 
+#include "clang/AST/ASTContext.h"
 #include "clang/AST/Stmt.h"
 #include "clang/Basic/SourceLocation.h"
 #include "clang/Basic/SourceManager.h"
-#include "clang/AST/ASTContext.h"
 
 #include <iostream>
 #include <string.h>
 
-GlobalFunctionLocator::GlobalFunctionLocator(MetricOptions& p_options) : m_options(p_options)
-{
+GlobalFunctionLocator::GlobalFunctionLocator(MetricOptions &p_options)
+    : m_options(p_options) {}
+
+TranslationUnitFunctionLocator *
+GlobalFunctionLocator::getLocatorFor(const std::string p_fileName) {
+    TranslationUnitFunctionLocator *ret_val = NULL;
+    MainSrcToFnLocMap_t::iterator it = m_map.find(p_fileName);
+
+    if (it != m_map.end()) {
+        ret_val = it->second;
+    } else {
+        ret_val = new TranslationUnitFunctionLocator(m_options);
+        m_map.insert(std::pair<std::string, TranslationUnitFunctionLocator *>(
+            p_fileName, ret_val));
+    }
+
+    return ret_val;
 }
 
-TranslationUnitFunctionLocator* GlobalFunctionLocator::getLocatorFor( const std::string p_fileName )
-{
-	TranslationUnitFunctionLocator* ret_val = NULL;
-	MainSrcToFnLocMap_t::iterator it = m_map.find( p_fileName );
+void GlobalFunctionLocator::dump() const {
+    MainSrcToFnLocMap_t::const_iterator it;
 
-	if( it != m_map.end() )
-	{
-		ret_val = it->second; 
-	}
-	else
-	{
-		ret_val = new TranslationUnitFunctionLocator(m_options);
-		m_map.insert(std::pair<std::string, TranslationUnitFunctionLocator* >(p_fileName, ret_val));
-	}
-
-	return ret_val;
+    for (it = m_map.begin(); it != m_map.end(); it++) {
+        std::string fileName = it->first;
+        if (!m_options.getUseAbsoluteFileNames()) {
+            fileName = makeRelative(fileName);
+        }
+        m_options.getOutput() << "Translation Unit: " << fileName << std::endl;
+        it->second->dump();
+    }
 }
 
-void GlobalFunctionLocator::dump() const
-{
-	MainSrcToFnLocMap_t::const_iterator it;
-
-	for( it = m_map.begin();
-		 it != m_map.end();
-		 it++ )
-	{
-		std::string fileName = it->first;
-		if (!m_options.getUseAbsoluteFileNames())
-		{
-			fileName = makeRelative(fileName);
-		}
-		m_options.getOutput() << "Translation Unit: " << fileName << std::endl;
-		it->second->dump();
-	}
+GlobalFunctionLocator::~GlobalFunctionLocator() {
+    for (MainSrcToFnLocMap_t::iterator it = m_map.begin(); it != m_map.end();
+         it++) {
+        delete (it->second);
+    }
 }
 
+TranslationUnitFunctionLocator::TranslationUnitFunctionLocator(
+    MetricOptions &p_options)
+    : m_options(p_options) {}
 
-GlobalFunctionLocator::~GlobalFunctionLocator()
-{
-	for( MainSrcToFnLocMap_t::iterator it = m_map.begin();
-		 it != m_map.end();
-		 it++ )
-	{
-		delete( it->second );
-	}
-}
+void TranslationUnitFunctionLocator::addFunctionLocation(
+    const clang::ASTContext *const p_context, const std::string &p_name,
+    const clang::FunctionDecl *const p_func) {
+    // TODO: need to check if getEndLoc() is a macro location?
+    clang::SourceLocation endLoc = p_func->getBody()->getEndLoc();
+    clang::SourceLocation bodyStart = p_func->getBody()->getBeginLoc();
+    clang::SourceLocation startLoc;
 
-TranslationUnitFunctionLocator::TranslationUnitFunctionLocator(MetricOptions& p_options) : m_options(p_options)
-{
-}
+    if (m_options.getPrototypesAreFileScope()) {
+        startLoc = p_func->getBody()->getBeginLoc();
+    } else {
+        startLoc = p_func->getBeginLoc();
+    }
 
-void TranslationUnitFunctionLocator::addFunctionLocation(const clang::ASTContext* const p_context, const std::string& p_name, const clang::FunctionDecl * const p_func)
-{
-	// TODO: need to check if getEndLoc() is a macro location?
-	clang::SourceLocation endLoc = p_func->getBody()->getEndLoc();
-	clang::SourceLocation bodyStart = p_func->getBody()->getBeginLoc();
-	clang::SourceLocation startLoc;
+    if (startLoc.isMacroID()) {
+        startLoc = p_context->getSourceManager().getFileLoc(startLoc);
+    }
 
-	if (m_options.getPrototypesAreFileScope())
-	{
-		startLoc = p_func->getBody()->getBeginLoc();
-	}
-	else
-	{
-		startLoc = p_func->getBeginLoc();
-	}
+    if (bodyStart.isMacroID()) {
+        bodyStart = p_context->getSourceManager().getFileLoc(bodyStart);
+    }
 
-	if (startLoc.isMacroID())
-	{
-		startLoc = p_context->getSourceManager().getFileLoc(startLoc);
-	}
-
-	if (bodyStart.isMacroID())
-	{
-		bodyStart = p_context->getSourceManager().getFileLoc(bodyStart);
-	}
-
-	clang::FileID fId = p_context->getSourceManager().getFileID(startLoc);
-	unsigned int hashVal = fId.getHashValue();
+    clang::FileID fId = p_context->getSourceManager().getFileID(startLoc);
+    unsigned int hashVal = fId.getHashValue();
 
 #if 0
 	std::cout << "addFunctionLocation : Adding to function map: " << p_name << " " << hashVal << " ( " << startLoc.getRawEncoding() << " to " << endLoc.getRawEncoding() << ")" << std::endl;
 #endif
 
-	FunctionInfo_t funcInfo = { endLoc, bodyStart, p_name };
-	m_map[hashVal][startLoc] = funcInfo;
+    FunctionInfo_t funcInfo = {endLoc, bodyStart, p_name};
+    m_map[hashVal][startLoc] = funcInfo;
 }
 
-void TranslationUnitFunctionLocator::dump() const
-{
-	SrcStartToFunctionMap_t::const_iterator it;
+void TranslationUnitFunctionLocator::dump() const {
+    SrcStartToFunctionMap_t::const_iterator it;
 
-	for( it = m_map.begin();
-		 it != m_map.end();
-		 it++ )
-	{
-		m_options.getOutput() << " File ID: " << it->first << std::endl;
-		StartInfoPair_t::const_iterator pit;
+    for (it = m_map.begin(); it != m_map.end(); it++) {
+        m_options.getOutput() << " File ID: " << it->first << std::endl;
+        StartInfoPair_t::const_iterator pit;
 
-		for( pit = it->second.begin();
-			 pit != it->second.end();
-			 pit++ )
-		{
-			m_options.getOutput() << "  Function Definition: " << pit->second.Name << " (" << pit->first.getRawEncoding() << "-" << pit->second.EndLocation.getRawEncoding() << ")" << std::endl;
-		}
-	}
+        for (pit = it->second.begin(); pit != it->second.end(); pit++) {
+            m_options.getOutput()
+                << "  Function Definition: " << pit->second.Name << " ("
+                << pit->first.getRawEncoding() << "-"
+                << pit->second.EndLocation.getRawEncoding() << ")" << std::endl;
+        }
+    }
 }
 
-std::string TranslationUnitFunctionLocator::FindFunction(const clang::SourceManager& p_SourceManager, clang::SourceLocation& p_loc, clang::SourceLocation* p_end, clang::SourceLocation* p_body) const
-{
-	std::string ret_val = "";
-	unsigned fileIdHash = p_SourceManager.getFileID( p_loc ).getHashValue();
-	SrcStartToFunctionMap_t::const_iterator file_it = m_map.find(fileIdHash);
-	if( file_it != m_map.end() )
-	{
-		StartInfoPair_t::const_iterator func_it = file_it->second.begin();
+std::string TranslationUnitFunctionLocator::FindFunction(
+    const clang::SourceManager &p_SourceManager, clang::SourceLocation &p_loc,
+    clang::SourceLocation *p_end, clang::SourceLocation *p_body) const {
+    std::string ret_val = "";
+    unsigned fileIdHash = p_SourceManager.getFileID(p_loc).getHashValue();
+    SrcStartToFunctionMap_t::const_iterator file_it = m_map.find(fileIdHash);
+    if (file_it != m_map.end()) {
+        StartInfoPair_t::const_iterator func_it = file_it->second.begin();
 
-		/* While we've not found a matching function and there are still functions to consider ... */
-		while(( ret_val == "" ) && ( func_it != file_it->second.end()))
-		{
-			/* Does the location we're considering match the function start or end or is it within those bounds? */
-			if(( p_loc == (*func_it).first ) || 
-			   (p_loc == (*func_it).second.EndLocation) ||
-			   (( (*func_it).first < p_loc ) &&
-				(p_loc < (*func_it).second.EndLocation)))
-			{
-				ret_val = (*func_it).second.Name;
-				if( p_end != NULL )
-				{
-					*p_end = (*func_it).second.EndLocation;
-				}
-				if (p_body != NULL)
-				{
-					*p_body = (*func_it).second.BodyStart;
-				}
-				break;
-			}
-			/* Next function in the map */
-			func_it++;
-		}
-	}
-	return ret_val;
+        /* While we've not found a matching function and there are still
+         * functions to consider ... */
+        while ((ret_val == "") && (func_it != file_it->second.end())) {
+            /* Does the location we're considering match the function start or
+             * end or is it within those bounds? */
+            if ((p_loc == (*func_it).first) ||
+                (p_loc == (*func_it).second.EndLocation) ||
+                (((*func_it).first < p_loc) &&
+                 (p_loc < (*func_it).second.EndLocation))) {
+                ret_val = (*func_it).second.Name;
+                if (p_end != NULL) {
+                    *p_end = (*func_it).second.EndLocation;
+                }
+                if (p_body != NULL) {
+                    *p_body = (*func_it).second.BodyStart;
+                }
+                break;
+            }
+            /* Next function in the map */
+            func_it++;
+        }
+    }
+    return ret_val;
 }

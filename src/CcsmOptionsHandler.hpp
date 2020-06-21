@@ -1,6 +1,6 @@
 /*
    @file
-   @brief 
+   @brief
 
    @author John Bailey
    @copyright Copyright 2015 John Bailey
@@ -20,42 +20,45 @@
    limitations under the License.
 */
 
-#if !defined( CCSM_OPTIONS_HANDLER_HPP )
-#define       CCSM_OPTIONS_HANDLER_HPP
+#if !defined(CCSM_OPTIONS_HANDLER_HPP)
+#define CCSM_OPTIONS_HANDLER_HPP
 
-#include "clang/Tooling/CommonOptionsParser.h"
 #include "MetricOptions.hpp"
+#include "clang/Tooling/CommonOptionsParser.h"
 
 class CcsmOptionsHandler {
 
-private:
-	clang::tooling::CommonOptionsParser *m_optionsParser = NULL;
-	MetricOptions                       *m_metricOptions = NULL;
-	std::set<MetricType_e>               m_outputMetrics;
+  private:
+    clang::tooling::CommonOptionsParser *m_optionsParser = NULL;
+    MetricOptions *m_metricOptions = NULL;
+    std::set<MetricType_e> m_outputMetrics;
 
-	/** Indicates whether or not the C89/90 standard is specified for any of the files to be analysed */
-	bool m_usesC89 = false;
-	/** Indicates whether or not the C11 standard is specified for any of the files to be analysed */
-	bool m_usesC11 = false;
-	/** Indicates whether or not the C99 standard is specified for any of the files to be analysed */
-	bool m_usesC99 = false;
-	/** Indicates whether or not C++ is specified for any of the files to be analysed */
-	bool m_usesCpp = false;
+    /** Indicates whether or not the C89/90 standard is specified for any of the
+     * files to be analysed */
+    bool m_usesC89 = false;
+    /** Indicates whether or not the C11 standard is specified for any of the
+     * files to be analysed */
+    bool m_usesC11 = false;
+    /** Indicates whether or not the C99 standard is specified for any of the
+     * files to be analysed */
+    bool m_usesC99 = false;
+    /** Indicates whether or not C++ is specified for any of the files to be
+     * analysed */
+    bool m_usesCpp = false;
 
-	void analyseCompilerArgs(const char* const exeName);
-	void checkCompilerArgs(const char* const exeName);
-	void processOutputMetricList(void);
+    void analyseCompilerArgs(const char *const exeName);
+    void checkCompilerArgs(const char *const exeName);
+    void processOutputMetricList(void);
 
-public:
+  public:
+    CcsmOptionsHandler();
 
-	CcsmOptionsHandler();
+    void ParseOptions(int argc, const char **const argv);
 
-	void ParseOptions(int argc, const char ** const argv);
+    MetricOptions *getMetricOptions() const;
+    clang::tooling::CommonOptionsParser *getOptionsParser() const;
 
-	MetricOptions* getMetricOptions() const;
-	clang::tooling::CommonOptionsParser* getOptionsParser() const;
-
-	virtual ~CcsmOptionsHandler();
+    virtual ~CcsmOptionsHandler();
 };
 
 #endif

@@ -19,12 +19,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-#if !defined( METRIC_PP_CUSTOMER_HPP )
-#define       METRIC_PP_CUSTOMER_HPP
+#if !defined(METRIC_PP_CUSTOMER_HPP)
+#define METRIC_PP_CUSTOMER_HPP
 
-#include "MetricUnit.hpp"
-#include "MetricOptions.hpp"
 #include "FunctionLocator.hpp"
+#include "MetricOptions.hpp"
+#include "MetricUnit.hpp"
 
 #include "clang/AST/CommentVisitor.h"
 #include "clang/Lex/Preprocessor.h"
@@ -32,19 +32,29 @@
 #include <set>
 #include <string>
 
-class MetricPPCustomer : public clang::PPCallbacks, public clang::CommentHandler
-{
-protected:
-	MetricUnit*		                  m_topUnit         = NULL;
-    MetricOptions&                    m_options;
-	std::string                       m_commentFile;
-    std::set<std::string>*            m_commentFileList = NULL;
+class MetricPPCustomer : public clang::PPCallbacks,
+                         public clang::CommentHandler {
+  protected:
+    MetricUnit *m_topUnit = NULL;
+    MetricOptions &m_options;
+    std::string m_commentFile;
+    std::set<std::string> *m_commentFileList = NULL;
 
-public:
-	MetricPPCustomer( MetricUnit* p_topUnit, std::set<std::string>* p_commentFileList, MetricOptions& p_options );
-	virtual ~MetricPPCustomer();
-	virtual void InclusionDirective (clang::SourceLocation HashLoc, const clang::Token &IncludeTok, clang::StringRef FileName, bool IsAngled, clang::CharSourceRange FilenameRange, const clang::FileEntry *File, clang::StringRef SearchPath, clang::StringRef RelativePath, const clang::Module *Imported, clang::SrcMgr::CharacteristicKind FileType);
-	virtual bool HandleComment(clang::Preprocessor &PP, clang::SourceRange Loc);
+  public:
+    MetricPPCustomer(MetricUnit *p_topUnit,
+                     std::set<std::string> *p_commentFileList,
+                     MetricOptions &p_options);
+    virtual ~MetricPPCustomer();
+    virtual void InclusionDirective(clang::SourceLocation HashLoc,
+                                    const clang::Token &IncludeTok,
+                                    clang::StringRef FileName, bool IsAngled,
+                                    clang::CharSourceRange FilenameRange,
+                                    const clang::FileEntry *File,
+                                    clang::StringRef SearchPath,
+                                    clang::StringRef RelativePath,
+                                    const clang::Module *Imported,
+                                    clang::SrcMgr::CharacteristicKind FileType);
+    virtual bool HandleComment(clang::Preprocessor &PP, clang::SourceRange Loc);
 };
 
 #endif

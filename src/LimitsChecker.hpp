@@ -1,6 +1,6 @@
 /*
    @file
-   @brief 
+   @brief
 
    @author John Bailey
    @copyright Copyright 2016 John Bailey
@@ -20,20 +20,25 @@
    limitations under the License.
 */
 
-#if !defined( LIMITS_CHECKER_HPP )
-#define       LIMITS_CHECKER_HPP
+#if !defined(LIMITS_CHECKER_HPP)
+#define LIMITS_CHECKER_HPP
 
-#include "MetricUnit.hpp"
-#include "MetricOptions.hpp"
 #include "LimitLibrary.hpp"
+#include "MetricOptions.hpp"
+#include "MetricUnit.hpp"
 
-class LimitsChecker
-{
-    protected:
-		static std::string check(const MetricUnit* const p_topLevel, const MetricOptions& p_options, const LimitLibrary& p_limits);
-    public:
-        static void dump(const MetricUnit* const p_topLevel, const MetricOptions& p_options );
-		static void dump(const MetricUnit* const p_topLevel, const MetricOptions& p_options, const LimitLibrary& p_limits);
+class LimitsChecker {
+  protected:
+    static std::string check(const MetricUnit *const p_topLevel,
+                             const MetricOptions &p_options,
+                             const LimitLibrary &p_limits);
+
+  public:
+    static void dump(const MetricUnit *const p_topLevel,
+                     const MetricOptions &p_options);
+    static void dump(const MetricUnit *const p_topLevel,
+                     const MetricOptions &p_options,
+                     const LimitLibrary &p_limits);
 };
 
 #endif

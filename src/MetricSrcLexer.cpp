@@ -15,167 +15,159 @@
 */
 
 #include "MetricSrcLexer.hpp"
-#include "MetricUtils.hpp"
 #include "MetricPPIncludeHandler.hpp"
 #include "MetricUnit.hpp"
-#include "clang/Lex/Preprocessor.h"
+#include "MetricUtils.hpp"
 #include "clang/AST/ASTContext.h"
 #include "clang/Basic/FileManager.h"
+#include "clang/Lex/Preprocessor.h"
 
 #include <iostream>
 
-MetricSrcLexer::MetricSrcLexer(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, MetricOptions& p_options) : m_compilerInstance(p_CI), 
-	                                                                                                             m_topUnit( p_topUnit ), 
-	                                                                                                             m_options( p_options ),
-																												 m_currentUnit( NULL )
-{
-}
+MetricSrcLexer::MetricSrcLexer(clang::CompilerInstance &p_CI,
+                               MetricUnit *p_topUnit, MetricOptions &p_options)
+    : m_compilerInstance(p_CI), m_topUnit(p_topUnit), m_options(p_options),
+      m_currentUnit(NULL) {}
 
-MetricSrcLexer::~MetricSrcLexer(void)
-{
-}
+MetricSrcLexer::~MetricSrcLexer(void) {}
 
-void MetricSrcLexer::LexSources( clang::CompilerInstance& p_ci, const TranslationUnitFunctionLocator* const p_fnLocator )
-{
-	clang::Preprocessor &PP = p_ci.getPreprocessor();
-	clang::SourceManager &SM = p_ci.getSourceManager();
+void MetricSrcLexer::LexSources(
+    clang::CompilerInstance &p_ci,
+    const TranslationUnitFunctionLocator *const p_fnLocator) {
+    clang::Preprocessor &PP = p_ci.getPreprocessor();
+    clang::SourceManager &SM = p_ci.getSourceManager();
 
-	if( m_options.getDumpTokens() )
-	{
-		m_options.getOutput() << std::endl << "Start lexing translation unit: " << SM.getFileEntryForID( SM.getMainFileID() )->getName().str() << std::endl;
-	}
+    if (m_options.getDumpTokens()) {
+        m_options.getOutput()
+            << std::endl
+            << "Start lexing translation unit: "
+            << SM.getFileEntryForID(SM.getMainFileID())->getName().str()
+            << std::endl;
+    }
 
-	// Start preprocessing the specified input file.
-	clang::Token result;
-	m_lastToken.setKind( clang::tok::eof );
-	PP.EnterMainSourceFile();
-	PP.SetCommentRetentionState(true,true);
-	PP.addPPCallbacks( std::make_unique<MetricPPIncludeHandler>( m_options, SM, m_currentFileName ) );
-	clang::SourceLocation fnStart;
-	clang::SourceLocation fnEnd;
-	m_currentFileName = SM.getFileEntryForID( SM.getMainFileID() )->getName().str();
-	MetricUnit* fileUnit = NULL;
+    // Start preprocessing the specified input file.
+    clang::Token result;
+    m_lastToken.setKind(clang::tok::eof);
+    PP.EnterMainSourceFile();
+    PP.SetCommentRetentionState(true, true);
+    PP.addPPCallbacks(std::make_unique<MetricPPIncludeHandler>(
+        m_options, SM, m_currentFileName));
+    clang::SourceLocation fnStart;
+    clang::SourceLocation fnEnd;
+    m_currentFileName =
+        SM.getFileEntryForID(SM.getMainFileID())->getName().str();
+    MetricUnit *fileUnit = NULL;
 
-	do 
-	{
-		clang::SourceLocation tokenLoc;
-		bool shouldLexToken = true;
+    do {
+        clang::SourceLocation tokenLoc;
+        bool shouldLexToken = true;
 
-		PP.Lex(result);
+        PP.Lex(result);
 
-		tokenLoc = result.getLocation();
+        tokenLoc = result.getLocation();
 
-		/* If it's a macro then we want the expansion location */
-		if (tokenLoc.isMacroID())
-		{
-			tokenLoc = m_compilerInstance.getSourceManager().getFileLoc(tokenLoc);
-		}
+        /* If it's a macro then we want the expansion location */
+        if (tokenLoc.isMacroID()) {
+            tokenLoc =
+                m_compilerInstance.getSourceManager().getFileLoc(tokenLoc);
+        }
 
-		std::string fileName = m_currentFileName;
+        std::string fileName = m_currentFileName;
 
-		// TODO: Need to differentiate between "non-function" and "whole-file" level counts - e.g. 
-		//  unique numerical constants that aren't in functions and unique numerical constants across the whole file
-		if( m_options.ShouldIncludeFile( fileName ))
-		{
-			if( !m_options.isDefFile( fileName ))
-			{
-				m_currentFileName = fileName;
-			}
-			fileUnit = m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE);
+        // TODO: Need to differentiate between "non-function" and "whole-file"
+        // level counts - e.g.
+        //  unique numerical constants that aren't in functions and unique
+        //  numerical constants across the whole file
+        if (m_options.ShouldIncludeFile(fileName)) {
+            if (!m_options.isDefFile(fileName)) {
+                m_currentFileName = fileName;
+            }
+            fileUnit =
+                m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE);
 
-			// Not lex'd this file yet?
-			if (!fileUnit->hasBeenProcessed(getLexType()))
-			{
-				// Check to see if we need to do a new function name lookup
-				if ((m_currentFunctionName == "") || (tokenLoc.getRawEncoding() > fnEnd.getRawEncoding()) || (tokenLoc.getRawEncoding() < fnStart.getRawEncoding()))
-				{
-					std::string funcName = p_fnLocator->FindFunction(SM, tokenLoc, &fnEnd, &m_bodyStartLocation);
-					m_inBody = false;
-					fnStart = tokenLoc;
+            // Not lex'd this file yet?
+            if (!fileUnit->hasBeenProcessed(getLexType())) {
+                // Check to see if we need to do a new function name lookup
+                if ((m_currentFunctionName == "") ||
+                    (tokenLoc.getRawEncoding() > fnEnd.getRawEncoding()) ||
+                    (tokenLoc.getRawEncoding() < fnStart.getRawEncoding())) {
+                    std::string funcName = p_fnLocator->FindFunction(
+                        SM, tokenLoc, &fnEnd, &m_bodyStartLocation);
+                    m_inBody = false;
+                    fnStart = tokenLoc;
 
-					if(( funcName.length() > 0 ) && m_options.getDumpTokens() )
-					{
-						m_options.getOutput() << std::endl << "[fn:" << funcName << "@" << tokenLoc.getRawEncoding() << "-" << fnEnd.getRawEncoding() << "]" << std::endl << "  ";
-					}
+                    if ((funcName.length() > 0) && m_options.getDumpTokens()) {
+                        m_options.getOutput()
+                            << std::endl
+                            << "[fn:" << funcName << "@"
+                            << tokenLoc.getRawEncoding() << "-"
+                            << fnEnd.getRawEncoding() << "]" << std::endl
+                            << "  ";
+                    }
 
-					m_currentFunctionName = funcName;
+                    m_currentFunctionName = funcName;
 
-					if( m_currentFunctionName != "" ) 
-					{
-						if( m_options.ShouldIncludeFunction( m_currentFunctionName ))
-						{
-							CloseOutFnOrMtd();
-							m_currentUnit = fileUnit->getSubUnit(m_currentFunctionName, METRIC_UNIT_FUNCTION);
-							m_waitingForBody = true;
-						}
-						else
-						{
-							CloseOutFnOrMtd();
-							m_currentUnit = NULL;
-						}
-					}
-					else
-					{
-						if (m_currentUnit != fileUnit)
-						{
-							CloseOutFnOrMtd();
-							m_currentUnit = fileUnit;
-							EnterFileScope();
-						}
-					}
-				}
-				else
-				{
-					if (m_waitingForBody)
-					{
-						if ((m_bodyStartLocation < tokenLoc) ||
-							(m_bodyStartLocation == tokenLoc))
-						{
-							m_inBody = true;
-							m_waitingForBody = false;
-						}
-					}
-				}
+                    if (m_currentFunctionName != "") {
+                        if (m_options.ShouldIncludeFunction(
+                                m_currentFunctionName)) {
+                            CloseOutFnOrMtd();
+                            m_currentUnit = fileUnit->getSubUnit(
+                                m_currentFunctionName, METRIC_UNIT_FUNCTION);
+                            m_waitingForBody = true;
+                        } else {
+                            CloseOutFnOrMtd();
+                            m_currentUnit = NULL;
+                        }
+                    } else {
+                        if (m_currentUnit != fileUnit) {
+                            CloseOutFnOrMtd();
+                            m_currentUnit = fileUnit;
+                            EnterFileScope();
+                        }
+                    }
+                } else {
+                    if (m_waitingForBody) {
+                        if ((m_bodyStartLocation < tokenLoc) ||
+                            (m_bodyStartLocation == tokenLoc)) {
+                            m_inBody = true;
+                            m_waitingForBody = false;
+                        }
+                    }
+                }
 
-				if( m_currentUnit == NULL )
-				{
-					shouldLexToken = false;
-				}
-			}
-			else
-			{
-				shouldLexToken = false;
-			}
+                if (m_currentUnit == NULL) {
+                    shouldLexToken = false;
+                }
+            } else {
+                shouldLexToken = false;
+            }
 
-			if( shouldLexToken )
-			{
-				ProcessToken( result );
-				m_lastToken = result;
-			}
-		}
-	} while (result.isNot(clang::tok::eof));
+            if (shouldLexToken) {
+                ProcessToken(result);
+                m_lastToken = result;
+            }
+        }
+    } while (result.isNot(clang::tok::eof));
 
-	if (m_currentUnit != NULL)
-	{
-		CloseOutFnOrMtd();
-	}
+    if (m_currentUnit != NULL) {
+        CloseOutFnOrMtd();
+    }
 
-	for (clang::SourceManager::fileinfo_iterator it = SM.fileinfo_begin();
-		it != SM.fileinfo_end();
-		it++)
-	{
-		bool Invalid = false;
-		clang::FileID fid = SM.translateFile(it->first);
-		clang::StringRef Buffer = SM.getBufferData(fid, &Invalid);
-		std::string fileName = it->first->getName().str();
+    for (clang::SourceManager::fileinfo_iterator it = SM.fileinfo_begin();
+         it != SM.fileinfo_end(); it++) {
+        bool Invalid = false;
+        clang::FileID fid = SM.translateFile(it->first);
+        clang::StringRef Buffer = SM.getBufferData(fid, &Invalid);
+        std::string fileName = it->first->getName().str();
 
-		if (m_options.ShouldIncludeFile( fileName))
-		{
-            const SourceFileAndLine_t location = { true, 0, fileName, 0 };
+        if (m_options.ShouldIncludeFile(fileName)) {
+            const SourceFileAndLine_t location = {true, 0, fileName, 0};
 
-			MetricUnit* fileUnit = m_topUnit->getSubUnit(fileName, METRIC_UNIT_FILE);
-			fileUnit->set( METRIC_TYPE_LINE_COUNT, countNewlines( Buffer ), location );
-			fileUnit->setProcessed(getLexType());
-		}
-	}
+            MetricUnit *fileUnit =
+                m_topUnit->getSubUnit(fileName, METRIC_UNIT_FILE);
+            fileUnit->set(METRIC_TYPE_LINE_COUNT, countNewlines(Buffer),
+                          location);
+            fileUnit->setProcessed(getLexType());
+        }
+    }
 }

@@ -19,8 +19,8 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-#if !defined( METRIC_PP_INCLUDE_HANDLER_HPP )
-#define       METRIC_PP_INCLUDE_HANDLER_HPP
+#if !defined(METRIC_PP_INCLUDE_HANDLER_HPP)
+#define METRIC_PP_INCLUDE_HANDLER_HPP
 
 #include "MetricOptions.hpp"
 
@@ -28,18 +28,20 @@
 
 #include <string>
 
-class MetricPPIncludeHandler : public clang::PPCallbacks
-{
-	private:
-		const MetricOptions&  m_options;
-		std::string&          m_currentFile;
-		clang::SourceManager& m_SM;
-    public:
-		MetricPPIncludeHandler(const MetricOptions& p_options, clang::SourceManager& p_SM, std::string& p_currentFile);
-		virtual ~MetricPPIncludeHandler( void );
-		virtual void FileChanged(clang::SourceLocation Loc, FileChangeReason Reason,
-							     clang::SrcMgr::CharacteristicKind FileType,
-								 clang::FileID PrevFID = clang::FileID());
+class MetricPPIncludeHandler : public clang::PPCallbacks {
+  private:
+    const MetricOptions &m_options;
+    std::string &m_currentFile;
+    clang::SourceManager &m_SM;
+
+  public:
+    MetricPPIncludeHandler(const MetricOptions &p_options,
+                           clang::SourceManager &p_SM,
+                           std::string &p_currentFile);
+    virtual ~MetricPPIncludeHandler(void);
+    virtual void FileChanged(clang::SourceLocation Loc, FileChangeReason Reason,
+                             clang::SrcMgr::CharacteristicKind FileType,
+                             clang::FileID PrevFID = clang::FileID());
 };
 
 #endif

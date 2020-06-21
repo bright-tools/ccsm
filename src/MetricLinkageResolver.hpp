@@ -19,11 +19,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#if !defined( METRIC_LINKAGE_RESOLVER_HPP )
-#define       METRIC_LINKAGE_RESOLVER_HPP
+#if !defined(METRIC_LINKAGE_RESOLVER_HPP)
+#define METRIC_LINKAGE_RESOLVER_HPP
 
 #include "MetricUnit.hpp"
 
-extern void resolveLinkages(MetricUnit* p_topUnit);
+extern void resolveLinkages(MetricUnit *p_topUnit);
 
 #endif
