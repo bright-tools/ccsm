@@ -40,8 +40,10 @@ class MetricVisitor : public clang::RecursiveASTVisitor<MetricVisitor>
 protected:
 	typedef struct
 	{
-		MetricUnit::counter_t path_count;
-		bool                  path_has_return;
+		//  number paths that don't end in return
+		MetricUnit::counter_t path_regular;
+		// number paths that lead to return
+		MetricUnit::counter_t path_return;
 	} PathResults;
 
 	/** Table of pairs which match binary operators against metrics, used to initialise binaryOperatorToMetricMap */
