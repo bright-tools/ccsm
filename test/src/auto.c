@@ -1,0 +1,3 @@
+extern volatile int x;
+
+
