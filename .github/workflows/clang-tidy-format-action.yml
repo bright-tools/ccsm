@@ -1,6 +1,7 @@
-name: c-linter
+name: CI
 
 on: [pull_request]
+
 jobs:
   clang-tidy-format-action:
     name: clang-tidy-format-action
