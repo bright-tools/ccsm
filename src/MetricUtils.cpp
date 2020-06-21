@@ -4,6 +4,7 @@
 #include "clang/Basic/SourceLocation.h"
 #include "clang/AST/Stmt.h"
 #include "clang/AST/Decl.h"
+#include "clang/AST/ParentMapContext.h"
 
 #include <iostream>
 
@@ -95,7 +96,7 @@ void test()
 std::string makeRelative(const std::string& p_path, const std::string& p_cwd)
 {
 	std::string ret_val;
-	const std::string sep = llvm::sys::path::get_separator();
+	const std::string sep = llvm::sys::path::get_separator().str();
 
 	size_t path_pos = p_path.find(sep);
 	size_t cwd_pos = p_cwd.find(sep);
@@ -198,7 +199,7 @@ SourceFileAndLine_t getFileAndLine(const clang::SourceManager& p_sourceManager, 
 		}
 
 		ret_val.Valid = true;
-		ret_val.FileName = p_sourceManager.getFilename(resolved);
+		ret_val.FileName = p_sourceManager.getFilename(resolved).str();
 		ret_val.LineNo = p_sourceManager.getSpellingLineNumber(resolved);
 		ret_val.Column = p_sourceManager.getSpellingColumnNumber(resolved);
 	}

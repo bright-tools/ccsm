@@ -22,6 +22,7 @@
 #include "llvm/Support/CommandLine.h"
 #include "clang/Basic/Version.h"
 
+#include <llvm/Support/Host.h>
 #include <llvm/Support/Regex.h>
 #include <llvm/ADT/StringRef.h>
 
@@ -499,7 +500,7 @@ void CcsmOptionsHandler::analyseCompilerArgs(const char* const exeName)
 			}
 
 #if 0
-			std::cout << "C++: " << m_usesCpp << " C11:" << m_usesC11 << " C89: " << m_usesC89 << " C99: " << m_usesC99 << "\r\n";
+			std::cout << "C++: " << m_usesCpp << " C11:" << m_usesC11 << " C89: " << m_usesC89 << " C99: " << m_usesC99 << "\n";
 #endif
 		}
 	}

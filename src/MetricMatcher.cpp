@@ -22,6 +22,7 @@
 #include <sstream>
 #include <iostream>
 #include <llvm/Support/raw_os_ostream.h>
+#include <clang/Basic/FileManager.h>
 
 #define SOURCE_MANAGER (m_astContext->getSourceManager())
 
@@ -1268,7 +1269,7 @@ bool MetricVisitor::TraverseStmt(clang::Stmt *p_stmt)
 		{
 			default:
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-				std::cout << "TraverseStmt - Unhandled stmt type " << stmtKind << "(" << p_stmt->getStmtClassName() <<  ")\r\n";
+				std::cout << "TraverseStmt - Unhandled stmt type " << stmtKind << "(" << p_stmt->getStmtClassName() <<  ")\n";
 #endif
 				break;
 		}
@@ -1314,7 +1315,7 @@ bool MetricVisitor::TraverseDecl(clang::Decl *p_decl)
 			break;
 		default:
 #if defined( DEBUG_FN_TRACE_OUTOUT )
-			std::cout << "TraverseDecl - Unhandled decl type " << declKind << "(" << p_decl->getDeclKindName() << ")\r\n";
+			std::cout << "TraverseDecl - Unhandled decl type " << declKind << "(" << p_decl->getDeclKindName() << ")\n";
 #endif
 			break;
 	}
@@ -1328,7 +1329,7 @@ bool MetricVisitor::TraverseDecl(clang::Decl *p_decl)
 			x != SM.fileinfo_end() ;
 			x++ )
 		{
-			std::string name = (*x).first->getName();
+			std::string name = (*x).first->getName().str();
 #if 0
 			/* TODO: Cache not valid at this point, so NumLines not valid :-( */
 			std::cout << "   " << (*x).second->NumLines << std::endl;
