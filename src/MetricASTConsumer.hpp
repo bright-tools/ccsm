@@ -19,8 +19,8 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-#if !defined( METRIC_AST_CONSUMER_HPP )
-#define       METRIC_AST_CONSUMER_HPP
+#if !defined(METRIC_AST_CONSUMER_HPP)
+#define METRIC_AST_CONSUMER_HPP
 
 #include "clang/AST/ASTConsumer.h"
 #include "clang/AST/ASTContext.h"
@@ -32,38 +32,38 @@
 #include <vector>
 
 #include "FunctionLocator.hpp"
-#include "MetricOptions.hpp"
 #include "MetricMatcher.hpp"
+#include "MetricOptions.hpp"
 
-class MetricASTConsumer : public clang::ASTConsumer
-{
-protected:
-	clang::CompilerInstance& m_compilerInstance;
-    MetricOptions&           m_options;
-	MetricUnit               *m_topUnit         = NULL;
-	GlobalFunctionLocator    *m_fnLocator       = NULL;
+class MetricASTConsumer : public clang::ASTConsumer {
+  protected:
+    clang::CompilerInstance &m_compilerInstance;
+    MetricOptions &m_options;
+    MetricUnit *m_topUnit = NULL;
+    GlobalFunctionLocator *m_fnLocator = NULL;
 
-public:
-	explicit MetricASTConsumer(clang::CompilerInstance &CI, MetricUnit* p_topUnit, MetricOptions& p_options, GlobalFunctionLocator*  m_fnLocator = NULL);
+  public:
+    explicit MetricASTConsumer(clang::CompilerInstance &CI, MetricUnit *p_topUnit,
+                               MetricOptions &p_options, GlobalFunctionLocator *m_fnLocator = NULL);
 
-	virtual ~MetricASTConsumer(void);
-	virtual void HandleTranslationUnit(clang::ASTContext &Context);
+    virtual ~MetricASTConsumer(void);
+    virtual void HandleTranslationUnit(clang::ASTContext &Context);
 };
 
-class MetricPPConsumer : public clang::PreprocessorFrontendAction
-{
-protected:
-	MetricOptions&            m_options;
-	MetricUnit               *m_topUnit   = NULL;
-	GlobalFunctionLocator    *m_fnLocator = NULL;
-	bool                      m_expanded;
+class MetricPPConsumer : public clang::PreprocessorFrontendAction {
+  protected:
+    MetricOptions &m_options;
+    MetricUnit *m_topUnit = NULL;
+    GlobalFunctionLocator *m_fnLocator = NULL;
+    bool m_expanded;
 
-public:
-	explicit MetricPPConsumer(MetricUnit* p_topUnit, MetricOptions& p_options, GlobalFunctionLocator*  m_fnLocator = NULL, const bool p_expanded = true);
+  public:
+    explicit MetricPPConsumer(MetricUnit *p_topUnit, MetricOptions &p_options,
+                              GlobalFunctionLocator *m_fnLocator = NULL,
+                              const bool p_expanded = true);
 
-	virtual ~MetricPPConsumer(void);
-	virtual void ExecuteAction();
+    virtual ~MetricPPConsumer(void);
+    virtual void ExecuteAction();
 };
-
 
 #endif

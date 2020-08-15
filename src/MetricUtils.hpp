@@ -1,6 +1,6 @@
 /*
    @file
-   @brief Functions to support AST operations of any complexity that 
+   @brief Functions to support AST operations of any complexity that
           aren't supported out-of-the-box by clang.
 
    @author John Bailey
@@ -21,19 +21,20 @@
    limitations under the License.
 */
 
-#if !defined( METRIC_UTILS_HPP )
-#define       METRIC_UTILS_HPP
+#if !defined(METRIC_UTILS_HPP)
+#define METRIC_UTILS_HPP
 
-#include "clang/AST/ASTContext.h"
 #include "MetricUnit.hpp"
+#include "clang/AST/ASTContext.h"
 
-extern unsigned getControlDepth(const clang::Stmt* const p_stmt, clang::ASTContext* p_context );
-extern size_t   countNewlines( clang::StringRef& p_buffer );
-std::string makeRelative(const std::string& p_path);
-std::string makeRelative(const std::string& p_path, const std::string& p_cwd);
+extern unsigned getControlDepth(const clang::Stmt *const p_stmt, clang::ASTContext *p_context);
+extern size_t countNewlines(clang::StringRef &p_buffer);
+std::string makeRelative(const std::string &p_path);
+std::string makeRelative(const std::string &p_path, const std::string &p_cwd);
 
 extern const SourceFileAndLine_t InvalidSourceAndLine;
 
-SourceFileAndLine_t getFileAndLine( const clang::SourceManager& p_sourceManager, const clang::SourceLocation* p_sourceLoc );
+SourceFileAndLine_t getFileAndLine(const clang::SourceManager &p_sourceManager,
+                                   const clang::SourceLocation *p_sourceLoc);
 
 #endif

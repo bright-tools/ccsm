@@ -14,91 +14,76 @@
    limitations under the License.
 */
 
+#include "MetricSrcExpandedLexer.hpp"
 #include "MetricSrcLexer.hpp"
 #include "MetricSrcUnexpandedLexer.hpp"
-#include "MetricSrcExpandedLexer.hpp"
 
 #include "MetricASTConsumer.hpp"
 #include "clang/Basic/FileManager.h"
 #include "clang/Basic/SourceManager.h"
 
-MetricASTConsumer::MetricASTConsumer(clang::CompilerInstance &CI, MetricUnit* p_topUnit, MetricOptions& p_options, GlobalFunctionLocator*  p_fnLocator ) :
-																													  m_compilerInstance( CI ),
-																													  m_options( p_options ),
-																													  m_topUnit( p_topUnit ),
-																													  m_fnLocator( p_fnLocator )
-{ 
+MetricASTConsumer::MetricASTConsumer(clang::CompilerInstance &CI, MetricUnit *p_topUnit,
+                                     MetricOptions &p_options, GlobalFunctionLocator *p_fnLocator)
+    : m_compilerInstance(CI), m_options(p_options), m_topUnit(p_topUnit), m_fnLocator(p_fnLocator) {
 }
 
-MetricASTConsumer::~MetricASTConsumer(void) 
-{
+MetricASTConsumer::~MetricASTConsumer(void) {
 }
 
 #include <iostream>
 
-void MetricASTConsumer::HandleTranslationUnit(clang::ASTContext &Context) 
-{
-	clang::SourceManager& SM = Context.getSourceManager();
-	clang::TranslationUnitDecl* translationUnitDecl = Context.getTranslationUnitDecl();
+void MetricASTConsumer::HandleTranslationUnit(clang::ASTContext &Context) {
+    clang::SourceManager &SM = Context.getSourceManager();
+    clang::TranslationUnitDecl *translationUnitDecl = Context.getTranslationUnitDecl();
 
 #if 0
 	std::cout << "HandleTranslationUnit::Processing " << SM.getFileEntryForID(SM.getMainFileID())->getName().str() << std::endl;
 #endif
 
-	TranslationUnitFunctionLocator* fnMap = m_fnLocator->getLocatorFor( SM.getFileEntryForID( SM.getMainFileID() )->getName().str() );
+    TranslationUnitFunctionLocator *fnMap =
+        m_fnLocator->getLocatorFor(SM.getFileEntryForID(SM.getMainFileID())->getName().str());
 
-	MetricVisitor* visitor = new MetricVisitor(m_compilerInstance, m_topUnit, m_options, fnMap ); 
+    MetricVisitor *visitor = new MetricVisitor(m_compilerInstance, m_topUnit, m_options, fnMap);
 
-	/* we can use ASTContext to get the TranslationUnitDecl, which is
-		a single Decl that collectively represents the entire source file */
-	visitor->TraverseDecl( translationUnitDecl );
+    /* we can use ASTContext to get the TranslationUnitDecl, which is
+            a single Decl that collectively represents the entire source file */
+    visitor->TraverseDecl(translationUnitDecl);
 
-	/* Flag that all of the source files included in this AST tree have been processed. */
-	for( clang::SourceManager::fileinfo_iterator it = SM.fileinfo_begin();
-		 it != SM.fileinfo_end();
-		 it++ )
-	{
-		std::string fileName = it->first->getName().str();
+    /* Flag that all of the source files included in this AST tree have been
+     * processed. */
+    for (clang::SourceManager::fileinfo_iterator it = SM.fileinfo_begin(); it != SM.fileinfo_end();
+         it++) {
+        std::string fileName = it->first->getName().str();
 
-		if( m_options.ShouldIncludeFile( fileName ) &&
-			!(m_options.isDefFile( fileName )))
-		{
-			MetricUnit* fileUnit = m_topUnit->getSubUnit(fileName, METRIC_UNIT_FILE);
-			fileUnit->setProcessed( METRIC_UNIT_PROCESS_AST);
-		}
-	}
+        if (m_options.ShouldIncludeFile(fileName) && !(m_options.isDefFile(fileName))) {
+            MetricUnit *fileUnit = m_topUnit->getSubUnit(fileName, METRIC_UNIT_FILE);
+            fileUnit->setProcessed(METRIC_UNIT_PROCESS_AST);
+        }
+    }
 
-	delete( visitor );
+    delete (visitor);
 }
 
-MetricPPConsumer::MetricPPConsumer(MetricUnit* p_topUnit, MetricOptions& p_options, GlobalFunctionLocator*  p_fnLocator, const bool p_expanded)
-	: clang::PreprocessorFrontendAction(),
-	  m_options(p_options),
-      m_topUnit( p_topUnit ),
-      m_fnLocator( p_fnLocator ),
-	  m_expanded( p_expanded )
-{ 
+MetricPPConsumer::MetricPPConsumer(MetricUnit *p_topUnit, MetricOptions &p_options,
+                                   GlobalFunctionLocator *p_fnLocator, const bool p_expanded)
+    : clang::PreprocessorFrontendAction(), m_options(p_options), m_topUnit(p_topUnit),
+      m_fnLocator(p_fnLocator), m_expanded(p_expanded) {
 }
 
-MetricPPConsumer::~MetricPPConsumer(void) 
-{
+MetricPPConsumer::~MetricPPConsumer(void) {
 }
 
-void MetricPPConsumer::ExecuteAction()
-{
-	MetricSrcLexer* srcLexer;
-	if ( m_expanded )
-	{
-		srcLexer = new MetricSrcExpandedLexer(getCompilerInstance(), m_topUnit, m_options);
-	}
-	else
-	{
-		srcLexer = new MetricSrcUnexpandedLexer(getCompilerInstance(), m_topUnit, m_options);
-	}
-	clang::SourceManager& sm = getCompilerInstance().getSourceManager();
-	std::string mainFileName = sm.getFileEntryForID( sm.getMainFileID() )->getName().str();
-	
-	srcLexer->LexSources( getCompilerInstance(), m_fnLocator->getLocatorFor( mainFileName ) );
+void MetricPPConsumer::ExecuteAction() {
+    MetricSrcLexer *srcLexer;
+    if (m_expanded) {
+        srcLexer = new MetricSrcExpandedLexer(getCompilerInstance(), m_topUnit, m_options);
+    } else {
+        srcLexer = new MetricSrcUnexpandedLexer(getCompilerInstance(), m_topUnit, m_options);
+    }
+    clang::SourceManager &sm = getCompilerInstance().getSourceManager();
+    std::string mainFileName = sm.getFileEntryForID(sm.getMainFileID())->getName().str();
 
-	delete(srcLexer);
+    srcLexer->LexSources(getCompilerInstance(), m_fnLocator->getLocatorFor(mainFileName));
+
+    delete (srcLexer);
 }

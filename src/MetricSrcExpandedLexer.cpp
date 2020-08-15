@@ -15,36 +15,36 @@
 */
 
 #include "MetricSrcExpandedLexer.hpp"
-#include "MetricUtils.hpp"
 #include "MetricPPIncludeHandler.hpp"
-#include "clang/Lex/Preprocessor.h"
+#include "MetricUtils.hpp"
 #include "clang/AST/ASTContext.h"
+#include "clang/Lex/Preprocessor.h"
 
 #include <iostream>
 
 #define SOURCE_MANAGER (m_compilerInstance.getSourceManager())
 
 const static std::pair<MetricType_e, MetricType_e> metricToBodyMetricMapData[] = {
-	std::make_pair(METRIC_TYPE_DOUBLE,   METRIC_TYPE_BODY_DOUBLE),
-	std::make_pair(METRIC_TYPE_FLOAT,    METRIC_TYPE_BODY_FLOAT),
-	std::make_pair(METRIC_TYPE_CONST,    METRIC_TYPE_BODY_CONST),
-	std::make_pair(METRIC_TYPE_CHAR,     METRIC_TYPE_BODY_CHAR),
-	std::make_pair(METRIC_TYPE_SHORT,    METRIC_TYPE_BODY_SHORT),
-	std::make_pair(METRIC_TYPE_LONG,     METRIC_TYPE_BODY_LONG),
-	std::make_pair(METRIC_TYPE_UNSIGNED, METRIC_TYPE_BODY_UNSIGNED),
-	std::make_pair(METRIC_TYPE_SIGNED,   METRIC_TYPE_BODY_SIGNED),
-	std::make_pair(METRIC_TYPE_STATIC,   METRIC_TYPE_BODY_STATIC),
-	std::make_pair(METRIC_TYPE_UNION,    METRIC_TYPE_BODY_UNION),
-	std::make_pair(METRIC_TYPE_ENUM,     METRIC_TYPE_BODY_ENUM),
-	std::make_pair(METRIC_TYPE_VOID,     METRIC_TYPE_BODY_VOID),
-	std::make_pair(METRIC_TYPE_STRUCT,   METRIC_TYPE_BODY_STRUCT),
-	std::make_pair(METRIC_TYPE_INT,      METRIC_TYPE_BODY_INT)
-};
+    std::make_pair(METRIC_TYPE_DOUBLE, METRIC_TYPE_BODY_DOUBLE),
+    std::make_pair(METRIC_TYPE_FLOAT, METRIC_TYPE_BODY_FLOAT),
+    std::make_pair(METRIC_TYPE_CONST, METRIC_TYPE_BODY_CONST),
+    std::make_pair(METRIC_TYPE_CHAR, METRIC_TYPE_BODY_CHAR),
+    std::make_pair(METRIC_TYPE_SHORT, METRIC_TYPE_BODY_SHORT),
+    std::make_pair(METRIC_TYPE_LONG, METRIC_TYPE_BODY_LONG),
+    std::make_pair(METRIC_TYPE_UNSIGNED, METRIC_TYPE_BODY_UNSIGNED),
+    std::make_pair(METRIC_TYPE_SIGNED, METRIC_TYPE_BODY_SIGNED),
+    std::make_pair(METRIC_TYPE_STATIC, METRIC_TYPE_BODY_STATIC),
+    std::make_pair(METRIC_TYPE_UNION, METRIC_TYPE_BODY_UNION),
+    std::make_pair(METRIC_TYPE_ENUM, METRIC_TYPE_BODY_ENUM),
+    std::make_pair(METRIC_TYPE_VOID, METRIC_TYPE_BODY_VOID),
+    std::make_pair(METRIC_TYPE_STRUCT, METRIC_TYPE_BODY_STRUCT),
+    std::make_pair(METRIC_TYPE_INT, METRIC_TYPE_BODY_INT)};
 
-const std::map<MetricType_e, MetricType_e> MetricSrcExpandedLexer::m_metricToBodyMetricMap(metricToBodyMetricMapData,
-	metricToBodyMetricMapData + sizeof metricToBodyMetricMapData / sizeof metricToBodyMetricMapData[0]);
+const std::map<MetricType_e, MetricType_e> MetricSrcExpandedLexer::m_metricToBodyMetricMap(
+    metricToBodyMetricMapData, metricToBodyMetricMapData + sizeof metricToBodyMetricMapData /
+                                                               sizeof metricToBodyMetricMapData[0]);
 
-const static std::pair<clang::tok::TokenKind,MetricType_e> tokenKindToTypeMapData[] = {
+const static std::pair<clang::tok::TokenKind, MetricType_e> tokenKindToTypeMapData[] = {
 #if 0
 	/* These are handed in metric matcher such that the difference between unary and non-unary operators can be 
 	   distinguished */
@@ -116,209 +116,193 @@ const static std::pair<clang::tok::TokenKind,MetricType_e> tokenKindToTypeMapDat
 	//	std::make_pair(clang::tok::colon,        METRIC_TYPE_TOKEN_COLON),
 	//	std::make_pair(clang::tok::exclaim,      METRIC_TYPE_TOKEN_NOT),
 #endif
-	std::make_pair(clang::tok::exclaimequal, METRIC_TYPE_OPERATOR_COMP_NOT_EQUAL),
-	std::make_pair(clang::tok::percent,      METRIC_TYPE_OPERATOR_ARITHMETIC_MODULO),
-	std::make_pair(clang::tok::percentequal, METRIC_TYPE_OPERATOR_ARITHMETIC_MODULO_ASSIGN),
-	std::make_pair(clang::tok::ampamp,       METRIC_TYPE_OPERATOR_LOGICAL_AND),
-	std::make_pair(clang::tok::pipepipe,     METRIC_TYPE_OPERATOR_LOGICAL_OR),
-	std::make_pair(clang::tok::ampequal,     METRIC_TYPE_OPERATOR_BITWISE_AND_ASSIGN),
-	std::make_pair(clang::tok::starequal,    METRIC_TYPE_OPERATOR_ARITHMETIC_MULTIPLICATION_ASSIGN),
-	std::make_pair(clang::tok::plusequal,    METRIC_TYPE_OPERATOR_ARITHMETIC_ADDITION_ASSIGN),
-	std::make_pair(clang::tok::minusequal,   METRIC_TYPE_OPERATOR_ARITHMETIC_SUBTRACTION_ASSIGN),
-	std::make_pair(clang::tok::slash,        METRIC_TYPE_OPERATOR_ARITHMETIC_DIVISION),
-	std::make_pair(clang::tok::slashequal,   METRIC_TYPE_OPERATOR_ARITHMETIC_DIVISION_ASSIGN),
-	std::make_pair(clang::tok::kw_auto,      METRIC_TYPE_AUTO),
-	std::make_pair(clang::tok::kw_for,       METRIC_TYPE_FORLOOP),
-	std::make_pair(clang::tok::kw_extern,    METRIC_TYPE_EXTERN),
-	std::make_pair(clang::tok::kw_register,  METRIC_TYPE_REGISTER),
-	std::make_pair(clang::tok::kw_if,        METRIC_TYPE_IF),
-	std::make_pair(clang::tok::kw_else,      METRIC_TYPE_ELSE),
-	std::make_pair(clang::tok::kw_char,      METRIC_TYPE_CHAR),
-	std::make_pair(clang::tok::kw_double,    METRIC_TYPE_DOUBLE),
-	std::make_pair(clang::tok::kw_float,     METRIC_TYPE_FLOAT),
-	std::make_pair(clang::tok::kw_int,       METRIC_TYPE_INT),
-	std::make_pair(clang::tok::kw_long,      METRIC_TYPE_LONG),
-	std::make_pair(clang::tok::kw_short,     METRIC_TYPE_SHORT),
-	std::make_pair(clang::tok::kw_signed,    METRIC_TYPE_SIGNED),
-	std::make_pair(clang::tok::kw_unsigned,  METRIC_TYPE_UNSIGNED),
-	std::make_pair(clang::tok::kw_void,      METRIC_TYPE_VOID),
-	std::make_pair(clang::tok::kw_const,     METRIC_TYPE_CONST),
-	std::make_pair(clang::tok::kw_volatile,  METRIC_TYPE_VOLATILE),
-	std::make_pair(clang::tok::kw_static,    METRIC_TYPE_STATIC),
-	std::make_pair(clang::tok::kw_typedef,   METRIC_TYPE_TYPEDEF),
-	std::make_pair(clang::tok::kw_break,     METRIC_TYPE_BREAK),
-	std::make_pair(clang::tok::kw_case,      METRIC_TYPE_CASE),
-	std::make_pair(clang::tok::kw_continue,  METRIC_TYPE_CONTINUE),
-	std::make_pair(clang::tok::kw_default,   METRIC_TYPE_DEFAULT),
-	std::make_pair(clang::tok::kw_do,        METRIC_TYPE_DO),
-	std::make_pair(clang::tok::kw_enum,      METRIC_TYPE_ENUM),
-	std::make_pair(clang::tok::kw_goto,      METRIC_TYPE_GOTO),
-	std::make_pair(clang::tok::kw_return,    METRIC_TYPE_RETURN),
-	std::make_pair(clang::tok::kw_sizeof,    METRIC_TYPE_OPERATOR_SIZE_OF),
-	std::make_pair(clang::tok::kw_struct,    METRIC_TYPE_STRUCT),
-	std::make_pair(clang::tok::kw_switch,    METRIC_TYPE_SWITCH),
-	std::make_pair(clang::tok::kw_union,     METRIC_TYPE_UNION),
-	std::make_pair(clang::tok::kw_while,            METRIC_TYPE_WHILE),
-	std::make_pair(clang::tok::less,                METRIC_TYPE_OPERATOR_COMP_LESS_THAN),
-    std::make_pair(clang::tok::lessless,            METRIC_TYPE_OPERATOR_SHIFT_LEFT),
-	std::make_pair(clang::tok::lesslessequal,       METRIC_TYPE_OPERATOR_SHIFT_LEFT_ASSIGN),
-	std::make_pair(clang::tok::lessequal,           METRIC_TYPE_OPERATOR_COMP_LESS_THAN_EQUAL),
-    std::make_pair(clang::tok::equal,               METRIC_TYPE_OPERATOR_ARITHMETIC_ASSIGN),
-	std::make_pair(clang::tok::equalequal,          METRIC_TYPE_OPERATOR_COMP_EQUAL),
-	std::make_pair(clang::tok::greater,             METRIC_TYPE_OPERATOR_COMP_GREATER_THAN),
-	std::make_pair(clang::tok::greaterequal,        METRIC_TYPE_OPERATOR_COMP_GREATER_THAN_EQUAL),
-	std::make_pair(clang::tok::greatergreater,      METRIC_TYPE_OPERATOR_SHIFT_RIGHT),
-	std::make_pair(clang::tok::greatergreaterequal, METRIC_TYPE_OPERATOR_SHIFT_RIGHT_ASSIGN),
-	std::make_pair(clang::tok::caret,               METRIC_TYPE_OPERATOR_BITWISE_XOR),
-	std::make_pair(clang::tok::caretequal,          METRIC_TYPE_OPERATOR_BITWISE_XOR_ASSIGN),
-    std::make_pair(clang::tok::pipe,                METRIC_TYPE_OPERATOR_BITWISE_OR),
-	std::make_pair(clang::tok::pipeequal,           METRIC_TYPE_OPERATOR_BITWISE_OR_ASSIGN),
+    std::make_pair(clang::tok::exclaimequal, METRIC_TYPE_OPERATOR_COMP_NOT_EQUAL),
+    std::make_pair(clang::tok::percent, METRIC_TYPE_OPERATOR_ARITHMETIC_MODULO),
+    std::make_pair(clang::tok::percentequal, METRIC_TYPE_OPERATOR_ARITHMETIC_MODULO_ASSIGN),
+    std::make_pair(clang::tok::ampamp, METRIC_TYPE_OPERATOR_LOGICAL_AND),
+    std::make_pair(clang::tok::pipepipe, METRIC_TYPE_OPERATOR_LOGICAL_OR),
+    std::make_pair(clang::tok::ampequal, METRIC_TYPE_OPERATOR_BITWISE_AND_ASSIGN),
+    std::make_pair(clang::tok::starequal, METRIC_TYPE_OPERATOR_ARITHMETIC_MULTIPLICATION_ASSIGN),
+    std::make_pair(clang::tok::plusequal, METRIC_TYPE_OPERATOR_ARITHMETIC_ADDITION_ASSIGN),
+    std::make_pair(clang::tok::minusequal, METRIC_TYPE_OPERATOR_ARITHMETIC_SUBTRACTION_ASSIGN),
+    std::make_pair(clang::tok::slash, METRIC_TYPE_OPERATOR_ARITHMETIC_DIVISION),
+    std::make_pair(clang::tok::slashequal, METRIC_TYPE_OPERATOR_ARITHMETIC_DIVISION_ASSIGN),
+    std::make_pair(clang::tok::kw_auto, METRIC_TYPE_AUTO),
+    std::make_pair(clang::tok::kw_for, METRIC_TYPE_FORLOOP),
+    std::make_pair(clang::tok::kw_extern, METRIC_TYPE_EXTERN),
+    std::make_pair(clang::tok::kw_register, METRIC_TYPE_REGISTER),
+    std::make_pair(clang::tok::kw_if, METRIC_TYPE_IF),
+    std::make_pair(clang::tok::kw_else, METRIC_TYPE_ELSE),
+    std::make_pair(clang::tok::kw_char, METRIC_TYPE_CHAR),
+    std::make_pair(clang::tok::kw_double, METRIC_TYPE_DOUBLE),
+    std::make_pair(clang::tok::kw_float, METRIC_TYPE_FLOAT),
+    std::make_pair(clang::tok::kw_int, METRIC_TYPE_INT),
+    std::make_pair(clang::tok::kw_long, METRIC_TYPE_LONG),
+    std::make_pair(clang::tok::kw_short, METRIC_TYPE_SHORT),
+    std::make_pair(clang::tok::kw_signed, METRIC_TYPE_SIGNED),
+    std::make_pair(clang::tok::kw_unsigned, METRIC_TYPE_UNSIGNED),
+    std::make_pair(clang::tok::kw_void, METRIC_TYPE_VOID),
+    std::make_pair(clang::tok::kw_const, METRIC_TYPE_CONST),
+    std::make_pair(clang::tok::kw_volatile, METRIC_TYPE_VOLATILE),
+    std::make_pair(clang::tok::kw_static, METRIC_TYPE_STATIC),
+    std::make_pair(clang::tok::kw_typedef, METRIC_TYPE_TYPEDEF),
+    std::make_pair(clang::tok::kw_break, METRIC_TYPE_BREAK),
+    std::make_pair(clang::tok::kw_case, METRIC_TYPE_CASE),
+    std::make_pair(clang::tok::kw_continue, METRIC_TYPE_CONTINUE),
+    std::make_pair(clang::tok::kw_default, METRIC_TYPE_DEFAULT),
+    std::make_pair(clang::tok::kw_do, METRIC_TYPE_DO),
+    std::make_pair(clang::tok::kw_enum, METRIC_TYPE_ENUM),
+    std::make_pair(clang::tok::kw_goto, METRIC_TYPE_GOTO),
+    std::make_pair(clang::tok::kw_return, METRIC_TYPE_RETURN),
+    std::make_pair(clang::tok::kw_sizeof, METRIC_TYPE_OPERATOR_SIZE_OF),
+    std::make_pair(clang::tok::kw_struct, METRIC_TYPE_STRUCT),
+    std::make_pair(clang::tok::kw_switch, METRIC_TYPE_SWITCH),
+    std::make_pair(clang::tok::kw_union, METRIC_TYPE_UNION),
+    std::make_pair(clang::tok::kw_while, METRIC_TYPE_WHILE),
+    std::make_pair(clang::tok::less, METRIC_TYPE_OPERATOR_COMP_LESS_THAN),
+    std::make_pair(clang::tok::lessless, METRIC_TYPE_OPERATOR_SHIFT_LEFT),
+    std::make_pair(clang::tok::lesslessequal, METRIC_TYPE_OPERATOR_SHIFT_LEFT_ASSIGN),
+    std::make_pair(clang::tok::lessequal, METRIC_TYPE_OPERATOR_COMP_LESS_THAN_EQUAL),
+    std::make_pair(clang::tok::equal, METRIC_TYPE_OPERATOR_ARITHMETIC_ASSIGN),
+    std::make_pair(clang::tok::equalequal, METRIC_TYPE_OPERATOR_COMP_EQUAL),
+    std::make_pair(clang::tok::greater, METRIC_TYPE_OPERATOR_COMP_GREATER_THAN),
+    std::make_pair(clang::tok::greaterequal, METRIC_TYPE_OPERATOR_COMP_GREATER_THAN_EQUAL),
+    std::make_pair(clang::tok::greatergreater, METRIC_TYPE_OPERATOR_SHIFT_RIGHT),
+    std::make_pair(clang::tok::greatergreaterequal, METRIC_TYPE_OPERATOR_SHIFT_RIGHT_ASSIGN),
+    std::make_pair(clang::tok::caret, METRIC_TYPE_OPERATOR_BITWISE_XOR),
+    std::make_pair(clang::tok::caretequal, METRIC_TYPE_OPERATOR_BITWISE_XOR_ASSIGN),
+    std::make_pair(clang::tok::pipe, METRIC_TYPE_OPERATOR_BITWISE_OR),
+    std::make_pair(clang::tok::pipeequal, METRIC_TYPE_OPERATOR_BITWISE_OR_ASSIGN),
 };
 
-const std::map<clang::tok::TokenKind, MetricType_e> MetricSrcExpandedLexer::m_tokenKindToTypeMap(tokenKindToTypeMapData,
+const std::map<clang::tok::TokenKind, MetricType_e> MetricSrcExpandedLexer::m_tokenKindToTypeMap(
+    tokenKindToTypeMapData,
     tokenKindToTypeMapData + sizeof tokenKindToTypeMapData / sizeof tokenKindToTypeMapData[0]);
 
-
-MetricSrcExpandedLexer::MetricSrcExpandedLexer(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, MetricOptions& p_options) : MetricSrcLexer( p_CI, p_topUnit, p_options )
-{
+MetricSrcExpandedLexer::MetricSrcExpandedLexer(clang::CompilerInstance &p_CI, MetricUnit *p_topUnit,
+                                               MetricOptions &p_options)
+    : MetricSrcLexer(p_CI, p_topUnit, p_options) {
 }
 
-MetricSrcExpandedLexer::~MetricSrcExpandedLexer(void)
-{
+MetricSrcExpandedLexer::~MetricSrcExpandedLexer(void) {
 }
 
-MetricUnitProcessingType_e MetricSrcExpandedLexer::getLexType(void) const
-{
-	return METRIC_UNIT_PROCESS_LEX_EXPANDED;
+MetricUnitProcessingType_e MetricSrcExpandedLexer::getLexType(void) const {
+    return METRIC_UNIT_PROCESS_LEX_EXPANDED;
 }
 
-void MetricSrcExpandedLexer::HandleOperand(clang::Token& p_token)
-{
+void MetricSrcExpandedLexer::HandleOperand(clang::Token &p_token) {
 }
 
-void MetricSrcExpandedLexer::ProcessToken(clang::Token& p_token)
-{		
-	std::string tok_data;
-	unsigned int tok_len = p_token.getLength();
-	const clang::SourceLocation startLoc = p_token.getLocation();
-	const SourceFileAndLine_t fileAndLineLoc = getFileAndLine( SOURCE_MANAGER, &startLoc );
+void MetricSrcExpandedLexer::ProcessToken(clang::Token &p_token) {
+    std::string tok_data;
+    unsigned int tok_len = p_token.getLength();
+    const clang::SourceLocation startLoc = p_token.getLocation();
+    const SourceFileAndLine_t fileAndLineLoc = getFileAndLine(SOURCE_MANAGER, &startLoc);
 
-	if( m_options.getDumpTokens() )
-	{
-		m_options.getOutput() << "(" << p_token.getName();
-	}
+    if (m_options.getDumpTokens()) {
+        m_options.getOutput() << "(" << p_token.getName();
+    }
 
-	switch( p_token.getKind() )
-	{
-		case clang::tok::numeric_constant:
-			tok_data = clang::StringRef(p_token.getLiteralData(), tok_len).str();
-			m_currentFnNumerics.insert( tok_data );
-			m_currentUnit->increment( METRIC_TYPE_NUMERIC_CONSTANTS, fileAndLineLoc );
-			break;
-		case clang::tok::char_constant:
-			tok_data = clang::StringRef(p_token.getLiteralData(), tok_len).str();
-			m_currentFnCharConsts.insert( tok_data );
-			m_currentUnit->increment( METRIC_TYPE_CHAR_CONSTS, fileAndLineLoc );
-			break;
-		case clang::tok::string_literal:
-			tok_data = clang::StringRef(p_token.getLiteralData(), tok_len).str();
-			m_currentFnStrings.insert( tok_data );
-			m_currentUnit->increment( METRIC_TYPE_STRING_LITERALS, fileAndLineLoc );
-			break;
-		case clang::tok::comment:
-			/* TODO */
-			break;
-		case clang::tok::eof:
-			/* Not interested in registering end-of-file */
-			break;
-		default:
-			std::map<clang::tok::TokenKind, MetricType_e>::const_iterator typeLookup = m_tokenKindToTypeMap.find(p_token.getKind());
+    switch (p_token.getKind()) {
+        case clang::tok::numeric_constant:
+            tok_data = clang::StringRef(p_token.getLiteralData(), tok_len).str();
+            m_currentFnNumerics.insert(tok_data);
+            m_currentUnit->increment(METRIC_TYPE_NUMERIC_CONSTANTS, fileAndLineLoc);
+            break;
+        case clang::tok::char_constant:
+            tok_data = clang::StringRef(p_token.getLiteralData(), tok_len).str();
+            m_currentFnCharConsts.insert(tok_data);
+            m_currentUnit->increment(METRIC_TYPE_CHAR_CONSTS, fileAndLineLoc);
+            break;
+        case clang::tok::string_literal:
+            tok_data = clang::StringRef(p_token.getLiteralData(), tok_len).str();
+            m_currentFnStrings.insert(tok_data);
+            m_currentUnit->increment(METRIC_TYPE_STRING_LITERALS, fileAndLineLoc);
+            break;
+        case clang::tok::comment:
+            /* TODO */
+            break;
+        case clang::tok::eof:
+            /* Not interested in registering end-of-file */
+            break;
+        default:
+            std::map<clang::tok::TokenKind, MetricType_e>::const_iterator typeLookup =
+                m_tokenKindToTypeMap.find(p_token.getKind());
 
-			if (typeLookup != m_tokenKindToTypeMap.end())
-			{
-				m_currentUnit->increment( ( *typeLookup ).second, fileAndLineLoc );
-				if (m_inBody)
-				{
-					std::map<MetricType_e, MetricType_e>::const_iterator bodyTypeLookup = m_metricToBodyMetricMap.find((*typeLookup).second);
-					if (bodyTypeLookup != m_metricToBodyMetricMap.end())
-					{
-						m_currentUnit->increment( ( *bodyTypeLookup ).second, fileAndLineLoc );
-					}
-				}
-			}
-			else
-			{
-				if (p_token.isAnyIdentifier())
-				{
-					std::string tok_data = p_token.getIdentifierInfo()->getName().str();
-					if (m_options.getDumpTokens())
-					{
-						m_options.getOutput() << ",unreserved:" << tok_data;
-					}
-					m_currentFnIdentifiers.insert(tok_data);
-					m_currentUnit->increment( METRIC_TYPE_UNRESERVED_IDENTIFIERS, fileAndLineLoc );
-					if (m_inBody)
-					{
-						m_currentBodyIdentifiers.insert(tok_data);
-						m_currentUnit->increment( METRIC_TYPE_BODY_UNRESERVED_IDENTIFIERS, fileAndLineLoc );
-					}
-				}
-				else
-				{
-					/* TODO */
-				}
-				/* TODO */
-			}
+            if (typeLookup != m_tokenKindToTypeMap.end()) {
+                m_currentUnit->increment((*typeLookup).second, fileAndLineLoc);
+                if (m_inBody) {
+                    std::map<MetricType_e, MetricType_e>::const_iterator bodyTypeLookup =
+                        m_metricToBodyMetricMap.find((*typeLookup).second);
+                    if (bodyTypeLookup != m_metricToBodyMetricMap.end()) {
+                        m_currentUnit->increment((*bodyTypeLookup).second, fileAndLineLoc);
+                    }
+                }
+            } else {
+                if (p_token.isAnyIdentifier()) {
+                    std::string tok_data = p_token.getIdentifierInfo()->getName().str();
+                    if (m_options.getDumpTokens()) {
+                        m_options.getOutput() << ",unreserved:" << tok_data;
+                    }
+                    m_currentFnIdentifiers.insert(tok_data);
+                    m_currentUnit->increment(METRIC_TYPE_UNRESERVED_IDENTIFIERS, fileAndLineLoc);
+                    if (m_inBody) {
+                        m_currentBodyIdentifiers.insert(tok_data);
+                        m_currentUnit->increment(METRIC_TYPE_BODY_UNRESERVED_IDENTIFIERS,
+                                                 fileAndLineLoc);
+                    }
+                } else {
+                    /* TODO */
+                }
+                /* TODO */
+            }
 
+            break;
+    }
 
-			break;
-	}
+    HandleOperand(p_token);
 
-	HandleOperand(p_token);
-
-	if( m_options.getDumpTokens() )
-	{
-		m_options.getOutput() << "," << p_token.getLocation().getRawEncoding();
-		m_options.getOutput() << "," << m_compilerInstance.getSourceManager().getFileLoc(p_token.getLocation()).getRawEncoding();
-		if (tok_data.length())
-		{
-			m_options.getOutput() << "," << tok_data;
-		}
-		m_options.getOutput() << "," << (long)(p_token.getKind());
-		m_options.getOutput() << "," << (long)(p_token.getFlags());
-		m_options.getOutput() << ")";
-		if (m_dumpNewline)
-		{
-			m_options.getOutput() << std::endl << "  ";
-			m_dumpNewline = false;
-		}
-	}
-
+    if (m_options.getDumpTokens()) {
+        m_options.getOutput() << "," << p_token.getLocation().getRawEncoding();
+        m_options.getOutput() << ","
+                              << m_compilerInstance.getSourceManager()
+                                     .getFileLoc(p_token.getLocation())
+                                     .getRawEncoding();
+        if (tok_data.length()) {
+            m_options.getOutput() << "," << tok_data;
+        }
+        m_options.getOutput() << "," << (long)(p_token.getKind());
+        m_options.getOutput() << "," << (long)(p_token.getFlags());
+        m_options.getOutput() << ")";
+        if (m_dumpNewline) {
+            m_options.getOutput() << std::endl << "  ";
+            m_dumpNewline = false;
+        }
+    }
 }
 
-void MetricSrcExpandedLexer::CloseOutFnOrMtd(void)
-{
-	/* Have a current unit? */
-	if( m_currentUnit != NULL )
-	{
-		/* Close off accumulated metrics */
-		m_currentUnit->setSupplementary(METRIC_TYPE_NUMERIC_CONSTANTS, m_currentFnNumerics);
-		m_currentUnit->setSupplementary(METRIC_TYPE_STRING_LITERALS, m_currentFnStrings);
-		m_currentUnit->setSupplementary(METRIC_TYPE_CHAR_CONSTS, m_currentFnCharConsts);
-		m_currentUnit->setSupplementary(METRIC_TYPE_UNRESERVED_IDENTIFIERS, m_currentFnIdentifiers);
-		m_currentUnit->setSupplementary(METRIC_TYPE_BODY_UNRESERVED_IDENTIFIERS, m_currentBodyIdentifiers);
-	}
-	m_currentFnNumerics.clear();
-	m_currentFnStrings.clear();
-	m_currentFnIdentifiers.clear();
-	m_currentBodyIdentifiers.clear();
-	m_currentFnCharConsts.clear();
+void MetricSrcExpandedLexer::CloseOutFnOrMtd(void) {
+    /* Have a current unit? */
+    if (m_currentUnit != NULL) {
+        /* Close off accumulated metrics */
+        m_currentUnit->setSupplementary(METRIC_TYPE_NUMERIC_CONSTANTS, m_currentFnNumerics);
+        m_currentUnit->setSupplementary(METRIC_TYPE_STRING_LITERALS, m_currentFnStrings);
+        m_currentUnit->setSupplementary(METRIC_TYPE_CHAR_CONSTS, m_currentFnCharConsts);
+        m_currentUnit->setSupplementary(METRIC_TYPE_UNRESERVED_IDENTIFIERS, m_currentFnIdentifiers);
+        m_currentUnit->setSupplementary(METRIC_TYPE_BODY_UNRESERVED_IDENTIFIERS,
+                                        m_currentBodyIdentifiers);
+    }
+    m_currentFnNumerics.clear();
+    m_currentFnStrings.clear();
+    m_currentFnIdentifiers.clear();
+    m_currentBodyIdentifiers.clear();
+    m_currentFnCharConsts.clear();
 }
 
-void MetricSrcExpandedLexer::EnterFileScope(void)
-{
-	m_currentFnNumerics    = m_currentUnit->getSupplementary(METRIC_TYPE_NUMERIC_CONSTANTS);
-	m_currentFnStrings     = m_currentUnit->getSupplementary(METRIC_TYPE_STRING_LITERALS);
-	m_currentFnCharConsts  = m_currentUnit->getSupplementary(METRIC_TYPE_CHAR_CONSTS);
-	m_currentFnIdentifiers = m_currentUnit->getSupplementary(METRIC_TYPE_UNRESERVED_IDENTIFIERS);
+void MetricSrcExpandedLexer::EnterFileScope(void) {
+    m_currentFnNumerics = m_currentUnit->getSupplementary(METRIC_TYPE_NUMERIC_CONSTANTS);
+    m_currentFnStrings = m_currentUnit->getSupplementary(METRIC_TYPE_STRING_LITERALS);
+    m_currentFnCharConsts = m_currentUnit->getSupplementary(METRIC_TYPE_CHAR_CONSTS);
+    m_currentFnIdentifiers = m_currentUnit->getSupplementary(METRIC_TYPE_UNRESERVED_IDENTIFIERS);
 }

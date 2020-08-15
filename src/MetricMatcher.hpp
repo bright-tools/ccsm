@@ -20,103 +20,109 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-#if !defined( METRIC_MATCHER_HPP )
-#define       METRIC_MATCHER_HPP
+#if !defined(METRIC_MATCHER_HPP)
+#define METRIC_MATCHER_HPP
 
-#include "MetricUnit.hpp"
-#include "MetricOptions.hpp"
 #include "FunctionLocator.hpp"
+#include "MetricOptions.hpp"
+#include "MetricUnit.hpp"
 
+#include "clang/AST/ASTContext.h"
 #include "clang/AST/RecursiveASTVisitor.h"
 #include "clang/Frontend/CompilerInstance.h"
-#include "clang/AST/ASTContext.h"
 
 #include <ostream>
-#include <string>
 #include <set>
+#include <string>
 
-class MetricVisitor : public clang::RecursiveASTVisitor<MetricVisitor>
-{
-protected:
-	typedef struct
-	{
-		//  number paths that don't end in return, break, or continue
-		MetricUnit::counter_t path_regular;
-		// number paths that lead to return
-		MetricUnit::counter_t path_return;
-		// number paths that lead to break or continue
-		MetricUnit::counter_t path_break;
-	} PathResults;
+class MetricVisitor : public clang::RecursiveASTVisitor<MetricVisitor> {
+  protected:
+    typedef struct {
+        //  number paths that don't end in return, break, or continue
+        MetricUnit::counter_t path_regular;
+        // number paths that lead to return
+        MetricUnit::counter_t path_return;
+        // number paths that lead to break or continue
+        MetricUnit::counter_t path_break;
+    } PathResults;
 
-	/** Table of pairs which match binary operators against metrics, used to initialise binaryOperatorToMetricMap */
-	const static std::pair<clang::BinaryOperator::Opcode, MetricType_e> binaryOperatorToMetricPairs[];
+    /** Table of pairs which match binary operators against metrics, used to
+     * initialise binaryOperatorToMetricMap */
+    const static std::pair<clang::BinaryOperator::Opcode, MetricType_e>
+        binaryOperatorToMetricPairs[];
 
-	/** Map used to look up the metric associated with a particular binary operator */
-	const static std::map<clang::BinaryOperator::Opcode, MetricType_e> binaryOperatorToMetricMap;
+    /** Map used to look up the metric associated with a particular binary
+     * operator */
+    const static std::map<clang::BinaryOperator::Opcode, MetricType_e> binaryOperatorToMetricMap;
 
+    clang::CompilerInstance &m_compilerInstance;
+    clang::ASTContext *m_astContext = NULL;
+    MetricUnit *m_topUnit = NULL;
+    std::string m_currentFileName;
+    std::string m_currentFunctionName;
+    MetricUnit *m_currentUnit = NULL;
+    MetricOptions &m_options;
+    std::set<std::string> m_fnsCalled;
+    TranslationUnitFunctionLocator *m_fnLocator = NULL;
 
-	clang::CompilerInstance&        m_compilerInstance;
-	clang::ASTContext*		        m_astContext           = NULL;
-	MetricUnit*		                m_topUnit              = NULL;
-	std::string				        m_currentFileName;
-	std::string				        m_currentFunctionName;
-	MetricUnit*				        m_currentUnit          = NULL;
-    MetricOptions&	                m_options;
-	std::set<std::string>	        m_fnsCalled;          
-	TranslationUnitFunctionLocator* m_fnLocator            = NULL;
+    void HandleLoc(const clang::SourceLocation &p_loc);
+    void DeclCommon(const clang::DeclContext *p_declCtxt, const clang::Decl *p_decl);
+    void CloseOutFnOrMtd(void);
+    bool ShouldIncludeFile(const std::string &p_file);
+    void IncrementMetric(MetricUnit *const p_unit, const MetricType_e p_metricType,
+                         const clang::SourceLocation *p_startLocation);
+    void IncrementMetric(MetricUnit *const p_unit, const MetricType_e p_metricType,
+                         const MetricUnit *const p_file,
+                         const clang::SourceLocation *p_startLocation);
+    void UpdateCurrentFileName(const clang::SourceLocation &loc);
+    std::string getDefResolvedFileName(const clang::SourceLocation &loc);
+    PathResults getPathCount(const clang::Stmt *const p_stmt, uint16_t depth = 0);
+    PathResults getOtherPathCount(const clang::Stmt *const p_stmt, uint16_t depth = 0);
+    PathResults getIfPathCount(const clang::IfStmt *const p_stmt, uint16_t depth = 0);
+    PathResults getSwitchPathCount(const clang::SwitchStmt *const p_stmt, uint16_t depth = 0);
+    void getSwitchPathCountHandleCaseEnd(MetricVisitor::PathResults &prev_case,
+                                         MetricVisitor::PathResults &curr_case);
+    void incrementPathResults(MetricVisitor::PathResults &current,
+                              const MetricVisitor::PathResults &increment);
+    void CountStatements(const clang::Stmt *const p_stmt);
+    void CountStatements(const clang::Stmt::const_child_range &p_children);
+    void CalcFnLineCnt(clang::FunctionDecl *func);
 
-	void HandleLoc( const clang::SourceLocation& p_loc );
-	void DeclCommon(const clang::DeclContext* p_declCtxt, const clang::Decl* p_decl);
-	void CloseOutFnOrMtd( void );
-	bool ShouldIncludeFile( const std::string& p_file );
-	void IncrementMetric(MetricUnit* const p_unit, const MetricType_e p_metricType, const clang::SourceLocation* p_startLocation);
-	void IncrementMetric(MetricUnit* const p_unit, const MetricType_e p_metricType, const MetricUnit* const p_file, const clang::SourceLocation* p_startLocation);
-	void UpdateCurrentFileName( const clang::SourceLocation &loc );
-	std::string getDefResolvedFileName( const clang::SourceLocation &loc );
-	PathResults getPathCount(const clang::Stmt* const p_stmt, uint16_t depth = 0);
-	PathResults getOtherPathCount(const clang::Stmt* const p_stmt, uint16_t depth = 0);
-	PathResults getIfPathCount(const clang::IfStmt* const p_stmt, uint16_t depth = 0);
-	PathResults getSwitchPathCount(const clang::SwitchStmt* const p_stmt, uint16_t depth = 0);
-	void getSwitchPathCountHandleCaseEnd(MetricVisitor::PathResults &prev_case, MetricVisitor::PathResults &curr_case);
-	void incrementPathResults(MetricVisitor::PathResults &current, const MetricVisitor::PathResults &increment);
-	void CountStatements(const clang::Stmt* const p_stmt);
-	void CountStatements(const clang::Stmt::const_child_range& p_children);
-	void CalcFnLineCnt(clang::FunctionDecl *func);
+  public:
+    explicit MetricVisitor(clang::CompilerInstance &p_CI, MetricUnit *p_topUnit,
+                           MetricOptions &p_options,
+                           TranslationUnitFunctionLocator *p_fnLocator = NULL);
+    virtual ~MetricVisitor(void);
+    virtual bool VisitFunctionDecl(clang::FunctionDecl *func);
+    virtual bool VisitVarDecl(clang::VarDecl *p_varDec);
+    virtual bool VisitForStmt(clang::ForStmt *p_forSt);
+    virtual bool VisitLabelStmt(clang::LabelStmt *p_LabelSt);
+    virtual bool VisitDoStmt(clang::DoStmt *p_doSt);
+    virtual bool VisitWhileStmt(clang::WhileStmt *p_whileSt);
+    virtual bool VisitTypedefNameDecl(const clang::TypedefNameDecl *T);
+    virtual bool VisitSwitchStmt(clang::SwitchStmt *p_switchSt);
+    virtual bool VisitConditionalOperator(clang::ConditionalOperator *p_condOp);
+    virtual bool VisitDefaultStmt(clang::DefaultStmt *p_defaultSt);
+    virtual bool VisitCaseStmt(clang::CaseStmt *p_caseSt);
+    virtual bool VisitCompoundStmt(clang::CompoundStmt *p_compoundSt);
+    virtual bool VisitBinaryOperator(clang::BinaryOperator *p_binOp);
+    virtual bool VisitUnaryOperator(clang::UnaryOperator *p_uOp);
+    virtual bool VisitStmt(clang::Stmt *p_statement);
+    virtual bool VisitIfStmt(clang::IfStmt *p_ifSt);
+    virtual bool VisitRecordDecl(clang::RecordDecl *p_recordDecl);
+    virtual bool VisitExplicitCastExpr(clang::ExplicitCastExpr *p_castExpr);
+    virtual bool VisitCallExpr(clang::CallExpr *p_callExpr);
+    virtual bool VisitArraySubscriptExpr(clang::ArraySubscriptExpr *p_subs);
+    virtual bool VisitMemberExpr(clang::MemberExpr *p_memberExpr);
+    virtual bool VisitUnaryExprOrTypeTraitExpr(clang::UnaryExprOrTypeTraitExpr *p_unaryExpr);
+    virtual bool TraverseDecl(clang::Decl *p_decl);
+    virtual bool TraverseStmt(clang::Stmt *p_stmt);
+    virtual bool VisitEnumDecl(clang::EnumDecl *p_enumDecl);
+    virtual bool VisitCastExpr(clang::CastExpr *p_castExp);
 
-public:
-	
-	explicit MetricVisitor(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, MetricOptions& p_options,TranslationUnitFunctionLocator* p_fnLocator = NULL);
-	virtual ~MetricVisitor(void);
-	virtual bool VisitFunctionDecl(clang::FunctionDecl *func);
-	virtual bool VisitVarDecl(clang::VarDecl *p_varDec);
-	virtual bool VisitForStmt(clang::ForStmt *p_forSt);
-	virtual bool VisitLabelStmt(clang::LabelStmt *p_LabelSt);
-	virtual bool VisitDoStmt(clang::DoStmt *p_doSt);
-	virtual bool VisitWhileStmt(clang::WhileStmt *p_whileSt);
-	virtual bool VisitTypedefNameDecl(const clang::TypedefNameDecl *T);
-	virtual bool VisitSwitchStmt(clang::SwitchStmt *p_switchSt);
-	virtual bool VisitConditionalOperator(clang::ConditionalOperator *p_condOp);
-	virtual bool VisitDefaultStmt(clang::DefaultStmt *p_defaultSt);
-	virtual bool VisitCaseStmt(clang::CaseStmt *p_caseSt);
-	virtual bool VisitCompoundStmt(clang::CompoundStmt *p_compoundSt);
-	virtual bool VisitBinaryOperator(clang::BinaryOperator *p_binOp);
-	virtual bool VisitUnaryOperator(clang::UnaryOperator *p_uOp);
-	virtual bool VisitStmt(clang::Stmt *p_statement);
-	virtual bool VisitIfStmt(clang::IfStmt *p_ifSt);
-	virtual bool VisitRecordDecl(clang::RecordDecl* p_recordDecl);
-	virtual bool VisitExplicitCastExpr(clang::ExplicitCastExpr *p_castExpr);
-	virtual bool VisitCallExpr(clang::CallExpr *p_callExpr);
-	virtual bool VisitArraySubscriptExpr (clang::ArraySubscriptExpr *p_subs);
-	virtual bool VisitMemberExpr( clang::MemberExpr* p_memberExpr );
-	virtual bool VisitUnaryExprOrTypeTraitExpr( clang::UnaryExprOrTypeTraitExpr* p_unaryExpr );
-	virtual bool TraverseDecl(clang::Decl *p_decl);
-	virtual bool TraverseStmt(clang::Stmt *p_stmt);
-	virtual bool VisitEnumDecl(clang::EnumDecl* p_enumDecl);
-	virtual bool VisitCastExpr(clang::CastExpr *p_castExp);
-
-	/** Try to determine whether the passed Expression evaluates to a constant
-	     and if that constant is equivelent to false */
-	bool isExprConstantAndFalse( const clang::Expr* const p_expr );
+    /** Try to determine whether the passed Expression evaluates to a constant
+         and if that constant is equivelent to false */
+    bool isExprConstantAndFalse(const clang::Expr *const p_expr);
 
 #if 0
 	void dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE );

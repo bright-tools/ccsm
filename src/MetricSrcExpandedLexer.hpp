@@ -19,8 +19,8 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-#if !defined( METRIC_SRC_EXPANDED_LEXER_HPP )
-#define       METRIC_SRC_EXPANDED_LEXER_HPP
+#if !defined(METRIC_SRC_EXPANDED_LEXER_HPP)
+#define METRIC_SRC_EXPANDED_LEXER_HPP
 
 #include "MetricSrcLexer.hpp"
 
@@ -29,29 +29,29 @@
 
 #include <cstdint>
 
-class MetricSrcExpandedLexer : public MetricSrcLexer
-{
-	protected:
-		std::set<std::string>   m_currentFnNumerics;
-		std::set<std::string>   m_currentFnStrings;
-		std::set<std::string>   m_currentFnCharConsts;
-		std::set<std::string>   m_currentFnIdentifiers;
-		std::set<std::string>   m_currentBodyIdentifiers;
+class MetricSrcExpandedLexer : public MetricSrcLexer {
+  protected:
+    std::set<std::string> m_currentFnNumerics;
+    std::set<std::string> m_currentFnStrings;
+    std::set<std::string> m_currentFnCharConsts;
+    std::set<std::string> m_currentFnIdentifiers;
+    std::set<std::string> m_currentBodyIdentifiers;
 
-		bool					m_dumpNewline = false;
+    bool m_dumpNewline = false;
 
-		static const std::map<clang::tok::TokenKind,MetricType_e> m_tokenKindToTypeMap;
-		static const std::map<MetricType_e, MetricType_e> m_metricToBodyMetricMap;
+    static const std::map<clang::tok::TokenKind, MetricType_e> m_tokenKindToTypeMap;
+    static const std::map<MetricType_e, MetricType_e> m_metricToBodyMetricMap;
 
-		virtual void ProcessToken( clang::Token& p_token );
-		virtual void CloseOutFnOrMtd( void );
-		virtual void EnterFileScope(void);
-		virtual MetricUnitProcessingType_e getLexType(void) const;
-		void HandleOperand(clang::Token& p_token);
+    virtual void ProcessToken(clang::Token &p_token);
+    virtual void CloseOutFnOrMtd(void);
+    virtual void EnterFileScope(void);
+    virtual MetricUnitProcessingType_e getLexType(void) const;
+    void HandleOperand(clang::Token &p_token);
 
-	public:
-		MetricSrcExpandedLexer(clang::CompilerInstance &p_CI, MetricUnit* p_topUnit, MetricOptions& p_options);
-	    virtual ~MetricSrcExpandedLexer(void);
+  public:
+    MetricSrcExpandedLexer(clang::CompilerInstance &p_CI, MetricUnit *p_topUnit,
+                           MetricOptions &p_options);
+    virtual ~MetricSrcExpandedLexer(void);
 };
 
-#endif     // !defined( METRIC_SRC_EXPANDED_LEXER_HPP )
+#endif // !defined( METRIC_SRC_EXPANDED_LEXER_HPP )
