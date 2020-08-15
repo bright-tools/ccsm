@@ -23,12 +23,11 @@ extern void resolveLinkages(MetricUnit *p_topUnit) {
     MetricUnit::FunctionMap_t mapping = p_topUnit->getAllFunctionMap();
 
     /* Iterate all of the functions */
-    for (MetricUnit::FunctionMap_t::const_iterator it = mapping.begin();
-         it != mapping.end(); it++) {
+    for (MetricUnit::FunctionMap_t::const_iterator it = mapping.begin(); it != mapping.end();
+         it++) {
         /* Get a list of unresolved function calls within the current function &
          * iterate */
-        const std::set<std::string> &unresolvedFns =
-            it->second->getUnresolvedFns();
+        const std::set<std::string> &unresolvedFns = it->second->getUnresolvedFns();
         for (std::set<std::string>::const_iterator uit = unresolvedFns.begin();
              uit != unresolvedFns.end(); uit++) {
             /* Get a list of all functions with a matching name ... */
@@ -39,8 +38,7 @@ extern void resolveLinkages(MetricUnit *p_topUnit) {
                 if (fns->second->hasExternalLinkage()) {
                     /* TODO: Adding a non-NULL SourceLocation here would be
                      * useful */
-                    fns->second->increment(METRIC_TYPE_CALLED_BY_EXTERN,
-                                           InvalidSourceAndLine);
+                    fns->second->increment(METRIC_TYPE_CALLED_BY_EXTERN, InvalidSourceAndLine);
                     break;
                 }
                 fns++;

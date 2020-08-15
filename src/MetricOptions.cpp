@@ -26,9 +26,8 @@ MetricOptions::MetricOptions(std::vector<std::string> *const p_excludeFiles,
                              std::set<MetricType_e> p_outputMetrics,
                              std::vector<std::string> *const p_defFiles)
     : ExcludeFiles(p_excludeFiles), ExcludeFunctions(p_excludeFunctions),
-      OutputMetrics(p_outputMetrics), DefFiles(p_defFiles), m_dumpTokens(false),
-      m_dumpAST(false), m_useShortNames(false), m_useAbsoluteFileNames(false),
-      m_outputStream(&std::cout) {
+      OutputMetrics(p_outputMetrics), DefFiles(p_defFiles), m_dumpTokens(false), m_dumpAST(false),
+      m_useShortNames(false), m_useAbsoluteFileNames(false), m_outputStream(&std::cout) {
 }
 
 MetricOptions::~MetricOptions() {
@@ -44,8 +43,8 @@ bool MetricOptions::isFileInList(const std::vector<std::string> *const p_list,
                                  const std::string &p_name) const {
     bool ret_val = false;
     if (p_list != NULL) {
-        for (std::vector<std::string>::const_iterator it = p_list->begin();
-             it != p_list->end(); it++) {
+        for (std::vector<std::string>::const_iterator it = p_list->begin(); it != p_list->end();
+             it++) {
             llvm::Regex regex(*it);
             if (regex.match(p_name)) {
                 ret_val = true;
@@ -81,8 +80,8 @@ bool MetricOptions::ShouldIncludeFile(const std::string &p_fn) {
 
 bool MetricOptions::ShouldIncludeFunction(const std::string &p_fn) const {
     return ((ExcludeFunctions == NULL) ||
-            (std::find(ExcludeFunctions->begin(), ExcludeFunctions->end(),
-                       p_fn) == ExcludeFunctions->end()));
+            (std::find(ExcludeFunctions->begin(), ExcludeFunctions->end(), p_fn) ==
+             ExcludeFunctions->end()));
 }
 
 bool MetricOptions::ShouldIncludeMetric(MetricType_e p_metric) const {
@@ -141,8 +140,7 @@ MetricDumpFormat_e MetricOptions::getOutputFormat(void) const {
     return m_outputFormat;
 }
 
-void MetricOptions::setOutputMetric(const MetricUnitType_e p_metric,
-                                    const bool p_output) {
+void MetricOptions::setOutputMetric(const MetricUnitType_e p_metric, const bool p_output) {
     m_outputMetric[p_metric] = p_output;
 }
 
@@ -210,8 +208,7 @@ const std::vector<std::string> &MetricOptions::getLimitsFiles(void) const {
     return m_limitsFileNames;
 }
 
-void MetricOptions::setLimitWarningOutputFormat(
-    const MetricLimitsFormat_e p_format) {
+void MetricOptions::setLimitWarningOutputFormat(const MetricLimitsFormat_e p_format) {
     m_limitWarningOutput = p_format;
 }
 

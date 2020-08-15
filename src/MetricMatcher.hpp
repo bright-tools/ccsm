@@ -53,8 +53,7 @@ class MetricVisitor : public clang::RecursiveASTVisitor<MetricVisitor> {
 
     /** Map used to look up the metric associated with a particular binary
      * operator */
-    const static std::map<clang::BinaryOperator::Opcode, MetricType_e>
-        binaryOperatorToMetricMap;
+    const static std::map<clang::BinaryOperator::Opcode, MetricType_e> binaryOperatorToMetricMap;
 
     clang::CompilerInstance &m_compilerInstance;
     clang::ASTContext *m_astContext = NULL;
@@ -67,27 +66,20 @@ class MetricVisitor : public clang::RecursiveASTVisitor<MetricVisitor> {
     TranslationUnitFunctionLocator *m_fnLocator = NULL;
 
     void HandleLoc(const clang::SourceLocation &p_loc);
-    void DeclCommon(const clang::DeclContext *p_declCtxt,
-                    const clang::Decl *p_decl);
+    void DeclCommon(const clang::DeclContext *p_declCtxt, const clang::Decl *p_decl);
     void CloseOutFnOrMtd(void);
     bool ShouldIncludeFile(const std::string &p_file);
-    void IncrementMetric(MetricUnit *const p_unit,
-                         const MetricType_e p_metricType,
+    void IncrementMetric(MetricUnit *const p_unit, const MetricType_e p_metricType,
                          const clang::SourceLocation *p_startLocation);
-    void IncrementMetric(MetricUnit *const p_unit,
-                         const MetricType_e p_metricType,
+    void IncrementMetric(MetricUnit *const p_unit, const MetricType_e p_metricType,
                          const MetricUnit *const p_file,
                          const clang::SourceLocation *p_startLocation);
     void UpdateCurrentFileName(const clang::SourceLocation &loc);
     std::string getDefResolvedFileName(const clang::SourceLocation &loc);
-    PathResults getPathCount(const clang::Stmt *const p_stmt,
-                             uint16_t depth = 0);
-    PathResults getOtherPathCount(const clang::Stmt *const p_stmt,
-                                  uint16_t depth = 0);
-    PathResults getIfPathCount(const clang::IfStmt *const p_stmt,
-                               uint16_t depth = 0);
-    PathResults getSwitchPathCount(const clang::SwitchStmt *const p_stmt,
-                                   uint16_t depth = 0);
+    PathResults getPathCount(const clang::Stmt *const p_stmt, uint16_t depth = 0);
+    PathResults getOtherPathCount(const clang::Stmt *const p_stmt, uint16_t depth = 0);
+    PathResults getIfPathCount(const clang::IfStmt *const p_stmt, uint16_t depth = 0);
+    PathResults getSwitchPathCount(const clang::SwitchStmt *const p_stmt, uint16_t depth = 0);
     void getSwitchPathCountHandleCaseEnd(MetricVisitor::PathResults &prev_case,
                                          MetricVisitor::PathResults &curr_case);
     void incrementPathResults(MetricVisitor::PathResults &current,
@@ -122,8 +114,7 @@ class MetricVisitor : public clang::RecursiveASTVisitor<MetricVisitor> {
     virtual bool VisitCallExpr(clang::CallExpr *p_callExpr);
     virtual bool VisitArraySubscriptExpr(clang::ArraySubscriptExpr *p_subs);
     virtual bool VisitMemberExpr(clang::MemberExpr *p_memberExpr);
-    virtual bool
-    VisitUnaryExprOrTypeTraitExpr(clang::UnaryExprOrTypeTraitExpr *p_unaryExpr);
+    virtual bool VisitUnaryExprOrTypeTraitExpr(clang::UnaryExprOrTypeTraitExpr *p_unaryExpr);
     virtual bool TraverseDecl(clang::Decl *p_decl);
     virtual bool TraverseStmt(clang::Stmt *p_stmt);
     virtual bool VisitEnumDecl(clang::EnumDecl *p_enumDecl);

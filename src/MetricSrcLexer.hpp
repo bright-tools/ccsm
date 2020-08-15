@@ -49,15 +49,13 @@ class MetricSrcLexer {
     virtual MetricUnitProcessingType_e getLexType(void) const = 0;
 
   public:
-    MetricSrcLexer(clang::CompilerInstance &p_CI, MetricUnit *p_topUnit,
-                   MetricOptions &p_options);
+    MetricSrcLexer(clang::CompilerInstance &p_CI, MetricUnit *p_topUnit, MetricOptions &p_options);
     virtual ~MetricSrcLexer(void);
     virtual void CloseOutFnOrMtd(void) = 0;
     virtual void EnterFileScope(void) = 0;
 
-    virtual void
-    LexSources(clang::CompilerInstance &p_ci,
-               const TranslationUnitFunctionLocator *const p_fnLocator);
+    virtual void LexSources(clang::CompilerInstance &p_ci,
+                            const TranslationUnitFunctionLocator *const p_fnLocator);
 };
 
 #endif // !defined( METRIC_SRC_LEXER_HPP )

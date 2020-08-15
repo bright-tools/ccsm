@@ -29,9 +29,8 @@
 typedef enum
 {
 #define METRIC_ALIAS(_name, _alias)
-#define METRIC(_enum, _short_name, _long_name, _applies_global, _applies_file, \
-               _applies_function, _applies_method, _cumulative, _multipass,    \
-               _report_local, _scaling, _description)                          \
+#define METRIC(_enum, _short_name, _long_name, _applies_global, _applies_file, _applies_function,  \
+               _applies_method, _cumulative, _multipass, _report_local, _scaling, _description)    \
     _enum,
 #include "metrics.def"
 #undef METRIC_ALIAS
@@ -121,13 +120,11 @@ class MetricUnit {
                                        const MetricUnitType_e p_unitType);
     static bool isMetricLocalAndCumulative(const MetricType_e p_type);
     static float getScaledMetric(const MetricType_e p_type, counter_t p_val);
-    static std::string getScaledMetricString(const MetricType_e p_type,
-                                             counter_t p_val);
+    static std::string getScaledMetricString(const MetricType_e p_type, counter_t p_val);
 
-    const std::set<std::string>
-    getSupplementary(MetricType_e p_metric, const bool p_recurse = false) const;
-    void setSupplementary(MetricType_e p_metric,
-                          const std::set<std::string> p_val);
+    const std::set<std::string> getSupplementary(MetricType_e p_metric,
+                                                 const bool p_recurse = false) const;
+    void setSupplementary(MetricType_e p_metric, const std::set<std::string> p_val);
 
     /** Maximum metric count which can be stored in a count_t */
     static const counter_t counter_t_Max;
@@ -150,27 +147,22 @@ class MetricUnit {
     /** Sets a metric to the maximum of the current value and the specified
      * value
      */
-    void setMax(const MetricType_e p_metricType,
-                const MetricUnit::counter_t p_val,
+    void setMax(const MetricType_e p_metricType, const MetricUnit::counter_t p_val,
                 const SourceFileAndLine_t &p_sourceLoc);
-    void increment(const MetricType_e p_metricType,
-                   const SourceFileAndLine_t &p_sourceLoc,
+    void increment(const MetricType_e p_metricType, const SourceFileAndLine_t &p_sourceLoc,
                    const counter_t p_inc = 1);
     void set(const MetricType_e p_metricType, const MetricUnit::counter_t p_val,
              const SourceFileAndLine_t &p_sourceLoc);
 
-    counter_t getCounter(const MetricType_e p_metricType,
-                         const bool p_recurse = false) const;
+    counter_t getCounter(const MetricType_e p_metricType, const bool p_recurse = false) const;
 
-    MetricUnit *getSubUnit(const std::string &p_name,
-                           const MetricUnitType_e p_type,
+    MetricUnit *getSubUnit(const std::string &p_name, const MetricUnitType_e p_type,
                            const bool p_create = true);
 
     counter_t getSubUnitCount(const MetricUnitType_e p_type) const;
 
     MetricUnitType_e GetType(void) const;
-    std::string getUnitName(const bool p_useAbsFN,
-                            const bool p_usePrefix) const;
+    std::string getUnitName(const bool p_useAbsFN, const bool p_usePrefix) const;
     std::string getUnitName(const MetricOptions &p_options) const;
 
     const SubUnitMap_t *getSubUnits(void) const;
@@ -183,8 +175,7 @@ class MetricUnit {
 
     const MetricUnit *getParent() const;
 
-    const SourceFileAndLine_t &
-    getFirstInstanceLocation(const MetricType_e p_type) const;
+    const SourceFileAndLine_t &getFirstInstanceLocation(const MetricType_e p_type) const;
 
     std::string getFileName(const MetricOptions &p_options) const;
 };

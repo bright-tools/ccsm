@@ -19,16 +19,15 @@
 MetricPPIncludeHandler::MetricPPIncludeHandler(const MetricOptions &p_options,
                                                clang::SourceManager &p_SM,
                                                std::string &p_currentFile)
-    : clang::PPCallbacks(), m_options(p_options), m_currentFile(p_currentFile),
-      m_SM(p_SM) {
+    : clang::PPCallbacks(), m_options(p_options), m_currentFile(p_currentFile), m_SM(p_SM) {
 }
 
 MetricPPIncludeHandler::~MetricPPIncludeHandler(void) {
 }
 
-void MetricPPIncludeHandler::FileChanged(
-    clang::SourceLocation Loc, FileChangeReason Reason,
-    clang::SrcMgr::CharacteristicKind FileType, clang::FileID PrevFID) {
+void MetricPPIncludeHandler::FileChanged(clang::SourceLocation Loc, FileChangeReason Reason,
+                                         clang::SrcMgr::CharacteristicKind FileType,
+                                         clang::FileID PrevFID) {
     std::string fileName = m_SM.getFilename(Loc).str();
 
     if (!m_options.isDefFile(fileName)) {

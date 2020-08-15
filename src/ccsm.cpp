@@ -41,15 +41,14 @@ int main(int argc, const char **argv) {
 
         llvm::sys::PrintStackTraceOnErrorSignal(argv[0]);
 
-        clang::tooling::ClangTool Tool(
-            OptionsHandler.getOptionsParser()->getCompilations(),
-            OptionsHandler.getOptionsParser()->getSourcePathList());
+        clang::tooling::ClangTool Tool(OptionsHandler.getOptionsParser()->getCompilations(),
+                                       OptionsHandler.getOptionsParser()->getSourcePathList());
 
         // First tool-run to gather metrics from the AST.  This is done
         // separately from the second tool-rum as different pre-processor
         // options are used
-        Result = Tool.run(newASTMetricFrontendActionFactory(
-            metricOptions, &topUnit, &srcMap, &commentFileList));
+        Result = Tool.run(
+            newASTMetricFrontendActionFactory(metricOptions, &topUnit, &srcMap, &commentFileList));
 
         // Success?
         if (Result == 0) {
@@ -63,12 +62,12 @@ int main(int argc, const char **argv) {
             //  generation as the details of the function locations gathered
             //  from the AST are used for determining whether or not a function
             //  should be included
-            Result = Tool.run(newPPMetricFrontendActionFactory(
-                metricOptions, &topUnit, &srcMap, true));
+            Result =
+                Tool.run(newPPMetricFrontendActionFactory(metricOptions, &topUnit, &srcMap, true));
 
             if (Result == 0) {
-                Result = Tool.run(newPPMetricFrontendActionFactory(
-                    metricOptions, &topUnit, &srcMap, false));
+                Result = Tool.run(
+                    newPPMetricFrontendActionFactory(metricOptions, &topUnit, &srcMap, false));
             }
 
             // Success?

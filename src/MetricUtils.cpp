@@ -10,8 +10,7 @@
 
 const SourceFileAndLine_t InvalidSourceAndLine = {false, 0, "", 0};
 
-unsigned getControlDepth(const clang::Stmt *const p_stmt,
-                         clang::ASTContext *p_context) {
+unsigned getControlDepth(const clang::Stmt *const p_stmt, clang::ASTContext *p_context) {
     unsigned ret_val = 0;
 
     clang::SourceLocation loc, sloc;
@@ -26,18 +25,18 @@ unsigned getControlDepth(const clang::Stmt *const p_stmt,
     }
 
     switch (p_stmt->getStmtClass()) {
-    case clang::Stmt::IfStmtClass:
-    case clang::Stmt::SwitchStmtClass:
-    case clang::Stmt::DoStmtClass:
-    case clang::Stmt::WhileStmtClass:
-    case clang::Stmt::ForStmtClass:
-        ret_val += 1;
+        case clang::Stmt::IfStmtClass:
+        case clang::Stmt::SwitchStmtClass:
+        case clang::Stmt::DoStmtClass:
+        case clang::Stmt::WhileStmtClass:
+        case clang::Stmt::ForStmtClass:
+            ret_val += 1;
 #if 0
 			std::cout << p_stmt->getStmtClassName() << ": " << ret_val << "\n";
 #endif
-        break;
-    default:
-        break;
+            break;
+        default:
+            break;
     }
 
     return ret_val;
@@ -47,8 +46,7 @@ extern size_t countNewlines(clang::StringRef &p_buffer) {
     size_t pos = 0;
     size_t cnt = 0;
     size_t npos = p_buffer.npos;
-    while ((pos != p_buffer.npos) && (pos = p_buffer.find('\n', pos)) &&
-           (pos != p_buffer.npos)) {
+    while ((pos != p_buffer.npos) && (pos = p_buffer.find('\n', pos)) && (pos != p_buffer.npos)) {
         cnt++;
         pos++;
     }
@@ -100,11 +98,9 @@ std::string makeRelative(const std::string &p_path, const std::string &p_cwd) {
        Otherwise case-insensitively compare the roots (e.g. 'C:') - if these are
        different then we can't construct a relative path */
     if (llvm::sys::path::is_separator(p_cwd[0]) ||
-        (stricmp(p_path.substr(0, path_pos).c_str(),
-                 p_cwd.substr(0, cwd_pos).c_str()) == 0)) {
-        const size_t shortest = (p_cwd.length() < p_path.length())
-                                    ? p_cwd.length()
-                                    : p_path.length();
+        (stricmp(p_path.substr(0, path_pos).c_str(), p_cwd.substr(0, cwd_pos).c_str()) == 0)) {
+        const size_t shortest =
+            (p_cwd.length() < p_path.length()) ? p_cwd.length() : p_path.length();
         size_t pos;
         size_t last_sep = 0;
         ret_val = "";
@@ -123,12 +119,10 @@ std::string makeRelative(const std::string &p_path, const std::string &p_cwd) {
         /* Was there a mis-match part way through a string (e.g. 'window' vs
            'windows')?  If so, we need to treat them as different and
            back-track to the last separator */
-        if ((pos < p_path.length() &&
-             !(llvm::sys::path::is_separator(p_path[pos]) ||
-               llvm::sys::path::is_separator(p_path[pos - 1]))) ||
-            (pos < p_cwd.length() &&
-             !(llvm::sys::path::is_separator(p_cwd[pos]) ||
-               llvm::sys::path::is_separator(p_cwd[pos - 1])))) {
+        if ((pos < p_path.length() && !(llvm::sys::path::is_separator(p_path[pos]) ||
+                                        llvm::sys::path::is_separator(p_path[pos - 1]))) ||
+            (pos < p_cwd.length() && !(llvm::sys::path::is_separator(p_cwd[pos]) ||
+                                       llvm::sys::path::is_separator(p_cwd[pos - 1])))) {
             pos = last_sep + 1;
         }
 

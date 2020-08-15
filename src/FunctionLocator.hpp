@@ -65,13 +65,11 @@ class TranslationUnitFunctionLocator {
   public:
     TranslationUnitFunctionLocator(MetricOptions &p_options);
 
-    void addFunctionLocation(const clang::ASTContext *const p_context,
-                             const std::string &p_name,
+    void addFunctionLocation(const clang::ASTContext *const p_context, const std::string &p_name,
                              const clang::FunctionDecl *const p_func);
 
     std::string FindFunction(const clang::SourceManager &p_SourceManager,
-                             clang::SourceLocation &p_loc,
-                             clang::SourceLocation *p_end = NULL,
+                             clang::SourceLocation &p_loc, clang::SourceLocation *p_end = NULL,
                              clang::SourceLocation *p_body = NULL) const;
 
     void dump() const;
@@ -84,8 +82,7 @@ class TranslationUnitFunctionLocator {
 */
 class GlobalFunctionLocator {
   private:
-    typedef std::map<std::string, TranslationUnitFunctionLocator *>
-        MainSrcToFnLocMap_t;
+    typedef std::map<std::string, TranslationUnitFunctionLocator *> MainSrcToFnLocMap_t;
 
     MainSrcToFnLocMap_t m_map;
 

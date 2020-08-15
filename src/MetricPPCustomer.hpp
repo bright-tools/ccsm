@@ -32,8 +32,7 @@
 #include <set>
 #include <string>
 
-class MetricPPCustomer : public clang::PPCallbacks,
-                         public clang::CommentHandler {
+class MetricPPCustomer : public clang::PPCallbacks, public clang::CommentHandler {
   protected:
     MetricUnit *m_topUnit = NULL;
     MetricOptions &m_options;
@@ -41,18 +40,14 @@ class MetricPPCustomer : public clang::PPCallbacks,
     std::set<std::string> *m_commentFileList = NULL;
 
   public:
-    MetricPPCustomer(MetricUnit *p_topUnit,
-                     std::set<std::string> *p_commentFileList,
+    MetricPPCustomer(MetricUnit *p_topUnit, std::set<std::string> *p_commentFileList,
                      MetricOptions &p_options);
     virtual ~MetricPPCustomer();
-    virtual void InclusionDirective(clang::SourceLocation HashLoc,
-                                    const clang::Token &IncludeTok,
+    virtual void InclusionDirective(clang::SourceLocation HashLoc, const clang::Token &IncludeTok,
                                     clang::StringRef FileName, bool IsAngled,
                                     clang::CharSourceRange FilenameRange,
-                                    const clang::FileEntry *File,
-                                    clang::StringRef SearchPath,
-                                    clang::StringRef RelativePath,
-                                    const clang::Module *Imported,
+                                    const clang::FileEntry *File, clang::StringRef SearchPath,
+                                    clang::StringRef RelativePath, const clang::Module *Imported,
                                     clang::SrcMgr::CharacteristicKind FileType);
     virtual bool HandleComment(clang::Preprocessor &PP, clang::SourceRange Loc);
 };

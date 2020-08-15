@@ -33,8 +33,8 @@ void LimitLibrary::parseCsvLine(csv::ifstream &p_is) {
     std::string file;
     float limit;
 
-    p_is >> metricName >> global >> file >> pattern.fileName >>
-        pattern.funcName >> pattern.operand >> limit >> pattern.text;
+    p_is >> metricName >> global >> file >> pattern.fileName >> pattern.funcName >>
+        pattern.operand >> limit >> pattern.text;
 #if 0
 	std::cout << "Read: " << metricName << " / " << pattern.fileName << " / " << pattern.funcName << " / " << pattern.operand << " / " << pattern.limit << std::endl;
 #endif
@@ -59,8 +59,7 @@ void LimitLibrary::parseCsvLine(csv::ifstream &p_is) {
 			std::cout << "Metric is " << metric << std::endl;
 #endif
             if (knownOperators.find(pattern.operand) == knownOperators.end()) {
-                std::cerr << "Unknown operator in limits file '"
-                          << pattern.operand << "'\n";
+                std::cerr << "Unknown operator in limits file '" << pattern.operand << "'\n";
                 exit(EXIT_FAILURE);
             }
 
@@ -68,8 +67,7 @@ void LimitLibrary::parseCsvLine(csv::ifstream &p_is) {
 
             m_patternMap[metric].push_back(pattern);
         } else {
-            std::cerr << "Ignoring limits file line starting " << metricName
-                      << "\n";
+            std::cerr << "Ignoring limits file line starting " << metricName << "\n";
             exit(EXIT_FAILURE);
         }
     } else {
@@ -80,8 +78,8 @@ void LimitLibrary::parseCsvLine(csv::ifstream &p_is) {
 bool LimitLibrary::load(const std::vector<std::string> &p_fileNames) {
     bool ret_val = true;
 
-    for (std::vector<std::string>::const_iterator it = p_fileNames.begin();
-         it != p_fileNames.end(); it++) {
+    for (std::vector<std::string>::const_iterator it = p_fileNames.begin(); it != p_fileNames.end();
+         it++) {
         if (!load(*it)) {
             ret_val = false;
             break;
@@ -112,13 +110,11 @@ bool LimitLibrary::load(const std::string p_fileName) {
 }
 
 const LimitLibrary::limitPattern_t *
-LimitLibrary::findHighestPresidenceRule(const patternSet_t &p_set,
-                                        const MetricUnit &p_unit,
+LimitLibrary::findHighestPresidenceRule(const patternSet_t &p_set, const MetricUnit &p_unit,
                                         const MetricOptions &p_options) const {
     const limitPattern_t *pattern = NULL;
 
-    for (patternSet_t::const_iterator pit = p_set.begin(); pit != p_set.end();
-         pit++) {
+    for (patternSet_t::const_iterator pit = p_set.begin(); pit != p_set.end(); pit++) {
         if (unitMatchesLimitPattern(p_unit, p_options, &(*pit))) {
             pattern = &(*pit);
         }
@@ -143,11 +139,9 @@ std::string LimitLibrary::checkLimit(const MetricUnit &p_unit,
             if (it != m_patternMap.end()) {
                 /* Find the highest precident rule where the rule pattern
                  * matches this unit (if there is one) */
-                pattern =
-                    findHighestPresidenceRule(it->second, p_unit, p_options);
+                pattern = findHighestPresidenceRule(it->second, p_unit, p_options);
 
-                out << checkUnitPassesMetricLimit(p_unit, p_options, metric,
-                                                  pattern);
+                out << checkUnitPassesMetricLimit(p_unit, p_options, metric, pattern);
             }
         }
     }
@@ -155,14 +149,15 @@ std::string LimitLibrary::checkLimit(const MetricUnit &p_unit,
     return out.str();
 }
 
-std::string LimitLibrary::checkUnitPassesMetricLimit(
-    const MetricUnit &p_unit, const MetricOptions &p_options,
-    const MetricType_e p_metric, const limitPattern_t *const p_pattern) const {
+std::string LimitLibrary::checkUnitPassesMetricLimit(const MetricUnit &p_unit,
+                                                     const MetricOptions &p_options,
+                                                     const MetricType_e p_metric,
+                                                     const limitPattern_t *const p_pattern) const {
     std::stringstream out;
 
     if (p_pattern != NULL) {
-        MetricUnit::counter_t val = p_unit.getCounter(
-            p_metric, MetricUnit::isMetricCumulative(p_metric));
+        MetricUnit::counter_t val =
+            p_unit.getCounter(p_metric, MetricUnit::isMetricCumulative(p_metric));
 
 #if 0
 		std::cout << "Checking " << p_unit.getUnitName(p_options) << " for '" << MetricUnit::getMetricName(it->first) << "'\n";
@@ -178,14 +173,13 @@ std::string LimitLibrary::checkUnitPassesMetricLimit(
             ((p_pattern->operand == "<=") && (val <= p_pattern->limit))) {
             /* Passed check */
         } else {
-            const bool gccWarnings = (p_options.getLimitWarningOutputFormat() ==
-                                      METRIC_LIMITS_FORMAT_GCC);
+            const bool gccWarnings =
+                (p_options.getLimitWarningOutputFormat() == METRIC_LIMITS_FORMAT_GCC);
             const std::string &fileName = p_unit.getFileName(p_options);
             const std::string &unitName = p_unit.getUnitName(p_options);
 
             if (gccWarnings) {
-                SourceFileAndLine_t loc =
-                    p_unit.getFirstInstanceLocation(p_metric);
+                SourceFileAndLine_t loc = p_unit.getFirstInstanceLocation(p_metric);
 
                 out << fileName;
 
@@ -200,12 +194,10 @@ std::string LimitLibrary::checkUnitPassesMetricLimit(
                 out << unitName << " ";
             }
 
-            out << "failed limits check '"
-                << MetricUnit::getMetricName(p_metric) << "' (actual: "
-                << MetricUnit::getScaledMetricString(p_metric, val)
+            out << "failed limits check '" << MetricUnit::getMetricName(p_metric)
+                << "' (actual: " << MetricUnit::getScaledMetricString(p_metric, val)
                 << " expected: " << p_pattern->operand
-                << MetricUnit::getScaledMetricString(p_metric, p_pattern->limit)
-                << ")";
+                << MetricUnit::getScaledMetricString(p_metric, p_pattern->limit) << ")";
 
             if (p_pattern->text.length()) {
                 out << ": " << p_pattern->text;
@@ -217,38 +209,36 @@ std::string LimitLibrary::checkUnitPassesMetricLimit(
     return out.str();
 }
 
-bool LimitLibrary::unitMatchesLimitPattern(
-    const MetricUnit &p_unit, const MetricOptions &p_options,
-    const limitPattern_t *const p_pattern) {
+bool LimitLibrary::unitMatchesLimitPattern(const MetricUnit &p_unit, const MetricOptions &p_options,
+                                           const limitPattern_t *const p_pattern) {
     bool matches = false;
     switch (p_unit.GetType()) {
-    case METRIC_UNIT_GLOBAL:
-        if (p_pattern->global) {
-            matches = true;
-        }
-        break;
-    case METRIC_UNIT_FILE:
-        if (p_pattern->file) {
-            llvm::Regex regex(p_pattern->fileName);
-            if (regex.match(p_unit.getUnitName(p_options))) {
+        case METRIC_UNIT_GLOBAL:
+            if (p_pattern->global) {
                 matches = true;
             }
-        }
-        break;
-    case METRIC_UNIT_FUNCTION:
-        if (p_pattern->funcName.length()) {
-            llvm::Regex regex(p_pattern->funcName);
-            if (regex.match(p_unit.getUnitName(p_options))) {
-                llvm::Regex fileRegex(p_pattern->fileName);
-                if (fileRegex.match(
-                        p_unit.getParent()->getUnitName(p_options))) {
+            break;
+        case METRIC_UNIT_FILE:
+            if (p_pattern->file) {
+                llvm::Regex regex(p_pattern->fileName);
+                if (regex.match(p_unit.getUnitName(p_options))) {
                     matches = true;
                 }
             }
-        }
-        break;
-    default:
-        break;
+            break;
+        case METRIC_UNIT_FUNCTION:
+            if (p_pattern->funcName.length()) {
+                llvm::Regex regex(p_pattern->funcName);
+                if (regex.match(p_unit.getUnitName(p_options))) {
+                    llvm::Regex fileRegex(p_pattern->fileName);
+                    if (fileRegex.match(p_unit.getParent()->getUnitName(p_options))) {
+                        matches = true;
+                    }
+                }
+            }
+            break;
+        default:
+            break;
     }
     return matches;
 }

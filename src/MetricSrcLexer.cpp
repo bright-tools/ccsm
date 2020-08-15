@@ -24,27 +24,24 @@
 
 #include <iostream>
 
-MetricSrcLexer::MetricSrcLexer(clang::CompilerInstance &p_CI,
-                               MetricUnit *p_topUnit, MetricOptions &p_options)
-    : m_compilerInstance(p_CI), m_topUnit(p_topUnit), m_options(p_options),
-      m_currentUnit(NULL) {
+MetricSrcLexer::MetricSrcLexer(clang::CompilerInstance &p_CI, MetricUnit *p_topUnit,
+                               MetricOptions &p_options)
+    : m_compilerInstance(p_CI), m_topUnit(p_topUnit), m_options(p_options), m_currentUnit(NULL) {
 }
 
 MetricSrcLexer::~MetricSrcLexer(void) {
 }
 
-void MetricSrcLexer::LexSources(
-    clang::CompilerInstance &p_ci,
-    const TranslationUnitFunctionLocator *const p_fnLocator) {
+void MetricSrcLexer::LexSources(clang::CompilerInstance &p_ci,
+                                const TranslationUnitFunctionLocator *const p_fnLocator) {
     clang::Preprocessor &PP = p_ci.getPreprocessor();
     clang::SourceManager &SM = p_ci.getSourceManager();
 
     if (m_options.getDumpTokens()) {
-        m_options.getOutput()
-            << std::endl
-            << "Start lexing translation unit: "
-            << SM.getFileEntryForID(SM.getMainFileID())->getName().str()
-            << std::endl;
+        m_options.getOutput() << std::endl
+                              << "Start lexing translation unit: "
+                              << SM.getFileEntryForID(SM.getMainFileID())->getName().str()
+                              << std::endl;
     }
 
     // Start preprocessing the specified input file.
@@ -52,12 +49,10 @@ void MetricSrcLexer::LexSources(
     m_lastToken.setKind(clang::tok::eof);
     PP.EnterMainSourceFile();
     PP.SetCommentRetentionState(true, true);
-    PP.addPPCallbacks(std::make_unique<MetricPPIncludeHandler>(
-        m_options, SM, m_currentFileName));
+    PP.addPPCallbacks(std::make_unique<MetricPPIncludeHandler>(m_options, SM, m_currentFileName));
     clang::SourceLocation fnStart;
     clang::SourceLocation fnEnd;
-    m_currentFileName =
-        SM.getFileEntryForID(SM.getMainFileID())->getName().str();
+    m_currentFileName = SM.getFileEntryForID(SM.getMainFileID())->getName().str();
     MetricUnit *fileUnit = NULL;
 
     do {
@@ -70,8 +65,7 @@ void MetricSrcLexer::LexSources(
 
         /* If it's a macro then we want the expansion location */
         if (tokenLoc.isMacroID()) {
-            tokenLoc =
-                m_compilerInstance.getSourceManager().getFileLoc(tokenLoc);
+            tokenLoc = m_compilerInstance.getSourceManager().getFileLoc(tokenLoc);
         }
 
         std::string fileName = m_currentFileName;
@@ -84,8 +78,7 @@ void MetricSrcLexer::LexSources(
             if (!m_options.isDefFile(fileName)) {
                 m_currentFileName = fileName;
             }
-            fileUnit =
-                m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE);
+            fileUnit = m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE);
 
             // Not lex'd this file yet?
             if (!fileUnit->hasBeenProcessed(getLexType())) {
@@ -93,16 +86,15 @@ void MetricSrcLexer::LexSources(
                 if ((m_currentFunctionName == "") ||
                     (tokenLoc.getRawEncoding() > fnEnd.getRawEncoding()) ||
                     (tokenLoc.getRawEncoding() < fnStart.getRawEncoding())) {
-                    std::string funcName = p_fnLocator->FindFunction(
-                        SM, tokenLoc, &fnEnd, &m_bodyStartLocation);
+                    std::string funcName =
+                        p_fnLocator->FindFunction(SM, tokenLoc, &fnEnd, &m_bodyStartLocation);
                     m_inBody = false;
                     fnStart = tokenLoc;
 
                     if ((funcName.length() > 0) && m_options.getDumpTokens()) {
                         m_options.getOutput()
                             << std::endl
-                            << "[fn:" << funcName << "@"
-                            << tokenLoc.getRawEncoding() << "-"
+                            << "[fn:" << funcName << "@" << tokenLoc.getRawEncoding() << "-"
                             << fnEnd.getRawEncoding() << "]" << std::endl
                             << "  ";
                     }
@@ -110,11 +102,10 @@ void MetricSrcLexer::LexSources(
                     m_currentFunctionName = funcName;
 
                     if (m_currentFunctionName != "") {
-                        if (m_options.ShouldIncludeFunction(
-                                m_currentFunctionName)) {
+                        if (m_options.ShouldIncludeFunction(m_currentFunctionName)) {
                             CloseOutFnOrMtd();
-                            m_currentUnit = fileUnit->getSubUnit(
-                                m_currentFunctionName, METRIC_UNIT_FUNCTION);
+                            m_currentUnit =
+                                fileUnit->getSubUnit(m_currentFunctionName, METRIC_UNIT_FUNCTION);
                             m_waitingForBody = true;
                         } else {
                             CloseOutFnOrMtd();
@@ -129,8 +120,7 @@ void MetricSrcLexer::LexSources(
                     }
                 } else {
                     if (m_waitingForBody) {
-                        if ((m_bodyStartLocation < tokenLoc) ||
-                            (m_bodyStartLocation == tokenLoc)) {
+                        if ((m_bodyStartLocation < tokenLoc) || (m_bodyStartLocation == tokenLoc)) {
                             m_inBody = true;
                             m_waitingForBody = false;
                         }
@@ -155,8 +145,8 @@ void MetricSrcLexer::LexSources(
         CloseOutFnOrMtd();
     }
 
-    for (clang::SourceManager::fileinfo_iterator it = SM.fileinfo_begin();
-         it != SM.fileinfo_end(); it++) {
+    for (clang::SourceManager::fileinfo_iterator it = SM.fileinfo_begin(); it != SM.fileinfo_end();
+         it++) {
         bool Invalid = false;
         clang::FileID fid = SM.translateFile(it->first);
         clang::StringRef Buffer = SM.getBufferData(fid, &Invalid);
@@ -165,10 +155,8 @@ void MetricSrcLexer::LexSources(
         if (m_options.ShouldIncludeFile(fileName)) {
             const SourceFileAndLine_t location = {true, 0, fileName, 0};
 
-            MetricUnit *fileUnit =
-                m_topUnit->getSubUnit(fileName, METRIC_UNIT_FILE);
-            fileUnit->set(METRIC_TYPE_LINE_COUNT, countNewlines(Buffer),
-                          location);
+            MetricUnit *fileUnit = m_topUnit->getSubUnit(fileName, METRIC_UNIT_FILE);
+            fileUnit->set(METRIC_TYPE_LINE_COUNT, countNewlines(Buffer), location);
             fileUnit->setProcessed(getLexType());
         }
     }

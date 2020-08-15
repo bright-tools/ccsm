@@ -30,11 +30,12 @@
 #include "clang/Frontend/FrontendActions.h"
 #include "clang/Tooling/Tooling.h"
 
-extern clang::tooling::FrontendActionFactory *newPPMetricFrontendActionFactory(
-    MetricOptions &p_options, MetricUnit *p_topUnit,
-    GlobalFunctionLocator *p_srcMap, const bool p_expanded);
-extern clang::tooling::FrontendActionFactory *newASTMetricFrontendActionFactory(
-    MetricOptions &p_options, MetricUnit *p_topUnit,
-    GlobalFunctionLocator *p_srcMap, std::set<std::string> *p_commentFileList);
+extern clang::tooling::FrontendActionFactory *
+newPPMetricFrontendActionFactory(MetricOptions &p_options, MetricUnit *p_topUnit,
+                                 GlobalFunctionLocator *p_srcMap, const bool p_expanded);
+extern clang::tooling::FrontendActionFactory *
+newASTMetricFrontendActionFactory(MetricOptions &p_options, MetricUnit *p_topUnit,
+                                  GlobalFunctionLocator *p_srcMap,
+                                  std::set<std::string> *p_commentFileList);
 
 #endif

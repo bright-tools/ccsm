@@ -6,3 +6,4 @@ AllowShortLoopsOnASingleLine: false
 AllowShortCaseLabelsOnASingleLine: false
 IndentCaseLabels: true
 AllowShortEnumsOnASingleLine: false
+ColumnLimit: 100

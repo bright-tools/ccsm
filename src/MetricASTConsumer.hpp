@@ -43,9 +43,8 @@ class MetricASTConsumer : public clang::ASTConsumer {
     GlobalFunctionLocator *m_fnLocator = NULL;
 
   public:
-    explicit MetricASTConsumer(clang::CompilerInstance &CI,
-                               MetricUnit *p_topUnit, MetricOptions &p_options,
-                               GlobalFunctionLocator *m_fnLocator = NULL);
+    explicit MetricASTConsumer(clang::CompilerInstance &CI, MetricUnit *p_topUnit,
+                               MetricOptions &p_options, GlobalFunctionLocator *m_fnLocator = NULL);
 
     virtual ~MetricASTConsumer(void);
     virtual void HandleTranslationUnit(clang::ASTContext &Context);

@@ -17,8 +17,7 @@
 #include "LimitsChecker.hpp"
 #include "LimitLibrary.hpp"
 
-void LimitsChecker::dump(const MetricUnit *const p_topLevel,
-                         const MetricOptions &p_options) {
+void LimitsChecker::dump(const MetricUnit *const p_topLevel, const MetricOptions &p_options) {
     LimitLibrary limits;
 
     if (limits.load(p_options.getLimitsFiles())) {
@@ -28,22 +27,20 @@ void LimitsChecker::dump(const MetricUnit *const p_topLevel,
     }
 }
 
-void LimitsChecker::dump(const MetricUnit *const p_topLevel,
-                         const MetricOptions &p_options,
+void LimitsChecker::dump(const MetricUnit *const p_topLevel, const MetricOptions &p_options,
                          const LimitLibrary &p_limits) {
     p_options.getOutput() << check(p_topLevel, p_options, p_limits);
 }
 
-std::string LimitsChecker::check(const MetricUnit *const p_topLevel,
-                                 const MetricOptions &p_options,
+std::string LimitsChecker::check(const MetricUnit *const p_topLevel, const MetricOptions &p_options,
                                  const LimitLibrary &p_limits) {
     std::stringstream out;
     std::stringstream checkOut;
     std::string thisCheck;
     const std::string FILE_SEP = "----\n";
 
-    const bool groupWarnings = (p_options.getLimitWarningOutputFormat() ==
-                                METRIC_LIMITS_FORMAT_GROUP_BY_FILE);
+    const bool groupWarnings =
+        (p_options.getLimitWarningOutputFormat() == METRIC_LIMITS_FORMAT_GROUP_BY_FILE);
 
     bool outputTail = false;
     thisCheck = p_limits.checkLimit(*p_topLevel, p_options);
@@ -56,15 +53,14 @@ std::string LimitsChecker::check(const MetricUnit *const p_topLevel,
 
     if (groupWarnings && (checkOut.str().length() || thisCheck.length()) &&
         (p_topLevel->GetType() == METRIC_UNIT_FILE)) {
-        out << "== Limit warnings for: " << p_topLevel->getUnitName(p_options)
-            << "\n";
+        out << "== Limit warnings for: " << p_topLevel->getUnitName(p_options) << "\n";
         outputTail = true;
     }
 
     out << thisCheck;
 
-    if (groupWarnings && checkOut.str().length() &&
-        (p_topLevel->GetType() == METRIC_UNIT_GLOBAL) && thisCheck.length()) {
+    if (groupWarnings && checkOut.str().length() && (p_topLevel->GetType() == METRIC_UNIT_GLOBAL) &&
+        thisCheck.length()) {
         out << FILE_SEP;
     }
 

@@ -17,21 +17,17 @@ limitations under the License.
 #include "MetricDumper.hpp"
 #include "MetricOptions.hpp"
 
-#define IS_OUTPUT_TREE_FORM(_fmt)                                              \
-    (((_fmt) == METRIC_DUMP_FORMAT_TREE) ||                                    \
-     ((_fmt) == METRIC_DUMP_FORMAT_SPARSE_TREE))
+#define IS_OUTPUT_TREE_FORM(_fmt)                                                                  \
+    (((_fmt) == METRIC_DUMP_FORMAT_TREE) || ((_fmt) == METRIC_DUMP_FORMAT_SPARSE_TREE))
 
 const std::string MetricDumper::m_namePrefix[METRIC_UNIT_MAX] = {
     "", "File: ", "\tFunction: ", "\tMethod: "};
-const std::string MetricDumper::m_dumpPrefix[METRIC_UNIT_MAX] = {
-    "", "\t", "\t\t", "\t\t"};
+const std::string MetricDumper::m_dumpPrefix[METRIC_UNIT_MAX] = {"", "\t", "\t\t", "\t\t"};
 
 void MetricDumper::dumpMetric(std::ostream &out, const MetricUnit *const p_unit,
-                              const MetricType_e p_metric,
-                              const MetricDumpFormat_e p_fmt,
+                              const MetricType_e p_metric, const MetricDumpFormat_e p_fmt,
                               const std::string &p_sep, const bool p_recurse,
-                              const std::string &p_suffix,
-                              bool p_useShortNames) {
+                              const std::string &p_suffix, bool p_useShortNames) {
     MetricUnit::counter_t val = p_unit->getCounter(p_metric, p_recurse);
     const MetricUnitType_e metricType = p_unit->GetType();
 
@@ -53,8 +49,7 @@ void MetricDumper::dumpMetric(std::ostream &out, const MetricUnit *const p_unit,
     }
 }
 
-void MetricDumper::dump(const MetricUnit *const p_topLevel,
-                        const MetricOptions &p_options) {
+void MetricDumper::dump(const MetricUnit *const p_topLevel, const MetricOptions &p_options) {
     const MetricDumpFormat_e p_fmt = p_options.getOutputFormat();
 
     if (p_fmt != METRIC_DUMP_FORMAT_NONE) {
@@ -65,29 +60,27 @@ void MetricDumper::dump(const MetricUnit *const p_topLevel,
 
         if (p_options.getOutputMetric(metricUnitType)) {
             switch (p_fmt) {
-            case METRIC_DUMP_FORMAT_TREE:
-            case METRIC_DUMP_FORMAT_SPARSE_TREE:
-                sep = "\n";
-                break;
-            case METRIC_DUMP_FORMAT_TSV:
-                sep = "\t";
-                break;
-            case METRIC_DUMP_FORMAT_CSV:
-                sep = ",";
-                break;
-            default:
-                break;
+                case METRIC_DUMP_FORMAT_TREE:
+                case METRIC_DUMP_FORMAT_SPARSE_TREE:
+                    sep = "\n";
+                    break;
+                case METRIC_DUMP_FORMAT_TSV:
+                    sep = "\t";
+                    break;
+                case METRIC_DUMP_FORMAT_CSV:
+                    sep = ",";
+                    break;
+                default:
+                    break;
             }
 
-            if ((p_fmt == METRIC_DUMP_FORMAT_TSV) ||
-                (p_fmt == METRIC_DUMP_FORMAT_CSV)) {
+            if ((p_fmt == METRIC_DUMP_FORMAT_TSV) || (p_fmt == METRIC_DUMP_FORMAT_CSV)) {
 
                 if (metricUnitType == METRIC_UNIT_GLOBAL) {
                     out << "File" << sep << "Name" << sep;
                     int loop;
                     for (loop = 0; loop < METRIC_TYPE_MAX; loop++) {
-                        const MetricType_e metric =
-                            static_cast<MetricType_e>(loop);
+                        const MetricType_e metric = static_cast<MetricType_e>(loop);
                         const bool localAndCumulativeOutputs =
                             MetricUnit::isMetricCumulative(metric) &&
                             MetricUnit::isMetricLocalAndCumulative(metric);
@@ -103,8 +96,7 @@ void MetricDumper::dump(const MetricUnit *const p_topLevel,
                             std::string metricName;
 
                             if (useShortNames) {
-                                metricName =
-                                    MetricUnit::getMetricShortName(metric);
+                                metricName = MetricUnit::getMetricShortName(metric);
                             } else {
                                 metricName = MetricUnit::getMetricName(metric);
                             }
@@ -112,9 +104,8 @@ void MetricDumper::dump(const MetricUnit *const p_topLevel,
                             out << quote_wrapper << metricName;
 
                             if (localAndCumulativeOutputs) {
-                                out << "(local)" << quote_wrapper << sep
-                                    << quote_wrapper << metricName
-                                    << "(cumulative)";
+                                out << "(local)" << quote_wrapper << sep << quote_wrapper
+                                    << metricName << "(cumulative)";
                             }
                             out << quote_wrapper << sep;
                         }
@@ -127,18 +118,15 @@ void MetricDumper::dump(const MetricUnit *const p_topLevel,
                 out << m_namePrefix[metricUnitType];
             }
 
-            if ((p_fmt == METRIC_DUMP_FORMAT_TSV) ||
-                (p_fmt == METRIC_DUMP_FORMAT_CSV)) {
+            if ((p_fmt == METRIC_DUMP_FORMAT_TSV) || (p_fmt == METRIC_DUMP_FORMAT_CSV)) {
                 if (metricUnitType == METRIC_UNIT_FUNCTION) {
-                    out << p_topLevel->getParent()->getUnitName(p_options)
-                        << sep;
+                    out << p_topLevel->getParent()->getUnitName(p_options) << sep;
                 }
             }
 
             out << p_topLevel->getUnitName(p_options) << sep;
 
-            if ((p_fmt == METRIC_DUMP_FORMAT_TSV) ||
-                (p_fmt == METRIC_DUMP_FORMAT_CSV)) {
+            if ((p_fmt == METRIC_DUMP_FORMAT_TSV) || (p_fmt == METRIC_DUMP_FORMAT_CSV)) {
                 if (metricUnitType != METRIC_UNIT_FUNCTION) {
                     out << sep;
                 }
@@ -147,32 +135,28 @@ void MetricDumper::dump(const MetricUnit *const p_topLevel,
             unsigned loop;
             for (loop = 0; loop < METRIC_TYPE_MAX; loop++) {
                 const MetricType_e metric = static_cast<MetricType_e>(loop);
-                const bool metricIsCumulative =
-                    MetricUnit::isMetricCumulative(metric);
+                const bool metricIsCumulative = MetricUnit::isMetricCumulative(metric);
                 /* TODO: duped above */
                 const bool localAndCumulativeOutputs =
-                    metricIsCumulative &&
-                    MetricUnit::isMetricLocalAndCumulative(metric);
+                    metricIsCumulative && MetricUnit::isMetricLocalAndCumulative(metric);
 
                 if (p_options.ShouldIncludeMetric(metric)) {
                     /* Filter out metrics which only apply at file/method level
                      */
-                    if (MetricUnit::doesMetricApplyForUnit(metric,
-                                                           metricUnitType)) {
+                    if (MetricUnit::doesMetricApplyForUnit(metric, metricUnitType)) {
                         std::string sfx = "";
                         if (localAndCumulativeOutputs) {
                             if (metricUnitType == METRIC_UNIT_FILE) {
-                                dumpMetric(out, p_topLevel, (MetricType_e)loop,
-                                           p_fmt, sep, false, "(local)",
-                                           useShortNames);
+                                dumpMetric(out, p_topLevel, (MetricType_e)loop, p_fmt, sep, false,
+                                           "(local)", useShortNames);
                                 sfx = "(cumulative)";
                             } else if ((p_fmt == METRIC_DUMP_FORMAT_TSV) ||
                                        (p_fmt == METRIC_DUMP_FORMAT_CSV)) {
                                 out << sep;
                             }
                         }
-                        dumpMetric(out, p_topLevel, (MetricType_e)loop, p_fmt,
-                                   sep, metricIsCumulative, sfx, useShortNames);
+                        dumpMetric(out, p_topLevel, (MetricType_e)loop, p_fmt, sep,
+                                   metricIsCumulative, sfx, useShortNames);
                     } else if ((p_fmt == METRIC_DUMP_FORMAT_TSV) ||
                                (p_fmt == METRIC_DUMP_FORMAT_CSV)) {
                         out << sep;
@@ -183,17 +167,14 @@ void MetricDumper::dump(const MetricUnit *const p_topLevel,
                 }
             }
 
-            if ((p_fmt == METRIC_DUMP_FORMAT_TSV) ||
-                (p_fmt == METRIC_DUMP_FORMAT_CSV)) {
+            if ((p_fmt == METRIC_DUMP_FORMAT_TSV) || (p_fmt == METRIC_DUMP_FORMAT_CSV)) {
                 out << std::endl;
             }
         }
 
-        const MetricUnit::SubUnitMap_t *const subUnits =
-            p_topLevel->getSubUnits();
+        const MetricUnit::SubUnitMap_t *const subUnits = p_topLevel->getSubUnits();
 
-        for (MetricUnit::SubUnitMap_t::const_iterator unitIt =
-                 subUnits->begin();
+        for (MetricUnit::SubUnitMap_t::const_iterator unitIt = subUnits->begin();
              unitIt != subUnits->end(); ++unitIt) {
             dump((*unitIt).second, p_options);
         }

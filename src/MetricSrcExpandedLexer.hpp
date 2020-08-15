@@ -39,8 +39,7 @@ class MetricSrcExpandedLexer : public MetricSrcLexer {
 
     bool m_dumpNewline = false;
 
-    static const std::map<clang::tok::TokenKind, MetricType_e>
-        m_tokenKindToTypeMap;
+    static const std::map<clang::tok::TokenKind, MetricType_e> m_tokenKindToTypeMap;
     static const std::map<MetricType_e, MetricType_e> m_metricToBodyMetricMap;
 
     virtual void ProcessToken(clang::Token &p_token);
