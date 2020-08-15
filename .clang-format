@@ -5,4 +5,4 @@ AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
 AllowShortCaseLabelsOnASingleLine: false
 IndentCaseLabels: true
-#AllowShortEnumsOnASingleLine: false
+AllowShortEnumsOnASingleLine: false
