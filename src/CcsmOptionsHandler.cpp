@@ -17,6 +17,7 @@
 
 #include "CcsmOptionsHandler.hpp"
 #include "MetricUnit.hpp"
+#include "MetricUtils.hpp"
 #include "ccsm_ver.h"
 
 #include <clang/Basic/Version.h>
@@ -398,8 +399,13 @@ void CcsmOptionsHandler::analyseCompilerArgs(const char *const exeName) {
             IntrusiveRefCntPtr<DiagnosticIDs> DiagID(new DiagnosticIDs());
             DiagnosticsEngine Diags(DiagID, &*DiagOpts, DiagClient);
             clang::driver::Driver TheDriver(Path, T.str(), Diags);
-            TheDriver.setCheckInputsExist(false);
-            std::unique_ptr<clang::driver::Compilation> C(TheDriver.BuildCompilation(Args));
+            clang::driver::Compilation *compilation = TheDriver.BuildCompilation(Args);
+            if (compilation->getJobs().empty()) {
+                std::cout
+                    << "No compile jobs identified.  Were valid file(s) specified for analysis?" << std::endl;
+                exit(-1);
+            }
+            std::unique_ptr<clang::driver::Compilation> C(compilation);
             const driver::JobList &Jobs = C->getJobs();
             const driver::Command &Cmd = cast<driver::Command>(*Jobs.begin());
             const llvm::opt::ArgStringList &CCArgs = Cmd.getArguments();
