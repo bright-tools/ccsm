@@ -290,7 +290,6 @@ MetricVisitor::PathResults MetricVisitor::getSwitchPathCount(const clang::Switch
 MetricVisitor::PathResults MetricVisitor::getIfPathCount(const clang::IfStmt *const p_stmt,
                                                          uint16_t depth) {
     MetricVisitor::PathResults ret_val = {0, 0, 0};
-    bool has_return = false;
     const clang::IfStmt *ifStmt = p_stmt;
 
 #if defined(DEBUG_FN_TRACE_OUTOUT)
@@ -298,7 +297,6 @@ MetricVisitor::PathResults MetricVisitor::getIfPathCount(const clang::IfStmt *co
 #endif
 
     if (ifStmt != nullptr) {
-        has_return = true;
 
         /* Loops across 'if', 'else if' and 'else' constructs */
         while (ifStmt != nullptr) {
@@ -603,20 +601,28 @@ void MetricVisitor::CalcFnLineCnt(clang::FunctionDecl *func) {
         defEndLoc = SM.getFileLoc(defEndLoc);
     }
 
-    /* Obtain the buffer for the function body, then count the lines */
-    const char *body_start = SM.getCharacterData(bodyStartLoc);
-    const char *body_end = SM.getCharacterData(bodyEndLoc);
-    clang::StringRef body_buffer(body_start, body_end - body_start);
+    size_t lineCount = 0;
+    if (bodyStartLoc < bodyEndLoc) {
+        /* Obtain the buffer for the function body, then count the lines */
+        const char *body_start = SM.getCharacterData(bodyStartLoc);
+        const char *body_end = SM.getCharacterData(bodyEndLoc);
+        clang::StringRef body_buffer(body_start, body_end - body_start);
+        lineCount = countNewlines(body_buffer) + 1;
+    }
 
-    m_currentUnit->set(METRIC_TYPE_FUNCTION_BODY_LINE_COUNT, countNewlines(body_buffer) + 1,
+    m_currentUnit->set(METRIC_TYPE_FUNCTION_BODY_LINE_COUNT, lineCount,
                        getFileAndLine(SM, &bodyStartLoc));
 
-    /* Obtain buffer for whole function then count the lines */
-    const char *def_start = SM.getCharacterData(defStartLoc);
-    const char *def_end = SM.getCharacterData(defEndLoc);
-    clang::StringRef def_buffer(def_start, def_end - def_start);
+    lineCount = 0;
+    if (defStartLoc < defEndLoc) {
+        /* Obtain buffer for whole function then count the lines */
+        const char *def_start = SM.getCharacterData(defStartLoc);
+        const char *def_end = SM.getCharacterData(defEndLoc);
+        clang::StringRef def_buffer(def_start, def_end - def_start);
+        lineCount = countNewlines(def_buffer) + 1;
+    }
 
-    m_currentUnit->set(METRIC_TYPE_FUNCTION_DEF_LINE_COUNT, countNewlines(def_buffer) + 1,
+    m_currentUnit->set(METRIC_TYPE_FUNCTION_DEF_LINE_COUNT, lineCount,
                        getFileAndLine(SM, &defStartLoc));
 }
 
