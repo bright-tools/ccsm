@@ -35,9 +35,11 @@ class ASTMetricConsumerFactory : public clang::ASTFrontendAction {
 ASTMetricConsumerFactory::ASTMetricConsumerFactory(
     MetricOptions &p_options, MetricUnit *p_topUnit,
     GlobalFunctionLocator *p_srcMap)
-    : m_options(p_options), m_topUnit(p_topUnit), m_srcMap(p_srcMap) {}
+    : m_options(p_options), m_topUnit(p_topUnit), m_srcMap(p_srcMap) {
+}
 
-ASTMetricConsumerFactory::~ASTMetricConsumerFactory() {}
+ASTMetricConsumerFactory::~ASTMetricConsumerFactory() {
+}
 
 class ASTMetricFrontendActionFactory : public ASTMetricConsumerFactory {
   protected:
@@ -57,9 +59,11 @@ ASTMetricFrontendActionFactory::ASTMetricFrontendActionFactory(
     MetricOptions &p_options, MetricUnit *p_topUnit,
     GlobalFunctionLocator *p_srcMap, std::set<std::string> *p_commentFileList)
     : ASTMetricConsumerFactory(p_options, p_topUnit, p_srcMap),
-      m_commentFileList(p_commentFileList) {}
+      m_commentFileList(p_commentFileList) {
+}
 
-ASTMetricFrontendActionFactory::~ASTMetricFrontendActionFactory() {}
+ASTMetricFrontendActionFactory::~ASTMetricFrontendActionFactory() {
+}
 
 #include <iostream>
 
@@ -89,12 +93,14 @@ class ASTFrontendActionFactory : public clang::tooling::FrontendActionFactory {
                              std::set<std::string> *p_commentFileList)
         : clang::tooling::FrontendActionFactory(), m_options(p_options),
           m_topUnit(p_topUnit), m_srcMap(p_srcMap),
-          m_commentFileList(p_commentFileList) {}
+          m_commentFileList(p_commentFileList) {
+    }
     std::unique_ptr<clang::FrontendAction> create() override {
         return std::make_unique<ASTMetricFrontendActionFactory>(
             m_options, m_topUnit, m_srcMap, m_commentFileList);
     }
-    virtual ~ASTFrontendActionFactory() {}
+    virtual ~ASTFrontendActionFactory() {
+    }
 };
 
 clang::tooling::FrontendActionFactory *newASTMetricFrontendActionFactory(
@@ -116,14 +122,16 @@ class PPFrontendActionFactory : public clang::tooling::FrontendActionFactory {
                             GlobalFunctionLocator *p_srcMap,
                             const bool p_expanded)
         : clang::tooling::FrontendActionFactory(), m_options(p_options),
-          m_topUnit(p_topUnit), m_srcMap(p_srcMap), m_expanded(p_expanded) {}
+          m_topUnit(p_topUnit), m_srcMap(p_srcMap), m_expanded(p_expanded) {
+    }
 
     std::unique_ptr<clang::FrontendAction> create() override {
         return std::make_unique<MetricPPConsumer>(m_topUnit, m_options,
                                                   m_srcMap, m_expanded);
     }
 
-    virtual ~PPFrontendActionFactory() {}
+    virtual ~PPFrontendActionFactory() {
+    }
 };
 
 clang::tooling::FrontendActionFactory *newPPMetricFrontendActionFactory(

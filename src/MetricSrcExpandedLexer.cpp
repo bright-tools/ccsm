@@ -205,15 +205,18 @@ const std::map<clang::tok::TokenKind, MetricType_e>
 MetricSrcExpandedLexer::MetricSrcExpandedLexer(clang::CompilerInstance &p_CI,
                                                MetricUnit *p_topUnit,
                                                MetricOptions &p_options)
-    : MetricSrcLexer(p_CI, p_topUnit, p_options) {}
+    : MetricSrcLexer(p_CI, p_topUnit, p_options) {
+}
 
-MetricSrcExpandedLexer::~MetricSrcExpandedLexer(void) {}
+MetricSrcExpandedLexer::~MetricSrcExpandedLexer(void) {
+}
 
 MetricUnitProcessingType_e MetricSrcExpandedLexer::getLexType(void) const {
     return METRIC_UNIT_PROCESS_LEX_EXPANDED;
 }
 
-void MetricSrcExpandedLexer::HandleOperand(clang::Token &p_token) {}
+void MetricSrcExpandedLexer::HandleOperand(clang::Token &p_token) {
+}
 
 void MetricSrcExpandedLexer::ProcessToken(clang::Token &p_token) {
     std::string tok_data;

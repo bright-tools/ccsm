@@ -167,9 +167,11 @@ const std::map<clang::tok::TokenKind, MetricType_e>
 MetricSrcUnexpandedLexer::MetricSrcUnexpandedLexer(
     clang::CompilerInstance &p_CI, MetricUnit *p_topUnit,
     MetricOptions &p_options)
-    : MetricSrcLexer(p_CI, p_topUnit, p_options) {}
+    : MetricSrcLexer(p_CI, p_topUnit, p_options) {
+}
 
-MetricSrcUnexpandedLexer::~MetricSrcUnexpandedLexer(void) {}
+MetricSrcUnexpandedLexer::~MetricSrcUnexpandedLexer(void) {
+}
 
 MetricUnitProcessingType_e MetricSrcUnexpandedLexer::getLexType(void) const {
     return METRIC_UNIT_PROCESS_LEX_UNEXPANDED;

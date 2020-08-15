@@ -227,7 +227,9 @@ MetricUnit::FunctionMap_t MetricUnit::getAllFunctionMap(void) {
     return retVal;
 }
 
-bool MetricUnit::hasExternalLinkage(void) const { return m_hasExternalLinkage; }
+bool MetricUnit::hasExternalLinkage(void) const {
+    return m_hasExternalLinkage;
+}
 
 void MetricUnit::setMax(const MetricType_e p_metricType,
                         const MetricUnit::counter_t p_val,
@@ -241,7 +243,9 @@ void MetricUnit::setMax(const MetricType_e p_metricType,
     }
 }
 
-MetricUnitType_e MetricUnit::GetType(void) const { return m_type; }
+MetricUnitType_e MetricUnit::GetType(void) const {
+    return m_type;
+}
 
 MetricUnit::counter_t
 MetricUnit::getSubUnitCount(const MetricUnitType_e p_type) const {
@@ -791,7 +795,9 @@ const MetricUnit::SubUnitMap_t *MetricUnit::getSubUnits(void) const {
     return &m_subUnits;
 }
 
-const MetricUnit *MetricUnit::getParent() const { return m_parent; }
+const MetricUnit *MetricUnit::getParent() const {
+    return m_parent;
+}
 
 float MetricUnit::getScaledMetric(const MetricType_e p_type,
                                   MetricUnit::counter_t p_val) {

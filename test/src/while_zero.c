@@ -3,28 +3,21 @@
  * (c) 2018 John Bailey
  */
 
-int foo( void )
-{
+int foo(void) {
     /* There's only one path through this */
-    do
-    {}
-    while(0);
+    do {
+    } while (0);
     /* And only one path through this */
-    do
-    {}
-    while(0 && 0);
+    do {
+    } while (0 && 0);
 
     /* Only one path here (jump to end of compound statement) */
-    while(0)
-    {
+    while (0) {
         /* This is unreachable */
         unsigned a;
-        if( a )
-        {
+        if (a) {
             a++;
-        }
-        else
-        {
+        } else {
             a--;
         }
     }

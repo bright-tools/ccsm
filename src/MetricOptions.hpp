@@ -29,7 +29,8 @@
 #include <string>
 #include <vector>
 
-typedef enum {
+typedef enum
+{
     METRIC_DUMP_FORMAT_NONE,
     METRIC_DUMP_FORMAT_TREE,
     METRIC_DUMP_FORMAT_SPARSE_TREE,
@@ -37,7 +38,8 @@ typedef enum {
     METRIC_DUMP_FORMAT_CSV
 } MetricDumpFormat_e;
 
-typedef enum {
+typedef enum
+{
     METRIC_LIMITS_FORMAT_DEFAULT,
     METRIC_LIMITS_FORMAT_GROUP_BY_FILE,
     METRIC_LIMITS_FORMAT_GCC

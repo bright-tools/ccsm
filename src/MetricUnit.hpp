@@ -26,7 +26,8 @@
 
 #include "clang/Basic/SourceLocation.h"
 
-typedef enum {
+typedef enum
+{
 #define METRIC_ALIAS(_name, _alias)
 #define METRIC(_enum, _short_name, _long_name, _applies_global, _applies_file, \
                _applies_function, _applies_method, _cumulative, _multipass,    \
@@ -38,7 +39,8 @@ typedef enum {
     METRIC_TYPE_MAX
 } MetricType_e;
 
-typedef enum {
+typedef enum
+{
     METRIC_UNIT_GLOBAL = 0,
     METRIC_UNIT_FILE,
     METRIC_UNIT_FUNCTION,
@@ -46,7 +48,8 @@ typedef enum {
     METRIC_UNIT_MAX
 } MetricUnitType_e;
 
-typedef enum {
+typedef enum
+{
     METRIC_UNIT_PROCESS_AST,
     METRIC_UNIT_PROCESS_LEX_UNEXPANDED,
     METRIC_UNIT_PROCESS_LEX_EXPANDED,

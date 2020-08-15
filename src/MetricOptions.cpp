@@ -28,7 +28,8 @@ MetricOptions::MetricOptions(std::vector<std::string> *const p_excludeFiles,
     : ExcludeFiles(p_excludeFiles), ExcludeFunctions(p_excludeFunctions),
       OutputMetrics(p_outputMetrics), DefFiles(p_defFiles), m_dumpTokens(false),
       m_dumpAST(false), m_useShortNames(false), m_useAbsoluteFileNames(false),
-      m_outputStream(&std::cout) {}
+      m_outputStream(&std::cout) {
+}
 
 MetricOptions::~MetricOptions() {
     if (m_outputStream != &std::cout) {
@@ -88,21 +89,33 @@ bool MetricOptions::ShouldIncludeMetric(MetricType_e p_metric) const {
     return OutputMetrics.find(p_metric) != OutputMetrics.end();
 }
 
-void MetricOptions::setDumpTokens(const bool p_dump) { m_dumpTokens = p_dump; }
+void MetricOptions::setDumpTokens(const bool p_dump) {
+    m_dumpTokens = p_dump;
+}
 
-void MetricOptions::setDumpAST(const bool p_dump) { m_dumpAST = p_dump; }
+void MetricOptions::setDumpAST(const bool p_dump) {
+    m_dumpAST = p_dump;
+}
 
-bool MetricOptions::getDumpTokens(void) const { return m_dumpTokens; }
+bool MetricOptions::getDumpTokens(void) const {
+    return m_dumpTokens;
+}
 
-bool MetricOptions::getDumpAST(void) const { return m_dumpAST; }
+bool MetricOptions::getDumpAST(void) const {
+    return m_dumpAST;
+}
 
-bool MetricOptions::optionsOk(void) const { return m_optionsOk; }
+bool MetricOptions::optionsOk(void) const {
+    return m_optionsOk;
+}
 
 void MetricOptions::setUseShortNames(const bool p_shortNames) {
     m_useShortNames = p_shortNames;
 }
 
-bool MetricOptions::getUseShortNames(void) const { return m_useShortNames; }
+bool MetricOptions::getUseShortNames(void) const {
+    return m_useShortNames;
+}
 
 void MetricOptions::setPrototypesAreFileScope(const bool p_proto) {
     m_prototypesAreFileScope = p_proto;
@@ -137,9 +150,13 @@ bool MetricOptions::getOutputMetric(const MetricUnitType_e p_metric) const {
     return m_outputMetric[p_metric];
 }
 
-void MetricOptions::setDumpFnMap(const bool p_dump) { m_dumpFnMap = p_dump; }
+void MetricOptions::setDumpFnMap(const bool p_dump) {
+    m_dumpFnMap = p_dump;
+}
 
-bool MetricOptions::getDumpFnMap(void) const { return m_dumpFnMap; }
+bool MetricOptions::getDumpFnMap(void) const {
+    return m_dumpFnMap;
+}
 
 void MetricOptions::setExcludeStdHeaders(const bool p_exclude) {
     m_excludeStdHeaders = p_exclude;
@@ -169,7 +186,9 @@ bool MetricOptions::setOutputFile(const std::string p_fileName) {
     return retVal;
 }
 
-std::ostream &MetricOptions::getOutput(void) const { return *m_outputStream; }
+std::ostream &MetricOptions::getOutput(void) const {
+    return *m_outputStream;
+}
 
 std::string MetricOptions::getOutputFile(void) const {
     return m_outputFileName;
@@ -179,7 +198,9 @@ void MetricOptions::setUsePrefix(const bool p_prefix) {
     m_usePrefix = p_prefix;
 }
 
-bool MetricOptions::getUsePrefix() const { return m_usePrefix; }
+bool MetricOptions::getUsePrefix() const {
+    return m_usePrefix;
+}
 
 void MetricOptions::setLimitsFile(const std::vector<std::string> &p_fileName) {
     m_limitsFileNames = p_fileName;

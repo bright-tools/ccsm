@@ -23,7 +23,8 @@
 
 static const std::set<std::string> knownOperators = {">", "<", "<=", ">="};
 
-LimitLibrary::LimitLibrary() {}
+LimitLibrary::LimitLibrary() {
+}
 
 void LimitLibrary::parseCsvLine(csv::ifstream &p_is) {
     std::string metricName;

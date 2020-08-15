@@ -26,7 +26,8 @@
 #include <string.h>
 
 GlobalFunctionLocator::GlobalFunctionLocator(MetricOptions &p_options)
-    : m_options(p_options) {}
+    : m_options(p_options) {
+}
 
 TranslationUnitFunctionLocator *
 GlobalFunctionLocator::getLocatorFor(const std::string p_fileName) {
@@ -66,7 +67,8 @@ GlobalFunctionLocator::~GlobalFunctionLocator() {
 
 TranslationUnitFunctionLocator::TranslationUnitFunctionLocator(
     MetricOptions &p_options)
-    : m_options(p_options) {}
+    : m_options(p_options) {
+}
 
 void TranslationUnitFunctionLocator::addFunctionLocation(
     const clang::ASTContext *const p_context, const std::string &p_name,

@@ -27,9 +27,11 @@ MetricASTConsumer::MetricASTConsumer(clang::CompilerInstance &CI,
                                      MetricOptions &p_options,
                                      GlobalFunctionLocator *p_fnLocator)
     : m_compilerInstance(CI), m_options(p_options), m_topUnit(p_topUnit),
-      m_fnLocator(p_fnLocator) {}
+      m_fnLocator(p_fnLocator) {
+}
 
-MetricASTConsumer::~MetricASTConsumer(void) {}
+MetricASTConsumer::~MetricASTConsumer(void) {
+}
 
 #include <iostream>
 
@@ -74,9 +76,11 @@ MetricPPConsumer::MetricPPConsumer(MetricUnit *p_topUnit,
                                    GlobalFunctionLocator *p_fnLocator,
                                    const bool p_expanded)
     : clang::PreprocessorFrontendAction(), m_options(p_options),
-      m_topUnit(p_topUnit), m_fnLocator(p_fnLocator), m_expanded(p_expanded) {}
+      m_topUnit(p_topUnit), m_fnLocator(p_fnLocator), m_expanded(p_expanded) {
+}
 
-MetricPPConsumer::~MetricPPConsumer(void) {}
+MetricPPConsumer::~MetricPPConsumer(void) {
+}
 
 void MetricPPConsumer::ExecuteAction() {
     MetricSrcLexer *srcLexer;

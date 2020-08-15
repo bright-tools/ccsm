@@ -85,9 +85,11 @@ MetricVisitor::MetricVisitor(clang::CompilerInstance &p_CI,
                              MetricUnit *p_topUnit, MetricOptions &p_options,
                              TranslationUnitFunctionLocator *p_fnLocator)
     : m_compilerInstance(p_CI), m_astContext(&(p_CI.getASTContext())),
-      m_topUnit(p_topUnit), m_options(p_options), m_fnLocator(p_fnLocator) {}
+      m_topUnit(p_topUnit), m_options(p_options), m_fnLocator(p_fnLocator) {
+}
 
-MetricVisitor::~MetricVisitor(void) {}
+MetricVisitor::~MetricVisitor(void) {
+}
 
 std::string
 MetricVisitor::getDefResolvedFileName(const clang::SourceLocation &loc) {
@@ -773,7 +775,9 @@ bool MetricVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 
 #undef DEBUG_FN_TRACE_OUTOUT
 
-bool MetricVisitor::VisitEnumDecl(clang::EnumDecl *p_enumDecl) { return true; }
+bool MetricVisitor::VisitEnumDecl(clang::EnumDecl *p_enumDecl) {
+    return true;
+}
 
 bool MetricVisitor::VisitRecordDecl(clang::RecordDecl *p_recordDecl) {
     return true;
@@ -832,7 +836,9 @@ void MetricVisitor::HandleLoc(const clang::SourceLocation &p_loc) {
     }
 }
 
-bool MetricVisitor::VisitCastExpr(clang::CastExpr *p_castExp) { return true; }
+bool MetricVisitor::VisitCastExpr(clang::CastExpr *p_castExp) {
+    return true;
+}
 
 bool MetricVisitor::VisitVarDecl(clang::VarDecl *p_varDec) {
     const clang::SourceLocation varLoc = p_varDec->getBeginLoc();

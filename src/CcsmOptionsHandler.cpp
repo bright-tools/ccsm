@@ -411,7 +411,8 @@ void CcsmOptionsHandler::checkCompilerArgs(const char *const exeName) {
 using namespace clang;
 using namespace clang::tooling;
 
-void ccsm_marker(void) {}
+void ccsm_marker(void) {
+}
 
 void CcsmOptionsHandler::analyseCompilerArgs(const char *const exeName) {
     std::string Path = llvm::sys::fs::getMainExecutable(

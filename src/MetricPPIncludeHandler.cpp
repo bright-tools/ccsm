@@ -20,9 +20,11 @@ MetricPPIncludeHandler::MetricPPIncludeHandler(const MetricOptions &p_options,
                                                clang::SourceManager &p_SM,
                                                std::string &p_currentFile)
     : clang::PPCallbacks(), m_options(p_options), m_currentFile(p_currentFile),
-      m_SM(p_SM) {}
+      m_SM(p_SM) {
+}
 
-MetricPPIncludeHandler::~MetricPPIncludeHandler(void) {}
+MetricPPIncludeHandler::~MetricPPIncludeHandler(void) {
+}
 
 void MetricPPIncludeHandler::FileChanged(
     clang::SourceLocation Loc, FileChangeReason Reason,

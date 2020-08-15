@@ -23,9 +23,11 @@ MetricPPCustomer::MetricPPCustomer(MetricUnit *p_topUnit,
                                    std::set<std::string> *p_commentFileList,
                                    MetricOptions &p_options)
     : clang::PPCallbacks(), CommentHandler(), m_topUnit(p_topUnit),
-      m_options(p_options), m_commentFileList(p_commentFileList) {}
+      m_options(p_options), m_commentFileList(p_commentFileList) {
+}
 
-MetricPPCustomer::~MetricPPCustomer() {}
+MetricPPCustomer::~MetricPPCustomer() {
+}
 
 bool MetricPPCustomer::HandleComment(clang::Preprocessor &PP,
                                      clang::SourceRange Loc) {
