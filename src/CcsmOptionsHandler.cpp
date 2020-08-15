@@ -17,7 +17,6 @@
 
 #include "CcsmOptionsHandler.hpp"
 #include "MetricUnit.hpp"
-#include "MetricUtils.hpp"
 #include "ccsm_ver.h"
 
 #include <clang/Basic/Version.h>
