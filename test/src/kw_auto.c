@@ -7,14 +7,12 @@ int y;
 
 #define STORAGE auto
 
-int main( void )
-{
+int main(void) {
     auto int t;
     int z;
     auto int v;
 
-    if( 1 == 1 )
-    {
+    if (1 == 1) {
         auto int j;
     }
 
@@ -23,8 +21,7 @@ int main( void )
 
 int t;
 
-void v( void )
-{
+void v(void) {
     auto int p;
     STORAGE int i;
     STORAGE int q;

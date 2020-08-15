@@ -1,10 +1,11 @@
+// clang-format off
 #include "simple_include.h"
 #include "simple_include.h"
+// clang-format on
 
-int x,z,p;
+int x, z, p;
 
-void dummy( void )
-{
+void dummy(void) {
     /* This function shouldn't be counted due to the
        --exclude-fuction parameter setting */
     int o;
@@ -13,7 +14,6 @@ void dummy( void )
     register int a;
 }
 
-int main( void )
-{
+int main(void) {
     return x;
 }

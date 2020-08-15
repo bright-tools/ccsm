@@ -19,18 +19,23 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-#if !defined( METRIC_FRONTEND_ACTORS_HPP )
-#define       METRIC_FRONTEND_ACTORS_HPP
+#if !defined(METRIC_FRONTEND_ACTORS_HPP)
+#define METRIC_FRONTEND_ACTORS_HPP
 
+#include "FunctionLocator.hpp"
 #include "MetricOptions.hpp"
 #include "MetricUnit.hpp"
-#include "FunctionLocator.hpp"
 
-#include "clang/Frontend/FrontendActions.h"
 #include "clang/Frontend/CompilerInstance.h"
+#include "clang/Frontend/FrontendActions.h"
 #include "clang/Tooling/Tooling.h"
 
-extern clang::tooling::FrontendActionFactory* newPPMetricFrontendActionFactory( MetricOptions& p_options, MetricUnit* p_topUnit, GlobalFunctionLocator* p_srcMap, const bool p_expanded );
-extern clang::tooling::FrontendActionFactory* newASTMetricFrontendActionFactory( MetricOptions& p_options, MetricUnit* p_topUnit, GlobalFunctionLocator* p_srcMap, std::set<std::string>* p_commentFileList );
+extern clang::tooling::FrontendActionFactory *
+newPPMetricFrontendActionFactory(MetricOptions &p_options, MetricUnit *p_topUnit,
+                                 GlobalFunctionLocator *p_srcMap, const bool p_expanded);
+extern clang::tooling::FrontendActionFactory *
+newASTMetricFrontendActionFactory(MetricOptions &p_options, MetricUnit *p_topUnit,
+                                  GlobalFunctionLocator *p_srcMap,
+                                  std::set<std::string> *p_commentFileList);
 
 #endif

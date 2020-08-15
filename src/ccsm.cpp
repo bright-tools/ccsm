@@ -16,85 +16,80 @@
 */
 
 #include "CcsmOptionsHandler.hpp"
-#include "MetricFrontendActors.hpp"
 #include "FunctionLocator.hpp"
-#include "MetricLinkageResolver.hpp"
-#include "MetricDumper.hpp"
 #include "LimitsChecker.hpp"
+#include "MetricDumper.hpp"
+#include "MetricFrontendActors.hpp"
+#include "MetricLinkageResolver.hpp"
 
-#include "clang/Tooling/Tooling.h"
-#include "llvm/Support/Signals.h" 
+#include <clang/Tooling/Tooling.h>
+#include <llvm/Support/Signals.h>
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 
 int main(int argc, const char **argv) {
-	int Result;
-	MetricUnit topUnit(NULL, "Global", METRIC_UNIT_GLOBAL);
-	std::set<std::string> commentFileList;
-	CcsmOptionsHandler OptionsHandler;
+    int Result;
+    MetricUnit topUnit(NULL, "Global", METRIC_UNIT_GLOBAL);
+    std::set<std::string> commentFileList;
+    CcsmOptionsHandler OptionsHandler;
 
-	OptionsHandler.ParseOptions(argc, argv);
-	MetricOptions& metricOptions = *(OptionsHandler.getMetricOptions());
-	if (metricOptions.optionsOk())
-	{
-		GlobalFunctionLocator srcMap(*(OptionsHandler.getMetricOptions()));
+    OptionsHandler.ParseOptions(argc, argv);
+    MetricOptions &metricOptions = *(OptionsHandler.getMetricOptions());
+    if (metricOptions.optionsOk()) {
+        GlobalFunctionLocator srcMap(*(OptionsHandler.getMetricOptions()));
 
-		llvm::sys::PrintStackTraceOnErrorSignal(argv[0]);
+        llvm::sys::PrintStackTraceOnErrorSignal(argv[0]);
 
-		clang::tooling::ClangTool Tool(OptionsHandler.getOptionsParser()->getCompilations(),
-			OptionsHandler.getOptionsParser()->getSourcePathList());
+        clang::tooling::ClangTool Tool(OptionsHandler.getOptionsParser()->getCompilations(),
+                                       OptionsHandler.getOptionsParser()->getSourcePathList());
 
-		// First tool-run to gather metrics from the AST.  This is done separately from the second tool-rum
-		// as different pre-processor options are used
-		Result = Tool.run(newASTMetricFrontendActionFactory(metricOptions, &topUnit, &srcMap, &commentFileList));
+        // First tool-run to gather metrics from the AST.  This is done
+        // separately from the second tool-rum as different pre-processor
+        // options are used
+        Result = Tool.run(
+            newASTMetricFrontendActionFactory(metricOptions, &topUnit, &srcMap, &commentFileList));
 
-		// Success?
-		if (Result == 0)
-		{
-			// Now that all TUs have been processed, try to resolve function references which couldn't be 
-			//  resolved during the processing of individual translation units
-			resolveLinkages(&topUnit);
+        // Success?
+        if (Result == 0) {
+            // Now that all TUs have been processed, try to resolve function
+            // references which couldn't be
+            //  resolved during the processing of individual translation units
+            resolveLinkages(&topUnit);
 
-			// Second tool run to gather metrics from the pre-processor.  This is performed after the AST
-			//  generation as the details of the function locations gathered from the AST are used
-			//  for determining whether or not a function should be included
-			Result = Tool.run(newPPMetricFrontendActionFactory(metricOptions, &topUnit, &srcMap, true));
+            // Second tool run to gather metrics from the pre-processor.  This
+            // is performed after the AST
+            //  generation as the details of the function locations gathered
+            //  from the AST are used for determining whether or not a function
+            //  should be included
+            Result =
+                Tool.run(newPPMetricFrontendActionFactory(metricOptions, &topUnit, &srcMap, true));
 
-			if (Result == 0)
-			{
-				Result = Tool.run(newPPMetricFrontendActionFactory(metricOptions, &topUnit, &srcMap, false));
-			}
+            if (Result == 0) {
+                Result = Tool.run(
+                    newPPMetricFrontendActionFactory(metricOptions, &topUnit, &srcMap, false));
+            }
 
-			// Success?
-			if (Result == 0)
-			{
-				if (metricOptions.getDumpFnMap())
-				{
-					srcMap.dump();
-				}
+            // Success?
+            if (Result == 0) {
+                if (metricOptions.getDumpFnMap()) {
+                    srcMap.dump();
+                }
 
-				MetricDumper::dump(&topUnit, metricOptions);
+                MetricDumper::dump(&topUnit, metricOptions);
 
-				if (metricOptions.getLimitsFiles().size())
-				{
-					LimitsChecker::dump(&topUnit, metricOptions);
-				}
-			}
-			else
-			{
-				std::cerr << "Tool.run returned " << Result << std::endl;
-			}
-		}
-		else
-		{
-			std::cerr << "Tool.run returned " << Result << std::endl;
-		}
-	}
-	else
-	{
-		Result = EXIT_FAILURE;
-	}
+                if (metricOptions.getLimitsFiles().size()) {
+                    LimitsChecker::dump(&topUnit, metricOptions);
+                }
+            } else {
+                std::cerr << "Tool.run returned " << Result << std::endl;
+            }
+        } else {
+            std::cerr << "Tool.run returned " << Result << std::endl;
+        }
+    } else {
+        Result = EXIT_FAILURE;
+    }
 
-	return Result;
+    return Result;
 }
