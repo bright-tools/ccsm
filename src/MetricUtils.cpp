@@ -10,29 +10,46 @@
 
 const SourceFileAndLine_t InvalidSourceAndLine = {false, 0, "", 0};
 
-unsigned getControlDepth(const clang::Stmt *const p_stmt, clang::ASTContext *p_context) {
+bool isStmtAnIfFromElseIf(const clang::Stmt *const p_parentStmt, const clang::Stmt * const p_stmt) {
+    if (p_parentStmt->getStmtClass() == clang::Stmt::IfStmtClass) {
+        const clang::Stmt *elseStmt = static_cast<const clang::IfStmt *>(p_parentStmt)->getElse();
+        if ((elseStmt == p_stmt) && (elseStmt->getStmtClass() == clang::Stmt::IfStmtClass)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+unsigned getControlDepth(const clang::Stmt *const p_stmt, clang::ASTContext *p_context,
+                         const bool p_childIsElseIf) {
     unsigned ret_val = 0;
 
     clang::SourceLocation loc, sloc;
 
     /* Examine all the parents */
     for (const auto &Parent : p_context->getParents(*p_stmt)) {
-        /* Is the parent a Stmt? */
         const clang::Stmt *stmt = Parent.get<clang::Stmt>();
         if (stmt != NULL) {
-            ret_val += getControlDepth(stmt, p_context);
+            ret_val += getControlDepth(stmt, p_context, isStmtAnIfFromElseIf(stmt, p_stmt));
         }
     }
 
     switch (p_stmt->getStmtClass()) {
-        case clang::Stmt::IfStmtClass:
+        case clang::Stmt::IfStmtClass: {
+            /* We don't count "else if"s as increasing the depth, as the original "if" will already
+               have done that */
+            if (!p_childIsElseIf) {
+                ret_val++;
+            }
+        }
+        break;
         case clang::Stmt::SwitchStmtClass:
         case clang::Stmt::DoStmtClass:
         case clang::Stmt::WhileStmtClass:
         case clang::Stmt::ForStmtClass:
             ret_val += 1;
 #if 0
-			std::cout << p_stmt->getStmtClassName() << ": " << ret_val << "\n";
+			std::cout << "getControlDepth : " << p_stmt->getStmtClassName() << ": " << ret_val << "\n";
 #endif
             break;
         default:
