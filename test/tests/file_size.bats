@@ -2,13 +2,13 @@ load test_helper.bash
 
 EXPECTED=$(cat <<EOF
 Global
-Size in bytes: 124
+Size in bytes: 119
 Size in lines: 8
 File: src\file_size.c
 	Size in bytes: 43
 	Size in lines: 3
 File: src\file_size.h
-	Size in bytes: 58
+	Size in bytes: 53
 	Size in lines: 4
 File: src\file_size2.c
 	Size in bytes: 23
