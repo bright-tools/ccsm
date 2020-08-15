@@ -1,7 +1,10 @@
 name: CI
 
 on:
-  pull_request
+#  Disabled for now.  The version of clang-format available in CI gives a significantly different output to
+#   that in clang master, meaning that code formatted with the latest clang tools will not pass CI.
+#
+#  pull_request
 
 jobs:
   clang-format-action:
