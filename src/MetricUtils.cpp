@@ -60,14 +60,7 @@ unsigned getControlDepth(const clang::Stmt *const p_stmt, clang::ASTContext *p_c
 }
 
 extern size_t countNewlines(clang::StringRef &p_buffer) {
-    size_t pos = 0;
-    size_t cnt = 0;
-    size_t npos = p_buffer.npos;
-    while ((pos != p_buffer.npos) && (pos = p_buffer.find('\n', pos)) && (pos != p_buffer.npos)) {
-        cnt++;
-        pos++;
-    }
-    return cnt;
+    return p_buffer.count('\n');
 }
 
 #ifdef _WIN32
