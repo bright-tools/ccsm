@@ -40,6 +40,50 @@ unsigned singleIf(unsigned y) {
     return ret;
 }
 
+void else_ifs(int i){
+    if (i == 1){
+        /* Nesting level 1 */
+    }
+    else if (i == 2){
+        /* Nesting level 1 */
+    }
+    else if (i == 3){
+        /* Nesting level 1 */
+    }
+    else if (i == 4){
+        /* Nesting level 1 */
+    }
+    else if (i == 5){
+        /* Nesting level 1 */
+    }
+}
+
+void else_then_ifs(int i){
+    if (i == 1){
+        /* Nesting level 1 */
+    }
+    else {
+        if (i == 2){
+            /* Nesting level 2 */
+        }
+        else {
+            if (i == 3){
+                /* Nesting level 3 */
+            }
+            else {
+                if (i == 4){
+                    /* Nesting level 4 */
+                }
+                else {
+                    if (i == 5){
+                        /* Nesting level 5 */
+                    }
+                }
+            }
+        }
+    }
+}
+
 unsigned elser(unsigned x, unsigned y, unsigned z) {
     unsigned ret = 0;
     if (x) {

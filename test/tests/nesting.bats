@@ -5,6 +5,10 @@ Global
 File: src\nesting.c
 	Function: elifer
 		Nesting Level: 2
+	Function: else_ifs
+		Nesting Level: 1
+	Function: else_then_ifs
+		Nesting Level: 5
 	Function: elser
 		Nesting Level: 4
 	Function: singleIf
