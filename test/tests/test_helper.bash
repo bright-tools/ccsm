@@ -2,6 +2,19 @@ TEST_SOURCE_DIR=src
 EXCLUDE="--exclude-function=dummy,dummy2"
 GLOBAL_ARGS=${EXCLUDE}
 
+setup() {
+  if [ -z "$CCSM_EXE" ]; then
+    echo "# Please set the environment variable CCSM_EXE to point to the CCSM executable before running tests" >&3
+    assert [ ! -z "$CCSM_EXE" ]
+  elif [ ! -f "$CCSM_EXE" ]; then
+    echo "# Please ensure that CCSM_EXE points to a file" >&3
+    assert [ -f "$CCSM_EXE" ]
+  elif [ ! -x "$CCSM_EXE" ]; then
+    echo "# Please ensure that CCSM_EXE points to an executable file" >&3
+    assert [ -x "$CCSM_EXE" ]
+  fi
+}
+
 CCSM="${CCSM_EXE} ${GLOBAL_ARGS}"
 
 assert_ccsm_output() {
