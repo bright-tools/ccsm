@@ -35,7 +35,7 @@ LLVM_DIR=llvm
 if [ -d $LLVM_DIR ]; then
     git -C $LLVM_DIR pull
 else
-    git clone https://github.com/llvm/llvm-project.git $LLVM_DIR
+    git clone https://github.com/llvm/llvm-project.git $LLVM_DIR --branch release/12.x
 fi
 
 CLANG_DIR=$LLVM_DIR/clang
