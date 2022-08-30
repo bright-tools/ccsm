@@ -243,22 +243,24 @@ void path_020_expected_7(int a, int b) {
     if (a > 10) {
         while (a) {
             if (b == 1) {
-                continue;
+                continue; // path 1
             }
             if (b == 2) {
-                continue;
+                continue; // path 2
             }
             if (b == 3) {
-                continue;
+                continue; // path 3
             }
 
             if (b == 2) {
-                break;
+                break; // can't be reached
             }
 
-            return;
+            return;  // path 4
         }
+        // while not entered: path 5
     }
+    // if not entered: path 6
 }
 
 void path_021_expected_7(int a, int b) {
@@ -537,6 +539,38 @@ void path_040_expected_1(int y) {
     do {
         y++;
     } while (1 - 1);
+}
+
+void path_041_expected_5(int a){
+	while (1) {
+		if (a == 0){
+			break; // 1
+		}
+		if (a == 1){
+			break; // 2
+		}
+		if (a == 2){
+			break; // 3
+		}
+		break;	// 4
+	}
+    // Didn't enter while - 5
+}
+
+void path_042_expected_5(int a){
+	while (1){
+		if (a == 0){
+			continue; // 1
+		}
+		if (a == 1){
+			continue; // 2
+		}
+		if (a == 2){
+			continue; // 3
+		}
+		break;	// 4
+	}
+    // Didn't enter while - 5
 }
 
 int main(int argc, char **argv) {

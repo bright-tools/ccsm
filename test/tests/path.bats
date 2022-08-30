@@ -86,6 +86,10 @@ File: src\paths.c
 		Number of paths through the function: 1
 	Function: path_040_expected_1
 		Number of paths through the function: 1
+	Function: path_041_expected_5
+		Number of paths through the function: 5
+	Function: path_042_expected_5
+		Number of paths through the function: 5
 EOF
 )
 
