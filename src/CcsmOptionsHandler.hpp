@@ -29,7 +29,6 @@
 class CcsmOptionsHandler {
 
   private:
-    clang::tooling::CommonOptionsParser *m_optionsParser = NULL;
     MetricOptions *m_metricOptions = NULL;
     std::set<MetricType_e> m_outputMetrics;
 
@@ -46,19 +45,21 @@ class CcsmOptionsHandler {
      * analysed */
     bool m_usesCpp = false;
 
-    void analyseCompilerArgs(const char *const exeName);
-    void checkCompilerArgs(const char *const exeName);
+    void analyseCompilerArgs(const char *const exeName,
+                             clang::tooling::CommonOptionsParser &optionsParser);
+    void checkCompilerArgs(const char *const exeName, clang::tooling::CommonOptionsParser& optionsParser);
     void processOutputMetricList(void);
 
   public:
     CcsmOptionsHandler();
 
-    void ParseOptions(int argc, const char **const argv);
+    void CcsmOptionsHandler::ParseOptions(const char *const argv, clang::tooling::CommonOptionsParser& optionsParser);
 
     MetricOptions *getMetricOptions() const;
-    clang::tooling::CommonOptionsParser *getOptionsParser() const;
 
     virtual ~CcsmOptionsHandler();
 };
+
+extern llvm::cl::OptionCategory CCSMToolCategory;
 
 #endif

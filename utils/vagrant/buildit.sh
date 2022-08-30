@@ -35,7 +35,7 @@ LLVM_DIR=llvm
 if [ -d $LLVM_DIR ]; then
     git -C $LLVM_DIR pull
 else
-    git clone https://github.com/llvm/llvm-project.git $LLVM_DIR --branch llvmorg-12.0.0
+    git clone https://github.com/llvm/llvm-project.git $LLVM_DIR --branch llvmorg-14.0.6
 fi
 
 CLANG_DIR=$LLVM_DIR/clang

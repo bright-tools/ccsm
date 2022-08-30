@@ -23,6 +23,7 @@
 #include "MetricLinkageResolver.hpp"
 
 #include <clang/Tooling/Tooling.h>
+#include <clang/Tooling/CommonOptionsParser.h>
 #include <llvm/Support/Signals.h>
 
 #include <fstream>
@@ -34,15 +35,23 @@ int main(int argc, const char **argv) {
     std::set<std::string> commentFileList;
     CcsmOptionsHandler OptionsHandler;
 
-    OptionsHandler.ParseOptions(argc, argv);
+    llvm::Expected<clang::tooling::CommonOptionsParser> expectedParser =
+        clang::tooling::CommonOptionsParser::create(argc, argv, CCSMToolCategory);
+    if (!expectedParser) {
+        llvm::errs() << expectedParser.takeError();
+        exit(1);
+    }
+    clang::tooling::CommonOptionsParser& optionsParser = expectedParser.get();
+
+    OptionsHandler.ParseOptions(argv[0], optionsParser);
     MetricOptions &metricOptions = *(OptionsHandler.getMetricOptions());
     if (metricOptions.optionsOk()) {
         GlobalFunctionLocator srcMap(*(OptionsHandler.getMetricOptions()));
 
         llvm::sys::PrintStackTraceOnErrorSignal(argv[0]);
 
-        clang::tooling::ClangTool Tool(OptionsHandler.getOptionsParser()->getCompilations(),
-                                       OptionsHandler.getOptionsParser()->getSourcePathList());
+        clang::tooling::ClangTool Tool(optionsParser.getCompilations(),
+                                       optionsParser.getSourcePathList());
 
         // First tool-run to gather metrics from the AST.  This is done
         // separately from the second tool-rum as different pre-processor
