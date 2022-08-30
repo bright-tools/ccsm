@@ -53,7 +53,7 @@ class CcsmOptionsHandler {
   public:
     CcsmOptionsHandler();
 
-    void CcsmOptionsHandler::ParseOptions(const char *const argv, clang::tooling::CommonOptionsParser& optionsParser);
+    void ParseOptions(const char *const argv, clang::tooling::CommonOptionsParser& optionsParser);
 
     MetricOptions *getMetricOptions() const;
 

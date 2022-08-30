@@ -366,7 +366,7 @@ void ccsm_marker(void) {
 
 void CcsmOptionsHandler::analyseCompilerArgs(const char *const exeName,
                                              clang::tooling::CommonOptionsParser &optionsParser) {
-    std::string Path = llvm::sys::fs::getMainExecutable(exeName, ccsm_marker);
+    std::string Path = llvm::sys::fs::getMainExecutable(exeName, (void*)ccsm_marker);
     std::string TripleStr = llvm::sys::getProcessTriple();
     llvm::Triple T(TripleStr);
 
