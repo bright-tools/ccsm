@@ -253,7 +253,7 @@ void path_020_expected_7(int a, int b) {
             }
 
             if (b == 2) {
-                break; // can't be reached
+                break; // can't be reached, but CCSM can't currently tell - path 7
             }
 
             return;  // path 4
@@ -554,7 +554,7 @@ void path_041_expected_5(int a){
 		}
 		break;	// 4
 	}
-    // Didn't enter while - 5
+    // Didn't enter while - 5 (CCSM can't currently tell that the while is always entered)
 }
 
 void path_042_expected_5(int a){
@@ -570,7 +570,7 @@ void path_042_expected_5(int a){
 		}
 		break;	// 4
 	}
-    // Didn't enter while - 5
+    // Didn't enter while - 5 (CCSM can't currently tell that the while is always entered)
 }
 
 int main(int argc, char **argv) {
