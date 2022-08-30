@@ -1450,7 +1450,7 @@ void MetricVisitor::CountStatements(const clang::Stmt *const p_stmt) {
 }
 
 void MetricVisitor::CountStatements(const clang::Stmt::const_child_range &p_children) {
-    for (clang::Stmt::const_child_iterator cit = begin(p_children); cit != end(p_children); cit++) {
+    for (clang::Stmt::const_child_iterator cit = p_children.begin(); cit != p_children.end(); cit++) {
         if (*cit != NULL) {
             CountStatements(*cit);
         }

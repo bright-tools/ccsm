@@ -40,7 +40,7 @@ static const std::set<std::pair<std::string, std::string>>
                                                                    sizeof metricAliasListData[0]);
 
 // Set up the command line options
-static llvm::cl::OptionCategory CCSMToolCategory("ccsm options");
+llvm::cl::OptionCategory CCSMToolCategory("ccsm options");
 
 static std::vector<std::string> ExcludeFunctionList;
 
@@ -169,7 +169,6 @@ CcsmOptionsHandler::CcsmOptionsHandler() {
 }
 
 CcsmOptionsHandler::~CcsmOptionsHandler() {
-    delete (m_optionsParser);
     delete (m_metricOptions);
 }
 
@@ -224,9 +223,7 @@ void CcsmOptionsHandler::processOutputMetricList() {
     }
 }
 
-void CcsmOptionsHandler::ParseOptions(int argc, const char **const argv) {
-    m_optionsParser = new clang::tooling::CommonOptionsParser(argc, argv, CCSMToolCategory);
-
+void CcsmOptionsHandler::ParseOptions(const char *const argv, clang::tooling::CommonOptionsParser& optionsParser) {
     processOutputMetricList();
 
     m_metricOptions = new MetricOptions(&ExcludeFileList, &ExcludeFunctionList, m_outputMetrics,
@@ -252,15 +249,11 @@ void CcsmOptionsHandler::ParseOptions(int argc, const char **const argv) {
 
     m_metricOptions->setDumpFnMap(DumpFnMap);
 
-    checkCompilerArgs(argv[0]);
+    checkCompilerArgs(argv, optionsParser);
 }
 
 MetricOptions *CcsmOptionsHandler::getMetricOptions() const {
     return m_metricOptions;
-}
-
-clang::tooling::CommonOptionsParser *CcsmOptionsHandler::getOptionsParser() const {
-    return m_optionsParser;
 }
 
 #include "llvm/Support/Path.h"
@@ -321,8 +314,9 @@ const std::set<std::string> cpp_std_headers = {
     sep + "cstddef" + end, sep + "ctime" + end, sep + "cfloat" + end, sep + "csetjmp" + end,
     sep + "cstdint" + end, sep + "cuchar" + end};
 
-void CcsmOptionsHandler::checkCompilerArgs(const char *const exeName) {
-    analyseCompilerArgs(exeName);
+void CcsmOptionsHandler::checkCompilerArgs(const char *const exeName,
+                                           clang::tooling::CommonOptionsParser &optionsParser) {
+    analyseCompilerArgs(exeName, optionsParser);
 
     if (m_usesCpp) {
         std::cerr << "WARNING: Proper support for C++ language constructs is not "
@@ -370,8 +364,9 @@ using namespace clang::tooling;
 void ccsm_marker(void) {
 }
 
-void CcsmOptionsHandler::analyseCompilerArgs(const char *const exeName) {
-    std::string Path = llvm::sys::fs::getMainExecutable(exeName, (void *)(intptr_t)ccsm_marker);
+void CcsmOptionsHandler::analyseCompilerArgs(const char *const exeName,
+                                             clang::tooling::CommonOptionsParser &optionsParser) {
+    std::string Path = llvm::sys::fs::getMainExecutable(exeName, (void*)ccsm_marker);
     std::string TripleStr = llvm::sys::getProcessTriple();
     llvm::Triple T(TripleStr);
 
@@ -380,10 +375,10 @@ void CcsmOptionsHandler::analyseCompilerArgs(const char *const exeName) {
     m_usesC99 = false;
     m_usesC89 = false;
 
-    for (const auto &SourcePath : m_optionsParser->getSourcePathList()) {
+    for (const auto &SourcePath : optionsParser.getSourcePathList()) {
         std::string File(getAbsolutePath(SourcePath));
         std::vector<CompileCommand> CompileCommandsForFile =
-            m_optionsParser->getCompilations().getCompileCommands(File);
+            optionsParser.getCompilations().getCompileCommands(File);
         for (CompileCommand &CompileCommand : CompileCommandsForFile) {
             std::vector<std::string> CommandLine = CompileCommand.CommandLine;
             std::vector<const char *> Args;
