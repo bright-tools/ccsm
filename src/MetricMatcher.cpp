@@ -24,8 +24,6 @@
 #include <llvm/Support/raw_os_ostream.h>
 #include <sstream>
 
-#define DEBUG_FN_TRACE_OUTOUT
-
 #define SOURCE_MANAGER (m_astContext->getSourceManager())
 
 const std::pair<clang::Stmt::StmtClass, MetricType_e> keywordToMetricPairs[] = {
@@ -361,7 +359,7 @@ MetricVisitor::PathResults MetricVisitor::getPathCount(const clang::Stmt *const 
     // TODO: Return this for null, too?
     // TODO: Need to check that there are no GOTOs before doing the path count
 
-#if 1 || defined(DEBUG_FN_TRACE_OUTOUT)
+#if defined(DEBUG_FN_TRACE_OUTOUT)
     std::string blanks(depth, ' ');
     std::cout << blanks << "getPathCount - CONTEXT " << m_currentFileName
               << "::" << m_currentFunctionName << std::endl;
@@ -424,7 +422,7 @@ MetricVisitor::PathResults MetricVisitor::getPathCount(const clang::Stmt *const 
         }
     }
 
-#if 1 || defined(DEBUG_FN_TRACE_OUTOUT)
+#if defined(DEBUG_FN_TRACE_OUTOUT)
     std::cout << blanks << "getPathCount - regular " << ret_val.path_regular << ", return "
               << ret_val.path_return << ", break " << ret_val.path_break << std::endl;
 #endif
