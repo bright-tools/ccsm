@@ -24,6 +24,7 @@
 #define CCSM_OPTIONS_HANDLER_HPP
 
 #include "MetricOptions.hpp"
+#include "StandardHeaders.hpp"
 #include "clang/Tooling/CommonOptionsParser.h"
 
 class CcsmOptionsHandler {
@@ -32,28 +33,22 @@ class CcsmOptionsHandler {
     MetricOptions *m_metricOptions = NULL;
     std::set<MetricType_e> m_outputMetrics;
 
-    /** Indicates whether or not the C89/90 standard is specified for any of the
-     * files to be analysed */
-    bool m_usesC89 = false;
-    /** Indicates whether or not the C11 standard is specified for any of the
-     * files to be analysed */
-    bool m_usesC11 = false;
-    /** Indicates whether or not the C99 standard is specified for any of the
-     * files to be analysed */
-    bool m_usesC99 = false;
-    /** Indicates whether or not C++ is specified for any of the files to be
-     * analysed */
-    bool m_usesCpp = false;
+    /** Indicates whether or not a particular standard is specified for any of the
+     *  files to be analysed */
+    bool m_usesStd[STD_COUNT] = {false};
 
     void analyseCompilerArgs(const char *const exeName,
                              clang::tooling::CommonOptionsParser &optionsParser);
-    void checkCompilerArgs(const char *const exeName, clang::tooling::CommonOptionsParser& optionsParser);
+    void checkCompilerArgs(const char *const exeName,
+                           clang::tooling::CommonOptionsParser &optionsParser);
+    bool addMetricToOutputBasedOnShortnameOrAlias(std::string metricName);
+    void addAllMetricsToOutput(void);
     void processOutputMetricList(void);
 
   public:
     CcsmOptionsHandler();
 
-    void ParseOptions(const char *const argv, clang::tooling::CommonOptionsParser& optionsParser);
+    void ParseOptions(const char *const argv, clang::tooling::CommonOptionsParser &optionsParser);
 
     MetricOptions *getMetricOptions() const;
 

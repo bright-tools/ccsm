@@ -10,7 +10,7 @@
 
 const SourceFileAndLine_t InvalidSourceAndLine = {false, 0, "", 0};
 
-bool isStmtAnIfFromElseIf(const clang::Stmt *const p_parentStmt, const clang::Stmt * const p_stmt) {
+bool isStmtAnIfFromElseIf(const clang::Stmt *const p_parentStmt, const clang::Stmt *const p_stmt) {
     if (p_parentStmt->getStmtClass() == clang::Stmt::IfStmtClass) {
         const clang::Stmt *elseStmt = static_cast<const clang::IfStmt *>(p_parentStmt)->getElse();
         if ((elseStmt == p_stmt) && (elseStmt->getStmtClass() == clang::Stmt::IfStmtClass)) {
@@ -41,8 +41,7 @@ unsigned getControlDepth(const clang::Stmt *const p_stmt, clang::ASTContext *p_c
             if (!p_childIsElseIf) {
                 ret_val++;
             }
-        }
-        break;
+        } break;
         case clang::Stmt::SwitchStmtClass:
         case clang::Stmt::DoStmtClass:
         case clang::Stmt::WhileStmtClass:
