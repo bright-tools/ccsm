@@ -22,8 +22,8 @@
 #include "MetricFrontendActors.hpp"
 #include "MetricLinkageResolver.hpp"
 
-#include <clang/Tooling/Tooling.h>
 #include <clang/Tooling/CommonOptionsParser.h>
+#include <clang/Tooling/Tooling.h>
 #include <llvm/Support/Signals.h>
 
 #include <fstream>
@@ -41,7 +41,7 @@ int main(int argc, const char **argv) {
         llvm::errs() << expectedParser.takeError();
         exit(1);
     }
-    clang::tooling::CommonOptionsParser& optionsParser = expectedParser.get();
+    clang::tooling::CommonOptionsParser &optionsParser = expectedParser.get();
 
     OptionsHandler.ParseOptions(argv[0], optionsParser);
     MetricOptions &metricOptions = *(OptionsHandler.getMetricOptions());

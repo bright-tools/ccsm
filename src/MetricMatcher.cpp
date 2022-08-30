@@ -436,10 +436,10 @@ bool MetricVisitor::isExprConstantAndFalse(const clang::Expr *const p_expr) {
     /* See if the expression resolves to a constant integer & get the value if
      * so
      */
-    if( p_expr->isIntegerConstantExpr( *m_astContext ) ) {
-        llvm::Optional<llvm::APSInt> val = p_expr->getIntegerConstantExpr( *m_astContext );
+    if (p_expr->isIntegerConstantExpr(*m_astContext)) {
+        llvm::Optional<llvm::APSInt> val = p_expr->getIntegerConstantExpr(*m_astContext);
 
-        if ( val.getValue() == 0 ){
+        if (val.getValue() == 0) {
             retVal = true;
         }
     }
@@ -1450,7 +1450,8 @@ void MetricVisitor::CountStatements(const clang::Stmt *const p_stmt) {
 }
 
 void MetricVisitor::CountStatements(const clang::Stmt::const_child_range &p_children) {
-    for (clang::Stmt::const_child_iterator cit = p_children.begin(); cit != p_children.end(); cit++) {
+    for (clang::Stmt::const_child_iterator cit = p_children.begin(); cit != p_children.end();
+         cit++) {
         if (*cit != NULL) {
             CountStatements(*cit);
         }

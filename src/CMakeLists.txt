@@ -38,6 +38,8 @@ set(SOURCES
   LimitsChecker.cpp
   LimitLibrary.hpp
   LimitLibrary.cpp
+  StandardHeaders.hpp
+  StandardHeaders.cpp
 )
 
 add_clang_executable(ccsm ${SOURCES})
