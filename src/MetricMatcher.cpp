@@ -489,7 +489,7 @@ MetricVisitor::PathResults MetricVisitor::getOtherPathCount(const clang::Stmt *c
                        TODO: what about if the label is within a sub-tree? */
                     skipAllSubsequent = true;
                     // all paths until here are return paths
-                    ret_val.path_break = ret_val.path_regular;
+                    ret_val.path_break += ret_val.path_regular;
                     ret_val.path_regular = 0;
                     break;
                 case clang::Stmt::StmtClass::ReturnStmtClass:
