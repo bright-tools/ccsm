@@ -43,11 +43,11 @@ bool MetricPPCustomer::HandleComment(clang::Preprocessor &PP, clang::SourceRange
         (m_commentFileList->find(fileName) == m_commentFileList->end())) {
         std::string C(SM.getCharacterData(Start), SM.getCharacterData(Loc.getEnd()));
 
-        if (m_options.ShouldIncludeFile(fileName)) {
-            MetricUnit *unit = m_topUnit->getSubUnit(fileName, METRIC_UNIT_FILE);
-            unit->increment(METRIC_TYPE_COMMENT_BYTE_COUNT, getFileAndLine(SM, &Start), C.length());
-            unit->increment(METRIC_TYPE_COMMENT_COUNT, getFileAndLine(SM, &Start));
-        }
+        //if (m_options.ShouldIncludeFile(fileName)) {
+        //    MetricUnit *unit = m_topUnit->getSubUnit(fileName, METRIC_UNIT_FILE);
+        //    unit->increment(METRIC_TYPE_COMMENT_BYTE_COUNT, getFileAndLine(SM, &Start), C.length());
+        //    unit->increment(METRIC_TYPE_COMMENT_COUNT, getFileAndLine(SM, &Start));
+        //}
 
         m_commentFile = fileName;
         m_commentFileList->insert(fileName);

@@ -15,7 +15,6 @@
 */
 
 #include "MetricSrcExpandedLexer.hpp"
-#include "MetricPPIncludeHandler.hpp"
 #include "MetricUtils.hpp"
 #include "clang/AST/ASTContext.h"
 #include "clang/Lex/Preprocessor.h"
@@ -221,7 +220,8 @@ void MetricSrcExpandedLexer::ProcessToken(clang::Token &p_token) {
             m_currentUnit->increment(METRIC_TYPE_STRING_LITERALS, fileAndLineLoc);
             break;
         case clang::tok::comment:
-            /* TODO */
+            m_currentUnit->increment(METRIC_TYPE_COMMENT_COUNT, fileAndLineLoc, 1);
+            m_currentUnit->increment(METRIC_TYPE_COMMENT_BYTE_COUNT, fileAndLineLoc, tok_len);
             break;
         case clang::tok::eof:
             /* Not interested in registering end-of-file */

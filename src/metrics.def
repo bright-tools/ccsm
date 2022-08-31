@@ -170,10 +170,10 @@ METRIC( METRIC_TYPE_STATEMENTS,                               "STMT_CNT",       
 METRIC( METRIC_TYPE_TOKEN_STATEMENTS,                         "RAW_STMT_CNT",                   "Statement count (raw source)",						           true,  true,  true,  true,  true,       false,     true,         1,        "Number of statements in the code before pre-processing" )
 METRIC_ALIAS( "RAW_STMT_CNT", "HIS_STMT" )
 
-METRIC( METRIC_TYPE_HIS_COMMENT_DENSITY,                      "COMMENT_HIS_COMF",               "Comment density",									           true,  true,  false, false, true,       false,     false,     1000,        "Relationship of the number of comments to the number of statements, with range 0-1.  HIS metric." )
+METRIC( METRIC_TYPE_HIS_COMMENT_DENSITY,                      "COMMENT_HIS_COMF",               "Comment density",                                             true,  true,  true, false, true,       false,     false,     1000,        "Relationship of the number of comments to the number of statements, with range 0-1.  HIS metric." )
 METRIC_ALIAS( "COMMENT_HIS_COMF", "HIS_COMF" )
-METRIC( METRIC_TYPE_COMMENT_BYTE_COUNT,                       "COMMENT_BYTE_CNT",               "Comments in bytes",								           true,  true,  false, false, true,       false,     false,        1,        "Counts the total number of bytes which are used in comments.  Note that --exclude-function does not have any effect on this metric." )
-METRIC( METRIC_TYPE_COMMENT_COUNT,                            "COMMENT_CNT",                    "Comment count",									           true,  true,  false, false, true,       false,     false,        1,        "Counts the total number of comments.  Note that --exclude-function does not have any effect on this metric." )
+METRIC( METRIC_TYPE_COMMENT_BYTE_COUNT,                       "COMMENT_BYTE_CNT",               "Comments in bytes",                                           true,  true,  true, false, true,       false,     true,         1,        "Counts the total number of bytes which are used in comments.  Note that --exclude-function does not have any effect on this metric." )
+METRIC( METRIC_TYPE_COMMENT_COUNT,                            "COMMENT_CNT",                    "Comment count",                                               true,  true,  true, false, true,       false,     true,         1,        "Counts the total number of comments.  Note that --exclude-function does not have any effect on this metric." )
 
 
 METRIC( METRIC_TYPE_CYCLOMATIC,                               "MCCABE",                         "McCabe complexity",							               false, false, true,  true,  true,       false,     false,        1,        "" )

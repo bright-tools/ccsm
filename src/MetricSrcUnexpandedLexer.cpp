@@ -15,7 +15,6 @@
 */
 
 #include "MetricSrcUnexpandedLexer.hpp"
-#include "MetricPPIncludeHandler.hpp"
 #include "MetricUtils.hpp"
 #include "clang/AST/ASTContext.h"
 #include "clang/Lex/Preprocessor.h"
@@ -242,7 +241,7 @@ void MetricSrcUnexpandedLexer::ProcessToken(clang::Token &p_token) {
         case clang::tok::semi:
             break;
         case clang::tok::comment:
-            /* TODO */
+            /* Comments are counted by the expanded lexer */
             break;
         case clang::tok::eof:
             /* Not interested in registering end-of-file */

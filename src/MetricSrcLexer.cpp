@@ -15,7 +15,6 @@
 */
 
 #include "MetricSrcLexer.hpp"
-#include "MetricPPIncludeHandler.hpp"
 #include "MetricUnit.hpp"
 #include "MetricUtils.hpp"
 #include "clang/AST/ASTContext.h"
@@ -37,10 +36,11 @@ void MetricSrcLexer::LexSources(clang::CompilerInstance &p_ci,
     clang::Preprocessor &PP = p_ci.getPreprocessor();
     clang::SourceManager &SM = p_ci.getSourceManager();
 
+    m_currentFileName = SM.getFileEntryForID(SM.getMainFileID())->getName().str().c_str();
+
     if (m_options.getDumpTokens()) {
         m_options.getOutput() << std::endl
-                              << "Start lexing translation unit: "
-                              << SM.getFileEntryForID(SM.getMainFileID())->getName().str()
+                              << "Start lexing translation unit: " << m_currentFileName
                               << std::endl;
     }
 
@@ -49,15 +49,17 @@ void MetricSrcLexer::LexSources(clang::CompilerInstance &p_ci,
     m_lastToken.setKind(clang::tok::eof);
     PP.EnterMainSourceFile();
     PP.SetCommentRetentionState(true, true);
-    PP.addPPCallbacks(std::make_unique<MetricPPIncludeHandler>(m_options, SM, m_currentFileName));
     clang::SourceLocation fnStart;
     clang::SourceLocation fnEnd;
-    m_currentFileName = SM.getFileEntryForID(SM.getMainFileID())->getName().str();
     MetricUnit *fileUnit = NULL;
+    bool isFirstPass = true;
 
     do {
+
         clang::SourceLocation tokenLoc;
         bool shouldLexToken = true;
+
+        const std::string originalFileName = m_currentFileName;
 
         PP.Lex(result);
 
@@ -68,20 +70,22 @@ void MetricSrcLexer::LexSources(clang::CompilerInstance &p_ci,
             tokenLoc = m_compilerInstance.getSourceManager().getFileLoc(tokenLoc);
         }
 
-        std::string fileName = m_currentFileName;
+        m_currentFileName = SM.getFileEntryForID(SM.getFileID(tokenLoc))->getName().str().c_str();
 
         // TODO: Need to differentiate between "non-function" and "whole-file"
         // level counts - e.g.
         //  unique numerical constants that aren't in functions and unique
         //  numerical constants across the whole file
-        if (m_options.ShouldIncludeFile(fileName)) {
-            if (!m_options.isDefFile(fileName)) {
-                m_currentFileName = fileName;
+        if (m_options.ShouldIncludeFile(m_currentFileName)) {
+         
+            if (m_options.isDefFile(m_currentFileName)) {
+                m_currentFileName = originalFileName;
             }
             fileUnit = m_topUnit->getSubUnit(m_currentFileName, METRIC_UNIT_FILE);
 
             // Not lex'd this file yet?
             if (!fileUnit->hasBeenProcessed(getLexType())) {
+
                 // Check to see if we need to do a new function name lookup
                 if ((m_currentFunctionName == "") ||
                     (tokenLoc.getRawEncoding() > fnEnd.getRawEncoding()) ||
