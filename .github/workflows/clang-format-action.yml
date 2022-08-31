@@ -10,3 +10,5 @@ jobs:
       - uses: actions/checkout@v2
       - name: clang-format-action
         uses: bright-tools/clang-format-action@master
+        with:
+          clangversion: 12
