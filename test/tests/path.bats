@@ -71,7 +71,7 @@ File: src\paths.c
 	Function: path_032_expected_1
 		Number of paths through the function: 1
 	Function: path_033_expected_2
-		Number of paths through the function: 1
+		Number of paths through the function: 2
 	Function: path_034_expected_2
 		Number of paths through the function: 2
 	Function: path_035_expected_2
