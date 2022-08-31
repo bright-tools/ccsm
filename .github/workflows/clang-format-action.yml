@@ -1,15 +1,11 @@
 name: CI
 
-on:
-#  Disabled for now.  The version of clang-format available in CI gives a significantly different output to
-#   that in clang master, meaning that code formatted with the latest clang tools will not pass CI.
-#
-#  pull_request
+on: pull_request
 
 jobs:
   clang-format-action:
     name: clang-format-action
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - name: clang-format-action
