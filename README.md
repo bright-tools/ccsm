@@ -23,6 +23,7 @@ all files.
 CCSM is also able to check metrics against specified limits and output a warning
 in the case that the limit is not adhered to.
 
+* [Quick Start](example/README.md)
 * [Usage information (including command line parameters)](docs/usage.md)
 * [Example output](docs/example_output.md)
 * [Details of metrics](docs/metrics_details.md)
