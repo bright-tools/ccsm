@@ -154,11 +154,6 @@ static llvm::cl::list<std::string>
                llvm::cl::CommaSeparated, llvm::cl::ZeroOrMore, llvm::cl::value_desc("filename"),
                llvm::cl::cat(CCSMToolCategory));
 
-static llvm::cl::opt<bool>
-    UseConditionAnalysis("enable-condition-analysis",
-                         llvm::cl::desc("Enable condition analysis for path counting"),
-                         llvm::cl::init(false), llvm::cl::cat(CCSMToolCategory));
-
 static llvm::cl::extrahelp MoreHelp("\nVersion: " GEN_VER_VERSION_STRING);
 
 static void PrintVersion(llvm::raw_ostream &OS) {
@@ -253,7 +248,6 @@ void CcsmOptionsHandler::ParseOptions(const char *const argv,
     m_metricOptions->setOutputFile(OutputToFile);
     m_metricOptions->setUsePrefix(PrefixFunctionName);
     m_metricOptions->setLimitWarningOutputFormat(OutputLimitWarnings);
-    m_metricOptions->setUseConditionAnalysis(UseConditionAnalysis);
 
     m_metricOptions->setOutputMetric(METRIC_UNIT_METHOD, !NoMethod);
     m_metricOptions->setOutputMetric(METRIC_UNIT_FUNCTION, !NoFunction);
