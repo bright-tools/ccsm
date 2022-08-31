@@ -59,7 +59,6 @@ class MetricOptions {
     bool m_useAbsoluteFileNames = false;
     bool m_dumpFnMap = false;
     bool m_excludeStdHeaders = false;
-    bool m_useConditionAnalysis = false;
     MetricLimitsFormat_e m_limitWarningOutput = METRIC_LIMITS_FORMAT_DEFAULT;
     MetricDumpFormat_e m_outputFormat = METRIC_DUMP_FORMAT_TREE;
     bool m_outputMetric[METRIC_UNIT_MAX];
@@ -109,8 +108,6 @@ class MetricOptions {
     bool optionsOk(void) const;
     void setUsePrefix(const bool p_prefix);
     bool getUsePrefix() const;
-    void setUseConditionAnalysis(const bool p_useConditionAnalysis);
-    bool getUseConditionAnalysis() const;
     void setLimitWarningOutputFormat(const MetricLimitsFormat_e p_format);
     MetricLimitsFormat_e getLimitWarningOutputFormat(void) const;
 };
