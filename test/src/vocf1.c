@@ -11,26 +11,26 @@ void empty(void) {
 
 inline int storage(void) /* Don't count function declaration part     */
 {                        /*                                           */
-    typedef int p;  /* HALSTEAD_OPERATOR_UNIQUE_CNT:  1 - typedef         */
-                    /* HALSTEAD_OPERATOR_CNT:         1 - typedef         */
-                    /* HALSTEAD_OPERAND_UNIQUE_CNT:   2 - int, p          */
-                    /* HALSTEAD_OPERAND_CNT:          2 - int, p          */
-    auto int x;     /* HALSTEAD_OPERATOR_UNIQUE_CNT:  2 - auto            */
-                    /* HALSTEAD_OPERATOR_CNT:         2 - auto            */
-                    /* HALSTEAD_OPERAND_UNIQUE_CNT:   3 - x               */
-                    /* HALSTEAD_OPERAND_CNT:          4 - int, x          */
-    extern int y;   /* HALSTEAD_OPERATOR_UNIQUE_CNT:  3 - extern          */
-                    /* HALSTEAD_OPERATOR_CNT:         3 - extern          */
-                    /* HALSTEAD_OPERAND_UNIQUE_CNT:   4 - y               */
-                    /* HALSTEAD_OPERAND_CNT:          6 - int, y          */
-    register int t; /* HALSTEAD_OPERATOR_UNIQUE_CNT:  4 - register        */
-                    /* HALSTEAD_OPERATOR_CNT:         4 - register        */
-                    /* HALSTEAD_OPERAND_UNIQUE_CNT:   5 - t               */
-                    /* HALSTEAD_OPERAND_CNT:          8 - int, t          */
-    static int l;   /* HALSTEAD_OPERATOR_UNIQUE_CNT:  5 - static          */
-                    /* HALSTEAD_OPERATOR_CNT:         5 - static          */
-                    /* HALSTEAD_OPERAND_UNIQUE_CNT:   6 - l               */
-                    /* HALSTEAD_OPERAND_CNT:         10 - int, l          */
+    typedef int p;       /* HALSTEAD_OPERATOR_UNIQUE_CNT:  1 - typedef         */
+                         /* HALSTEAD_OPERATOR_CNT:         1 - typedef         */
+                         /* HALSTEAD_OPERAND_UNIQUE_CNT:   2 - int, p          */
+                         /* HALSTEAD_OPERAND_CNT:          2 - int, p          */
+    auto int x;          /* HALSTEAD_OPERATOR_UNIQUE_CNT:  2 - auto            */
+                         /* HALSTEAD_OPERATOR_CNT:         2 - auto            */
+                         /* HALSTEAD_OPERAND_UNIQUE_CNT:   3 - x               */
+                         /* HALSTEAD_OPERAND_CNT:          4 - int, x          */
+    extern int y;        /* HALSTEAD_OPERATOR_UNIQUE_CNT:  3 - extern          */
+                         /* HALSTEAD_OPERATOR_CNT:         3 - extern          */
+                         /* HALSTEAD_OPERAND_UNIQUE_CNT:   4 - y               */
+                         /* HALSTEAD_OPERAND_CNT:          6 - int, y          */
+    register int t;      /* HALSTEAD_OPERATOR_UNIQUE_CNT:  4 - register        */
+                         /* HALSTEAD_OPERATOR_CNT:         4 - register        */
+                         /* HALSTEAD_OPERAND_UNIQUE_CNT:   5 - t               */
+                         /* HALSTEAD_OPERAND_CNT:          8 - int, t          */
+    static int l;        /* HALSTEAD_OPERATOR_UNIQUE_CNT:  5 - static          */
+                         /* HALSTEAD_OPERATOR_CNT:         5 - static          */
+                         /* HALSTEAD_OPERAND_UNIQUE_CNT:   6 - l               */
+                         /* HALSTEAD_OPERAND_CNT:         10 - int, l          */
 }
 
 int qual(void)      /* Don't count function declaration part              */
