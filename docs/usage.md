@@ -90,3 +90,36 @@ or
 For example
 
     --output-metrics=FILE_CNT,RAW_KW.*
+
+Condition Analysis During Path Counting
+---------------------------------------
+
+The `--enable-condition-analysis` enables a simple form of condition analysis when
+computing path counts.  By default, the following code would produce a path count of
+2:
+
+```c
+if (0) {
+    ...
+} else {
+    ...
+}
+```
+
+as the code, as written, contains two paths.  However based on the condition, the first
+path can never be followed so the actual number of executable paths is 1.  Enabling
+condition analysis will result in a simple analysis of the conditions associated with
+`if` and `while` statements to determine whether such paths are actually executable or
+not; in the case that they aren't, they won't be included in the path count.
+
+Please note that the condition analysis is highly rudimentary.  It cannot, for example
+recognise that situations such as:
+
+```c
+if (0 == a) {
+
+} else if (0 == a) {
+
+}
+```
+contain duplicate conditions (which reduce the number of truly executable paths).
