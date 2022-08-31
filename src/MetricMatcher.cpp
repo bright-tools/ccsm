@@ -24,7 +24,6 @@
 #include <llvm/Support/raw_os_ostream.h>
 #include <sstream>
 
-#define DEBUG_FN_TRACE_OUTOUT
 #define SOURCE_MANAGER (m_astContext->getSourceManager())
 
 const std::pair<clang::Stmt::StmtClass, MetricType_e> keywordToMetricPairs[] = {
