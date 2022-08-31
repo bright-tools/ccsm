@@ -215,3 +215,11 @@ void MetricOptions::setLimitWarningOutputFormat(const MetricLimitsFormat_e p_for
 MetricLimitsFormat_e MetricOptions::getLimitWarningOutputFormat(void) const {
     return m_limitWarningOutput;
 }
+
+void MetricOptions::setUseConditionAnalysis(const bool p_useConditionAnalysis) {
+    m_useConditionAnalysis = p_useConditionAnalysis;
+}
+
+bool MetricOptions::getUseConditionAnalysis() const {
+    return m_useConditionAnalysis;
+}
