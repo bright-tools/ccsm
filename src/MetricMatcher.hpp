@@ -88,6 +88,13 @@ class MetricVisitor : public clang::RecursiveASTVisitor<MetricVisitor> {
     void CountStatements(const clang::Stmt::const_child_range &p_children);
     void CalcFnLineCnt(clang::FunctionDecl *func);
 
+    /** Try to determine whether the passed Expression evaluates to a constant
+     and if that constant is equivelent to false */
+    bool isExprConstantAndFalse(const clang::Expr *const p_expr);
+    bool isExprConstantAndTrue(const clang::Expr *const p_expr);
+    bool isExprConstantAndWithExpectedValue(const clang::Expr *const p_expr,
+                                            const bool expectedValue);
+
   public:
     explicit MetricVisitor(clang::CompilerInstance &p_CI, MetricUnit *p_topUnit,
                            MetricOptions &p_options,
@@ -119,10 +126,6 @@ class MetricVisitor : public clang::RecursiveASTVisitor<MetricVisitor> {
     virtual bool TraverseStmt(clang::Stmt *p_stmt);
     virtual bool VisitEnumDecl(clang::EnumDecl *p_enumDecl);
     virtual bool VisitCastExpr(clang::CastExpr *p_castExp);
-
-    /** Try to determine whether the passed Expression evaluates to a constant
-         and if that constant is equivelent to false */
-    bool isExprConstantAndFalse(const clang::Expr *const p_expr);
 
 #if 0
 	void dump( std::ostream& out, const bool p_output[ METRIC_UNIT_MAX ], const MetricDumpFormat_e p_fmt = METRIC_DUMP_FORMAT_TREE );

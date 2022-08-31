@@ -144,11 +144,9 @@ MetricVisitor::PathResults MetricVisitor::getSwitchPathCount(const clang::Switch
     MetricVisitor::PathResults currCase = {0, 0, 0};
 
     // If the switch is based on an enum and all enum values are covered then
-    // effectively there should be no need for
-    //  a default
+    // effectively there should be no need for a default
     // TODO: Not necessarily true - just because an enum is being used it does
-    // not stop other values
-    //  being assigned to the variable
+    // not stop other values being assigned to the variable
     bool hasDefault = p_stmt->isAllEnumCasesCovered();
 
 #if defined(DEBUG_FN_TRACE_OUTOUT)
@@ -227,8 +225,7 @@ MetricVisitor::PathResults MetricVisitor::getSwitchPathCount(const clang::Switch
         currCase.path_break += currCase.path_regular * sub_count.path_break;
         currCase.path_regular *= sub_count.path_regular;
 
-        // handle case that statement has no regular paths (only break, or
-        // return)
+        // handle case that statement has no regular paths (only break, or return)
         // -> case block complete
         if (sub_count.path_regular == 0) {
 
@@ -306,19 +303,27 @@ MetricVisitor::PathResults MetricVisitor::getIfPathCount(const clang::IfStmt *co
 #endif
 
     if (ifStmt != nullptr) {
+        bool isBlockKnownEntered = false;
 
         /* Loops across 'if', 'else if' and 'else' constructs */
-        while (ifStmt != nullptr) {
+        while (!isBlockKnownEntered && (ifStmt != nullptr)) {
+
             MetricVisitor::PathResults thenCount = {1, 0, 0};
             /* Default to one gives an count for an implicit else block in the
              * case that there is not one in the code */
             MetricVisitor::PathResults elseCount = {1, 0, 0};
 
-            /* Get the path count for the 'then' block */
-            thenCount = getPathCount(ifStmt->getThen(), depth);
+            if (isExprConstantAndFalse(ifStmt->getCond())) {
+                thenCount.path_regular = 0;
+            } else {
+                /* Get the path count for the 'then' block */
+                thenCount = getPathCount(ifStmt->getThen(), depth);
+            }
 
-            /* Is there an else block? */
-            if (ifStmt->getElse() != nullptr) {
+            if (isExprConstantAndTrue(ifStmt->getCond())) {
+                isBlockKnownEntered = true;
+                elseCount.path_regular = 0;
+            } else if (ifStmt->getElse() != nullptr) {
 #if defined(DEBUG_FN_TRACE_OUTOUT)
                 std::cout << blanks << "getIfPathCount - Else is "
                           << ifStmt->getElse()->getStmtClassName() << std::endl;
@@ -387,14 +392,19 @@ MetricVisitor::PathResults MetricVisitor::getPathCount(const clang::Stmt *const 
                 ret_val =
                     getSwitchPathCount(static_cast<const clang::SwitchStmt *>(p_stmt), thisDepth);
                 break;
-            case clang::Stmt::StmtClass::WhileStmtClass:
-                if (!isExprConstantAndFalse(
-                        static_cast<const clang::WhileStmt *>(p_stmt)->getCond())) {
+            case clang::Stmt::StmtClass::WhileStmtClass: {
+                const clang::Expr *whileStmtCond =
+                    static_cast<const clang::WhileStmt *>(p_stmt)->getCond();
+                if (!isExprConstantAndFalse(whileStmtCond)) {
                     ret_val = getPathCount(
                         (static_cast<const clang::WhileStmt *>(p_stmt)->getBody()), thisDepth);
-                    ret_val.path_regular += ret_val.path_break + 1;
+                    ret_val.path_regular += ret_val.path_break;
+                    if (!isExprConstantAndTrue(whileStmtCond)) {
+                        /* Path where while isn't entered */
+                        ret_val.path_regular += 1;
+                    }
                 }
-                break;
+            } break;
             case clang::Stmt::StmtClass::ForStmtClass:
                 ret_val = getPathCount((static_cast<const clang::ForStmt *>(p_stmt)->getBody()),
                                        thisDepth);
@@ -403,12 +413,6 @@ MetricVisitor::PathResults MetricVisitor::getPathCount(const clang::Stmt *const 
             case clang::Stmt::StmtClass::DoStmtClass:
                 ret_val = getPathCount((static_cast<const clang::DoStmt *>(p_stmt)->getBody()),
                                        thisDepth);
-                /* If the condition is constant and false, this isn't a junction
-                 * point, so don't increase the path count */
-                if (!isExprConstantAndFalse(
-                        static_cast<const clang::DoStmt *>(p_stmt)->getCond())) {
-                    ret_val.path_regular += ret_val.path_break + 1;
-                }
                 break;
             case clang::Stmt::StmtClass::ReturnStmtClass:
                 IncrementMetric(m_currentUnit, METRIC_TYPE_RETURNPOINTS, &startLoc);
@@ -439,16 +443,25 @@ MetricVisitor::PathResults MetricVisitor::getPathCount(const clang::Stmt *const 
     return ret_val;
 }
 
+bool MetricVisitor::isExprConstantAndTrue(const clang::Expr *const p_expr) {
+    return isExprConstantAndWithExpectedValue(p_expr, true);
+}
+
 bool MetricVisitor::isExprConstantAndFalse(const clang::Expr *const p_expr) {
+    return isExprConstantAndWithExpectedValue(p_expr, false);
+}
+
+bool MetricVisitor::isExprConstantAndWithExpectedValue(const clang::Expr *const p_expr,
+                                                       const bool expectedValue) {
     bool retVal = false;
 
-    /* See if the expression resolves to a constant integer & get the value if
-     * so
-     */
-    if (p_expr->isIntegerConstantExpr(*m_astContext)) {
+    /* See if the expression resolves to a constant integer & get the value if so */
+    if (m_options.getUseConditionAnalysis() && p_expr->isIntegerConstantExpr(*m_astContext)) {
         llvm::Optional<llvm::APSInt> val = p_expr->getIntegerConstantExpr(*m_astContext);
 
-        if (val.getValue() == 0) {
+        const bool isValueZero = (val.getValue() == 0);
+
+        if ((!expectedValue && isValueZero) || (expectedValue && !isValueZero)) {
             retVal = true;
         }
     }
