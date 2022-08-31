@@ -155,11 +155,20 @@ MetricVisitor::PathResults MetricVisitor::getSwitchPathCount(const clang::Switch
     std::string blanks(depth, ' ');
 #endif
 
+    const clang::Stmt* childCollection;
+
+    if (clang::Stmt::StmtClass::CompoundStmtClass == p_stmt->getBody()->getStmtClass()) {
+        childCollection = p_stmt->getBody();
+    } else {
+        /* If the body isn't a compound statement, then getBody() gives us a list of statements which is incomplete */
+        childCollection = p_stmt;
+    }
+
     // iterate over all statements incl. case/break/default
-    const clang::Stmt *compound = p_stmt->getBody();
     bool case_complete = true;
-    for (clang::Stmt::const_child_iterator it = compound->child_begin();
-         it != compound->child_end(); it++) {
+    for (clang::Stmt::const_child_iterator it = childCollection->child_begin();
+         it != childCollection->child_end();
+         it++) {
         const clang::Stmt *stmt = (*it);
 
 #if defined(DEBUG_FN_TRACE_OUTOUT)

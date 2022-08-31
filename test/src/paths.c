@@ -446,7 +446,6 @@ int path_032_expected_1(int y) {
     return x;
 }
 
-/* TODO: This function doesn't give the expected test result */
 int path_033_expected_2(int y) {
     int x = 0;
     switch (y)
