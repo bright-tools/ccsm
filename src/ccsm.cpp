@@ -32,7 +32,6 @@
 int main(int argc, const char **argv) {
     int Result;
     MetricUnit topUnit(NULL, "Global", METRIC_UNIT_GLOBAL);
-    std::set<std::string> commentFileList;
     CcsmOptionsHandler OptionsHandler;
 
     llvm::Expected<clang::tooling::CommonOptionsParser> expectedParser =
@@ -57,7 +56,7 @@ int main(int argc, const char **argv) {
         // separately from the second tool-rum as different pre-processor
         // options are used
         Result = Tool.run(
-            newASTMetricFrontendActionFactory(metricOptions, &topUnit, &srcMap, &commentFileList));
+            newASTMetricFrontendActionFactory(metricOptions, &topUnit, &srcMap));
 
         // Success?
         if (Result == 0) {

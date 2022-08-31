@@ -16,8 +16,6 @@ set(SOURCES
   MetricDumper.cpp
   MetricOptions.hpp
   MetricOptions.cpp
-  MetricPPCustomer.hpp
-  MetricPPCustomer.cpp
   MetricASTConsumer.hpp
   MetricASTConsumer.cpp
   MetricSrcLexer.cpp

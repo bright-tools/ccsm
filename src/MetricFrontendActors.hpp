@@ -35,7 +35,6 @@ newPPMetricFrontendActionFactory(MetricOptions &p_options, MetricUnit *p_topUnit
                                  GlobalFunctionLocator *p_srcMap, const bool p_expanded);
 extern clang::tooling::FrontendActionFactory *
 newASTMetricFrontendActionFactory(MetricOptions &p_options, MetricUnit *p_topUnit,
-                                  GlobalFunctionLocator *p_srcMap,
-                                  std::set<std::string> *p_commentFileList);
+                                  GlobalFunctionLocator *p_srcMap);
 
 #endif
