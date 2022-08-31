@@ -4,7 +4,7 @@ void path_switch_001_expected_3(int a) {
             break; // Path 1a
         case 1:
             break; // Path 1b
-        // Path 1c - no cases executed
+            // Path 1c - no cases executed
     }
 
     // Summary: Paths = [1a, 1b, 1c] = 3

@@ -12,34 +12,31 @@ void path_while_002_expected_1(int y) {
     } while (1 - 1);
 }
 
-void path_while_003_expected_2_raw_1ca()
-{
+void path_while_003_expected_2_raw_1ca() {
     while (0) {
     }
 }
 
-void path_while_004_expected_3(int a, int b)
-{
+void path_while_004_expected_3(int a, int b) {
     while (a) {
         // Path 1a
         while (b) {
             // Path 2a
         }
-        // Path 2b - while not entered 
+        // Path 2b - while not entered
     }
     // Path 1b - while not entered
 
     /* Summary: paths = [1a2a, 1a2b, 1b] = 3 */
 }
 
-void path_while_005_expected_3raw_1ca(int a, int b)
-{
+void path_while_005_expected_3raw_1ca(int a, int b) {
     while (0) {
         // Path 1a
         while (b) {
             // Path 2a
         }
-        // Path 2b - while not entered 
+        // Path 2b - while not entered
     }
     // Path 1b - while not entered
 
@@ -47,14 +44,13 @@ void path_while_005_expected_3raw_1ca(int a, int b)
     /*          condition analysis paths = [1b] = 1 */
 }
 
-void path_while_006_expected_3raw_2ca(int a, int b)
-{
+void path_while_006_expected_3raw_2ca(int a, int b) {
     while (1) {
         // Path 1a
         while (b) {
             // Path 2a
         }
-        // Path 2b - while not entered 
+        // Path 2b - while not entered
     }
     // Path 1b - while not entered
 
@@ -74,15 +70,14 @@ void path_while_007_expected_2(int y) {
     /* Summary: raw paths = [1a2a, 1a2b] = 2 */
 }
 
-int path_while_008_expected_1(void)
-{
+int path_while_008_expected_1(void) {
     do {
         // Path 1a
-    } while(0);
+    } while (0);
 
     do {
         // Path 1a
-    } while(0);
+    } while (0);
 }
 
 int path_while_009_expected_3raw_1ca(void) {
@@ -98,8 +93,7 @@ int path_while_009_expected_3raw_1ca(void) {
     while (0) {
         /* This is technically unreachable */
         unsigned a;
-        while (a)
-        {
+        while (a) {
             // Path 2a
         }
         // Path 2b - while not entered

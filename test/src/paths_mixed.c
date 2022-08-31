@@ -132,7 +132,7 @@ void path_mixed_010_expected_7(int a, int b) {
                 break; // can't be reached
             }
 
-            return;  // path 4
+            return; // path 4
         }
         // while not entered: path 5
     }
@@ -320,26 +320,26 @@ int path_mixed_020_expected_2(int y) {
     return x;
 }
 
-#define NEST_MACRO(x, y, z)                                                    \
-    do {                                                                       \
-        if (x) {                                                               \
-            if (y) {                                                           \
-                z = 0;                                                         \
-            }                                                                  \
-        }                                                                      \
+#define NEST_MACRO(x, y, z)                                                                        \
+    do {                                                                                           \
+        if (x) {                                                                                   \
+            if (y) {                                                                               \
+                z = 0;                                                                             \
+            }                                                                                      \
+        }                                                                                          \
     } while (0)
 
 int path_mixed_021_expected_3(int y) {
     unsigned x = 0;
 
-    NEST_MACRO(y, y+1, x);
+    NEST_MACRO(y, y + 1, x);
     return x;
 }
 
 void path_mixed_022_expected_2(int y) {
     do {
         if (y) {
-            y++;  // Path 1
+            y++; // Path 1
         }
         // Path 2 - implicit else
     } while (0);
@@ -354,50 +354,50 @@ void path_mixed_023_expected_3raw_1ca(int y) {
     // Path 1 - while block is never entered
 }
 
-void path_mixed_024_expected_5raw_4ca(int a){
-	while (1) {
-		if (a == 0){
-			break; // 1
-		}
-		if (a == 1){
-			break; // 2
-		}
-		if (a == 2){
-			break; // 3
-		}
-		break;	// 4
-	}
+void path_mixed_024_expected_5raw_4ca(int a) {
+    while (1) {
+        if (a == 0) {
+            break; // 1
+        }
+        if (a == 1) {
+            break; // 2
+        }
+        if (a == 2) {
+            break; // 3
+        }
+        break; // 4
+    }
     // while is always entered, no path where it is not
 }
 
-void path_mixed_025_expected_5raw_4ca(int a){
-	while (1){
-		if (a == 0){
-			continue; // 1
-		}
-		if (a == 1){
-			continue; // 2
-		}
-		if (a == 2){
-			continue; // 3
-		}
-		break;	// 4
-	}
+void path_mixed_025_expected_5raw_4ca(int a) {
+    while (1) {
+        if (a == 0) {
+            continue; // 1
+        }
+        if (a == 1) {
+            continue; // 2
+        }
+        if (a == 2) {
+            continue; // 3
+        }
+        break; // 4
+    }
     // while is always entered, no path where it is not
 }
 
-void path_mixed_026_expected_5raw_1ca(int a){
-	while (0){
-		if (a == 0){
-			continue;
-		}
-		if (a == 1){
-			continue;
-		}
-		if (a == 2){
-			continue;
-		}
-		break;	// 4
-	}
+void path_mixed_026_expected_5raw_1ca(int a) {
+    while (0) {
+        if (a == 0) {
+            continue;
+        }
+        if (a == 1) {
+            continue;
+        }
+        if (a == 2) {
+            continue;
+        }
+        break; // 4
+    }
     // Path 1 - didn't enter the while
 }

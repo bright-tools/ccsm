@@ -141,47 +141,36 @@ int path_if_010_expected_2(int y) {
     }
 }
 
-void path_if_011_expected_3raw_1ca()
-{
-    if (1)
-    {
+void path_if_011_expected_3raw_1ca() {
+    if (1) {
         // Path 1
-    } else if(1) {
+    } else if (1) {
         // Inaccessible
-    } 
-    else {
+    } else {
         // Inaccessible
     }
 }
 
-void path_if_012_expected_3raw_1ca()
-{
-    if (0)
-    {
+void path_if_012_expected_3raw_1ca() {
+    if (0) {
         // Inaccessible
-    } else if(0)
-    {
+    } else if (0) {
         // Inaccessible
     } else {
         // Path 1
     }
 }
 
-void path_if_013_expected_2raw_1ca()
-{
-    if (1)
-    {
+void path_if_013_expected_2raw_1ca() {
+    if (1) {
         // Path 1
-    }
-    else {
+    } else {
         // Inaccessible
     }
 }
 
-void path_if_014_expected_2raw_1ca()
-{
-    if (1)
-    {
+void path_if_014_expected_2raw_1ca() {
+    if (1) {
         // Path 1
     }
     // No implicit else

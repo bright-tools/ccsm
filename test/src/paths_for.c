@@ -13,7 +13,7 @@ int path_for_003_expected_3(int y) {
         {
             y++; // Path 2a
         }
-        // Path 2b - for loop not executed
+    // Path 2b - for loop not executed
     // Path 1b - for loop not executed
 
     /* Summary: path count = [1a2a, 1a2b, 1b] = 3 */
