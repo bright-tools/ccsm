@@ -31,11 +31,16 @@ function basicToolCheck {
 basicToolCheck
 
 LLVM_DIR=llvm
+TAG=llvmorg-14.0.6
 
 if [ -d $LLVM_DIR ]; then
-    git -C $LLVM_DIR pull
+    :
+    # We can't pull if we don't have an upstream branch
+    # git -C $LLVM_DIR pull
 else
-    git clone https://github.com/llvm/llvm-project.git $LLVM_DIR --branch llvmorg-14.0.6
+    git clone https://github.com/llvm/llvm-project.git $LLVM_DIR  --branch $TAG
+    # Use the tag name for a local branch
+    git -C $LLVM_DIR switch -C $TAG
 fi
 
 CLANG_DIR=$LLVM_DIR/clang
@@ -45,7 +50,7 @@ if [ $(grep -c CCSM_DIR $CMAKE_FILE) -lt 1 ]; then
     CCSM_PATH=$(realpath $1)
     echo "Adding CCSM to clang tools makefile"
     echo "set(CCSM_DIR $CCSM_PATH)" >> $CMAKE_FILE
-    echo "add_subdirectory(\${CCSM_DIR}/src \${CMAKE_CURRENT_BINARY_DIR}/ccsm)" >> $CMAKE_FILE
+    echo 'add_subdirectory(${CCSM_DIR}/src ${CMAKE_CURRENT_BINARY_DIR}/ccsm)' >> $CMAKE_FILE
 else
     echo "CCSM already seems to be in the clang tools makefile"
 fi
