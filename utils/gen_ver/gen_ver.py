@@ -20,7 +20,7 @@ def make_ver(git_dir=None):
            '#define GEN_VER_VERSION_STRING "{}"'.format(ver_str),
            ]
 
-    return "\n".join(txt)
+    return "\n".join(txt) + "\n"
 
 
 class Usage(Exception):

@@ -159,7 +159,7 @@ static llvm::cl::opt<bool>
                          llvm::cl::desc("Enable condition analysis for path counting"),
                          llvm::cl::init(false), llvm::cl::cat(CCSMToolCategory));
 
-static llvm::cl::extrahelp MoreHelp("\nVersion: " GEN_VER_VERSION_STRING);
+static llvm::cl::extrahelp MoreHelp("\nVersion: " GEN_VER_VERSION_STRING "\n");
 
 static void PrintVersion(llvm::raw_ostream &OS) {
     OS << "CCSM (https://github.com/bright-tools/ccsm):" << '\n'
