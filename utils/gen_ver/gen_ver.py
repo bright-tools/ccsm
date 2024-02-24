@@ -11,13 +11,10 @@ if sys.version_info.major < 3:
 def make_ver(git_dir=None):
 
     # Get the version string
-    ver = subprocess.check_output(['git', 'describe', '--match', 'v[0-9]*', '--abbrev=7', 'HEAD'], cwd=git_dir, encoding='UTF-8')
-    # Check for local changes
-    chngs = subprocess.check_output(['git', 'diff-index', '--name-only', 'HEAD', '--'], cwd=git_dir, encoding='UTF-8')
+    ver = subprocess.check_output(['git', 'describe', '--tags', '--match', 'v[0-9]*', '--abbrev=7', '--dirty'],
+                                   cwd=git_dir, universal_newlines=True)
 
     ver_str = ver.rstrip()
-    if len(chngs) > 0:
-        ver_str += ".dirty"
 
     txt = ["/* Generated automatically by {} */".format(os.path.basename(__file__)),
            '#define GEN_VER_VERSION_STRING "{}"'.format(ver_str),
